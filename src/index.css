@@ -1,0 +1,430 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CRITICAL: Prevent horizontal scroll on mobile - MUST BE FIRST */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+#root {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+}
+
+/* Healthcare Platform Design System - Professional Medical Theme
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 210 15% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 20%;
+
+    /* Medical primary - trustworthy blue */
+    --primary: 210 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 210 100% 85%;
+
+    /* Medical secondary - calming green */
+    --secondary: 150 60% 96%;
+    --secondary-foreground: 150 30% 20%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 10% 50%;
+
+    /* Medical accent - professional teal */
+    --accent: 180 70% 50%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 180 70% 95%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 90%;
+    --input: 210 20% 95%;
+    --ring: 210 100% 45%;
+
+    /* Medical specific tokens */
+    --medical-success: 150 70% 45%;
+    --medical-warning: 45 90% 60%;
+    --medical-emergency: 0 75% 55%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(210 100% 45%), hsl(180 70% 50%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
+    --gradient-accent: linear-gradient(90deg, hsl(180 70% 50%), hsl(210 100% 45%));
+
+    /* Shadows */
+    --shadow-soft: 0 2px 20px -5px hsl(210 50% 30% / 0.1);
+    --shadow-medium: 0 4px 30px -10px hsl(210 50% 30% / 0.15);
+    --shadow-strong: 0 8px 40px -15px hsl(210 50% 30% / 0.2);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* ========================================
+     CRITICAL: Mobile Overflow Prevention
+     ======================================== */
+  
+  /* Force prevent horizontal overflow - CRITICAL */
+  html {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative;
+  }
+  
+  /* Main app container */
+  #root {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure all containers respect viewport width */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Prevent specific elements from causing overflow */
+  div, section, main, article, aside, header, footer, nav {
+    max-width: 100%;
+  }
+  
+  /* Allow specific elements to scale properly */
+  img, svg, video, canvas, iframe {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Prevent text from causing overflow */
+  p, h1, h2, h3, h4, h5, h6, span, a, li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Fix for containers with padding that might overflow */
+  /* Only apply strict width limits on mobile */
+  @media (max-width: 768px) {
+    .container {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    
+    [class*="container"],
+    [class*="mx-auto"] {
+      max-width: 100% !important;
+    }
+  }
+  
+  /* Mobile specific fixes */
+  @media (max-width: 768px) {
+    /* Reset all min-width on mobile */
+    * {
+      min-width: 0 !important;
+    }
+    
+    /* Force grid to respect viewport */
+    .grid {
+      width: 100% !important;
+      max-width: 100vw !important;
+    }
+    
+    /* Force flex containers to wrap */
+    .flex {
+      flex-wrap: wrap !important;
+    }
+    
+    /* Ensure all sections fit viewport */
+    section, main, article, footer {
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+    }
+    
+    /* Fix for absolute/fixed positioned elements */
+    .absolute, .fixed {
+      max-width: 100vw !important;
+    }
+    
+    /* Force all max-w-* classes to respect viewport on mobile */
+    [class*="max-w-"] {
+      max-width: 100% !important;
+    }
+    
+    /* Ensure padding doesn't cause overflow */
+    * {
+      box-sizing: border-box !important;
+    }
+  }
+  
+  /* ========================================
+     iOS Safari Compatibility Fixes
+     ======================================== */
+  
+  /* 1. Momentum scrolling for smooth scroll on iOS */
+  .overflow-y-auto,
+  .overflow-y-scroll,
+  [class*="overflow-y"] {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 2. Prevent iOS Safari from zooming on input focus (font-size must be >= 16px) */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="date"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+  
+  /* 3. Fixed position elements - prevent iOS Safari rendering issues */
+  .fixed {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* 4. Touch-friendly interactions */
+  button,
+  a,
+  [role="button"],
+  [role="link"],
+  .cursor-pointer {
+    cursor: pointer;
+    touch-action: manipulation; /* Prevents double-tap zoom */
+    -webkit-tap-highlight-color: transparent; /* Removes iOS tap highlight */
+  }
+  
+  /* 5. Minimum touch targets per Apple Human Interface Guidelines (44x44px) */
+  button:not([class*="size-icon"]):not([class*="size-sm"]):not([class*="size-compact"]):not([role="switch"]),
+  a:not([class*="size-icon"]):not([class*="size-sm"]):not([class*="size-compact"]),
+  [role="button"]:not([class*="size-icon"]):not([class*="size-sm"]):not([class*="size-compact"]) {
+    min-height: 44px;
+  }
+  
+  /* Exception: Switch components should maintain their designed size */
+  button[role="switch"],
+  [role="switch"] {
+    min-height: unset !important;
+  }
+  
+  /* Exception: Checkbox components should maintain their designed size */
+  button[role="checkbox"],
+  [role="checkbox"],
+  [type="checkbox"] {
+    min-height: unset !important;
+    min-width: unset !important;
+  }
+  
+  /* 6. Smooth font rendering */
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* 7. Prevent pull-to-refresh on iOS Safari */
+  body {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* 8. Ensure touch-friendly custom dropdowns */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+}
+
+
+/* Tiptap Editor Styles */
+.ProseMirror {
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin-left: 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.ProseMirror code {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: 'Courier New', monospace;
+}
+
+.ProseMirror pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  list-style-position: outside;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror ul li,
+.ProseMirror ol li {
+  padding-left: 0.25rem;
+}
+
+/* Blog content lists */
+.blog-content ul,
+.blog-content ol {
+  padding-left: 1.5rem;
+  list-style-position: outside;
+}
+
+.blog-content ul {
+  list-style-type: disc;
+}
+
+.blog-content ol {
+  list-style-type: decimal;
+}
+
+.blog-content ul li,
+.blog-content ol li {
+  padding-left: 0.25rem;
+}
+
+/* Note: List margins and H3 spacing are dynamically applied via inline styles in BlogPost and RichTextEditor */
+
+.ProseMirror a {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror a:hover {
+  color: #1d4ed8;
+}
+
+.ProseMirror mark {
+  background-color: #fef08a;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.125rem;
+}
+
+/* Note: H1, H2, H3, and P styles are now dynamically applied via BlogTypographySettings */

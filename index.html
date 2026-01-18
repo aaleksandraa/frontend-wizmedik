@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="bs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WizMedik - Pronađite doktore, klinike, banje, domove u Bosni i Hercegovini | Online zakazivanje</title>
+    <meta name="description" content="MediBIH je vodeća platforma za pronalaženje doktora i online zakazivanje termina u BiH. Pretražite 500+ doktora, 50+ specijalnosti u Sarajevu, Banja Luci, Tuzli i drugim gradovima.">
+    <meta name="keywords" content="doktor sarajevo, doktor banja luka, doktor tuzla, kardiolog, pedijatar, ginekolog, stomatolog, online zakazivanje, zdravstvo bih, privatne klinike">
+    <meta name="author" content="wizMedik" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://medibih.ba/" />
+    
+    <!-- Geo tags -->
+    <meta name="geo.region" content="BA" />
+    <meta name="geo.placename" content="Bosna i Hercegovina" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="MediBIH - Pronađite doktore u Bosni i Hercegovini" />
+    <meta property="og:description" content="Vodeća platforma za pronalaženje doktora i online zakazivanje termina u BiH. 500+ doktora, 50+ specijalnosti." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://medibih.ba/" />
+    <meta property="og:image" content="https://medibih.ba/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="bs_BA" />
+    <meta property="og:site_name" content="MediBIH" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MediBIH - Pronađite doktore u BiH" />
+    <meta name="twitter:description" content="Online zakazivanje termina kod doktora u Bosni i Hercegovini" />
+    <meta name="twitter:image" content="https://medibih.ba/og-image.jpg" />
+    
+    <!-- Favicon - Multiple sizes for better browser support -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+    <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="wizMedik" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0066cc" />
+    <meta name="msapplication-TileColor" content="#0066cc" />
+    <meta name="msapplication-navbutton-color" content="#0066cc" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0066cc" />
+    
+    <!-- CRITICAL: Prevent horizontal scroll on mobile -->
+    <style>
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      #root {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+      }
+      * {
+        box-sizing: border-box !important;
+      }
+      @media (max-width: 768px) {
+        * {
+          max-width: 100% !important;
+        }
+        .container, [class*="container"] {
+          max-width: 100% !important;
+          width: 100% !important;
+        }
+        section, main, article, footer, nav, header {
+          overflow-x: hidden !important;
+          max-width: 100vw !important;
+        }
+      }
+    </style>
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Schema.org Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalBusiness",
+      "name": "MediBIH",
+      "description": "Platforma za pronalaženje doktora i online zakazivanje termina u Bosni i Hercegovini",
+      "url": "https://medibih.ba",
+      "logo": "https://medibih.ba/logo.png",
+      "areaServed": {
+        "@type": "Country",
+        "name": "Bosnia and Herzegovina"
+      },
+      "sameAs": [
+        "https://www.facebook.com/medibih",
+        "https://www.instagram.com/medibih"
+      ]
+    }
+    </script>
+    
+    <!-- Schema.org WebSite for Sitelinks Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MediBIH",
+      "url": "https://medibih.ba",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://medibih.ba/doktori?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <div id="root" style="overflow-x: hidden; max-width: 100vw; width: 100%;"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
