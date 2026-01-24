@@ -5,17 +5,26 @@
 @tailwind utilities;
 
 /* CRITICAL: Prevent horizontal scroll on mobile - MUST BE FIRST */
-html, body {
+html {
   overflow-x: hidden !important;
   max-width: 100vw !important;
   width: 100% !important;
-  position: relative !important;
+  height: 100%;
+}
+
+body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  min-height: 100vh;
+  /* REMOVED: position: relative - this was blocking scroll on mobile */
 }
 
 #root {
   overflow-x: hidden !important;
   max-width: 100vw !important;
   width: 100% !important;
+  min-height: 100vh;
 }
 
 /* Healthcare Platform Design System - Professional Medical Theme
@@ -147,18 +156,21 @@ All colors MUST be HSL.
   html {
     overflow-x: hidden !important;
     width: 100% !important;
+    height: 100%;
   }
   
   body {
     overflow-x: hidden !important;
     width: 100% !important;
-    position: relative;
+    min-height: 100vh;
+    /* REMOVED: position: relative - this was blocking scroll on mobile */
   }
   
   /* Main app container */
   #root {
     overflow-x: hidden !important;
     width: 100% !important;
+    min-height: 100vh;
   }
   
   /* Ensure all containers respect viewport width */
@@ -316,6 +328,26 @@ All colors MUST be HSL.
   /* 8. Ensure touch-friendly custom dropdowns */
   .touch-manipulation {
     touch-action: manipulation;
+  }
+  
+  /* 9. CRITICAL: Ensure body can scroll on mobile */
+  @media (max-width: 768px) {
+    html, body {
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      height: auto !important;
+      min-height: 100vh !important;
+    }
+    
+    body {
+      position: static !important;
+    }
+    
+    #root {
+      overflow-y: visible !important;
+      height: auto !important;
+      min-height: 100vh !important;
+    }
   }
 }
 
