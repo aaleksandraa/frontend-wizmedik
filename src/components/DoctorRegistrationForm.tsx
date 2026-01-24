@@ -106,7 +106,8 @@ export function DoctorRegistrationForm() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/register/doctor', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${API_URL}/register/doctor`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

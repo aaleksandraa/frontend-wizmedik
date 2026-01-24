@@ -28,6 +28,9 @@ import {
 import {
   arrayMove,
   SortableContext,
+
+// API URL configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
@@ -204,25 +207,25 @@ export default function SpaDashboard() {
       const token = localStorage.getItem('auth_token');
       
       const [profileRes, statsRes, paketiRes, vrsteRes, indikacijeRes, terapijeRes, customTerapijeRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/spa/profile', {
+        axios.get(`${API_URL}/spa/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/spa/statistics', {
+        axios.get(`${API_URL}/spa/statistics`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/spa/paketi', {
+        axios.get(`${API_URL}/spa/paketi`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/spa/vrste/available', {
+        axios.get(`${API_URL}/spa/vrste/available`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/spa/indikacije/available', {
+        axios.get(`${API_URL}/spa/indikacije/available`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/spa/terapije/available', {
+        axios.get(`${API_URL}/spa/terapije/available`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:8000/api/spa/custom-terapije', {
+        axios.get(`${API_URL}/spa/custom-terapije`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -317,7 +320,7 @@ export default function SpaDashboard() {
       };
 
       const response = await axios.put(
-        'http://localhost:8000/api/spa/profile',
+        `${API_URL}/spa/profile`,
         dataToSend,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -349,7 +352,7 @@ export default function SpaDashboard() {
       formData.append('image', file);
 
       const response = await axios.post(
-        'http://localhost:8000/api/spa/featured-image',
+        `${API_URL}/spa/featured-image`,
         formData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
       );
@@ -381,7 +384,7 @@ export default function SpaDashboard() {
       console.log('Uploading image to spa gallery...', file.name);
 
       const response = await axios.post(
-        'http://localhost:8000/api/spa/galerija',
+        `${API_URL}/spa/galerija`,
         formData,
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
       );
@@ -414,7 +417,7 @@ export default function SpaDashboard() {
       console.log('Deleting image:', url);
       
       const response = await axios.delete(
-        'http://localhost:8000/api/spa/galerija',
+        `${API_URL}/spa/galerija`,
         { 
           headers: { Authorization: `Bearer ${token}` },
           data: { url }
@@ -447,7 +450,7 @@ export default function SpaDashboard() {
       console.log('Setting featured image:', url);
       
       const response = await axios.post(
-        'http://localhost:8000/api/spa/set-featured',
+        `${API_URL}/spa/set-featured`,
         { image_url: url },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -478,13 +481,13 @@ export default function SpaDashboard() {
       
       if (editingPaket) {
         await axios.put(
-          `http://localhost:8000/api/spa/paketi/${editingPaket.id}`,
+          `${API_URL}/spa/paketi/${editingPaket.id}`,
           paketData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
         await axios.post(
-          'http://localhost:8000/api/spa/paketi',
+          `${API_URL}/spa/paketi`,
           paketData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -516,7 +519,7 @@ export default function SpaDashboard() {
     try {
       const token = localStorage.getItem('auth_token');
       await axios.delete(
-        `http://localhost:8000/api/spa/paketi/${id}`,
+        `${API_URL}/spa/paketi/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -542,13 +545,13 @@ export default function SpaDashboard() {
       
       if (editingCustomTerapija) {
         await axios.put(
-          `http://localhost:8000/api/spa/custom-terapije/${editingCustomTerapija.id}`,
+          `${API_URL}/spa/custom-terapije/${editingCustomTerapija.id}`,
           customTerapijaData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
         await axios.post(
-          'http://localhost:8000/api/spa/custom-terapije',
+          `${API_URL}/spa/custom-terapije`,
           customTerapijaData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -580,7 +583,7 @@ export default function SpaDashboard() {
     try {
       const token = localStorage.getItem('auth_token');
       await axios.delete(
-        `http://localhost:8000/api/spa/custom-terapije/${id}`,
+        `${API_URL}/spa/custom-terapije/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -629,7 +632,7 @@ export default function SpaDashboard() {
     try {
       const token = localStorage.getItem('auth_token');
       await axios.post(
-        'http://localhost:8000/api/spa/reorder-terapije',
+        `${API_URL}/spa/reorder-terapije`,
         {
           terapije: reordered.map((t, index) => ({
             id: t.id,
@@ -668,7 +671,7 @@ export default function SpaDashboard() {
     try {
       const token = localStorage.getItem('auth_token');
       await axios.post(
-        'http://localhost:8000/api/spa/reorder-paketi',
+        `${API_URL}/spa/reorder-paketi`,
         {
           paketi: reordered.map((p, index) => ({
             id: p.id,

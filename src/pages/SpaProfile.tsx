@@ -63,7 +63,8 @@ export default function SpaProfile() {
     if (!url) return '';
     if (url.startsWith('http')) return url;
     if (url.startsWith('/storage/')) {
-      return `http://localhost:8000${url}`;
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      return `${API_BASE}${url}`;
     }
     return url;
   };

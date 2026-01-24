@@ -64,7 +64,8 @@ export function RegistrationSettings() {
   const fetchSettings = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await axios.get('http://localhost:8000/api/admin/registration-settings', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await axios.get(`${API_URL}/admin/registration-settings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSettings(response.data);
@@ -84,7 +85,8 @@ export function RegistrationSettings() {
     setSaving(true);
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.put('http://localhost:8000/api/admin/registration-settings', settings, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      await axios.put(`${API_URL}/admin/registration-settings`, settings, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({

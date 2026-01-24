@@ -55,7 +55,8 @@ export function RegistrationRequests() {
   const fetchRequests = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await axios.get('http://localhost:8000/api/admin/registration-requests', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      const response = await axios.get(`${API_URL}/admin/registration-requests`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRequests(response.data.data || response.data);
@@ -75,7 +76,8 @@ export function RegistrationRequests() {
     setProcessing(true);
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.post(`http://localhost:8000/api/admin/registration-requests/${id}/approve`, {}, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      await axios.post(`${API_URL}/admin/registration-requests/${id}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({
@@ -104,7 +106,8 @@ export function RegistrationRequests() {
     setProcessing(true);
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.post(`http://localhost:8000/api/admin/registration-requests/${id}/reject`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      await axios.post(`${API_URL}/admin/registration-requests/${id}/reject`, {
         reason: 'Zahtjev odbijen i obrisan od strane administratora'
       }, {
         headers: { Authorization: `Bearer ${token}` }
