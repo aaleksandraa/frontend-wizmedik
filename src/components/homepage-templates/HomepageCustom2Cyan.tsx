@@ -300,7 +300,7 @@ export default function HomepageCustom2Cyan() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
-              <Heart className="w-3 h-3 mr-2" />Zašto MediBIH
+              <Heart className="w-3 h-3 mr-2" />Zašto WizMedik
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Zdravstvena njega kakvu zaslužujete</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Povezujemo vas s najboljim zdravstvenim stručnjacima</p>

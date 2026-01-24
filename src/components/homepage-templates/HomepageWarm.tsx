@@ -283,7 +283,7 @@ export function HomepageWarm() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4 text-[#E8B931]">MediBIH</h3>
+              <h3 className="text-xl font-bold mb-4 text-[#E8B931]">WizMedik</h3>
               <p className="text-[#A8A49E]">
                 Vaš partner za zdravlje u Bosni i Hercegovini.
               </p>
@@ -307,12 +307,12 @@ export function HomepageWarm() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Kontakt</h4>
-              <p className="text-[#A8A49E]">podrska@medibih.ba</p>
+              <p className="text-[#A8A49E]">podrska@wizmedik.com</p>
               <p className="text-[#A8A49E]">+387 33 123 456</p>
             </div>
           </div>
           <div className="border-t border-[#3D3A36] mt-8 pt-8 text-center text-[#6B6560]">
-            © 2024 MediBIH. Sva prava zadržana.
+            © 2024 WizMedik. Sva prava zadržana.
           </div>
         </div>
       </footer>

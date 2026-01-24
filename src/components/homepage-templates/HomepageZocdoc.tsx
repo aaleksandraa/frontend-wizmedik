@@ -270,7 +270,7 @@ export function HomepageZocdoc() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">MediBIH</h3>
+              <h3 className="text-xl font-bold mb-4">WizMedik</h3>
               <p className="text-gray-400">
                 Vaš partner za zdravlje u Bosni i Hercegovini.
               </p>
@@ -294,12 +294,12 @@ export function HomepageZocdoc() {
             </div>
             <div>
               <h4 className="font-semibold mb-4">Kontakt</h4>
-              <p className="text-gray-400">podrska@medibih.ba</p>
+              <p className="text-gray-400">podrska@wizmedik.com</p>
               <p className="text-gray-400">+387 33 123 456</p>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
-            © 2024 MediBIH. Sva prava zadržana.
+            © 2024 WizMedik. Sva prava zadržana.
           </div>
         </div>
       </footer>

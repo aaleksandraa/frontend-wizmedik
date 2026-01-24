@@ -499,7 +499,7 @@ export default function SpaIndikacije() {
   return (
     <>
       <Helmet>
-        <title>Indikacije i terapije u banjama - Vodič za banjsko liječenje | MediBIH</title>
+        <title>Indikacije i terapije u banjama - Vodič za banjsko liječenje | WizMedik</title>
         <meta name="description" content="Kompletan vodič o zdravstvenim stanjima koja se liječe u banjama BiH. Reumatološka, ortopedska, neurološka rehabilitacija, balneoterapija, hidroterapija i više." />
         <meta name="keywords" content="banjsko liječenje, balneoterapija, hidroterapija, rehabilitacija, reumatizam, artritis, fizikalna terapija, termalne vode, peloidoterapija, kineziterapija" />
         

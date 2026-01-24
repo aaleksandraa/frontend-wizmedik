@@ -143,24 +143,24 @@ export default function BlogPost() {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "MediBIH",
-      "logo": { "@type": "ImageObject", "url": "https://medibih.ba/logo.png" }
+      "name": "WizMedik",
+      "logo": { "@type": "ImageObject", "url": "https://wizmedik.com/logo.png" }
     },
     "datePublished": post.published_at,
-    "mainEntityOfPage": { "@type": "WebPage", "@id": `https://medibih.ba/blog/${post.slug}` }
+    "mainEntityOfPage": { "@type": "WebPage", "@id": `https://wizmedik.com/blog/${post.slug}` }
   };
 
   return (
     <>
       <Helmet>
-        <title>{post.meta_title || post.naslov} | MediBIH Blog</title>
+        <title>{post.meta_title || post.naslov} | WizMedik Blog</title>
         <meta name="description" content={post.meta_description || post.excerpt} />
         {post.meta_keywords && <meta name="keywords" content={post.meta_keywords} />}
-        <link rel="canonical" href={`https://medibih.ba/blog/${post.slug}`} />
+        <link rel="canonical" href={`https://wizmedik.com/blog/${post.slug}`} />
         <meta property="og:title" content={post.naslov} />
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://medibih.ba/blog/${post.slug}`} />
+        <meta property="og:url" content={`https://wizmedik.com/blog/${post.slug}`} />
         {post.thumbnail && <meta property="og:image" content={post.thumbnail} />}
         <meta property="article:published_time" content={post.published_at} />
         <meta property="article:author" content={post.autor_name} />

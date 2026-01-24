@@ -18,7 +18,7 @@ export default function HealthCalculators() {
   return (
     <>
       <Helmet>
-        <title>Zdravstveni Kalkulatori - BMI, Kalorije, Bazalni Metabolizam | MediBIH</title>
+        <title>Zdravstveni Kalkulatori - BMI, Kalorije, Bazalni Metabolizam | WizMedik</title>
         <meta name="description" content="Besplatni zdravstveni kalkulatori: BMI indeks tjelesne mase, bazalni metabolizam, dnevne potrebe za kalorijama i proteinima, preporučeni unos zaštitnih materija, kalkulator termina porođaja." />
         <meta name="keywords" content="BMI kalkulator, indeks tjelesne mase, bazalni metabolizam, kalorije kalkulator, proteini kalkulator, termin porođaja, zdravstveni kalkulatori" />
         <link rel="canonical" href={`${window.location.origin}/kalkulatori`} />

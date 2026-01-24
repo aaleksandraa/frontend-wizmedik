@@ -176,7 +176,7 @@ export default function CitySpecialtyDoctors() {
   return (
     <>
       <Helmet>
-        <title>{pageTitle} | MediBIH</title>
+        <title>{pageTitle} | WizMedik</title>
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content={`${specialtyName} ${cityName}, doktor ${cityName}, ${specialtyName?.toLowerCase()}, zdravstvo ${cityName}, pregled ${cityName}, specijalist ${specialtyName?.toLowerCase()}`} />
         <meta property="og:title" content={pageTitle} />

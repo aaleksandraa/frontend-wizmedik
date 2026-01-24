@@ -65,7 +65,7 @@ export default function Cities() {
   return (
     <>
       <Helmet>
-        <title>Gradovi - Doktori i klinike po gradovima BiH | MediBIH</title>
+        <title>Gradovi - Doktori i klinike po gradovima BiH | WizMedik</title>
         <meta name="description" content="Pronađite doktore i klinike u svim većim gradovima Bosne i Hercegovine. Sarajevo, Banja Luka, Tuzla, Mostar, Zenica i drugi." />
         <meta name="keywords" content="doktori BiH, klinike BiH, zdravstvo po gradovima, ljekari Sarajevo, ljekari Banja Luka" />
         <link rel="canonical" href={window.location.href} />

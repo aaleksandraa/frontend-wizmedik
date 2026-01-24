@@ -107,8 +107,8 @@ class ErrorBoundary extends Component<Props, State> {
 
               <p className="text-sm text-gray-500 text-center mt-4">
                 Ako problem i dalje postoji, kontaktirajte našu podršku na{' '}
-                <a href="mailto:podrska@medibih.ba" className="text-primary hover:underline">
-                  podrska@medibih.ba
+                <a href="mailto:podrska@wizmedik.com" className="text-primary hover:underline">
+                  podrska@wizmedik.com
                 </a>
               </p>
             </CardContent>

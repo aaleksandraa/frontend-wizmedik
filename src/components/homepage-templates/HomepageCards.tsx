@@ -222,13 +222,13 @@ export function HomepageCards() {
       {/* Footer */}
       <footer className="py-8 px-4 mt-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-          <span className="font-semibold text-slate-900">MediBIH</span>
+          <span className="font-semibold text-slate-900">WizMedik</span>
           <div className="flex gap-6">
             <Link to="/specijalnosti" className="hover:text-slate-900">Specijalnosti</Link>
             <Link to="/pitanja" className="hover:text-slate-900">Pitanja</Link>
             <Link to="/klinike" className="hover:text-slate-900">Klinike</Link>
           </div>
-          <span>© 2024 MediBIH</span>
+          <span>© 2024 WizMedik</span>
         </div>
       </footer>
     </div>

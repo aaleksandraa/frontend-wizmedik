@@ -211,7 +211,7 @@ export default function ClinicProfile() {
   return (
     <>
       <Helmet>
-        <title>{clinic.naziv} - Klinika u {clinic.grad} | MediBIH</title>
+        <title>{clinic.naziv} - Klinika u {clinic.grad} | WizMedik</title>
         <meta name="description" content={`${clinic.naziv} u ${clinic.grad}u. ${clinic.opis || 'Profesionalna zdravstvena ustanova sa stručnim osobljem.'} Zakažite termin online.`} />
         <meta property="og:title" content={`${clinic.naziv} - ${clinic.grad}`} />
         <meta property="og:description" content={clinic.opis || `Profesionalna zdravstvena ustanova u ${clinic.grad}u`} />

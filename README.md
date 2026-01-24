@@ -163,7 +163,7 @@ Build output (`dist/` folder) može biti deploy-ovan na:
 ```nginx
 server {
     listen 80;
-    server_name medibih.ba;
+    server_name wizmedik.com;
     root /var/www/frontend/dist;
     index index.html;
 

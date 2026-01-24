@@ -33,7 +33,7 @@ export default function ForgotPassword() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Heart className="h-8 w-8 text-primary mr-2" />
-            <h1 className="text-2xl font-bold text-foreground">MediBIH</h1>
+            <h1 className="text-2xl font-bold text-foreground">WizMedik</h1>
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">
             Zaboravljena lozinka

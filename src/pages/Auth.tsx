@@ -164,7 +164,7 @@ export default function Auth() {
             <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
               <Heart className="h-8 w-8 text-primary" />
             </div>
-            <span className="text-2xl font-bold text-foreground">MediBIH</span>
+            <span className="text-2xl font-bold text-foreground">WizMedik</span>
           </Link>
         </div>
 

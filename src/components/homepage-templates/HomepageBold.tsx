@@ -166,13 +166,13 @@ export function HomepageBold() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-white/10">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-bold text-xl bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">MediBIH</span>
+          <span className="font-bold text-xl bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">WizMedik</span>
           <div className="flex gap-6 text-sm text-gray-400">
             <Link to="/specijalnosti" className="hover:text-white">Specijalnosti</Link>
             <Link to="/pitanja" className="hover:text-white">Pitanja</Link>
             <Link to="/klinike" className="hover:text-white">Klinike</Link>
           </div>
-          <span className="text-sm text-gray-600">© 2024 MediBIH</span>
+          <span className="text-sm text-gray-600">© 2024 WizMedik</span>
         </div>
       </footer>
     </div>

@@ -292,13 +292,13 @@ export default function Clinics() {
   return (
     <>
       <Helmet>
-        <title>Privatne klinike u BiH - Zdravstvene ustanove | MediBIH</title>
+        <title>Privatne klinike u BiH - Zdravstvene ustanove | WizMedik</title>
         <meta name="description" content="Pronađite privatne klinike u Bosni i Hercegovini. Sarajevo, Banja Luka, Tuzla, Mostar. Moderne zdravstvene ustanove sa stručnim osobljem." />
         <meta name="keywords" content="privatne klinike bih, klinika sarajevo, klinika banja luka, zdravstvene ustanove, poliklinika, medicinski centar" />
-        <link rel="canonical" href="https://medibih.ba/klinike" />
+        <link rel="canonical" href="https://wizmedik.com/klinike" />
         <meta property="og:title" content="Privatne klinike u BiH" />
         <meta property="og:description" content="Pronađite privatne klinike u Bosni i Hercegovini. Moderne zdravstvene ustanove." />
-        <meta property="og:url" content="https://medibih.ba/klinike" />
+        <meta property="og:url" content="https://wizmedik.com/klinike" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       

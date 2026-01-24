@@ -255,13 +255,13 @@ export default function Doctors() {
   return (
     <>
       <Helmet>
-        <title>Doktori u BiH - Pronađite specijaliste | MediBIH</title>
+        <title>Doktori u BiH - Pronađite specijaliste | WizMedik</title>
         <meta name="description" content="Pretražite 500+ doktora u Bosni i Hercegovini. Kardiolozi, pedijatri, ginekolozi, stomatolozi i drugi specijalisti. Online zakazivanje termina." />
         <meta name="keywords" content="doktor bih, doktor sarajevo, doktor banja luka, kardiolog, pedijatar, ginekolog, stomatolog, specijalist, online zakazivanje" />
-        <link rel="canonical" href="https://medibih.ba/doktori" />
+        <link rel="canonical" href="https://wizmedik.com/doktori" />
         <meta property="og:title" content="Doktori u BiH - Pronađite specijaliste" />
         <meta property="og:description" content="Pretražite 500+ doktora u Bosni i Hercegovini. Online zakazivanje termina." />
-        <meta property="og:url" content="https://medibih.ba/doktori" />
+        <meta property="og:url" content="https://wizmedik.com/doktori" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       

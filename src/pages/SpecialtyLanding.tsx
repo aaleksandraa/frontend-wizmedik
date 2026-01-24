@@ -262,7 +262,7 @@ export default function SpecialtyLanding() {
   // SEO
   const seoTitle =
     specialtyInfo?.meta_title ||
-    `${specialty.naziv} - Specijalisti i pregledi | MediBIH`;
+    `${specialty.naziv} - Specijalisti i pregledi | WizMedik`;
   const seoDescription =
     specialtyInfo?.meta_description ||
     `${specialty.detaljniOpis} Pronađite najbolje ${specialty.naziv.toLowerCase()} specijaliste u BiH.`;

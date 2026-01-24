@@ -127,7 +127,7 @@ export default function PitanjeDetalji() {
   return (
     <>
       <Helmet>
-        <title>{pitanje.naslov} - MediBIH</title>
+        <title>{pitanje.naslov} - WizMedik</title>
         <meta name="description" content={pitanje.sadrzaj.substring(0, 160)} />
         <meta name="keywords" content={pitanje.tagovi?.join(', ')} />
       </Helmet>

@@ -377,12 +377,12 @@ export function HomepageMedical() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
-            <div><h3 className="text-xl font-bold mb-4">MediBIH</h3><p className="text-gray-400">Vaš partner za zdravlje u Bosni i Hercegovini.</p></div>
+            <div><h3 className="text-xl font-bold mb-4">WizMedik</h3><p className="text-gray-400">Vaš partner za zdravlje u Bosni i Hercegovini.</p></div>
             <div><h4 className="font-semibold mb-4">Linkovi</h4><ul className="space-y-2 text-gray-400"><li><Link to="/specijalnosti" className="hover:text-white">Specijalnosti</Link></li><li><Link to="/gradovi" className="hover:text-white">Gradovi</Link></li><li><Link to="/klinike" className="hover:text-white">Klinike</Link></li><li><Link to="/blog" className="hover:text-white">Blog</Link></li></ul></div>
             <div><h4 className="font-semibold mb-4">Podrška</h4><ul className="space-y-2 text-gray-400"><li><a href="#" className="hover:text-white">Pomoć</a></li><li><a href="#" className="hover:text-white">Kontakt</a></li><li><a href="#" className="hover:text-white">Privatnost</a></li></ul></div>
-            <div><h4 className="font-semibold mb-4">Kontakt</h4><p className="text-gray-400">podrska@medibih.ba</p><p className="text-gray-400">+387 33 123 456</p></div>
+            <div><h4 className="font-semibold mb-4">Kontakt</h4><p className="text-gray-400">podrska@wizmedik.com</p><p className="text-gray-400">+387 33 123 456</p></div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">© 2024 MediBIH. Sva prava zadržana.</div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">© 2024 WizMedik. Sva prava zadržana.</div>
         </div>
       </footer>
     </div>

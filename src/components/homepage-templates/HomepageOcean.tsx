@@ -139,12 +139,12 @@ export function HomepageOcean() {
       <footer className="bg-[#1565C0] text-white py-10">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
-            <div><h3 className="text-xl font-bold mb-3">MediBIH</h3><p className="text-white/70">Vaš zdravstveni partner.</p></div>
+            <div><h3 className="text-xl font-bold mb-3">WizMedik</h3><p className="text-white/70">Vaš zdravstveni partner.</p></div>
             <div><h4 className="font-semibold mb-3">Linkovi</h4><ul className="space-y-2 text-white/70"><li><Link to="/specijalnosti" className="hover:text-white">Specijalnosti</Link></li><li><Link to="/pitanja" className="hover:text-white">Pitanja</Link></li></ul></div>
             <div><h4 className="font-semibold mb-3">Podrška</h4><ul className="space-y-2 text-white/70"><li><a href="#" className="hover:text-white">Kontakt</a></li></ul></div>
-            <div><h4 className="font-semibold mb-3">Kontakt</h4><p className="text-white/70">podrska@medibih.ba</p></div>
+            <div><h4 className="font-semibold mb-3">Kontakt</h4><p className="text-white/70">podrska@wizmedik.com</p></div>
           </div>
-          <div className="border-t border-white/20 mt-8 pt-6 text-center text-white/50">© 2024 MediBIH</div>
+          <div className="border-t border-white/20 mt-8 pt-6 text-center text-white/50">© 2024 WizMedik</div>
         </div>
       </footer>
     </div>

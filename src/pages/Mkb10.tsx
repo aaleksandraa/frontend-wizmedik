@@ -223,16 +223,16 @@ export default function Mkb10() {
     "@graph": [
       {
         "@type": "MedicalWebPage",
-        "@id": "https://medibih.ba/mkb-10#webpage",
-        "url": "https://medibih.ba/mkb-10",
+        "@id": "https://wizmedik.com/mkb-10#webpage",
+        "url": "https://wizmedik.com/mkb-10",
         "name": "MKB-10 Šifarnik bolesti - Međunarodna klasifikacija bolesti",
         "description": "Kompletna MKB-10 klasifikacija bolesti na srpskom jeziku. Pretražujte preko 14.000 dijagnoza po šifri ili nazivu. Besplatna online baza medicinskih dijagnoza.",
         "inLanguage": "sr-Latn-BA",
         "isPartOf": {
           "@type": "WebSite",
-          "@id": "https://medibih.ba/#website",
-          "url": "https://medibih.ba",
-          "name": "MediBiH",
+          "@id": "https://wizmedik.com/#website",
+          "url": "https://wizmedik.com",
+          "name": "WizMedik",
           "description": "Zdravstveni portal Bosne i Hercegovine"
         },
         "about": {
@@ -251,12 +251,12 @@ export default function Mkb10() {
         "lastReviewed": new Date().toISOString().split('T')[0],
         "reviewedBy": {
           "@type": "Organization",
-          "name": "MediBiH"
+          "name": "WizMedik"
         }
       },
       {
         "@type": "Dataset",
-        "@id": "https://medibih.ba/mkb-10#dataset",
+        "@id": "https://wizmedik.com/mkb-10#dataset",
         "name": "MKB-10 Baza dijagnoza",
         "description": `Kompletna baza MKB-10 dijagnoza sa ${statistika?.ukupno_kategorija || 22} kategorija i ${statistika?.ukupno_dijagnoza?.toLocaleString() || '14.000+'} dijagnoza`,
         "keywords": ["MKB-10", "ICD-10", "dijagnoze", "bolesti", "medicinska klasifikacija", "šifre bolesti"],
@@ -268,30 +268,30 @@ export default function Mkb10() {
         "distribution": {
           "@type": "DataDownload",
           "encodingFormat": "text/html",
-          "contentUrl": "https://medibih.ba/mkb-10"
+          "contentUrl": "https://wizmedik.com/mkb-10"
         }
       },
       {
         "@type": "BreadcrumbList",
-        "@id": "https://medibih.ba/mkb-10#breadcrumb",
+        "@id": "https://wizmedik.com/mkb-10#breadcrumb",
         "itemListElement": [
           {
             "@type": "ListItem",
             "position": 1,
             "name": "Početna",
-            "item": "https://medibih.ba"
+            "item": "https://wizmedik.com"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "MKB-10 Šifarnik bolesti",
-            "item": "https://medibih.ba/mkb-10"
+            "item": "https://wizmedik.com/mkb-10"
           }
         ]
       },
       {
         "@type": "FAQPage",
-        "@id": "https://medibih.ba/mkb-10#faq",
+        "@id": "https://wizmedik.com/mkb-10#faq",
         "mainEntity": faqData.map(faq => ({
           "@type": "Question",
           "name": faq.pitanje,
@@ -326,30 +326,30 @@ export default function Mkb10() {
     <>
       <Helmet>
         {/* Osnovni meta tagovi */}
-        <title>MKB-10 Šifarnik bolesti | Međunarodna klasifikacija bolesti - MediBiH</title>
+        <title>MKB-10 Šifarnik bolesti | Međunarodna klasifikacija bolesti - WizMedik</title>
         <meta name="description" content="Kompletna MKB-10 klasifikacija bolesti na srpskom jeziku. Pretražujte preko 14.000 dijagnoza po šifri ili nazivu. Besplatna online baza medicinskih dijagnoza sa 22 kategorije." />
         <meta name="keywords" content="MKB-10, MKB 10, ICD-10, šifarnik bolesti, klasifikacija bolesti, dijagnoze, medicinske šifre, bolesti, zdravlje, medicina, A00-B99, zarazne bolesti, tumori, kardiovaskularne bolesti" />
-        <meta name="author" content="MediBiH" />
+        <meta name="author" content="WizMedik" />
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <link rel="canonical" href="https://medibih.ba/mkb-10" />
+        <link rel="canonical" href="https://wizmedik.com/mkb-10" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://medibih.ba/mkb-10" />
+        <meta property="og:url" content="https://wizmedik.com/mkb-10" />
         <meta property="og:title" content="MKB-10 Šifarnik bolesti | Međunarodna klasifikacija bolesti" />
         <meta property="og:description" content="Kompletna MKB-10 klasifikacija bolesti na srpskom jeziku. Pretražujte preko 14.000 dijagnoza po šifri ili nazivu." />
-        <meta property="og:image" content="https://medibih.ba/images/mkb10-og.jpg" />
+        <meta property="og:image" content="https://wizmedik.com/images/mkb10-og.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:locale" content="sr_BA" />
-        <meta property="og:site_name" content="MediBiH" />
+        <meta property="og:site_name" content="WizMedik" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content="https://medibih.ba/mkb-10" />
+        <meta name="twitter:url" content="https://wizmedik.com/mkb-10" />
         <meta name="twitter:title" content="MKB-10 Šifarnik bolesti | Međunarodna klasifikacija bolesti" />
         <meta name="twitter:description" content="Kompletna MKB-10 klasifikacija bolesti na srpskom jeziku. Pretražujte preko 14.000 dijagnoza." />
-        <meta name="twitter:image" content="https://medibih.ba/images/mkb10-twitter.jpg" />
+        <meta name="twitter:image" content="https://wizmedik.com/images/mkb10-twitter.jpg" />
         
         {/* Dodatni SEO meta tagovi */}
         <meta name="language" content="sr-Latn-BA" />

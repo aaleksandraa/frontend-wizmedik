@@ -294,7 +294,7 @@ export default function CityLanding() {
   return (
     <>
       <Helmet>
-        <title>Doktori, klinike, laboratorije i domovi u {city.naziv}u - Zakažite pregled online | MediBIH</title>
+        <title>Doktori, klinike, laboratorije i domovi u {city.naziv}u - Zakažite pregled online | WizMedik</title>
         <meta name="description" content={`${city.detaljni_opis} Pronađite ${doctors.length} doktora, ${clinics.length} klinika, ${laboratories.length} laboratorija, ${spas.length} banja i ${domovi.length} domova za njegu ${city.u_gradu || `u ${city.naziv}u`}. Zakažite pregled online.`} />
         <meta name="keywords" content={`doktor ${city.naziv}, klinika ${city.naziv}, laboratorija ${city.naziv}, banja ${city.naziv}, dom za starije ${city.naziv}, pregled ${city.naziv}, zdravstvo ${city.naziv}, ljekari ${city.naziv}, analize ${city.naziv}`} />
         <meta property="og:title" content={`Doktori i klinike u ${city.naziv}u`} />

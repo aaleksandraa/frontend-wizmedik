@@ -1,6 +1,6 @@
 {
-  "name": "MediBIH - Zdravstvena Platforma",
-  "short_name": "MediBIH",
+  "name": "WizMedik - Zdravstvena Platforma",
+  "short_name": "WizMedik",
   "description": "Nacionalni servis za zakazivanje pregleda u privatnoj praksi u Bosni i Hercegovini",
   "start_url": "/",
   "display": "standalone",

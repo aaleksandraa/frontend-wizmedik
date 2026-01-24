@@ -132,7 +132,7 @@ export default function HomepageCustom() {
                 </h1>
                 
                 <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
-                  MediBIH je nacionalni servis za zakazivanje pregleda u privatnoj praksi
+                  WizMedik je nacionalni servis za zakazivanje pregleda u privatnoj praksi
                 </p>
               </div>
 
@@ -273,7 +273,7 @@ export default function HomepageCustom() {
       <section className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4 px-4 py-1"><Heart className="w-3 h-3 mr-2 text-red-500" />Zašto MediBIH</Badge>
+            <Badge variant="outline" className="mb-4 px-4 py-1"><Heart className="w-3 h-3 mr-2 text-red-500" />Zašto WizMedik</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Zdravstvena njega kakvu zaslužujete</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Povezujemo vas s najboljim zdravstvenim stručnjacima u Bosni i Hercegovini</p>
           </div>

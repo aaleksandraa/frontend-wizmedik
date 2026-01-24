@@ -29,8 +29,8 @@ export default function TermsOfService() {
   return (
     <>
       <Helmet>
-        <title>{title} - MediBIH</title>
-        <meta name="description" content="Uslovi korištenja platforme MediBIH." />
+        <title>{title} - WizMedik</title>
+        <meta name="description" content="Uslovi korištenja platforme WizMedik." />
       </Helmet>
 
       <Navbar />

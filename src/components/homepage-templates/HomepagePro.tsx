@@ -356,7 +356,7 @@ export function HomepagePro() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <div className="col-span-2 md:col-span-1">
-              <h3 className="text-xl font-bold mb-4">MediBIH</h3>
+              <h3 className="text-xl font-bold mb-4">WizMedik</h3>
               <p className="text-gray-400 text-sm">Vaš partner za zdravlje u Bosni i Hercegovini.</p>
             </div>
             <div>
@@ -378,12 +378,12 @@ export function HomepagePro() {
             </div>
             <div>
               <h4 className="font-semibold mb-3 md:mb-4">Kontakt</h4>
-              <p className="text-gray-400 text-sm">podrska@medibih.ba</p>
+              <p className="text-gray-400 text-sm">podrska@wizmedik.com</p>
               <p className="text-gray-400 text-sm">+387 33 123 456</p>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-6 md:pt-8 text-center text-gray-500 text-sm">
-            © 2024 MediBIH. Sva prava zadržana.
+            © 2024 WizMedik. Sva prava zadržana.
           </div>
         </div>
       </footer>

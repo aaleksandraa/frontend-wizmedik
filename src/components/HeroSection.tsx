@@ -94,7 +94,7 @@ export function HeroSection() {
             Pronađite ljekara privatne prakse za<br />Vas i zakažite pregled
           </h1>
           <p className="text-lg md:text-xl opacity-95 max-w-3xl mx-auto">
-            MediBIH je nacionalni servis za zakazivanje pregleda u privatnoj praksi
+            WizMedik je nacionalni servis za zakazivanje pregleda u privatnoj praksi
           </p>
         </div>
         

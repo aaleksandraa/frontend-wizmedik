@@ -200,7 +200,7 @@ export default function CareHomes() {
       const tip = filterOptions?.tipovi_domova.find(t => t.slug === selectedTipDoma);
       if (tip) parts.push(`- ${tip.naziv}`);
     }
-    parts.push('| MediBIH');
+    parts.push('| WizMedik');
     return parts.join(' ');
   }, [selectedGrad, selectedTipDoma, filterOptions]);
 
@@ -343,7 +343,7 @@ export default function CareHomes() {
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="MediBIH" />
+        <meta property="og:site_name" content="WizMedik" />
         <meta property="og:locale" content="bs_BA" />
         <meta property="og:image" content={`${window.location.origin}/og-domovi-njega.jpg`} />
         
@@ -841,12 +841,12 @@ export default function CareHomes() {
             </h2>
             <div className="prose prose-gray max-w-none">
               <p>
-                MediBIH vam pomaže pronaći idealan dom za njegu vaših najdražih. Naša platforma okuplja verificirane domove za starije i bolesne osobe širom Bosne i Hercegovine, omogućavajući vam da uporedite usluge, cijene i recenzije na jednom mjestu.
+                WizMedik vam pomaže pronaći idealan dom za njegu vaših najdražih. Naša platforma okuplja verificirane domove za starije i bolesne osobe širom Bosne i Hercegovine, omogućavajući vam da uporedite usluge, cijene i recenzije na jednom mjestu.
               </p>
               <p>
                 Bilo da tražite dom sa osnovnom njegom za samostalne starije osobe, pojačanu njegu za one kojima je potrebna svakodnevna pomoć, ili specijaliziranu njegu za osobe sa demencijom i Alzheimerovom bolešću - na pravom ste mjestu.
               </p>
-              <h3 className="text-xl font-semibold mt-6 mb-3">Zašto koristiti MediBIH za pronalazak doma?</h3>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Zašto koristiti WizMedik za pronalazak doma?</h3>
               <ul className="list-disc list-inside space-y-2">
                 <li>Svi domovi su verificirani i provjereni</li>
                 <li>Detaljne informacije o uslugama, osoblju i cijenama</li>

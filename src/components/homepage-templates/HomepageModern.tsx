@@ -181,12 +181,12 @@ export function HomepageModern() {
       <footer className="bg-gray-900 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div><h3 className="text-2xl font-bold mb-4">MediBIH</h3><p className="text-gray-400">Vas partner za zdravlje.</p></div>
+            <div><h3 className="text-2xl font-bold mb-4">WizMedik</h3><p className="text-gray-400">Vas partner za zdravlje.</p></div>
             <div><h4 className="font-semibold mb-4">Navigacija</h4><ul className="space-y-2 text-gray-400"><li><Link to="/doktori/svi" className="hover:text-white">Doktori</Link></li><li><Link to="/klinike" className="hover:text-white">Klinike</Link></li></ul></div>
             <div><h4 className="font-semibold mb-4">Podrska</h4><ul className="space-y-2 text-gray-400"><li><Link to="/pitanja" className="hover:text-white">Pitanja</Link></li></ul></div>
-            <div><h4 className="font-semibold mb-4">Kontakt</h4><p className="text-gray-400">podrska@medibih.ba</p></div>
+            <div><h4 className="font-semibold mb-4">Kontakt</h4><p className="text-gray-400">podrska@wizmedik.com</p></div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-500">2024 MediBIH</div>
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-500">2024 WizMedik</div>
         </div>
       </footer>
     </div>

@@ -154,7 +154,7 @@ export default function PostaviPitanje() {
   return (
     <>
       <Helmet>
-        <title>Postavi Pitanje - MediBIH</title>
+        <title>Postavi Pitanje - WizMedik</title>
         <meta name="description" content="Postavite medicinsko pitanje i dobijte odgovor od stručnih doktora u Bosni i Hercegovini" />
         <meta name="keywords" content="medicinsko pitanje, zdravstveni savjet, doktor online, besplatno pitanje" />
       </Helmet>

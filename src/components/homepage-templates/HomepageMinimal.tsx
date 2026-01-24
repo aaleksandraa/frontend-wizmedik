@@ -143,7 +143,7 @@ export function HomepageMinimal() {
       {/* Footer - Minimal */}
       <footer className="py-8 px-4 border-t">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-semibold text-gray-900">MediBIH</span>
+          <span className="font-semibold text-gray-900">WizMedik</span>
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <Link to="/specijalnosti" className="hover:text-gray-900">Specijalnosti</Link>
             <Link to="/pitanja" className="hover:text-gray-900">Pitanja</Link>

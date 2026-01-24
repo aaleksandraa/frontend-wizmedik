@@ -469,11 +469,11 @@ export default function CareHomesVodic() {
     "url": window.location.href,
     "author": {
       "@type": "Organization",
-      "name": "MediBIH"
+      "name": "WizMedik"
     },
     "publisher": {
       "@type": "Organization",
-      "name": "MediBIH"
+      "name": "WizMedik"
     }
   };
 
@@ -519,7 +519,7 @@ export default function CareHomesVodic() {
   return (
     <>
       <Helmet>
-        <title>Vodič za domove za starije - Tipovi domova, nivoi njege i programi | MediBIH</title>
+        <title>Vodič za domove za starije - Tipovi domova, nivoi njege i programi | WizMedik</title>
         <meta name="description" content="Kompletan vodič o domovima za starije i bolesne osobe u BiH. Saznajte razlike između tipova domova, nivoa njege (osnovna, pojačana, intenzivna), specijaliziranih programa za demenciju, rehabilitaciju i palijativnu njegu." />
         <meta name="keywords" content="dom za starije, starački dom, njega starijih, demencija njega, palijativna njega, rehabilitacija, nivo njege, dom za bolesne, gerontološki centar" />
         

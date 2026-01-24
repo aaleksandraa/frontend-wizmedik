@@ -519,7 +519,7 @@ export function SpecialtyEditor({ specialty, open, onClose, onSaved, allSpecialt
                   <Input
                     value={form.meta_title || ''}
                     onChange={(e) => setForm({ ...form, meta_title: e.target.value })}
-                    placeholder="npr. Kardiologija - Pronađite kardiologa | MediBIH"
+                    placeholder="npr. Kardiologija - Pronađite kardiologa | WizMedik"
                     maxLength={70}
                   />
                   <p className="text-xs text-muted-foreground">{(form.meta_title || '').length}/70</p>

@@ -65,7 +65,7 @@ export function AppointmentConfirmation({ appointment, onClose }: AppointmentCon
 
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//MediBIH//Appointment//BS
+PRODID:-//WizMedik//Appointment//BS
 BEGIN:VEVENT
 DTSTART:${formatForICS(startDate)}
 DTEND:${formatForICS(endDate)}

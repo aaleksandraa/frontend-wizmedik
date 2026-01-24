@@ -92,16 +92,16 @@ export default function Blog() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "MediBIH Blog - Zdravstveni savjeti",
+    "name": "WizMedik Blog - Zdravstveni savjeti",
     "description": "Stručni zdravstveni savjeti od doktora u Bosni i Hercegovini",
-    "url": "https://medibih.ba/blog",
+    "url": "https://wizmedik.com/blog",
     "blogPost": posts.slice(0, 5).map(post => ({
       "@type": "BlogPosting",
       "headline": post.naslov,
       "description": post.excerpt,
       "author": { "@type": "Person", "name": post.autor_name },
       "datePublished": post.published_at,
-      "url": `https://medibih.ba/blog/${post.slug}`
+      "url": `https://wizmedik.com/blog/${post.slug}`
     }))
   };
 

@@ -100,8 +100,8 @@ export default function RegistrationOptions() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Registracija - MediBIH</title>
-        <meta name="description" content="Registrujte se na MediBIH platformu kao doktor, klinika, laboratorija, banja ili dom za njegu. Proširite svoju praksu i dosegnite više pacijenata." />
+        <title>Registracija - WizMedik</title>
+        <meta name="description" content="Registrujte se na WizMedik platformu kao doktor, klinika, laboratorija, banja ili dom za njegu. Proširite svoju praksu i dosegnite više pacijenata." />
       </Helmet>
 
       <Navbar />
@@ -164,7 +164,7 @@ export default function RegistrationOptions() {
           <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 md:p-12">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Zašto se registrovati na MediBIH?
+                Zašto se registrovati na WizMedik?
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 Naša platforma vam pruža sve alate potrebne za uspješno upravljanje vašom praksom

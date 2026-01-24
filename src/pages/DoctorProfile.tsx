@@ -418,7 +418,7 @@ export default function DoctorProfile() {
       <>
         <Navbar />
         <Helmet>
-          <title>Dr. {doctor.ime} {doctor.prezime} - {doctor.specijalnost} {doctor.grad} | MediBIH</title>
+          <title>Dr. {doctor.ime} {doctor.prezime} - {doctor.specijalnost} {doctor.grad} | WizMedik</title>
           <meta name="description" content={`Dr. ${doctor.ime} ${doctor.prezime}, ${doctor.specijalnost} u ${doctor.grad}u.`} />
         </Helmet>
         <DoctorTemplate
@@ -493,7 +493,7 @@ export default function DoctorProfile() {
     <>
       <Navbar />
       <Helmet>
-        <title>Dr. {doctor.ime} {doctor.prezime} - {doctor.specijalnost} {doctor.grad} | MediBIH</title>
+        <title>Dr. {doctor.ime} {doctor.prezime} - {doctor.specijalnost} {doctor.grad} | WizMedik</title>
         <meta name="description" content={`Dr. ${doctor.ime} ${doctor.prezime}, ${doctor.specijalnost} u ${doctor.grad}u. ${doctor.opis || 'Iskusan stručnjak sa dugogodišnjim iskustvom.'} Zakažite termin online.`} />
         <meta name="keywords" content={`${doctor.specijalnost} ${doctor.grad}, doktor ${doctor.grad}, ${doctor.specijalnost.toLowerCase()}, zdravstvo ${doctor.grad}, ${doctor.ime} ${doctor.prezime}`} />
         <meta property="og:title" content={`Dr. ${doctor.ime} ${doctor.prezime} - ${doctor.specijalnost}`} />

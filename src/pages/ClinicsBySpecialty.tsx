@@ -140,7 +140,7 @@ export default function ClinicsBySpecialty() {
   return (
     <>
       <Helmet>
-        <title>{specialtyName} - Klinike | MediBIH</title>
+        <title>{specialtyName} - Klinike | WizMedik</title>
         <meta name="description" content={`Pronađite najbolje klinike koje nude usluge ${specialtyName.toLowerCase()} specijalnosti u Bosni i Hercegovini. Pregled svih klinika sa stručnim osobljem.`} />
         <meta name="keywords" content={`${specialtyName}, klinike, zdravstvo BiH, ${specialtyName.toLowerCase()} klinika`} />
         <meta property="og:title" content={`${specialtyName} - Klinike`} />

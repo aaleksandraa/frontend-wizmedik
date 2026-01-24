@@ -1,8 +1,8 @@
-// Service Worker for MediBIH PWA
+// Service Worker for WizMedik PWA
 // Version 1.0.0
 
-const CACHE_NAME = 'medibih-v1';
-const RUNTIME_CACHE = 'medibih-runtime-v1';
+const CACHE_NAME = 'wizmedik-v1';
+const RUNTIME_CACHE = 'wizmedik-runtime-v1';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -171,7 +171,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('MediBIH', options)
+    self.registration.showNotification('WizMedik', options)
   );
 });
 

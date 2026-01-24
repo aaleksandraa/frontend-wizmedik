@@ -95,7 +95,7 @@ export default function Pitanja() {
   return (
     <>
       <Helmet>
-        <title>Medicinska Pitanja i Odgovori - MediBIH</title>
+        <title>Medicinska Pitanja i Odgovori - WizMedik</title>
         <meta name="description" content="Pregledajte medicinska pitanja i odgovore od stručnih doktora" />
       </Helmet>
       <Navbar />

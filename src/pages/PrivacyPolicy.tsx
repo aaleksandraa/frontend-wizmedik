@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Helmet>
-        <title>{title} - MediBIH</title>
+        <title>{title} - WizMedik</title>
         <meta name="description" content="Politika privatnosti - saznajte kako prikupljamo i koristimo vaše podatke." />
       </Helmet>
 
