@@ -11,7 +11,7 @@ interface Specialty {
   icon_url?: string;
   parent_id?: number;
   children?: Specialty[];
-  doctorCount?: number;
+  // doctorCount removed - not needed, slows down page load
 }
 
 interface Props {
@@ -23,17 +23,9 @@ export function SpecialtyTemplateClassic({ specialties }: Props) {
     <div className="space-y-8 sm:space-y-10">
       {specialties.map((category) => (
         <section key={category.id} className="space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug">
-              {category.naziv}
-            </h2>
-
-            {typeof category.doctorCount === "number" && category.doctorCount > 0 && (
-              <Badge variant="secondary" className="text-[11px] leading-4 shrink-0">
-                {category.doctorCount} doktora
-              </Badge>
-            )}
-          </div>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug">
+            {category.naziv}
+          </h2>
 
           {category.opis && (
             <p className="text-sm sm:text-[15px] text-muted-foreground leading-relaxed max-w-3xl">
@@ -85,14 +77,6 @@ export function SpecialtyTemplateClassic({ specialties }: Props) {
                     <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                       {subspec.opis}
                     </p>
-                  )}
-
-                  {typeof subspec.doctorCount === "number" && subspec.doctorCount > 0 && (
-                    <div className="mt-2">
-                      <Badge variant="secondary" className="text-[11px] leading-4">
-                        {subspec.doctorCount} doktora
-                      </Badge>
-                    </div>
                   )}
                 </Card>
               </Link>

@@ -13,7 +13,7 @@ interface Specialty {
   icon_url?: string;
   parent_id?: number;
   children?: Specialty[];
-  doctorCount?: number;
+  // doctorCount removed - not needed, slows down page load
 }
 
 interface Props {
@@ -48,14 +48,6 @@ export function SpecialtyTemplateCards({ specialties }: Props) {
                   <CardTitle className="text-base sm:text-lg leading-snug truncate">
                     {category.naziv}
                   </CardTitle>
-
-                  {typeof category.doctorCount === "number" && category.doctorCount > 0 && (
-                    <div className="mt-1">
-                      <Badge variant="secondary" className="text-[11px] leading-4">
-                        {category.doctorCount} doktora
-                      </Badge>
-                    </div>
-                  )}
                 </div>
               </Link>
 

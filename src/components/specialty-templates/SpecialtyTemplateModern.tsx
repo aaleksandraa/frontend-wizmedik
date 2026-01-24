@@ -12,7 +12,7 @@ interface Specialty {
   icon_url?: string;
   parent_id?: number;
   children?: Specialty[];
-  doctorCount?: number;
+  // doctorCount removed - not needed, slows down page load
 }
 
 interface Props {
@@ -78,18 +78,11 @@ export function SpecialtyTemplateModern({ specialties }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {s.parentName && (
-                      <Badge variant="outline" className="text-[11px] leading-4">
-                        {s.parentName}
-                      </Badge>
-                    )}
-                    {typeof s.doctorCount === "number" && s.doctorCount > 0 && (
-                      <Badge variant="secondary" className="text-[11px] leading-4">
-                        {s.doctorCount} doktora
-                      </Badge>
-                    )}
-                  </div>
+                  {s.parentName && (
+                    <Badge variant="outline" className="text-[11px] leading-4">
+                      {s.parentName}
+                    </Badge>
+                  )}
 
                   <h3 className="font-semibold text-base sm:text-lg leading-snug">
                     {s.naziv}

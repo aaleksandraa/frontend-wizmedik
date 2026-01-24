@@ -19,7 +19,7 @@ interface Specialty {
   slug?: string;
   parent_id?: number;
   children?: Specialty[];
-  doctorCount?: number;
+  // doctorCount removed - not needed, slows down page load
 }
 
 export default function Specialties() {
@@ -49,17 +49,17 @@ export default function Specialties() {
 
   const fetchSpecialties = async () => {
     try {
-      const response = await specialtiesAPI.getWithCounts();
+      // Use regular API without doctor counts for faster loading
+      const response = await specialtiesAPI.getAll();
       const specialtiesData = response.data || [];
 
       setSpecialties(
         specialtiesData.map((spec: any) => ({
           ...spec,
-          doctorCount: spec.doctor_count || 0,
+          // Don't include doctor count - not needed and slows down page
           children:
             spec.children?.map((child: any) => ({
               ...child,
-              doctorCount: child.doctor_count || 0,
             })) || [],
         }))
       );

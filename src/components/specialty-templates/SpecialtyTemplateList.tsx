@@ -13,7 +13,7 @@ interface Specialty {
   icon_url?: string;
   parent_id?: number;
   children?: Specialty[];
-  doctorCount?: number;
+  // doctorCount removed - not needed, slows down page load
 }
 
 interface Props {
@@ -38,17 +38,9 @@ export function SpecialtyTemplateList({ specialties }: Props) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-base sm:text-lg leading-snug truncate">
-                      {category.naziv}
-                    </h3>
-
-                    {typeof category.doctorCount === "number" && category.doctorCount > 0 && (
-                      <Badge variant="secondary" className="text-[11px] leading-4">
-                        {category.doctorCount} doktora
-                      </Badge>
-                    )}
-                  </div>
+                  <h3 className="font-semibold text-base sm:text-lg leading-snug truncate">
+                    {category.naziv}
+                  </h3>
 
                   {category.opis && (
                     <p className="text-sm text-muted-foreground line-clamp-1">
@@ -87,17 +79,9 @@ export function SpecialtyTemplateList({ specialties }: Props) {
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="font-semibold text-sm sm:text-[15px] truncate">
-                              {subspec.naziv}
-                            </h4>
-
-                            {typeof subspec.doctorCount === "number" && subspec.doctorCount > 0 && (
-                              <Badge variant="secondary" className="text-[11px] leading-4">
-                                {subspec.doctorCount} doktora
-                              </Badge>
-                            )}
-                          </div>
+                          <h4 className="font-semibold text-sm sm:text-[15px] truncate">
+                            {subspec.naziv}
+                          </h4>
 
                           {subspec.opis && (
                             <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
