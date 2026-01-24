@@ -28,9 +28,6 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-
-// API URL configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
@@ -38,6 +35,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
+// API URL configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface Laboratory {
   id: number;

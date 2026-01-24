@@ -28,9 +28,6 @@ import {
 import {
   arrayMove,
   SortableContext,
-
-// API URL configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
@@ -45,6 +42,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
+// API URL configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface Spa {
   id: number;
