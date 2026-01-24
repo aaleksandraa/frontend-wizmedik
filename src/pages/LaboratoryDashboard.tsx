@@ -375,7 +375,7 @@ export default function LaboratoryDashboard() {
     if (!laboratory) return;
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.put(`${API_URL}/laboratory/profile', laboratory, {
+      await axios.put(`${API_URL}/laboratory/profile`, laboratory, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({ title: 'Uspjeh', description: 'Profil ažuriran' });
@@ -420,7 +420,7 @@ export default function LaboratoryDashboard() {
     
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.put(`${API_URL}/laboratory/change-password', passwordForm, {
+      await axios.put(`${API_URL}/laboratory/change-password`, passwordForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({ title: 'Uspjeh', description: 'Lozinka promijenjena' });
@@ -494,7 +494,7 @@ export default function LaboratoryDashboard() {
         });
         toast({ title: 'Uspjeh', description: 'Analiza ažurirana' });
       } else {
-        await axios.post(`${API_URL}/laboratory/analize', data, {
+        await axios.post(`${API_URL}/laboratory/analize`, data, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast({ title: 'Uspjeh', description: 'Analiza dodana' });
@@ -581,7 +581,7 @@ export default function LaboratoryDashboard() {
         });
         toast({ title: 'Uspjeh', description: 'Paket ažuriran' });
       } else {
-        await axios.post(`${API_URL}/laboratory/paketi', data, {
+        await axios.post(`${API_URL}/laboratory/paketi`, data, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast({ title: 'Uspjeh', description: 'Paket kreiran' });
