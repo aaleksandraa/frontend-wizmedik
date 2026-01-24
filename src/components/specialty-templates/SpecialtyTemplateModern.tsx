@@ -1,7 +1,8 @@
-import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { IconRenderer } from './IconRenderer';
+import { Link } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { IconRenderer } from "./IconRenderer";
+import { ArrowRight } from "lucide-react";
 
 interface Specialty {
   id: number;
@@ -19,73 +20,90 @@ interface Props {
 }
 
 const gradients = [
-  'from-blue-500/10 to-cyan-500/10',
-  'from-purple-500/10 to-pink-500/10',
-  'from-green-500/10 to-emerald-500/10',
-  'from-orange-500/10 to-red-500/10',
-  'from-indigo-500/10 to-blue-500/10',
-  'from-rose-500/10 to-pink-500/10',
+  "from-blue-500/10 to-cyan-500/10",
+  "from-purple-500/10 to-pink-500/10",
+  "from-green-500/10 to-emerald-500/10",
+  "from-orange-500/10 to-red-500/10",
+  "from-indigo-500/10 to-blue-500/10",
+  "from-rose-500/10 to-pink-500/10",
 ];
 
 export function SpecialtyTemplateModern({ specialties }: Props) {
-  const navigate = useNavigate();
-
-  const handleSpecialtyClick = (specialty: Specialty) => {
-    navigate(`/specijalnost/${specialty.slug}`);
-  };
-
-  // Flatten all specialties with parent info
-  const allSpecialties: Array<Specialty & { parentName?: string }> = [];
-  specialties.forEach((parent, idx) => {
-    allSpecialties.push({ ...parent, parentName: undefined });
-    if (parent.children) {
-      parent.children.forEach(child => {
-        allSpecialties.push({ ...child, parentName: parent.naziv });
-      });
-    }
+  const all: Array<Specialty & { parentName?: string }> = [];
+  specialties.forEach((parent) => {
+    all.push({ ...parent, parentName: undefined });
+    parent.children?.forEach((child) => {
+      all.push({ ...child, parentName: parent.naziv });
+    });
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {allSpecialties.map((specialty, index) => {
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      {all.map((s, index) => {
         const gradient = gradients[index % gradients.length];
-        
+
         return (
-          <Card 
-            key={specialty.id}
-            className={`relative overflow-hidden cursor-pointer group hover:shadow-2xl transition-all duration-300 bg-gradient-to-br ${gradient}`}
-            onClick={() => handleSpecialtyClick(specialty)}
+          <Link
+            key={s.id}
+            to={`/specijalnost/${s.slug}`}
+            className="group block focus:outline-none"
+            aria-label={`Otvori specijalnost: ${s.naziv}`}
           >
-            <div className="p-6 space-y-4">
-              <div className="flex items-start justify-between">
-                <div className="w-14 h-14 rounded-2xl bg-white shadow-md group-hover:scale-110 transition-transform flex items-center justify-center overflow-hidden">
-                  <IconRenderer iconUrl={specialty.icon_url} alt={specialty.naziv} className="w-7 h-7 text-primary" />
+            <Card
+              className={[
+                "relative overflow-hidden h-full",
+                "cursor-pointer",
+                "bg-gradient-to-br",
+                gradient,
+                "border",
+                "transition-all duration-200",
+                "sm:hover:shadow-xl",
+                "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                "motion-reduce:transition-none",
+              ].join(" ")}
+            >
+              <div className="p-4 sm:p-6 flex flex-col gap-3 sm:gap-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-background/80 border shadow-sm flex items-center justify-center overflow-hidden shrink-0 transition-transform sm:group-hover:scale-105 motion-reduce:transform-none">
+                    <IconRenderer
+                      iconUrl={s.icon_url}
+                      alt={s.naziv}
+                      className="w-5 h-5 sm:w-7 sm:h-7 text-primary"
+                    />
+                  </div>
+
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-colors sm:group-hover:bg-primary sm:group-hover:text-white">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {s.parentName && (
+                      <Badge variant="outline" className="text-[11px] leading-4">
+                        {s.parentName}
+                      </Badge>
+                    )}
+                    {typeof s.doctorCount === "number" && s.doctorCount > 0 && (
+                      <Badge variant="secondary" className="text-[11px] leading-4">
+                        {s.doctorCount} doktora
+                      </Badge>
+                    )}
+                  </div>
+
+                  <h3 className="font-semibold text-base sm:text-lg leading-snug">
+                    {s.naziv}
+                  </h3>
+
+                  {s.opis && (
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                      {s.opis}
+                    </p>
+                  )}
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                {specialty.parentName && (
-                  <Badge variant="outline" className="text-xs">
-                    {specialty.parentName}
-                  </Badge>
-                )}
-                <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
-                  {specialty.naziv}
-                </h3>
-                {specialty.opis && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {specialty.opis}
-                  </p>
-                )}
-              </div>
-              
-              <div className="flex items-center justify-end pt-2 border-t">
-                <div className="w-8 h-8 rounded-full bg-primary/10 group-hover:bg-primary group-hover:text-white transition-colors flex items-center justify-center">
-                  <span className="text-lg">→</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </Link>
         );
       })}
     </div>

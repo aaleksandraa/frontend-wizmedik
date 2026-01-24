@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import * as Sentry from '@sentry/react';
 
 interface Props {
   children: ReactNode;
@@ -32,16 +33,20 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to monitoring service (Sentry, LogRocket, etc.)
+    // Log error to console
     console.error('Error caught by boundary:', error, errorInfo);
+    
+    // Send to Sentry
+    Sentry.captureException(error, {
+      extra: {
+        componentStack: errorInfo.componentStack,
+      },
+    });
     
     this.setState({
       error,
       errorInfo,
     });
-
-    // TODO: Send to error tracking service
-    // Sentry.captureException(error, { extra: errorInfo });
   }
 
   handleReset = () => {

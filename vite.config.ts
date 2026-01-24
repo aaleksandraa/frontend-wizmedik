@@ -53,6 +53,12 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom'],
   },
   build: {
+    // Target older browsers for maximum compatibility
+    target: ['es2015', 'chrome79', 'safari12', 'firefox78', 'edge79'],
+    
+    // Polyfills for older browsers
+    cssTarget: 'chrome79',
+    
     // Code splitting
     rollupOptions: {
       output: {
@@ -77,18 +83,30 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
+    
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
-    // Minification
+    
+    // Minification with legacy support
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
         drop_debugger: mode === 'production',
+        ecma: 2015, // Target ES2015 for compatibility
+      },
+      format: {
+        ecma: 2015, // Output ES2015 compatible code
       },
     },
+    
     // Source maps only in development
     sourcemap: mode === 'development',
+    
+    // Ensure compatibility with older browsers
+    modulePreload: {
+      polyfill: true,
+    },
   },
   // Optimize dependencies
   optimizeDeps: {

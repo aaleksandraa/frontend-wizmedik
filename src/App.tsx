@@ -4,13 +4,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { initSentry } from "@/utils/sentry";
+import { initSentry } from "@/config/sentry";
+import { initGA, trackPageView } from "@/config/analytics";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -63,10 +64,23 @@ import HealthCalculators from "./pages/HealthCalculators";
 import CookiePolicy from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
 
+// Component to track page views
+const PageViewTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page view on route change
+    trackPageView(location.pathname + location.search, document.title);
+  }, [location]);
+
+  return null;
+};
+
 const App = () => {
-  // Initialize Sentry on app load
+  // Initialize Sentry and Google Analytics on app load
   useEffect(() => {
     initSentry();
+    initGA();
   }, []);
 
   return (
@@ -78,6 +92,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <PageViewTracker />
               <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
