@@ -321,16 +321,16 @@ export default function LaboratoryDashboard() {
       const token = localStorage.getItem('auth_token');
       
       const [profileRes, statsRes, analyzesRes, packagesRes] = await Promise.all([
-        axios.get(${API_URL}/laboratory/profile', {
+        axios.get(`${API_URL}/laboratory/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(${API_URL}/laboratory/statistics', {
+        axios.get(`${API_URL}/laboratory/statistics`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(${API_URL}/laboratory/analize', {
+        axios.get(`${API_URL}/laboratory/analize`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(${API_URL}/laboratory/paketi', {
+        axios.get(`${API_URL}/laboratory/paketi`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -363,7 +363,7 @@ export default function LaboratoryDashboard() {
   
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(${API_URL}/laboratorije/kategorije/all');
+      const res = await axios.get(`${API_URL}/laboratorije/kategorije/all`);
       setCategories(res.data?.data || res.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -375,7 +375,7 @@ export default function LaboratoryDashboard() {
     if (!laboratory) return;
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.put(${API_URL}/laboratory/profile', laboratory, {
+      await axios.put(`${API_URL}/laboratory/profile', laboratory, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({ title: 'Uspjeh', description: 'Profil ažuriran' });
@@ -420,7 +420,7 @@ export default function LaboratoryDashboard() {
     
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.put(${API_URL}/laboratory/change-password', passwordForm, {
+      await axios.put(`${API_URL}/laboratory/change-password', passwordForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({ title: 'Uspjeh', description: 'Lozinka promijenjena' });
@@ -494,7 +494,7 @@ export default function LaboratoryDashboard() {
         });
         toast({ title: 'Uspjeh', description: 'Analiza ažurirana' });
       } else {
-        await axios.post(${API_URL}/laboratory/analize', data, {
+        await axios.post(`${API_URL}/laboratory/analize', data, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast({ title: 'Uspjeh', description: 'Analiza dodana' });
@@ -581,7 +581,7 @@ export default function LaboratoryDashboard() {
         });
         toast({ title: 'Uspjeh', description: 'Paket ažuriran' });
       } else {
-        await axios.post(${API_URL}/laboratory/paketi', data, {
+        await axios.post(`${API_URL}/laboratory/paketi', data, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast({ title: 'Uspjeh', description: 'Paket kreiran' });
@@ -638,7 +638,7 @@ export default function LaboratoryDashboard() {
       const newImages = [...(laboratory?.galerija || []), response.data.url];
       
       const token = localStorage.getItem('auth_token');
-      await axios.put(${API_URL}/laboratory/profile', 
+      await axios.put(`${API_URL}/laboratory/profile`, 
         { galerija: newImages }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -662,7 +662,7 @@ export default function LaboratoryDashboard() {
     try {
       const newImages = (laboratory?.galerija || []).filter(img => img !== imageUrl);
       const token = localStorage.getItem('auth_token');
-      await axios.put(${API_URL}/laboratory/profile', 
+      await axios.put(`${API_URL}/laboratory/profile`, 
         { galerija: newImages }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -677,7 +677,7 @@ export default function LaboratoryDashboard() {
   const handleSetFeaturedImage = async (imageUrl: string) => {
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.put(${API_URL}/laboratory/profile', 
+      await axios.put(`${API_URL}/laboratory/profile`, 
         { featured_slika: imageUrl }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -708,7 +708,7 @@ export default function LaboratoryDashboard() {
           redoslijed: index
         }));
 
-        await axios.put(${API_URL}/laboratory/analize/reorder', 
+        await axios.put(`${API_URL}/laboratory/analize/reorder`, 
           { analyses: updates },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -740,7 +740,7 @@ export default function LaboratoryDashboard() {
           redoslijed: index
         }));
 
-        await axios.put(${API_URL}/laboratory/paketi/reorder', 
+        await axios.put(`${API_URL}/laboratory/paketi/reorder`, 
           { packages: updates },
           { headers: { Authorization: `Bearer ${token}` } }
         );
