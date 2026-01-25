@@ -61,10 +61,19 @@
     <meta name="msapplication-navbutton-color" content="#0066cc" />
     <meta name="apple-mobile-web-app-status-bar-style" content="#0066cc" />
     
-    <!-- CRITICAL: Prevent horizontal scroll on mobile -->
+    <!-- CRITICAL: Prevent horizontal scroll, allow vertical scroll -->
     <style>
-      html, body {
+      html {
         overflow-x: hidden !important;
+        overflow-y: auto !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
         max-width: 100vw !important;
         width: 100% !important;
         margin: 0;
@@ -77,14 +86,6 @@
       }
       * {
         box-sizing: border-box !important;
-      }
-      @media (max-width: 768px) {
-        * {
-          max-width: 100vw !important;
-        }
-        section, main, article, footer, nav, header, div {
-          overflow-x: hidden !important;
-        }
       }
     </style>
     
