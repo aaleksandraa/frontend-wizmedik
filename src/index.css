@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CRITICAL: Prevent horizontal scroll ONLY on body, allow vertical scroll */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 /* Healthcare Platform Design System - Professional Medical Theme
 All colors MUST be HSL.
 */
@@ -138,13 +144,9 @@ All colors MUST be HSL.
     overflow-wrap: break-word;
   }
   
-  /* Mobile specific fixes - ONLY prevent horizontal overflow */
-  @media (max-width: 768px) {
-    /* Force containers to respect viewport width */
-    .container, [class*="container"] {
-      max-width: 100% !important;
-      width: 100% !important;
-    }
+  /* Ensure containers respect viewport width */
+  .container, [class*="container"] {
+    max-width: 100%;
   }
   
   /* ========================================
