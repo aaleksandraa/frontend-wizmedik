@@ -44,6 +44,8 @@ interface Doctor {
   youtube_linkovi?: Array<{ url: string; naslov: string }>;
   slika_profila?: string;
   radno_vrijeme?: any;
+  telemedicine_enabled?: boolean;
+  telemedicine_phone?: string;
   kategorijeUsluga?: Array<{
     id: number;
     naziv: string;
@@ -663,13 +665,13 @@ export default function DoctorProfile() {
                       dangerouslySetInnerHTML={{ __html: doctor.opis }}
                     />
                     
-                    {/* Action Buttons below description */}
-                    <div className="flex flex-wrap gap-3 pt-4 border-t">
+                    {/* Action Buttons below description - Responsive */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                       {doctor.prihvata_online && (
                         <Button 
                           onClick={() => setShowBooking(true)}
                           size="lg"
-                          className="flex-1 min-w-[200px]"
+                          className="w-full sm:flex-1"
                         >
                           <Calendar className="w-5 h-5 mr-2" />
                           Zakaži online
@@ -679,12 +681,12 @@ export default function DoctorProfile() {
                         <Button 
                           variant="outline"
                           size="lg"
-                          className="flex-1 min-w-[200px]"
+                          className="w-full sm:flex-1"
                           asChild
                         >
                           <a href={`tel:${doctor.telefon}`}>
                             <Phone className="w-5 h-5 mr-2" />
-                            Pozovite {doctor.telefon}
+                            Pozovite
                           </a>
                         </Button>
                       )}
@@ -692,7 +694,7 @@ export default function DoctorProfile() {
                         <Button 
                           variant="secondary"
                           size="lg"
-                          className="flex-1 min-w-[200px]"
+                          className="w-full sm:flex-1"
                           onClick={() => {
                             const servicesSection = document.getElementById('usluge-section');
                             servicesSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -869,36 +871,7 @@ export default function DoctorProfile() {
                 </Card>
               )}
 
-              {/* Mobile Action Buttons - Show only on mobile, below "O doktoru" */}
-              <Card className="mb-8 shadow-medium lg:hidden order-2">
-                <CardContent className="pt-6">
-                  <div className="space-y-3">
-                    {doctor.prihvata_online && (
-                      <Button 
-                        onClick={() => setShowBooking(true)}
-                        className="w-full h-12 text-base"
-                        size="lg"
-                      >
-                        <Calendar className="w-5 h-5 mr-2" />
-                        Zakažite termin
-                      </Button>
-                    )}
-                    {doctor.telefon && (
-                      <Button 
-                        variant="outline"
-                        className="w-full h-12 text-base"
-                        size="lg"
-                        asChild
-                      >
-                        <a href={`tel:${doctor.telefon}`}>
-                          <Phone className="w-5 h-5 mr-2" />
-                          Pozovite: {doctor.telefon}
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Mobile Action Buttons - REMOVED - Already shown in "O doktoru" section */}
 
               {/* Guest Visits Section */}
               {guestVisits.length > 0 && (

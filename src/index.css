@@ -339,6 +339,8 @@ All colors MUST be HSL.
       -webkit-overflow-scrolling: touch !important;
       height: auto !important;
       min-height: 100vh !important;
+      position: relative !important;
+      touch-action: pan-y !important;
     }
     
     body {
@@ -350,6 +352,23 @@ All colors MUST be HSL.
       overflow-x: hidden !important;
       height: auto !important;
       min-height: 100vh !important;
+      position: relative !important;
+    }
+    
+    /* CRITICAL: Prevent any JavaScript from blocking scroll */
+    * {
+      touch-action: pan-y pan-x !important;
+    }
+    
+    /* Allow scroll on main content areas */
+    main, section, article, div {
+      overflow-y: visible !important;
+    }
+    
+    /* Ensure no fixed height containers block scroll */
+    .h-screen, .min-h-screen, [class*="h-screen"], [class*="min-h-screen"] {
+      height: auto !important;
+      min-height: auto !important;
     }
   }
 }

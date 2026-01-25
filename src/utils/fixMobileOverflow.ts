@@ -97,11 +97,15 @@ export function fixMobileOverflow() {
   };
 }
 
-// Auto-run on load
-if (typeof window !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixMobileOverflow);
-  } else {
-    fixMobileOverflow();
-  }
-}
+// DISABLED: This utility was causing scroll issues on mobile
+// The aggressive DOM manipulation was preventing proper scroll behavior
+// Mobile overflow is now handled via CSS in index.css
+
+// Auto-run on load - DISABLED
+// if (typeof window !== 'undefined') {
+//   if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', fixMobileOverflow);
+//   } else {
+//     fixMobileOverflow();
+//   }
+// }
