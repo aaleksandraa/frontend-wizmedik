@@ -61,46 +61,18 @@
     <meta name="msapplication-navbutton-color" content="#0066cc" />
     <meta name="apple-mobile-web-app-status-bar-style" content="#0066cc" />
     
-    <!-- CRITICAL: Mobile scroll fix - Allow vertical scroll, prevent horizontal overflow -->
+    <!-- CRITICAL: Mobile scroll - Minimal CSS, no overflow restrictions -->
     <style>
+      * {
+        box-sizing: border-box;
+      }
       html, body {
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        max-width: 100vw !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        -webkit-overflow-scrolling: touch !important;
+        width: 100%;
+        margin: 0;
+        padding: 0;
       }
       #root {
-        overflow-x: hidden !important;
-        max-width: 100vw !important;
-        width: 100% !important;
-      }
-      * {
-        box-sizing: border-box !important;
-      }
-      @media (max-width: 768px) {
-        html, body {
-          position: relative !important;
-          height: auto !important;
-          min-height: 100vh !important;
-          touch-action: pan-y !important;
-        }
-        body {
-          position: static !important;
-        }
-        * {
-          max-width: 100% !important;
-        }
-        .container, [class*="container"] {
-          max-width: 100% !important;
-          width: 100% !important;
-        }
-        section, main, article, footer, nav, header {
-          overflow-x: hidden !important;
-          max-width: 100vw !important;
-        }
+        width: 100%;
       }
     </style>
     
@@ -144,8 +116,8 @@
     </script>
   </head>
 
-  <body style="overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;">
-    <div id="root" style="overflow-x: hidden; max-width: 100vw; width: 100%;"></div>
+  <body>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

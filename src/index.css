@@ -4,26 +4,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CRITICAL: Mobile Scroll Fix */
+/* CRITICAL: Mobile Scroll Fix - Minimal approach */
 html {
-  overflow-x: hidden;
   width: 100%;
   height: 100%;
 }
 
 body {
-  overflow-x: hidden;
   width: 100%;
   min-height: 100vh;
-  /* CRITICAL: Allow vertical scroll on mobile */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 #root {
-  overflow-x: hidden;
   width: 100%;
   min-height: 100vh;
+}
+
+/* CRITICAL: Prevent Radix UI Dialog from blocking scroll */
+body[data-scroll-locked] {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* CRITICAL: Allow scroll on mobile at all times */
+@media (max-width: 768px) {
+  html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  body[data-scroll-locked] {
+    overflow: auto !important;
+  }
 }
 
 /* Healthcare Platform Design System - Professional Medical Theme
@@ -148,109 +161,18 @@ All colors MUST be HSL.
   }
   
   /* ========================================
-     CRITICAL: Mobile Scroll Fix
+     CRITICAL: Mobile Scroll Fix - MINIMAL
      ======================================== */
-  
-  /* Allow vertical scroll, prevent horizontal overflow */
-  html {
-    overflow-x: hidden;
-    overflow-y: auto;
-    width: 100%;
-    height: 100%;
-  }
-  
-  body {
-    overflow-x: hidden;
-    overflow-y: auto;
-    width: 100%;
-    min-height: 100vh;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Main app container */
-  #root {
-    overflow-x: hidden;
-    width: 100%;
-    min-height: 100vh;
-  }
   
   /* Ensure all containers respect viewport width */
   * {
     box-sizing: border-box;
   }
   
-  /* Prevent specific elements from causing overflow */
-  div, section, main, article, aside, header, footer, nav {
-    max-width: 100%;
-  }
-  
-  /* Allow specific elements to scale properly */
-  img, svg, video, canvas, iframe {
-    max-width: 100%;
-    height: auto;
-  }
-  
   /* Prevent text from causing overflow */
   p, h1, h2, h3, h4, h5, h6, span, a, li {
     word-wrap: break-word;
     overflow-wrap: break-word;
-  }
-  
-  /* Fix for containers with padding that might overflow */
-  /* Only apply strict width limits on mobile */
-  @media (max-width: 768px) {
-    .container {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
-    }
-    
-    [class*="container"],
-    [class*="mx-auto"] {
-      max-width: 100% !important;
-    }
-  }
-  
-  /* Mobile specific fixes */
-  @media (max-width: 768px) {
-    /* Reset all min-width on mobile */
-    * {
-      min-width: 0 !important;
-    }
-    
-    /* Force grid to respect viewport */
-    .grid {
-      width: 100% !important;
-      max-width: 100vw !important;
-    }
-    
-    /* Force flex containers to wrap */
-    .flex {
-      flex-wrap: wrap !important;
-    }
-    
-    /* Ensure all sections fit viewport */
-    section, main, article, footer {
-      width: 100% !important;
-      max-width: 100vw !important;
-      overflow-x: hidden !important;
-    }
-    
-    /* Fix for absolute/fixed positioned elements */
-    .absolute, .fixed {
-      max-width: 100vw !important;
-    }
-    
-    /* Force all max-w-* classes to respect viewport on mobile */
-    [class*="max-w-"] {
-      max-width: 100% !important;
-    }
-    
-    /* Ensure padding doesn't cause overflow */
-    * {
-      box-sizing: border-box !important;
-    }
   }
   
   /* ========================================
@@ -331,44 +253,12 @@ All colors MUST be HSL.
     touch-action: manipulation;
   }
   
-  /* 9. CRITICAL: Ensure body can scroll on mobile */
+  /* 9. CRITICAL: Mobile scroll - DO NOT block scroll */
   @media (max-width: 768px) {
-    html, body {
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      -webkit-overflow-scrolling: touch !important;
-      height: auto !important;
-      min-height: 100vh !important;
-      position: relative !important;
-      touch-action: pan-y !important;
-    }
-    
-    body {
-      position: static !important;
-    }
-    
-    #root {
-      overflow-y: visible !important;
-      overflow-x: hidden !important;
-      height: auto !important;
-      min-height: 100vh !important;
-      position: relative !important;
-    }
-    
-    /* CRITICAL: Prevent any JavaScript from blocking scroll */
-    * {
-      touch-action: pan-y pan-x !important;
-    }
-    
-    /* Allow scroll on main content areas */
-    main, section, article, div {
-      overflow-y: visible !important;
-    }
-    
-    /* Ensure no fixed height containers block scroll */
-    .h-screen, .min-h-screen, [class*="h-screen"], [class*="min-h-screen"] {
-      height: auto !important;
-      min-height: auto !important;
+    /* Remove any height restrictions */
+    html, body, #root {
+      height: auto;
+      min-height: 100vh;
     }
   }
 }
