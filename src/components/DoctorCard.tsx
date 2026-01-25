@@ -131,6 +131,18 @@ export function DoctorCard({ doctor: rawDoctor, settings: propSettings }: Doctor
     splitcolor: () => <SplitColorCard doctor={doctor} settings={s} />,
     neumorphism: () => <NeumorphismCard doctor={doctor} settings={s} />,
     magazine: () => <MagazineCard doctor={doctor} settings={s} />,
+    listcompact: () => <ListCompactCard doctor={doctor} settings={s} />,
+    professional: () => <ProfessionalCard doctor={doctor} settings={s} />,
+    elegant: () => <ElegantCard doctor={doctor} settings={s} />,
+    bold: () => <BoldCard doctor={doctor} settings={s} />,
+    horizontalinfo: () => <HorizontalInfoCard doctor={doctor} settings={s} />,
+    horizontaldetail: () => <HorizontalDetailCard doctor={doctor} settings={s} />,
+    timeline: () => <TimelineCard doctor={doctor} settings={s} />,
+    badge: () => <BadgeCard doctor={doctor} settings={s} />,
+    overlay: () => <OverlayCard doctor={doctor} settings={s} />,
+    sidebar: () => <SidebarCard doctor={doctor} settings={s} />,
+    testimonial: () => <TestimonialCard doctor={doctor} settings={s} />,
+    pricing: () => <PricingCard doctor={doctor} settings={s} />,
   };
 
   const VariantComponent = variants[s.variant] || variants.classic;
@@ -607,7 +619,7 @@ function NeonCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings:
         
         <div className="relative z-10">
           <div className="flex items-center gap-4">
-            <Avatar className="h-14 w-14 ring-2" style={{ ringColor: s.primaryColor }}>
+            <Avatar className="h-14 w-14 ring-2 ring-primary">
               <AvatarImage src={doctor.slika_profila} />
               <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
                 {doctor.ime?.[0]}{doctor.prezime?.[0]}
@@ -672,7 +684,7 @@ function CardStackCard({ doctor, settings: s }: { doctor: NormalizedDoctor; sett
         <Card className="relative bg-white shadow-lg hover:shadow-xl transition-all">
           <CardContent className="p-5">
             <div className="flex items-start gap-4">
-              <Avatar className="h-14 w-14 ring-2 ring-offset-2" style={{ ringColor: s.primaryColor }}>
+              <Avatar className="h-14 w-14 ring-2 ring-offset-2 ring-primary">
                 <AvatarImage src={doctor.slika_profila} />
                 <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
                   {doctor.ime?.[0]}{doctor.prezime?.[0]}
@@ -865,6 +877,724 @@ function MagazineCard({ doctor, settings: s }: { doctor: NormalizedDoctor; setti
   );
 }
 
+// List Compact - Slika lijevo, info desno (kao što si opisala)
+function ListCompactCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <div className="flex items-start gap-4 p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
+        {/* Profile Image - Left */}
+        <Avatar className="h-20 w-20 flex-shrink-0">
+          <AvatarImage src={doctor.slika_profila} />
+          <AvatarFallback className="text-lg" style={{ backgroundColor: `${s.primaryColor}20`, color: s.primaryColor }}>
+            {doctor.ime?.[0]}{doctor.prezime?.[0]}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Content - Right */}
+        <div className="flex-1 min-w-0">
+          {/* Name */}
+          <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+            Dr. {doctor.ime} {doctor.prezime}
+          </h3>
+
+          {/* Specialty */}
+          {s.showSpecialty && doctor.specijalnost && (
+            <p className="text-sm text-gray-600 mb-2">
+              {doctor.specijalnost}
+            </p>
+          )}
+
+          {/* Location */}
+          {s.showLocation && doctor.grad && (
+            <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
+              <MapPin className="h-4 w-4" />
+              <span>{doctor.grad}</span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              <Link to={`/doktor/${doctor.slug}`}>
+                O doktoru
+              </Link>
+            </Button>
+            
+            {s.showBookButton && (
+              <Button
+                asChild
+                size="sm"
+                className="text-xs"
+                style={{ backgroundColor: s.primaryColor }}
+              >
+                <Link to={`/doktor/${doctor.slug}#zakazi`}>
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Zakaži termin
+                </Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// Professional - Korporativni stil
+function ProfessionalCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <Card className="hover:shadow-lg transition-all h-full border-t-4" style={{ borderTopColor: s.primaryColor }}>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="relative mb-4">
+              <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+                <AvatarImage src={doctor.slika_profila} />
+                <AvatarFallback className="text-2xl" style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                  {doctor.ime?.[0]}{doctor.prezime?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              {s.showOnlineStatus && doctor.prihvata_online && (
+                <div 
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center"
+                  style={{ backgroundColor: s.accentColor }}
+                >
+                  <CheckCircle className="h-4 w-4 text-white" />
+                </div>
+              )}
+            </div>
+            
+            <h3 className="font-bold text-xl mb-1">Dr. {doctor.ime} {doctor.prezime}</h3>
+            
+            {s.showSpecialty && (
+              <div 
+                className="inline-block px-4 py-1 rounded-full text-sm font-medium mb-3"
+                style={{ backgroundColor: `${s.primaryColor}15`, color: s.primaryColor }}
+              >
+                {doctor.specijalnost}
+              </div>
+            )}
+            
+            <div className="w-full space-y-2 mb-4">
+              {s.showLocation && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" style={{ color: s.primaryColor }} />
+                  <span>{doctor.grad}</span>
+                </div>
+              )}
+              
+              {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`h-4 w-4 ${i < Math.round(doctor.ocjena!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium">{formatRating(doctor.ocjena)}</span>
+                  <span className="text-xs text-muted-foreground">({doctor.broj_ocjena})</span>
+                </div>
+              )}
+            </div>
+            
+            {s.showBookButton && (
+              <Button 
+                className="w-full font-semibold"
+                style={{ backgroundColor: s.primaryColor }}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Zakažite pregled
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+// Elegant - Sofisticirani dizajn
+function ElegantCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <div className="group relative h-full">
+        <div 
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl"
+          style={{ backgroundColor: `${s.primaryColor}30` }}
+        />
+        <Card className="relative bg-white/95 backdrop-blur-sm rounded-2xl border-2 hover:border-primary/50 transition-all h-full overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-10" style={{ 
+            background: `radial-gradient(circle, ${s.primaryColor}, transparent)`
+          }} />
+          
+          <CardContent className="p-6 relative z-10">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="relative">
+                <Avatar className="h-16 w-16 ring-2 ring-offset-2 ring-primary/40">
+                  <AvatarImage src={doctor.slika_profila} />
+                  <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                    {doctor.ime?.[0]}{doctor.prezime?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+                  <div 
+                    className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg"
+                    style={{ backgroundColor: s.accentColor }}
+                  >
+                    {formatRating(doctor.ocjena)}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="font-serif font-bold text-lg leading-tight mb-1">
+                  Dr. {doctor.ime} {doctor.prezime}
+                </h3>
+                {s.showSpecialty && (
+                  <p className="text-sm italic" style={{ color: s.primaryColor }}>
+                    {doctor.specijalnost}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              {s.showLocation && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${s.primaryColor}10` }}
+                  >
+                    <MapPin className="h-4 w-4" style={{ color: s.primaryColor }} />
+                  </div>
+                  <span>{doctor.grad}</span>
+                </div>
+              )}
+              
+              {s.showPhone && doctor.telefon && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${s.primaryColor}10` }}
+                  >
+                    <Phone className="h-4 w-4" style={{ color: s.primaryColor }} />
+                  </div>
+                  <span>{doctor.telefon}</span>
+                </div>
+              )}
+            </div>
+            
+            {s.showOnlineStatus && doctor.prihvata_online && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm" style={{ color: s.accentColor }}>
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="font-medium">Dostupno online zakazivanje</span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </Link>
+  );
+}
+
+// Bold - Hrabar i upečatljiv
+function BoldCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <div 
+        className="relative rounded-xl overflow-hidden hover:scale-[1.02] transition-transform h-full"
+        style={{ backgroundColor: s.primaryColor }}
+      >
+        {/* Decorative pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-40 h-40 rounded-full -translate-y-1/2 translate-x-1/2" style={{ backgroundColor: 'white' }} />
+          <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full translate-y-1/2 -translate-x-1/2" style={{ backgroundColor: 'white' }} />
+        </div>
+        
+        <div className="relative z-10 p-6 text-white">
+          <div className="flex items-start gap-4 mb-4">
+            <Avatar className="h-16 w-16 ring-4 ring-white/30 shrink-0">
+              <AvatarImage src={doctor.slika_profila} />
+              <AvatarFallback className="bg-white/20 text-white text-lg">
+                {doctor.ime?.[0]}{doctor.prezime?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            
+            <div className="flex-1">
+              <h3 className="font-black text-xl leading-tight mb-1">
+                Dr. {doctor.ime} {doctor.prezime}
+              </h3>
+              {s.showSpecialty && (
+                <div className="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold">
+                  {doctor.specijalnost}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            {s.showLocation && (
+              <div className="flex items-center gap-2 text-white/90">
+                <MapPin className="h-5 w-5" />
+                <span className="font-semibold">{doctor.grad}</span>
+              </div>
+            )}
+            
+            {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                  <Star className="h-5 w-5 fill-yellow-300 text-yellow-300" />
+                  <span className="font-black text-lg">{formatRating(doctor.ocjena)}</span>
+                </div>
+                <span className="text-white/80 text-sm">({doctor.broj_ocjena} recenzija)</span>
+              </div>
+            )}
+          </div>
+          
+          {s.showBookButton && (
+            <Button 
+              className="w-full bg-white font-black text-lg py-6 hover:bg-white/90"
+              style={{ color: s.primaryColor }}
+            >
+              <Calendar className="h-5 w-5 mr-2" />
+              ZAKAŽI ODMAH
+            </Button>
+          )}
+          
+          {s.showOnlineStatus && doctor.prihvata_online && (
+            <div className="mt-3 flex items-center justify-center gap-2 text-sm font-bold">
+              <CheckCircle className="h-4 w-4" />
+              ONLINE BOOKING DOSTUPAN
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// Horizontal Info - Kao horizontal ali sa "Detaljnije" dugmetom, bez ocjena
+function HorizontalInfoCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <Card className="hover:shadow-lg transition-all h-full">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-14 w-14 shrink-0">
+              <AvatarImage src={doctor.slika_profila} />
+              <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                {doctor.ime?.[0]}{doctor.prezime?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold truncate">Dr. {doctor.ime} {doctor.prezime}</h3>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                {s.showSpecialty && <span>{doctor.specijalnost}</span>}
+                {s.showSpecialty && s.showLocation && <span>•</span>}
+                {s.showLocation && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" /> {doctor.grad}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="shrink-0">
+              <Button size="sm" variant="ghost" className="bg-gray-100 hover:bg-gray-200 text-gray-700">
+                Detaljnije
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+// Horizontal Detail - Kao horizontalinfo ali sa lokacijom u trećem redu i većom slikom
+function HorizontalDetailCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <Card className="hover:shadow-lg transition-all h-full">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20 shrink-0">
+              <AvatarImage src={doctor.slika_profila} />
+              <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                {doctor.ime?.[0]}{doctor.prezime?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base truncate">Dr. {doctor.ime} {doctor.prezime}</h3>
+              {s.showSpecialty && (
+                <p className="text-sm text-muted-foreground mt-0.5">{doctor.specijalnost}</p>
+              )}
+              {s.showLocation && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                  <MapPin className="h-3 w-3" />
+                  <span>{doctor.grad}</span>
+                </div>
+              )}
+            </div>
+            <div className="shrink-0">
+              <Button size="sm" variant="ghost" className="bg-gray-100 hover:bg-gray-200 text-gray-700">
+                Detaljnije
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+// Timeline - Vertikalni timeline stil
+function TimelineCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <div className="relative pl-8 pb-8 hover:opacity-90 transition-opacity">
+        {/* Timeline line */}
+        <div 
+          className="absolute left-3 top-0 bottom-0 w-0.5"
+          style={{ backgroundColor: `${s.primaryColor}30` }}
+        />
+        
+        {/* Timeline dot */}
+        <div 
+          className="absolute left-0 top-2 w-6 h-6 rounded-full border-4 border-white shadow-md"
+          style={{ backgroundColor: s.primaryColor }}
+        />
+        
+        <Card className="ml-4">
+          <CardContent className="p-4">
+            <div className="flex gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={doctor.slika_profila} />
+                <AvatarFallback style={{ backgroundColor: `${s.primaryColor}20`, color: s.primaryColor }}>
+                  {doctor.ime?.[0]}{doctor.prezime?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm">Dr. {doctor.ime} {doctor.prezime}</h3>
+                {s.showSpecialty && (
+                  <p className="text-xs text-muted-foreground">{doctor.specijalnost}</p>
+                )}
+                {s.showLocation && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                    <MapPin className="h-3 w-3" />
+                    {doctor.grad}
+                  </div>
+                )}
+                {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+                  <div className="flex items-center gap-1 mt-2">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs font-medium">{formatRating(doctor.ocjena)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Link>
+  );
+}
+
+// Badge - Sa badge elementima
+function BadgeCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <Card className="hover:shadow-lg transition-all h-full overflow-hidden">
+        <div className="relative">
+          {/* Top badge */}
+          {s.showOnlineStatus && doctor.prihvata_online && (
+            <div 
+              className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold text-white z-10"
+              style={{ backgroundColor: s.accentColor }}
+            >
+              Online
+            </div>
+          )}
+          
+          <CardContent className="p-5">
+            <div className="flex flex-col items-center text-center">
+              <Avatar className="h-20 w-20 mb-3 ring-2 ring-offset-2" style={{ '--tw-ring-color': s.primaryColor } as React.CSSProperties}>
+                <AvatarImage src={doctor.slika_profila} />
+                <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                  {doctor.ime?.[0]}{doctor.prezime?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              
+              <h3 className="font-bold mb-1">Dr. {doctor.ime} {doctor.prezime}</h3>
+              
+              {/* Badges row */}
+              <div className="flex flex-wrap gap-1 justify-center mb-3">
+                {s.showSpecialty && (
+                  <Badge variant="secondary" className="text-xs">
+                    {doctor.specijalnost}
+                  </Badge>
+                )}
+                {s.showLocation && (
+                  <Badge variant="outline" className="text-xs">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {doctor.grad}
+                  </Badge>
+                )}
+                {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+                  <Badge style={{ backgroundColor: `${s.primaryColor}20`, color: s.primaryColor }} className="text-xs">
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    {formatRating(doctor.ocjena)}
+                  </Badge>
+                )}
+              </div>
+              
+              {s.showBookButton && (
+                <Button size="sm" className="w-full" style={{ backgroundColor: s.primaryColor }}>
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Zakaži
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+// Overlay - Sa overlay efektom na hover
+function OverlayCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <div className="relative group h-full rounded-xl overflow-hidden">
+        {/* Background image or color */}
+        <div 
+          className="absolute inset-0 transition-transform group-hover:scale-110"
+          style={{ 
+            background: doctor.slika_profila 
+              ? `url(${doctor.slika_profila}) center/cover` 
+              : `linear-gradient(135deg, ${s.primaryColor}, ${s.accentColor})`
+          }}
+        />
+        
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        
+        {/* Content */}
+        <div className="relative h-full p-5 flex flex-col justify-end text-white">
+          <h3 className="font-bold text-lg mb-1">Dr. {doctor.ime} {doctor.prezime}</h3>
+          {s.showSpecialty && (
+            <p className="text-sm text-white/90 mb-2">{doctor.specijalnost}</p>
+          )}
+          
+          <div className="flex items-center justify-between">
+            {s.showLocation && (
+              <span className="text-xs flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {doctor.grad}
+              </span>
+            )}
+            {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+              <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs font-semibold">{formatRating(doctor.ocjena)}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Hidden button that appears on hover */}
+          <Button 
+            className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ backgroundColor: s.primaryColor }}
+          >
+            Pogledaj profil
+          </Button>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// Sidebar - Kompaktan za sidebar
+function SidebarCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <div className="p-3 hover:bg-muted/50 rounded-lg transition-all border border-transparent hover:border-border">
+        <div className="flex gap-3">
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarImage src={doctor.slika_profila} />
+            <AvatarFallback className="text-xs" style={{ backgroundColor: `${s.primaryColor}20`, color: s.primaryColor }}>
+              {doctor.ime?.[0]}{doctor.prezime?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-sm truncate">Dr. {doctor.ime} {doctor.prezime}</h4>
+            {s.showSpecialty && (
+              <p className="text-xs text-muted-foreground truncate">{doctor.specijalnost}</p>
+            )}
+            <div className="flex items-center gap-2 mt-1">
+              {s.showLocation && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {doctor.grad}
+                </span>
+              )}
+              {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+                <span className="text-xs flex items-center gap-1">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  {formatRating(doctor.ocjena)}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// Testimonial - Kao testimonial kartica
+function TestimonialCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <Card className="hover:shadow-xl transition-all h-full">
+        <CardContent className="p-6">
+          {/* Quote icon */}
+          <div 
+            className="w-10 h-10 rounded-full flex items-center justify-center mb-4"
+            style={{ backgroundColor: `${s.primaryColor}15` }}
+          >
+            <svg className="w-5 h-5" style={{ color: s.primaryColor }} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+          </div>
+          
+          <div className="flex items-start gap-4 mb-4">
+            <Avatar className="h-14 w-14 shrink-0">
+              <AvatarImage src={doctor.slika_profila} />
+              <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                {doctor.ime?.[0]}{doctor.prezime?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <h3 className="font-bold">Dr. {doctor.ime} {doctor.prezime}</h3>
+              {s.showSpecialty && (
+                <p className="text-sm" style={{ color: s.primaryColor }}>{doctor.specijalnost}</p>
+              )}
+            </div>
+          </div>
+          
+          {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star 
+                    key={i} 
+                    className={`h-4 w-4 ${i < Math.round(doctor.ocjena!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm font-medium">{formatRating(doctor.ocjena)}</span>
+              <span className="text-xs text-muted-foreground">({doctor.broj_ocjena} recenzija)</span>
+            </div>
+          )}
+          
+          {s.showLocation && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              {doctor.grad}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+// Pricing - Kao pricing kartica
+function PricingCard({ doctor, settings: s }: { doctor: NormalizedDoctor; settings: DoctorCardSettings }) {
+  return (
+    <Link to={`/doktor/${doctor.slug}`}>
+      <Card className="hover:shadow-xl hover:scale-[1.02] transition-all h-full border-2" style={{ borderColor: `${s.primaryColor}30` }}>
+        <CardContent className="p-0">
+          {/* Header */}
+          <div className="p-5 text-center" style={{ background: `linear-gradient(135deg, ${s.primaryColor}10, ${s.accentColor}10)` }}>
+            <Avatar className="h-16 w-16 mx-auto mb-3 ring-2 ring-white shadow-lg">
+              <AvatarImage src={doctor.slika_profila} />
+              <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                {doctor.ime?.[0]}{doctor.prezime?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <h3 className="font-bold text-lg">Dr. {doctor.ime} {doctor.prezime}</h3>
+            {s.showSpecialty && (
+              <p className="text-sm font-medium mt-1" style={{ color: s.primaryColor }}>
+                {doctor.specijalnost}
+              </p>
+            )}
+          </div>
+          
+          {/* Features */}
+          <div className="p-5 space-y-3">
+            {s.showLocation && (
+              <div className="flex items-center gap-2 text-sm">
+                <div 
+                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${s.accentColor}20` }}
+                >
+                  <MapPin className="h-3 w-3" style={{ color: s.accentColor }} />
+                </div>
+                <span>{doctor.grad}</span>
+              </div>
+            )}
+            
+            {s.showRating && doctor.ocjena && doctor.ocjena > 0 && (
+              <div className="flex items-center gap-2 text-sm">
+                <div 
+                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${s.accentColor}20` }}
+                >
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                </div>
+                <span>{formatRating(doctor.ocjena)} ocjena ({doctor.broj_ocjena})</span>
+              </div>
+            )}
+            
+            {s.showOnlineStatus && doctor.prihvata_online && (
+              <div className="flex items-center gap-2 text-sm">
+                <div 
+                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${s.accentColor}20` }}
+                >
+                  <CheckCircle className="h-3 w-3" style={{ color: s.accentColor }} />
+                </div>
+                <span>Online rezervacija</span>
+              </div>
+            )}
+          </div>
+          
+          {/* CTA */}
+          {s.showBookButton && (
+            <div className="p-5 pt-0">
+              <Button className="w-full font-semibold" style={{ backgroundColor: s.primaryColor }}>
+                <Calendar className="h-4 w-4 mr-2" />
+                Zakaži pregled
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 export const DOCTOR_CARD_VARIANTS = [
   { id: 'classic', name: 'Klasični', description: 'Tradicionalni prikaz sa svim informacijama' },
   { id: 'modern', name: 'Moderni', description: 'Čist dizajn sa akcentnom linijom' },
@@ -882,5 +1612,18 @@ export const DOCTOR_CARD_VARIANTS = [
   { id: 'splitcolor', name: 'Podijeljeni', description: 'Dvobojni dizajn' },
   { id: 'neumorphism', name: 'Neumorphism', description: 'Meki UI sa sjenama' },
   { id: 'magazine', name: 'Magazinski', description: 'Uređivački stil' },
+  { id: 'listcompact', name: 'Lista Kompakt', description: 'Slika lijevo, info desno sa dugmićima' },
+  { id: 'professional', name: 'Profesionalni', description: 'Korporativni stil sa zvjezdicama' },
+  { id: 'elegant', name: 'Elegantni', description: 'Sofisticirani dizajn sa efektima' },
+  { id: 'bold', name: 'Hrabri', description: 'Upečatljiv dizajn sa jakim bojama' },
+  { id: 'horizontalinfo', name: 'Horizontalni Info', description: 'Široki layout sa "Detaljnije" dugmetom, bez ocjena' },
+  { id: 'horizontaldetail', name: 'Horizontalni Detalj', description: 'Kao horizontalinfo ali sa lokacijom u trećem redu i većom slikom' },
+  { id: 'timeline', name: 'Timeline', description: 'Vertikalni timeline stil sa linijom' },
+  { id: 'badge', name: 'Badge', description: 'Sa badge elementima i online statusom' },
+  { id: 'overlay', name: 'Overlay', description: 'Sa overlay efektom i hover animacijom' },
+  { id: 'sidebar', name: 'Sidebar', description: 'Kompaktan za sidebar i male prostore' },
+  { id: 'testimonial', name: 'Testimonial', description: 'Kao testimonial sa quote ikonom' },
+  { id: 'pricing', name: 'Pricing', description: 'Kao pricing kartica sa features listom' },
 ];
+
 

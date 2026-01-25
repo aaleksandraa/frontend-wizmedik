@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { TimeSlotPicker } from '@/components/TimeSlotPicker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableServiceSelect } from '@/components/SearchableServiceSelect';
 
 interface AddAppointmentFormProps {
   doctorId: number;
@@ -154,18 +154,12 @@ export function AddAppointmentForm({
 
       <div>
         <Label>Usluga *</Label>
-        <Select value={selectedService} onValueChange={setSelectedService} required>
-          <SelectTrigger>
-            <SelectValue placeholder="Izaberite uslugu" />
-          </SelectTrigger>
-          <SelectContent>
-            {services.map((service: any) => (
-              <SelectItem key={service.id} value={service.id.toString()}>
-                {service.naziv} - {service.cijena ? `${service.cijena} KM` : 'Po dogovoru'} ({service.trajanje_minuti} min)
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableServiceSelect
+          services={services}
+          value={selectedService}
+          onValueChange={setSelectedService}
+          placeholder="Izaberite uslugu"
+        />
       </div>
 
       <TimeSlotPicker

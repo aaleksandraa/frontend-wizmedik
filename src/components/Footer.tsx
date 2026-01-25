@@ -17,6 +17,7 @@ import {
   Calculator,
   MapPin,
 } from 'lucide-react';
+import { useLogoSettings } from '@/hooks/useLogoSettings';
 
 const searchLinks = [
   { to: '/doktori', label: 'Doktori', icon: Stethoscope },
@@ -70,6 +71,44 @@ function FooterItem({
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { settings: logoSettings, loading: logoLoading } = useLogoSettings();
+
+  // Footer Logo Component
+  const FooterLogo = () => {
+    if (logoLoading) {
+      return (
+        <div className="flex items-center gap-2 justify-center lg:justify-start">
+          <div className="h-10 w-32 bg-slate-800 animate-pulse rounded" />
+        </div>
+      );
+    }
+
+    if (!logoSettings.footer_logo_enabled) {
+      return null;
+    }
+
+    return (
+      <div className="flex items-center gap-2 justify-center lg:justify-start">
+        {logoSettings.show_heart_icon && (
+          <div className="p-2 rounded-xl bg-[rgb(8,145,178)]/10">
+            <Heart className="w-6 h-6" style={{ color: 'rgb(8, 145, 178)' }} />
+          </div>
+        )}
+        {logoSettings.footer_logo_type === 'text' || !logoSettings.footer_logo_url ? (
+          <div className="flex items-center gap-1 text-2xl font-bold">
+            <span style={{ color: 'rgb(8, 145, 178)' }}>Wiz</span>
+            <span className="text-white">Medik</span>
+          </div>
+        ) : (
+          <img
+            src={logoSettings.footer_logo_url}
+            alt="wizMedik"
+            className="h-10 w-auto object-contain"
+          />
+        )}
+      </div>
+    );
+  };
 
   return (
     <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200 overflow-hidden w-full">
@@ -80,12 +119,8 @@ export function Footer() {
         <div className="md:hidden">
           {/* Top company block */}
           <div className="text-center">
-            <div className="flex items-center gap-2 justify-center mb-3">
-              <img 
-                src="/wizmedik-logo-dark.png" 
-                alt="wizMedik" 
-                className="h-10 w-auto object-contain"
-              />
+            <div className="mb-3">
+              <FooterLogo />
             </div>
 
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm mx-auto">
@@ -230,12 +265,8 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-8 w-full">
             {/* Company */}
             <div className="col-span-1 md:col-span-4 lg:col-span-1 text-center lg:text-left">
-              <div className="flex items-center gap-2 mb-3 justify-center lg:justify-start">
-                <img 
-                  src="/wizmedik-logo-dark.png" 
-                  alt="wizMedik" 
-                  className="h-10 w-auto object-contain"
-                />
+              <div className="mb-3">
+                <FooterLogo />
               </div>
               <p className="text-slate-400 mb-4 text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
                 Moderna platforma za povezivanje pacijenata sa najboljim doktorima i klinikama u BiH.

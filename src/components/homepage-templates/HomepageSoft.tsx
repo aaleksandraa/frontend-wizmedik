@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { 
@@ -205,34 +206,28 @@ export function HomepageSoft() {
             </Tabs>
 
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
-                <select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full h-14 pl-12 pr-4 rounded-2xl border-2 border-gray-100 focus:border-purple-300 focus:outline-none appearance-none bg-white cursor-pointer text-base"
-                >
-                  <option value="">Odaberite grad</option>
-                  {gradovi.map((grad) => (
-                    <option key={grad.id} value={grad.slug}>{grad.naziv}</option>
-                  ))}
-                </select>
-              </div>
+              <CustomSelect
+                value={selectedCity}
+                onChange={setSelectedCity}
+                placeholder="Odaberite grad"
+                options={gradovi.map((grad) => ({
+                  value: grad.slug,
+                  label: grad.naziv,
+                }))}
+                className="h-14"
+              />
 
               {activeTab === 'doktori' && (
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
-                  <select
-                    value={selectedSpecialty}
-                    onChange={(e) => setSelectedSpecialty(e.target.value)}
-                    className="w-full h-14 pl-12 pr-4 rounded-2xl border-2 border-gray-100 focus:border-purple-300 focus:outline-none appearance-none bg-white cursor-pointer text-base"
-                  >
-                    <option value="">Odaberite specijalnost</option>
-                    {specijalnosti.map((spec) => (
-                      <option key={spec.id} value={spec.slug}>{spec.naziv}</option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  value={selectedSpecialty}
+                  onChange={setSelectedSpecialty}
+                  placeholder="Odaberite specijalnost"
+                  options={specijalnosti.map((spec) => ({
+                    value: spec.slug,
+                    label: spec.naziv,
+                  }))}
+                  className="h-14"
+                />
               )}
 
               <Button 

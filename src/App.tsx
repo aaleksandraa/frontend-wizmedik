@@ -32,6 +32,7 @@ import SpaDashboard from "./pages/SpaDashboard";
 import ClinicsBySpecialty from "./pages/ClinicsBySpecialty";
 import Specialties from "./pages/Specialties";
 import Doctors from "./pages/Doctors";
+import DoctorsCompactList from "./pages/DoctorsCompactList";
 import Laboratories from "./pages/Laboratories";
 import LaboratoryProfile from "./pages/LaboratoryProfile";
 import Spas from "./pages/Spas";
@@ -106,6 +107,7 @@ const App = () => {
               <Route path="/klinike/:grad/:specijalnost" element={<Clinics />} />
               <Route path="/specijalnosti" element={<Specialties />} />
               <Route path="/doktori" element={<Doctors />} />
+              <Route path="/doktori/lista" element={<DoctorsCompactList />} />
               <Route path="/doktor/:slug" element={<DoctorProfile />} />
               <Route path="/laboratorije" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />

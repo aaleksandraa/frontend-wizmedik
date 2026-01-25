@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { doctorsAPI, notifikacijeAPI } from '@/services/api';
 import { useNavbarTheme } from '@/hooks/useNavbarTheme';
+import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -298,11 +299,7 @@ export function Navbar() {
         <div className="flex h-20 items-center justify-between gap-3">{/* Increased from h-14 to h-20 */}
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <img 
-              src="/wizmedik-logo.png" 
-              alt="wizMedik" 
-              className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
-            />
+            <Logo className="h-10" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -555,11 +552,7 @@ export function Navbar() {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between p-4 border-b bg-white">
                   <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                    <img 
-                      src="/wizmedik-logo.png" 
-                      alt="wizMedik" 
-                      className="h-8 w-auto object-contain"
-                    />
+                    <Logo className="h-8" />
                   </Link>
                 </div>
 

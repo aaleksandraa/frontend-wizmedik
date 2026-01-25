@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { DoctorCard } from '@/components/DoctorCard';
 import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
@@ -118,23 +119,16 @@ export default function HomepageCustom2Yellow() {
                   <form onSubmit={handleSearch} className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       {/* Specialty Select */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">
-                          Oblast medicine
-                        </label>
-                        <select 
-                          value={selectedSpecialty}
-                          onChange={(e) => setSelectedSpecialty(e.target.value)}
-                          className="w-full h-12 px-4 rounded-lg border-2 border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-amber-500 transition-colors"
-                        >
-                          <option value="">Odaberite specijalnost</option>
-                          {specialties.map((specialty) => (
-                            <option key={specialty.id} value={specialty.slug}>
-                              {specialty.naziv}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      <CustomSelect
+                        label="Oblast medicine"
+                        value={selectedSpecialty}
+                        onChange={setSelectedSpecialty}
+                        placeholder="Odaberite specijalnost"
+                        options={specialties.map((specialty) => ({
+                          value: specialty.slug,
+                          label: specialty.naziv,
+                        }))}
+                      />
 
                       {/* City Select */}
                       <div className="space-y-2">

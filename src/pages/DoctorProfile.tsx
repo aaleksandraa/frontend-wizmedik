@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { doctorsAPI, appointmentsAPI, guestVisitsAPI } from '@/services/api';
+import { doctorsAPI, appointmentsAPI, guestVisitsAPI, blogAPI } from '@/services/api';
 import { reviewsAPI, Recenzija } from '@/services/reviewsAPI';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Phone, Star, Clock, Calendar, MessageSquare, Award, Building2, Briefcase } from 'lucide-react';
+import { MapPin, Phone, Star, Clock, Calendar, MessageSquare, Award, Building2, Briefcase, FileText, ArrowDown, Video } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { BookAppointmentForm } from '@/components/BookAppointmentForm';
 import { GuestBookingDialog } from '@/components/GuestBookingDialog';
@@ -41,6 +41,7 @@ interface Doctor {
   ocjena?: number;
   broj_ocjena?: number;
   opis?: string;
+  youtube_linkovi?: Array<{ url: string; naslov: string }>;
   slika_profila?: string;
   radno_vrijeme?: any;
   kategorijeUsluga?: Array<{
@@ -57,6 +58,22 @@ interface Doctor {
     }>;
   }>;
 }
+
+// Helper function to extract YouTube video ID from URL
+const getYouTubeVideoId = (url: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/shorts\/([^&\n?#]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
 
 interface RatingStats {
   average: number;
@@ -130,6 +147,10 @@ export default function DoctorProfile() {
   const [guestVisits, setGuestVisits] = useState<GuestVisit[]>([]);
   const [selectedGuestVisit, setSelectedGuestVisit] = useState<GuestVisit | null>(null);
   const [showGuestVisitBooking, setShowGuestVisitBooking] = useState(false);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [blogPage, setBlogPage] = useState(1);
+  const [blogHasMore, setBlogHasMore] = useState(false);
+  const [loadingBlog, setLoadingBlog] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -144,7 +165,8 @@ export default function DoctorProfile() {
         await Promise.all([
           fetchRecenzije(),
           fetchServices(),
-          fetchGuestVisits()
+          fetchGuestVisits(),
+          fetchBlogPosts()
         ]);
         
         // Fetch eligible termini samo za pacijente (manje kritično)
@@ -182,6 +204,35 @@ export default function DoctorProfile() {
       console.error('Error fetching guest visits:', error);
       setGuestVisits([]); // Set empty array on error
     }
+  };
+
+  const fetchBlogPosts = async (page = 1) => {
+    if (!slug) return;
+    
+    setLoadingBlog(true);
+    try {
+      const response = await blogAPI.getDoctorPosts(slug);
+      const posts = response.data?.data || response.data || [];
+      
+      if (page === 1) {
+        setBlogPosts(posts.slice(0, 3)); // Show first 3 posts
+        setBlogHasMore(posts.length > 3);
+      } else {
+        setBlogPosts(posts);
+        setBlogHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+      setBlogPosts([]);
+      setBlogHasMore(false);
+    } finally {
+      setLoadingBlog(false);
+    }
+  };
+
+  const loadMoreBlogPosts = () => {
+    setBlogPage(2);
+    fetchBlogPosts(2);
   };
 
   const fetchBookedSlots = async () => {
@@ -514,7 +565,7 @@ export default function DoctorProfile() {
           ]} />
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col">
               {/* Doctor Info Card - Mobile Optimized */}
               <Card className="mb-8 shadow-medium overflow-hidden">
                 <CardHeader className="pb-4">
@@ -593,19 +644,265 @@ export default function DoctorProfile() {
                         )}
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-lg">O doktoru</h3>
-                      <p className="text-muted-foreground">
-                        {doctor.opis || `Dr. ${doctor.ime} ${doctor.prezime} je iskusan ${doctor.specijalnost.toLowerCase()} sa dugogodišnjim iskustvom u pružanju kvalitetne zdravstvene njege.`}
-                      </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* O doktoru Section - Separate Card */}
+              {doctor.opis && (
+                <Card className="mb-8 shadow-medium order-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Briefcase className="w-5 h-5 text-primary" />
+                      O doktoru
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div 
+                      className="prose prose-sm max-w-none text-muted-foreground mb-6"
+                      dangerouslySetInnerHTML={{ __html: doctor.opis }}
+                    />
+                    
+                    {/* Action Buttons below description */}
+                    <div className="flex flex-wrap gap-3 pt-4 border-t">
+                      {doctor.prihvata_online && (
+                        <Button 
+                          onClick={() => setShowBooking(true)}
+                          size="lg"
+                          className="flex-1 min-w-[200px]"
+                        >
+                          <Calendar className="w-5 h-5 mr-2" />
+                          Zakaži online
+                        </Button>
+                      )}
+                      {doctor.telefon && (
+                        <Button 
+                          variant="outline"
+                          size="lg"
+                          className="flex-1 min-w-[200px]"
+                          asChild
+                        >
+                          <a href={`tel:${doctor.telefon}`}>
+                            <Phone className="w-5 h-5 mr-2" />
+                            Pozovite {doctor.telefon}
+                          </a>
+                        </Button>
+                      )}
+                      {(doctor.kategorijeUsluga?.length > 0 || services.length > 0) && (
+                        <Button 
+                          variant="secondary"
+                          size="lg"
+                          className="flex-1 min-w-[200px]"
+                          onClick={() => {
+                            const servicesSection = document.getElementById('usluge-section');
+                            servicesSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                        >
+                          <Briefcase className="w-5 h-5 mr-2" />
+                          Usluge
+                          <ArrowDown className="w-4 h-4 ml-2" />
+                        </Button>
+                      )}
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Telemedicine Section */}
+              {doctor.telemedicine_enabled && doctor.telemedicine_phone && (
+                <Card className="mb-8 shadow-medium order-1 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-blue-900">
+                      <Video className="w-5 h-5" />
+                      Telemedicina - Video konsultacije
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-gray-700">
+                      Dr. {doctor.ime} {doctor.prezime} nudi mogućnost video konsultacija za određene usluge. 
+                      Zakažite termin telefonom i dogovorite se za online pregled.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button 
+                        variant="default"
+                        size="lg"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        asChild
+                      >
+                        <a href={`tel:${doctor.telemedicine_phone}`}>
+                          <Phone className="w-5 h-5 mr-2" />
+                          Zakažite video poziv: {doctor.telemedicine_phone}
+                        </a>
+                      </Button>
+                    </div>
+                    <div className="bg-white/60 rounded-lg p-4 space-y-2">
+                      <p className="text-sm font-medium text-gray-900">Prednosti telemedicine:</p>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li className="flex items-start gap-2">
+                          <span className="text-green-600 mt-0.5">✓</span>
+                          <span>Konsultacije iz udobnosti vašeg doma</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-green-600 mt-0.5">✓</span>
+                          <span>Ušteda vremena - bez putovanja do ordinacije</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-green-600 mt-0.5">✓</span>
+                          <span>Idealno za kontrolne preglede i savjete</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* YouTube Videos Section */}
+              {doctor.youtube_linkovi && doctor.youtube_linkovi.length > 0 && (
+                <Card className="mb-8 shadow-medium order-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      Video snimci
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {doctor.youtube_linkovi.map((video, index) => {
+                        const videoId = getYouTubeVideoId(video.url);
+                        if (!videoId) return null;
+                        
+                        return (
+                          <div key={index} className="space-y-2">
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                              <iframe
+                                src={`https://www.youtube.com/embed/${videoId}`}
+                                title={video.naslov}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="absolute inset-0 w-full h-full"
+                              />
+                            </div>
+                            {video.naslov && (
+                              <h4 className="font-medium text-sm">{video.naslov}</h4>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Blog Posts Section - Savjeti */}
+              {blogPosts.length > 0 && (
+                <Card className="mb-8 shadow-medium order-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-primary" />
+                      Savjeti
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {blogPosts.map((post) => (
+                        <Link 
+                          key={post.id} 
+                          to={`/blog/${post.slug}`}
+                          className="block p-4 bg-muted/30 rounded-lg border hover:shadow-md hover:border-primary/50 transition-all"
+                        >
+                          <div className="flex gap-4">
+                            {post.thumbnail && (
+                              <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                                <img 
+                                  src={post.thumbnail} 
+                                  alt={post.naslov}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg mb-2 line-clamp-2 hover:text-primary transition-colors">
+                                {post.naslov}
+                              </h3>
+                              {post.excerpt && (
+                                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                                  {post.excerpt}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {new Date(post.created_at).toLocaleDateString('sr-Latn-BA', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                                {post.categories && post.categories.length > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {post.categories[0].naziv}
+                                    </Badge>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    
+                    {blogHasMore && (
+                      <div className="mt-6 text-center">
+                        <Button 
+                          variant="outline" 
+                          onClick={loadMoreBlogPosts}
+                          disabled={loadingBlog}
+                        >
+                          {loadingBlog ? 'Učitavanje...' : 'Učitaj više članaka'}
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Mobile Action Buttons - Show only on mobile, below "O doktoru" */}
+              <Card className="mb-8 shadow-medium lg:hidden order-2">
+                <CardContent className="pt-6">
+                  <div className="space-y-3">
+                    {doctor.prihvata_online && (
+                      <Button 
+                        onClick={() => setShowBooking(true)}
+                        className="w-full h-12 text-base"
+                        size="lg"
+                      >
+                        <Calendar className="w-5 h-5 mr-2" />
+                        Zakažite termin
+                      </Button>
+                    )}
+                    {doctor.telefon && (
+                      <Button 
+                        variant="outline"
+                        className="w-full h-12 text-base"
+                        size="lg"
+                        asChild
+                      >
+                        <a href={`tel:${doctor.telefon}`}>
+                          <Phone className="w-5 h-5 mr-2" />
+                          Pozovite: {doctor.telefon}
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Guest Visits Section */}
               {guestVisits.length > 0 && (
-                <Card className="mb-8 shadow-medium border-l-4 border-l-blue-500">
+                <Card className="mb-8 shadow-medium border-l-4 border-l-blue-500 order-3">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="w-5 h-5 text-blue-600" />
@@ -697,7 +994,7 @@ export default function DoctorProfile() {
 
               {/* Services Section */}
               {(doctor.kategorijeUsluga?.length > 0 || services.length > 0) && (
-                <Card className="mb-8 shadow-medium">
+                <Card id="usluge-section" className="mb-8 shadow-medium order-4 scroll-mt-8">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Briefcase className="w-5 h-5 text-primary" />
@@ -845,7 +1142,7 @@ export default function DoctorProfile() {
               )}
 
               {/* Reviews Section */}
-              <Card className="shadow-medium">
+              <Card className="shadow-medium order-5">
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2">

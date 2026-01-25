@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { TemplateSettings } from '@/components/admin/TemplateSettings';
 import { SpecialtyEditor } from '@/components/admin/SpecialtyEditor';
 import { DoctorCardSettings } from '@/components/admin/DoctorCardSettings';
@@ -28,6 +29,7 @@ import { ClinicCardSettings } from '@/components/admin/ClinicCardSettings';
 import { LegalSettings } from '@/components/admin/LegalSettings';
 import { SpecialtyTemplateSettings } from '@/components/admin/SpecialtyTemplateSettings';
 import { RegistrationSettings } from '@/components/admin/RegistrationSettings';
+import { LogoSettings } from '@/components/admin/LogoSettings';
 import HomepageSettings from '@/components/admin/HomepageSettings';
 import { BlogTypographySettings } from '@/components/admin/BlogTypographySettings';
 import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSettings';
@@ -923,6 +925,10 @@ export default function AdminPanel() {
                 <Users className="h-4 w-4 mr-2 hidden sm:inline" />
                 Registracija
               </TabsTrigger>
+              <TabsTrigger value="logo" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Image className="h-4 w-4 mr-2 hidden sm:inline" />
+                Logo
+              </TabsTrigger>
               <TabsTrigger value="mkb10" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <FileText className="h-4 w-4 mr-2 hidden sm:inline" />
                 MKB-10
@@ -1346,6 +1352,11 @@ export default function AdminPanel() {
               <RegistrationSettings />
             </TabsContent>
 
+            {/* LOGO TAB */}
+            <TabsContent value="logo">
+              <LogoSettings />
+            </TabsContent>
+
             {/* MKB-10 TAB */}
             <TabsContent value="mkb10">
               <Mkb10Manager />
@@ -1428,7 +1439,11 @@ export default function AdminPanel() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Opis</label>
-                  <Textarea value={doctorForm.opis} onChange={(e) => setDoctorForm({...doctorForm, opis: e.target.value})} rows={3} />
+                  <RichTextEditor 
+                    value={doctorForm.opis} 
+                    onChange={(value) => setDoctorForm({...doctorForm, opis: value})} 
+                    rows={4} 
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Profilna slika</label>
@@ -1503,7 +1518,11 @@ export default function AdminPanel() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Opis</label>
-                  <Textarea value={clinicForm.opis} onChange={(e) => setClinicForm({...clinicForm, opis: e.target.value})} rows={3} />
+                  <RichTextEditor 
+                    value={clinicForm.opis} 
+                    onChange={(value) => setClinicForm({...clinicForm, opis: value})} 
+                    rows={4} 
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Slike</label>
@@ -1569,11 +1588,19 @@ export default function AdminPanel() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Kratak opis *</label>
-                  <Textarea value={cityForm.opis} onChange={(e) => setCityForm({...cityForm, opis: e.target.value})} rows={2} required />
+                  <RichTextEditor 
+                    value={cityForm.opis} 
+                    onChange={(value) => setCityForm({...cityForm, opis: value})} 
+                    rows={3} 
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Detaljan opis *</label>
-                  <Textarea value={cityForm.detaljni_opis} onChange={(e) => setCityForm({...cityForm, detaljni_opis: e.target.value})} rows={4} required />
+                  <RichTextEditor 
+                    value={cityForm.detaljni_opis} 
+                    onChange={(value) => setCityForm({...cityForm, detaljni_opis: value})} 
+                    rows={6} 
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1723,7 +1750,11 @@ export default function AdminPanel() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Opis</label>
-                  <Textarea value={blogCategoryForm.opis} onChange={(e) => setBlogCategoryForm({ ...blogCategoryForm, opis: e.target.value })} rows={3} />
+                  <RichTextEditor 
+                    value={blogCategoryForm.opis} 
+                    onChange={(value) => setBlogCategoryForm({ ...blogCategoryForm, opis: value })} 
+                    rows={3} 
+                  />
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button type="submit" className="flex-1">{editingBlogCategory ? 'Sačuvaj' : 'Kreiraj'}</Button>

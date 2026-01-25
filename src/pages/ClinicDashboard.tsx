@@ -20,6 +20,8 @@ import {
 import { format } from 'date-fns';
 import { Navbar } from '@/components/Navbar';
 import { ClinicCalendar } from '@/components/clinic/ClinicCalendar';
+import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 
 interface ClinicProfile {
   id: number;
@@ -91,7 +93,8 @@ interface ClinicDoctor {
 interface Specialty {
   id: number;
   naziv: string;
-  children?: Specialty[];
+  slug?: string;
+  parent_id?: number | null;
 }
 
 interface DoctorInvitation {
@@ -236,7 +239,33 @@ export default function ClinicDashboard() {
   const fetchSpecialties = async () => {
     try {
       const res = await specialtiesAPI.getAll();
-      setSpecialties(res.data?.data || res.data || []);
+      const hierarchicalData = res.data?.data || res.data || [];
+      
+      // Flatten hierarchical data: parents with children nested -> flat array with parent_id
+      const flatSpecialties: any[] = [];
+      hierarchicalData.forEach((parent: any) => {
+        // Add parent
+        flatSpecialties.push({
+          id: parent.id,
+          naziv: parent.naziv,
+          slug: parent.slug,
+          parent_id: parent.parent_id || null
+        });
+        
+        // Add children if they exist
+        if (parent.children && Array.isArray(parent.children)) {
+          parent.children.forEach((child: any) => {
+            flatSpecialties.push({
+              id: child.id,
+              naziv: child.naziv,
+              slug: child.slug,
+              parent_id: parent.id
+            });
+          });
+        }
+      });
+      
+      setSpecialties(flatSpecialties);
     } catch (error) {
       console.error('Error fetching specialties:', error);
     }
@@ -249,15 +278,6 @@ export default function ClinicDashboard() {
     } catch (error) {
       console.error('Error fetching cities:', error);
     }
-  };
-
-  const getAllSpecialties = (specs: Specialty[]): Specialty[] => {
-    let result: Specialty[] = [];
-    specs.forEach(spec => {
-      result.push(spec);
-      if (spec.children) result = result.concat(getAllSpecialties(spec.children));
-    });
-    return result;
   };
 
   const fetchData = async () => {
@@ -953,14 +973,16 @@ export default function ClinicDashboard() {
                       <div>
                         <Label>Specijalnost *</Label>
                         <Select value={doctorForm.specijalnost_id} onValueChange={(val) => {
-                          const spec = getAllSpecialties(specialties).find(s => s.id.toString() === val);
+                          const spec = specialties.find(s => s.id.toString() === val);
                           setDoctorForm({ ...doctorForm, specijalnost_id: val, specijalnost: spec?.naziv || '' });
                           setFormErrors({ ...formErrors, specijalnost: '' });
                         }}>
                           <SelectTrigger className={formErrors.specijalnost ? 'border-red-500' : ''}><SelectValue placeholder="Odaberi specijalnost" /></SelectTrigger>
                           <SelectContent>
-                            {getAllSpecialties(specialties).map(spec => (
-                              <SelectItem key={spec.id} value={spec.id.toString()}>{spec.naziv}</SelectItem>
+                            {specialties.map(spec => (
+                              <SelectItem key={spec.id} value={spec.id.toString()}>
+                                {spec.parent_id ? `  └─ ${spec.naziv}` : spec.naziv}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -968,7 +990,11 @@ export default function ClinicDashboard() {
                       </div>
                       <div>
                         <Label>Opis</Label>
-                        <Textarea value={doctorForm.opis} onChange={(e) => setDoctorForm({ ...doctorForm, opis: e.target.value })} rows={3} />
+                        <RichTextEditor 
+                          value={doctorForm.opis} 
+                          onChange={(value) => setDoctorForm({ ...doctorForm, opis: value })} 
+                          rows={4} 
+                        />
                       </div>
                       <div>
                         <Label>Slika profila</Label>
@@ -1498,11 +1524,10 @@ export default function ClinicDashboard() {
                       </div>
                       <div>
                         <Label>Opis</Label>
-                        <Textarea
+                        <RichTextEditor
                           value={profile.opis || ''}
-                          onChange={(e) => setProfile({ ...profile, opis: e.target.value })}
-                          disabled={!editingProfile}
-                          rows={4}
+                          onChange={(value) => setProfile({ ...profile, opis: value })}
+                          rows={6}
                           placeholder="Opišite vašu kliniku, usluge koje nudite..."
                         />
                       </div>
@@ -1699,39 +1724,11 @@ export default function ClinicDashboard() {
                 <CardContent>
                   <div className="space-y-2">
                     <Label>Odaberite specijalnosti koje vaša klinika nudi</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-96 overflow-y-auto p-4 border rounded-lg bg-muted/20">
-                      {getAllSpecialties(specialties).map((spec) => (
-                        <label key={spec.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded">
-                          <input
-                            type="checkbox"
-                            checked={selectedSpecialties.includes(spec.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedSpecialties([...selectedSpecialties, spec.id]);
-                              } else {
-                                setSelectedSpecialties(selectedSpecialties.filter(id => id !== spec.id));
-                              }
-                            }}
-                            disabled={!editingProfile}
-                            className="w-4 h-4"
-                          />
-                          <span className="text-sm">{spec.naziv}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {selectedSpecialties.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-sm text-muted-foreground mb-2">Odabrane specijalnosti ({selectedSpecialties.length}):</p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedSpecialties.map(id => {
-                            const spec = getAllSpecialties(specialties).find(s => s.id === id);
-                            return spec ? (
-                              <Badge key={id} variant="secondary">{spec.naziv}</Badge>
-                            ) : null;
-                          })}
-                        </div>
-                      </div>
-                    )}
+                    <SpecialtiesCheckboxList 
+                      specialties={specialties}
+                      selectedIds={selectedSpecialties}
+                      onChange={setSelectedSpecialties}
+                    />
                   </div>
                 </CardContent>
               </Card>

@@ -395,3 +395,15 @@ export const domoviAPI = {
   getByGrad: (grad: string) => api.get('/domovi-njega', { params: { grad } }),
   getFilterOptions: () => api.get('/domovi-njega/filter-options'),
 };
+
+
+// Calendar Sync API
+export const calendarSyncAPI = {
+  getSettings: () => api.get('/doctor/calendar-sync'),
+  updateSettings: (data: {
+    enabled?: boolean;
+    google_calendar_url?: string;
+    outlook_calendar_url?: string;
+  }) => api.put('/doctor/calendar-sync', data),
+  regenerateToken: () => api.post('/doctor/calendar-sync/regenerate-token'),
+};

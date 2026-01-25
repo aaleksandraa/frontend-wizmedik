@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,13 +19,16 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, Settings, Clock, DollarSign, Plus, Edit, Trash2, Save, Upload, 
   CalendarClock, XCircle, ChevronLeft, ChevronRight, User, Briefcase, MapPin,
-  Phone, Mail, Star, TrendingUp, Building2, Check, X, FileText, Eye, GripVertical, FolderOpen
+  Phone, Mail, Star, TrendingUp, Building2, Check, X, FileText, Eye, GripVertical, FolderOpen, CalendarDays
 } from 'lucide-react';
+import { CalendarSyncSettings } from '@/components/CalendarSyncSettings';
 import { format, isPast } from 'date-fns';
 import { AddAppointmentForm } from '@/components/AddAppointmentForm';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { MultiSelectSpecialties } from '@/components/MultiSelectSpecialties';
+import { HierarchicalSpecialtiesSelect } from '@/components/HierarchicalSpecialtiesSelect';
+import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import { CitySelect } from '@/components/CitySelect';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -43,6 +47,7 @@ interface DoctorProfile {
   longitude?: number;
   google_maps_link?: string;
   opis?: string;
+  youtube_linkovi?: Array<{ url: string; naslov: string }>;
   slika_profila?: string;
   klinika_id?: number;
   klinika_naziv?: string;
@@ -54,6 +59,8 @@ interface DoctorProfile {
   auto_potvrda?: boolean;
   slot_trajanje_minuti?: number;
   prihvata_ostalo?: boolean;
+  telemedicine_enabled?: boolean;
+  telemedicine_phone?: string;
   specijalnosti?: any[];
 }
 
@@ -645,7 +652,33 @@ export default function DoctorDashboard() {
   const fetchSpecialties = async () => {
     try {
       const response = await specialtiesAPI.getAll();
-      setSpecialties(response.data || []);
+      const hierarchicalData = response.data || [];
+      
+      // Flatten hierarchical data: parents with children nested -> flat array with parent_id
+      const flatSpecialties: any[] = [];
+      hierarchicalData.forEach((parent: any) => {
+        // Add parent
+        flatSpecialties.push({
+          id: parent.id,
+          naziv: parent.naziv,
+          slug: parent.slug,
+          parent_id: parent.parent_id || null
+        });
+        
+        // Add children if they exist
+        if (parent.children && Array.isArray(parent.children)) {
+          parent.children.forEach((child: any) => {
+            flatSpecialties.push({
+              id: child.id,
+              naziv: child.naziv,
+              slug: child.slug,
+              parent_id: parent.id
+            });
+          });
+        }
+      });
+      
+      setSpecialties(flatSpecialties);
     } catch (error) {
       console.error('Error fetching specialties:', error);
     }
@@ -708,6 +741,8 @@ export default function DoctorDashboard() {
       specialty_ids: selectedSpecialtyIds,
       prihvata_online: profile.prihvata_online, auto_potvrda: profile.auto_potvrda,
       slot_trajanje_minuti: profile.slot_trajanje_minuti,
+      telemedicine_enabled: profile.telemedicine_enabled ?? false,
+      telemedicine_phone: profile.telemedicine_phone || null,
       radno_vrijeme: transformedWorkingHours, pauze: breaks, odmori: holidays
     };
     if (profile.latitude) updateData.latitude = Number(profile.latitude);
@@ -1105,6 +1140,10 @@ export default function DoctorDashboard() {
               <TabsTrigger value="profil" className="flex-1 min-w-[80px]">
                 <Settings className="h-4 w-4 mr-2 hidden sm:inline" />
                 Profil
+              </TabsTrigger>
+              <TabsTrigger value="calendar-sync" className="flex-1 min-w-[80px]">
+                <CalendarDays className="h-4 w-4 mr-2 hidden sm:inline" />
+                Kalendar Sync
               </TabsTrigger>
               <TabsTrigger value="blog" className="flex-1 min-w-[80px]" onClick={() => fetchBlogData()}>
                 <FileText className="h-4 w-4 mr-2 hidden sm:inline" />
@@ -1762,11 +1801,85 @@ export default function DoctorDashboard() {
                       </div>
                       <div>
                         <Label>Specijalnosti</Label>
-                        <MultiSelectSpecialties specialties={specialties} selectedIds={selectedSpecialtyIds} onChange={setSelectedSpecialtyIds} placeholder="Izaberite specijalnosti..." />
+                        <SpecialtiesCheckboxList 
+                          specialties={specialties} 
+                          selectedIds={selectedSpecialtyIds} 
+                          onChange={setSelectedSpecialtyIds} 
+                        />
                       </div>
                       <div>
-                        <Label>Opis</Label>
-                        <Textarea value={profile.opis || ''} onChange={(e) => setProfile({...profile, opis: e.target.value})} rows={4} />
+                        <Label>O doktoru (Opis)</Label>
+                        <RichTextEditor 
+                          value={profile.opis || ''} 
+                          onChange={(value) => setProfile({...profile, opis: value})} 
+                          rows={8}
+                          placeholder="Unesite informacije o sebi, iskustvu, obrazovanju..."
+                        />
+                      </div>
+
+                      {/* YouTube Video Links */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label>YouTube Video Snimci</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const currentLinks = profile.youtube_linkovi || [];
+                              setProfile({
+                                ...profile,
+                                youtube_linkovi: [...currentLinks, { url: '', naslov: '' }]
+                              });
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Dodaj video
+                          </Button>
+                        </div>
+                        {profile.youtube_linkovi && profile.youtube_linkovi.length > 0 ? (
+                          <div className="space-y-3">
+                            {profile.youtube_linkovi.map((video, index) => (
+                              <div key={index} className="flex gap-2 items-start p-3 bg-muted/30 rounded-lg">
+                                <div className="flex-1 space-y-2">
+                                  <Input
+                                    placeholder="Naslov videa"
+                                    value={video.naslov}
+                                    onChange={(e) => {
+                                      const newLinks = [...(profile.youtube_linkovi || [])];
+                                      newLinks[index] = { ...newLinks[index], naslov: e.target.value };
+                                      setProfile({ ...profile, youtube_linkovi: newLinks });
+                                    }}
+                                  />
+                                  <Input
+                                    placeholder="YouTube URL (npr. https://www.youtube.com/watch?v=...)"
+                                    value={video.url}
+                                    onChange={(e) => {
+                                      const newLinks = [...(profile.youtube_linkovi || [])];
+                                      newLinks[index] = { ...newLinks[index], url: e.target.value };
+                                      setProfile({ ...profile, youtube_linkovi: newLinks });
+                                    }}
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newLinks = (profile.youtube_linkovi || []).filter((_, i) => i !== index);
+                                    setProfile({ ...profile, youtube_linkovi: newLinks });
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">
+                            Nema dodanih video snimaka. Kliknite "Dodaj video" da dodate YouTube linkove.
+                          </p>
+                        )}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
@@ -1795,11 +1908,29 @@ export default function DoctorDashboard() {
                           <Switch checked={profile.prihvata_ostalo ?? true} onCheckedChange={(checked) => setProfile({...profile, prihvata_ostalo: checked})} />
                           <Label>Dozvoli "Ostalo" uslugu</Label>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Switch checked={profile.telemedicine_enabled ?? false} onCheckedChange={(checked) => setProfile({...profile, telemedicine_enabled: checked})} />
+                          <Label>Telemedicina (Video pozivi)</Label>
+                        </div>
                       </div>
                       {profile.auto_potvrda && (
                         <p className="text-sm text-muted-foreground bg-green-50 p-2 rounded">
                           ✓ Svi novi termini će automatski biti potvrđeni bez potrebe za ručnom potvrdom.
                         </p>
+                      )}
+                      {profile.telemedicine_enabled && (
+                        <div>
+                          <Label>Telefon za telemedicinu</Label>
+                          <Input 
+                            value={profile.telemedicine_phone || ''} 
+                            onChange={(e) => setProfile({...profile, telemedicine_phone: e.target.value})}
+                            placeholder="Unesite broj telefona za video pozive"
+                            className="max-w-md"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Ovaj broj će biti prikazan pacijentima za zakazivanje video konsultacija
+                          </p>
+                        </div>
                       )}
                       <div>
                         <Label>Trajanje slota</Label>
@@ -1968,6 +2099,12 @@ export default function DoctorDashboard() {
                 </>
               )}
             </TabsContent>
+
+            {/* CALENDAR SYNC TAB */}
+            <TabsContent value="calendar-sync" className="space-y-6">
+              <CalendarSyncSettings />
+            </TabsContent>
+
           </Tabs>
         </div>
       </div>

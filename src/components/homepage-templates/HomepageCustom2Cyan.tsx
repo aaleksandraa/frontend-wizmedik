@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { DoctorCard } from '@/components/DoctorCard';
 import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
@@ -94,9 +95,9 @@ export default function HomepageCustom2Cyan() {
       <Navbar />
       
       {/* Hero Section - ZocDoc Style with Cyan */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+      <section className="relative overflow-visible bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
         {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-1/3 h-full opacity-20">
+        <div className="absolute top-0 right-0 w-1/3 h-full opacity-20 pointer-events-none">
           <svg viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
             <path d="M200 100C200 155.228 155.228 200 100 200C44.7715 200 0 155.228 0 100C0 44.7715 44.7715 0 100 0C155.228 0 200 44.7715 200 100Z" fill="#06B6D4" fillOpacity="0.1"/>
             <path d="M400 300C400 355.228 355.228 400 300 400C244.772 400 200 355.228 200 300C200 244.772 244.772 200 300 200C355.228 200 400 244.772 400 300Z" fill="#0891B2" fillOpacity="0.1"/>
@@ -104,7 +105,7 @@ export default function HomepageCustom2Cyan() {
           </svg>
         </div>
 
-        <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
+        <div className="container mx-auto px-4 py-16 lg:py-24 pb-32 lg:pb-40 relative z-10">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-[1.4fr_1fr] gap-12 items-center">
               {/* Left Side - Text */}
@@ -120,79 +121,58 @@ export default function HomepageCustom2Cyan() {
                 </p>
 
                 {/* Search Box */}
-                <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 relative z-50">
                   <form onSubmit={handleSearch} className="space-y-4">
                     <div className="grid md:grid-cols-3 gap-4">
                       {/* Type Select - FIRST */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">
-                          Šta tražite?
-                        </label>
-                        <select 
+                      <div className="relative z-40">
+                        <CustomSelect
+                          label="Šta tražite?"
                           value={selectedType}
-                          onChange={(e) => setSelectedType(e.target.value)}
-                          className="w-full h-12 px-4 rounded-lg border-2 border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-cyan-500 transition-colors"
-                        >
-                          <option value="">Odaberite tip</option>
-                          <option value="doktori">Doktori</option>
-                          <option value="klinike">Klinike</option>
-                          <option value="laboratorije">Laboratorije</option>
-                          <option value="banje">Banje i rehabilitacija</option>
-                          <option value="domovi">Domovi za starija i bolesna lica</option>
-                        </select>
+                          onChange={setSelectedType}
+                          placeholder="Odaberite tip"
+                          options={[
+                            { value: 'doktori', label: 'Doktori' },
+                            { value: 'klinike', label: 'Klinike' },
+                            { value: 'laboratorije', label: 'Laboratorije' },
+                            { value: 'banje', label: 'Banje i rehabilitacija' },
+                            { value: 'domovi', label: 'Domovi za starija i bolesna lica' },
+                          ]}
+                        />
                       </div>
 
                       {/* Specialty Select - SECOND */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">
-                          Oblast medicine
-                        </label>
-                        <select 
+                      <div className="relative z-50">
+                        <CustomSelect
+                          label="Oblast medicine"
                           value={selectedSpecialty}
-                          onChange={(e) => setSelectedSpecialty(e.target.value)}
-                          className="w-full h-12 px-4 rounded-lg border-2 border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-cyan-500 transition-colors"
-                        >
-                          <option value="">Odaberite specijalnost</option>
-                          {specialties.map((specialty) => (
-                            <option key={specialty.id} value={specialty.slug}>
-                              {specialty.naziv}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={setSelectedSpecialty}
+                          placeholder="Odaberite specijalnost"
+                          options={specialties.map((specialty) => ({
+                            value: specialty.slug,
+                            label: specialty.naziv,
+                          }))}
+                        />
                       </div>
 
                       {/* City Select - THIRD */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 block">
-                          Grad
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={citySearchQuery}
-                            onChange={(e) => setCitySearchQuery(e.target.value)}
-                            onFocus={() => setCitySearchQuery('')}
-                            placeholder="Pretražite grad..."
-                            className="w-full h-12 px-4 rounded-lg border-2 border-gray-200 bg-white text-gray-900 focus:outline-none focus:border-cyan-500 transition-colors"
-                          />
-                          {citySearchQuery && filteredCities.length > 0 && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                              {filteredCities.map((city) => (
-                                <button
-                                  key={city.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedCity(city.slug);
-                                    setCitySearchQuery(city.naziv);
-                                  }}
-                                  className="w-full px-4 py-3 text-left hover:bg-cyan-50 transition-colors"
-                                >
-                                  {city.naziv}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                      <div className="relative z-40">
+                        <CustomSelect
+                          label="Grad"
+                          value={selectedCity}
+                          onChange={(value) => {
+                            setSelectedCity(value);
+                            const city = cities.find((c: any) => c.slug === value);
+                            if (city) {
+                              setCitySearchQuery(city.naziv);
+                            }
+                          }}
+                          placeholder="Odaberite grad"
+                          options={cities.map((city: any) => ({
+                            value: city.slug,
+                            label: city.naziv,
+                          }))}
+                        />
                       </div>
                     </div>
 

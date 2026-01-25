@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { DoctorCard } from '@/components/DoctorCard';
 import { DoctorCardSoft } from '@/components/cards/DoctorCardSoft';
 import { ClinicCard } from '@/components/ClinicCard';
@@ -140,42 +141,31 @@ export default function HomepageCustom() {
               <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   {/* Type Select - FIRST */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground block">
-                      Šta tražite?
-                    </label>
-                    <select 
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                      className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Odaberite tip</option>
-                      <option value="doktori">Doktori</option>
-                      <option value="klinike">Klinike</option>
-                      <option value="laboratorije">Laboratorije</option>
-                      <option value="banje">Banje i rehabilitacija</option>
-                      <option value="domovi">Domovi za starija i bolesna lica</option>
-                    </select>
-                  </div>
+                  <CustomSelect
+                    label="Šta tražite?"
+                    value={selectedType}
+                    onChange={setSelectedType}
+                    placeholder="Odaberite tip"
+                    options={[
+                      { value: 'doktori', label: 'Doktori' },
+                      { value: 'klinike', label: 'Klinike' },
+                      { value: 'laboratorije', label: 'Laboratorije' },
+                      { value: 'banje', label: 'Banje i rehabilitacija' },
+                      { value: 'domovi', label: 'Domovi za starija i bolesna lica' },
+                    ]}
+                  />
 
                   {/* Specialty Select - SECOND */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground block">
-                      Oblast
-                    </label>
-                    <select 
-                      value={selectedSpecialty}
-                      onChange={(e) => setSelectedSpecialty(e.target.value)}
-                      className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Odaberite specijalnost</option>
-                      {specialties.map((specialty) => (
-                        <option key={specialty.id} value={specialty.slug}>
-                          {specialty.naziv}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <CustomSelect
+                    label="Oblast"
+                    value={selectedSpecialty}
+                    onChange={setSelectedSpecialty}
+                    placeholder="Odaberite specijalnost"
+                    options={specialties.map((specialty) => ({
+                      value: specialty.slug,
+                      label: specialty.naziv,
+                    }))}
+                  />
 
                   {/* City Select with Search - THIRD */}
                   <div className="space-y-2">
