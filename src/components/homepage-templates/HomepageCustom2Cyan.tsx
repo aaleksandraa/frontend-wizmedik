@@ -95,7 +95,7 @@ export default function HomepageCustom2Cyan() {
       <Navbar />
       
       {/* Hero Section - ZocDoc Style with Cyan */}
-      <section className="relative overflow-visible bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+      <section className="relative bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
         {/* Decorative Elements */}
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-20 pointer-events-none">
           <svg viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -124,8 +124,8 @@ export default function HomepageCustom2Cyan() {
                 <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 relative z-50">
                   <form onSubmit={handleSearch} className="space-y-4">
                     <div className="grid md:grid-cols-3 gap-4">
-                      {/* Type Select - FIRST */}
-                      <div className="relative z-40">
+                      {/* Type Select - FIRST - Highest z-index on mobile */}
+                      <div className="relative z-[60] md:z-40">
                         <CustomSelect
                           label="Šta tražite?"
                           value={selectedType}
@@ -142,7 +142,7 @@ export default function HomepageCustom2Cyan() {
                       </div>
 
                       {/* Specialty Select - SECOND */}
-                      <div className="relative z-50">
+                      <div className="relative z-50 md:z-50">
                         <CustomSelect
                           label="Oblast medicine"
                           value={selectedSpecialty}
@@ -156,7 +156,7 @@ export default function HomepageCustom2Cyan() {
                       </div>
 
                       {/* City Select - THIRD */}
-                      <div className="relative z-40">
+                      <div className="relative z-40 md:z-40">
                         <CustomSelect
                           label="Grad"
                           value={selectedCity}

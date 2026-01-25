@@ -86,7 +86,7 @@ export function CustomSelect({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-hidden">
+        <div className="absolute z-[9999] w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-hidden">
           {/* Search Input (for long lists) */}
           {options.length > 5 && (
             <div className="p-2 border-b border-gray-100">
