@@ -4,22 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Mobile Width Fix - Minimal & Precise */
-html {
-  overflow-x: hidden;
-  width: 100%;
-}
-
+/* Modern Professional Mobile Width Fix - No overflow manipulation on html */
 body {
-  overflow-x: hidden;
+  /* Prevent horizontal scroll without blocking vertical scroll */
+  overflow-x: clip;  /* Modern alternative to hidden - doesn't affect scroll */
   width: 100%;
-  position: relative;
+  min-width: 0;  /* Allow shrinking */
 }
 
 #root {
-  overflow-x: hidden;
+  /* Contain layout to prevent overflow */
   width: 100%;
-  position: relative;
+  min-width: 0;
+  contain: layout style;  /* Modern CSS containment */
 }
 
 /* Healthcare Platform Design System - Professional Medical Theme
@@ -138,34 +135,47 @@ All colors MUST be HSL.
   * {
     @apply border-border;
     box-sizing: border-box;
+    /* Prevent elements from growing beyond container */
+    min-width: 0;
+    min-height: 0;
   }
 
   body {
     @apply bg-background text-foreground;
   }
   
-  /* Prevent media elements from causing overflow */
+  /* Modern approach: Prevent media elements from causing overflow */
   img, svg, video, canvas, iframe {
     max-width: 100%;
     height: auto;
+    display: block;  /* Remove inline spacing */
   }
   
   /* Prevent text from causing overflow */
   p, h1, h2, h3, h4, h5, h6, span, a, li {
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto;  /* Modern text breaking */
   }
   
-  /* Professional container width management */
+  /* Modern container management */
   .container, [class*="container"] {
-    max-width: 100%;
     width: 100%;
+    max-width: 100%;
+    padding-left: clamp(1rem, 5vw, 2rem);  /* Responsive padding */
+    padding-right: clamp(1rem, 5vw, 2rem);
   }
   
-  /* Prevent specific layout elements from overflow - NOT all elements */
-  section, main, article, header, footer, nav {
+  /* Layout containment for major sections */
+  section, main, article {
+    width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    contain: layout;  /* Modern CSS containment */
+  }
+  
+  /* Prevent grid/flex overflow */
+  .grid, .flex {
+    min-width: 0;  /* Allow shrinking */
   }
   
   /* ========================================
