@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import legacy from '@vitejs/plugin-legacy';
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -27,6 +28,19 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
+    // Legacy support for older browsers (including mobile)
+    legacy({
+      targets: ['defaults', 'not IE 11', 'iOS >= 12', 'Safari >= 12', 'Chrome >= 79'],
+      additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+      renderLegacyChunks: true,
+      polyfills: [
+        'es.symbol',
+        'es.array.iterator',
+        'es.promise',
+        'es.object.assign',
+        'es.promise.finally',
+      ],
+    }),
     // Gzip compression
     viteCompression({
       algorithm: 'gzip',
@@ -53,8 +67,8 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom'],
   },
   build: {
-    // Target modern browsers for better mobile support
-    target: ['es2020', 'chrome90', 'safari14', 'firefox88', 'edge90'],
+    // Let legacy plugin handle browser targets
+    target: 'esnext',
     
     // Modern CSS target
     cssTarget: 'chrome90',
@@ -87,16 +101,12 @@ export default defineConfig(({ mode }) => ({
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
     
-    // Minification with modern support
+    // Minification
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
         drop_debugger: mode === 'production',
-        ecma: 2020, // Target ES2020 for better mobile support
-      },
-      format: {
-        ecma: 2020, // Output ES2020 compatible code
       },
     },
     

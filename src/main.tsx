@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadCardSettings } from "./hooks/useCardSettings";
 import { preloadSearchData } from "./hooks/useSmartSearch";
+import "./utils/mobileScrollDebug";
 
 // Ensure React is available globally (fixes module loading issues on refresh)
 if (typeof window !== 'undefined') {
