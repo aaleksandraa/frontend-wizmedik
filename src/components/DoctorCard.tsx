@@ -1225,7 +1225,8 @@ function HorizontalDetailCard({ doctor, settings: s }: { doctor: NormalizedDocto
     <Link to={`/doktor/${doctor.slug}`}>
       <Card className="hover:shadow-lg transition-all h-full">
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+          {/* Desktop layout */}
+          <div className="hidden sm:flex items-center gap-4">
             <Avatar className="h-20 w-20 shrink-0">
               <AvatarImage src={doctor.slika_profila} />
               <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
@@ -1248,6 +1249,29 @@ function HorizontalDetailCard({ doctor, settings: s }: { doctor: NormalizedDocto
               <Button size="sm" variant="ghost" className="bg-gray-100 hover:bg-gray-200 text-gray-700">
                 Detaljnije
               </Button>
+            </div>
+          </div>
+
+          {/* Mobile layout */}
+          <div className="flex sm:hidden items-start gap-3">
+            <Avatar className="h-16 w-16 shrink-0">
+              <AvatarImage src={doctor.slika_profila} />
+              <AvatarFallback style={{ backgroundColor: s.primaryColor, color: 'white' }}>
+                {doctor.ime?.[0]}{doctor.prezime?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm leading-tight">Dr. {doctor.ime} {doctor.prezime}</h3>
+              {s.showSpecialty && (
+                <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{doctor.specijalnost}</p>
+              )}
+              {s.showLocation && (
+                <div className="flex items-center gap-1 mt-1">
+                  <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground">{doctor.grad}</span>
+                  <span className="ml-auto text-xs font-semibold text-gray-700">Detaljnije</span>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
