@@ -97,20 +97,60 @@ export function initMobileScrollDebug() {
 
   // Check if scroll is working after 2 seconds
   setTimeout(() => {
+    const scrollWidth = document.documentElement.scrollWidth;
+    const clientWidth = document.documentElement.clientWidth;
+    const hasHorizontalOverflow = scrollWidth > clientWidth;
+    
     console.log('🔍 After 2s - Current State:', {
       scrollY: window.scrollY,
+      scrollX: window.scrollX,
       scrollHeight: document.documentElement.scrollHeight,
       clientHeight: document.documentElement.clientHeight,
+      scrollWidth: scrollWidth,
+      clientWidth: clientWidth,
+      hasHorizontalOverflow: hasHorizontalOverflow,
       canScroll: document.documentElement.scrollHeight > document.documentElement.clientHeight,
       bodyOverflow: getComputedStyle(body).overflow,
       bodyOverflowY: getComputedStyle(body).overflowY,
+      bodyOverflowX: getComputedStyle(body).overflowX,
       htmlOverflow: getComputedStyle(html).overflow,
       htmlOverflowY: getComputedStyle(html).overflowY,
+      htmlOverflowX: getComputedStyle(html).overflowX,
     });
 
     if (scrollCount === 0 && touchCount > 0) {
       console.error('❌ PROBLEM: Touch events detected but NO scroll events!');
       console.error('This means scroll is blocked by something.');
+    }
+    
+    if (hasHorizontalOverflow) {
+      console.warn('⚠️ HORIZONTAL OVERFLOW DETECTED!');
+      console.warn(`Page width (${scrollWidth}px) is wider than viewport (${clientWidth}px)`);
+      console.warn('Finding elements causing overflow...');
+      
+      // Find elements causing horizontal overflow
+      const allElements = document.querySelectorAll('*');
+      const overflowingElements: HTMLElement[] = [];
+      
+      allElements.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          const rect = el.getBoundingClientRect();
+          if (rect.right > clientWidth || rect.width > clientWidth) {
+            overflowingElements.push(el);
+          }
+        }
+      });
+      
+      console.warn(`Found ${overflowingElements.length} elements causing overflow:`);
+      overflowingElements.slice(0, 10).forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        console.warn('  -', el.tagName, el.className, {
+          width: rect.width,
+          right: rect.right,
+          viewportWidth: clientWidth,
+          overflow: rect.right - clientWidth,
+        });
+      });
     }
   }, 2000);
 
