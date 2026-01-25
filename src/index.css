@@ -4,10 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CRITICAL: Prevent horizontal scroll ONLY on body, allow vertical scroll */
-body {
-  overflow-x: hidden;
+/* CRITICAL: Force viewport width on mobile */
+html {
   max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+#root {
+  max-width: 100vw;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* Healthcare Platform Design System - Professional Medical Theme
@@ -132,6 +144,11 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
   
+  /* CRITICAL: Force all elements to respect viewport width */
+  * {
+    max-width: 100vw;
+  }
+  
   /* Prevent elements from causing horizontal overflow */
   img, svg, video, canvas, iframe {
     max-width: 100%;
@@ -147,6 +164,12 @@ All colors MUST be HSL.
   /* Ensure containers respect viewport width */
   .container, [class*="container"] {
     max-width: 100%;
+    width: 100%;
+  }
+  
+  /* Force sections to fit viewport */
+  section, main, article, div, header, footer, nav {
+    max-width: 100vw;
   }
   
   /* ========================================
