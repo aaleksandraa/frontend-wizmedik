@@ -22,6 +22,7 @@ export default function HomepageCustom3Cyan() {
   const [selectedType, setSelectedType] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [citySearchQuery, setCitySearchQuery] = useState('');
   const [currentWord, setCurrentWord] = useState(0);
 
   // Animated words that change every 2 seconds
@@ -58,6 +59,10 @@ export default function HomepageCustom3Cyan() {
   const specialties = data.specialties || [];
   const cities = data.cities || [];
   const pitanja = data.pitanja || [];
+
+  const filteredCities = cities.filter((city: any) => 
+    city.naziv.toLowerCase().includes(citySearchQuery.toLowerCase())
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -459,9 +464,16 @@ export default function HomepageCustom3Cyan() {
             <div className="absolute top-32 right-20 text-5xl">🏥</div>
             <div className="absolute bottom-20 left-32 text-7xl">💊</div>
             <div className="absolute bottom-32 right-10 text-6xl">🩺</div>
+            <div className="absolute top-1/2 left-1/4 text-4xl">💉</div>
+            <div className="absolute top-1/3 right-1/3 text-5xl">🔬</div>
+            <div className="absolute bottom-1/3 left-2/3 text-4xl">❤️</div>
           </div>
 
-          <div className="container mx-auto px-4 relative z-10">
+          {/* Animated Pulse Circles */}
+          <div className="absolute top-20 right-1/4 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse overflow-hidden"></div>
+          <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000 overflow-hidden"></div>
+
+          <div className={`container mx-auto px-4 relative z-10 transition-all duration-300 ${citySearchQuery && filteredCities.length > 0 ? 'pb-96' : 'pb-0'}`}>
             <div className="text-center mb-12">
               <Badge variant="secondary" className="mb-4 px-4 py-1 bg-white/10 text-white border-white/20">
                 <MapPin className="w-3 h-3 mr-2" />Lokacije
@@ -470,6 +482,48 @@ export default function HomepageCustom3Cyan() {
               <p className="text-gray-400 max-w-2xl mx-auto">
                 Pronađite doktore i klinike u svim većim gradovima Bosne i Hercegovine
               </p>
+            </div>
+
+            {/* City Search Box */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={citySearchQuery}
+                  onChange={(e) => setCitySearchQuery(e.target.value)}
+                  placeholder="Pretražite grad..."
+                  className="w-full h-16 px-6 pr-12 rounded-2xl border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 text-lg"
+                />
+                <Search className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                
+                {/* Search Results Dropdown */}
+                {citySearchQuery && filteredCities.length > 0 && (
+                  <div className="absolute z-50 w-full mt-2 bg-slate-800 border border-white/20 rounded-2xl shadow-2xl max-h-96 overflow-y-auto backdrop-blur-lg">
+                    {filteredCities.map((city: any) => (
+                      <Link
+                        key={city.id}
+                        to={`/grad/${city.slug}`}
+                        className="flex items-center justify-between px-6 py-4 hover:bg-white/10 transition-colors border-b border-white/5 last:border-0 group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/30 to-cyan-500/10 flex items-center justify-center group-hover:from-cyan-500 group-hover:to-cyan-600 transition-all">
+                            <MapPin className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-white text-lg group-hover:text-cyan-400 transition-colors">
+                              {city.naziv}
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              {city.broj_doktora || 0}+ doktora dostupno
+                            </p>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="text-center">
