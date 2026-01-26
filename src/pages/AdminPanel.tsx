@@ -28,6 +28,7 @@ import { DoctorCardSettings } from '@/components/admin/DoctorCardSettings';
 import { ClinicCardSettings } from '@/components/admin/ClinicCardSettings';
 import { LegalSettings } from '@/components/admin/LegalSettings';
 import { SpecialtyTemplateSettings } from '@/components/admin/SpecialtyTemplateSettings';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { RegistrationSettings } from '@/components/admin/RegistrationSettings';
 import { LogoSettings } from '@/components/admin/LogoSettings';
 import HomepageSettings from '@/components/admin/HomepageSettings';
@@ -1211,7 +1212,7 @@ export default function AdminPanel() {
                         <CardContent className="p-4 flex items-center justify-between">
                           <div className="flex items-center gap-4 flex-1">
                             {post.thumbnail ? (
-                              <img src={post.thumbnail} alt="" className="w-16 h-12 rounded object-cover" />
+                              <img src={fixImageUrl(post.thumbnail) || ''} alt="" className="w-16 h-12 rounded object-cover" />
                             ) : (
                               <div className="w-16 h-12 rounded bg-muted flex items-center justify-center">
                                 <FileText className="h-6 w-6 text-muted-foreground" />
@@ -1691,7 +1692,7 @@ export default function AdminPanel() {
                       }
                     }
                   }} />
-                  {blogPostForm.thumbnail && <img src={blogPostForm.thumbnail} alt="" className="w-32 h-20 rounded object-cover mt-2" />}
+                  {blogPostForm.thumbnail && <img src={fixImageUrl(blogPostForm.thumbnail) || ''} alt="" className="w-32 h-20 rounded object-cover mt-2" />}
                 </div>
                 <div>
                   <label className="text-sm font-medium">Kategorije</label>

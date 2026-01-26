@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { doctorsAPI, appointmentsAPI, guestVisitsAPI, blogAPI } from '@/services/api';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { reviewsAPI, Recenzija } from '@/services/reviewsAPI';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -818,7 +819,7 @@ export default function DoctorProfile() {
                             {post.thumbnail && (
                               <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
                                 <img 
-                                  src={post.thumbnail} 
+                                  src={fixImageUrl(post.thumbnail) || ''} 
                                   alt={post.naslov}
                                   className="w-full h-full object-cover"
                                 />
