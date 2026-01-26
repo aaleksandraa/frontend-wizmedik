@@ -231,6 +231,107 @@ export default function HomepageCustom3Cyan() {
         </div>
       </section>
 
+      {/* Blog Section - Latest Health Tips */}
+      {data.blog_posts && data.blog_posts.length > 0 && (
+        <section className="py-16 bg-gradient-to-br from-cyan-50 via-blue-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-10">
+              <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
+                <Lightbulb className="w-3 h-3 mr-2" />Zdravstveni savjeti
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Najnoviji savjeti</h2>
+              <p className="text-gray-600">Stručni savjeti i informacije od naših doktora</p>
+            </div>
+
+            {/* Desktop: 3 columns with large images */}
+            <div className="hidden md:grid md:grid-cols-3 gap-6">
+              {data.blog_posts.slice(0, 3).map((post: any) => (
+                <Link key={post.id} to={`/blog/${post.slug}`}>
+                  <Card className="group h-full hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200 overflow-hidden">
+                    {post.slika_url && (
+                      <div className="aspect-video overflow-hidden">
+                        <img 
+                          src={fixImageUrl(post.slika_url) || ''} 
+                          alt={post.naslov}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        {post.kategorija && (
+                          <Badge variant="secondary" className="bg-cyan-100 text-cyan-700">
+                            {post.kategorija.naziv}
+                          </Badge>
+                        )}
+                        <span className="text-sm text-gray-500">
+                          {new Date(post.created_at).toLocaleDateString('bs-BA')}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-cyan-700 transition-colors">
+                        {post.naslov}
+                      </h3>
+                      <p className="text-sm text-gray-600 line-clamp-3">
+                        {post.kratak_opis || post.sadrzaj?.substring(0, 150)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            {/* Mobile: Horizontal layout (small image left, text right) */}
+            <div className="md:hidden space-y-4">
+              {data.blog_posts.slice(0, 3).map((post: any) => (
+                <Link key={post.id} to={`/blog/${post.slug}`}>
+                  <Card className="hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200">
+                    <CardContent className="p-4">
+                      <div className="flex gap-4">
+                        {/* Small thumbnail on left */}
+                        {post.slika_url && (
+                          <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                            <img 
+                              src={fixImageUrl(post.slika_url) || ''} 
+                              alt={post.naslov}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        
+                        {/* Text content on right */}
+                        <div className="flex-1 min-w-0">
+                          {post.kategorija && (
+                            <Badge variant="secondary" className="bg-cyan-100 text-cyan-700 mb-2">
+                              {post.kategorija.naziv}
+                            </Badge>
+                          )}
+                          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm">
+                            {post.naslov}
+                          </h3>
+                          <p className="text-xs text-gray-500">
+                            {new Date(post.created_at).toLocaleDateString('bs-BA')}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            {/* View All Button */}
+            <div className="text-center mt-8">
+              <Link to="/blog">
+                <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
+                  Svi savjeti
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Top Specialties - Quick Services Style */}
       <section className="py-12 bg-white border-b border-gray-100">
         <div className="container mx-auto px-4">
@@ -430,64 +531,6 @@ export default function HomepageCustom3Cyan() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {data.domovi.slice(0, 4).map((dom: any) => (
                 <ClinicCard key={dom.id} clinic={dom} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Blog Posts Section */}
-      {data.blog_posts && data.blog_posts.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
-              <div>
-                <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
-                  <Lightbulb className="w-3 h-3 mr-2" />Zdravstveni savjeti
-                </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Najnoviji članci</h2>
-                <p className="text-gray-600 mt-2">Stručni savjeti i informacije od naših doktora</p>
-              </div>
-              <Link to="/blog">
-                <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
-                  Svi članci
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {data.blog_posts.slice(0, 3).map((post: any) => (
-                <Link key={post.id} to={`/blog/${post.slug}`}>
-                  <Card className="group h-full hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200 overflow-hidden">
-                    {post.slika_url && (
-                      <div className="aspect-video overflow-hidden">
-                        <img 
-                          src={fixImageUrl(post.slika_url) || ''} 
-                          alt={post.naslov}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    )}
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        {post.kategorija && (
-                          <Badge variant="secondary" className="bg-cyan-100 text-cyan-700">
-                            {post.kategorija.naziv}
-                          </Badge>
-                        )}
-                        <span className="text-sm text-gray-500">
-                          {new Date(post.created_at).toLocaleDateString('bs-BA')}
-                        </span>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-cyan-700 transition-colors">
-                        {post.naslov}
-                      </h3>
-                      <p className="text-sm text-gray-600 line-clamp-3">
-                        {post.kratak_opis || post.sadrzaj?.substring(0, 150)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
               ))}
             </div>
           </div>
