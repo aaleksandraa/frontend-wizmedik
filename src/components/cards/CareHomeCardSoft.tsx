@@ -129,7 +129,7 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
           )}
 
           {/* Programs */}
-          {dom.programi_njege.length > 0 && (
+          {dom.programi_njege && dom.programi_njege.length > 0 && (
             <div className="mb-4">
               <p className="text-xs font-medium text-gray-700 mb-2">Programi njege:</p>
               <div className="flex flex-wrap gap-1">

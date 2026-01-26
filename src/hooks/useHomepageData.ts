@@ -40,10 +40,40 @@ export function useHomepageData() {
         // Add cache busting to force fresh data
         const response = await homepageAPI.getData();
         console.log('Homepage API response:', response.data);
+        
+        // Validate response data
+        if (!response.data) {
+          throw new Error('No data received from API');
+        }
+        
         setData(response.data);
+        setError(null);
       } catch (err) {
         console.error('Error fetching homepage data:', err);
         setError(err as Error);
+        // Set empty data structure to prevent undefined errors
+        setData({
+          settings: {
+            doctor_profile_template: 'classic',
+            clinic_profile_template: 'classic',
+            homepage_template: 'classic',
+            modern_cover_type: 'gradient',
+            modern_cover_value: 'from-primary via-primary/90 to-primary/80',
+          },
+          specialties: [],
+          doctors: [],
+          clinics: [],
+          banje: [],
+          domovi: [],
+          cities: [],
+          all_cities: [],
+          pitanja: [],
+          blog_posts: [],
+          filters: {
+            specialties: [],
+            cities: [],
+          },
+        });
       } finally {
         setLoading(false);
       }
