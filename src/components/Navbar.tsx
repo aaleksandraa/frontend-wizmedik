@@ -43,6 +43,7 @@ import {
   FileText,
   Droplet,
   Heart,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -549,6 +550,16 @@ export function Navbar() {
               <SheetDescription className="sr-only">Glavni meni za navigaciju</SheetDescription>
 
               <div className="flex flex-col h-full">
+                {/* Mobile Header - Logo and Close Button */}
+                <div className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
+                  <Logo className="h-8" />
+                  <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-lg hover:bg-gray-100">
+                      <X className="w-5 h-5 text-gray-600" />
+                    </Button>
+                  </SheetClose>
+                </div>
+
                 {/* Mobile User Info - Cyan theme */}
                 {user && (
                   <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100">

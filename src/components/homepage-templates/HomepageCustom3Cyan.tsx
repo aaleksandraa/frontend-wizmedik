@@ -32,7 +32,7 @@ export default function HomepageCustom3Cyan() {
   });
 
   // Animated words that change every 2 seconds
-  const words = ['ljekara', 'kliniku', 'laboratoriju', 'banju', 'dom', 'savjet'];
+  const words = ['ljekara', 'kliniku', 'banju', 'dom', 'savjet'];
 
   useEffect(() => {
     const interval = setInterval(() => {
