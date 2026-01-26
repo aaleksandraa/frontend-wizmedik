@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb } from '@/components/Breadcrumb';
-import { Calendar, Clock, ArrowLeft, Share2 } from 'lucide-react';
+import { Calendar, ArrowLeft, Share2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { fixImageUrl } from '@/utils/imageUrl';
 
@@ -170,7 +170,7 @@ export default function BlogPost() {
         
         <main className="max-w-5xl mx-auto px-4 py-2 md:py-4">
           <article>
-            {/* Header - all in one compact block */}
+            {/* Header - ultra compact structure */}
             <header className="mb-6 md:mb-8">
               {/* Breadcrumb */}
               <Breadcrumb items={[
@@ -178,27 +178,25 @@ export default function BlogPost() {
                 { label: post.naslov }
               ]} />
               
-              {/* Categories - no gap */}
-              <div className="flex flex-wrap gap-2 mt-1">
-                {post.categories.map(cat => (
-                  <Link key={cat.id} to={`/blog?category=${cat.slug}`}>
-                    <Badge variant="secondary">{cat.naziv}</Badge>
-                  </Link>
-                ))}
-              </div>
-              
               {/* Title - minimal gap */}
-              <h1 className="text-3xl md:text-4xl font-bold mt-2 mb-4">{post.naslov}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mt-1 mb-2">{post.naslov}</h1>
               
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
-                <span className="flex items-center gap-1">
+              {/* Date and Category - perfectly aligned in same line */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="inline-flex items-center gap-1 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  {formatBosnianDate(post.published_at)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {post.reading_time} min čitanja
-                </span>
+                  <span>{formatBosnianDate(post.published_at)}</span>
+                </div>
+                {post.categories.length > 0 && (
+                  <>
+                    <span className="text-muted-foreground/50 text-sm">•</span>
+                    <Link to={`/blog?category=${post.categories[0].slug}`} className="inline-flex">
+                      <Badge variant="secondary" className="hover:bg-primary/20 transition-colors text-sm py-0.5 px-2">
+                        {post.categories[0].naziv}
+                      </Badge>
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Author - only show if doctor */}
