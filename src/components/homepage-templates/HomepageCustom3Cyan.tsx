@@ -84,6 +84,11 @@ export default function HomepageCustom3Cyan() {
   const cities = data.cities || []; // For display with doctor counts
   const allCities = data.all_cities || []; // For dropdown filters
   const pitanja = data.pitanja || [];
+  const blogPosts = data.blog_posts || [];
+
+  // Debug: Log blog posts data
+  console.log('Blog posts data:', data.blog_posts);
+  console.log('Blog posts length:', blogPosts.length);
 
   const filteredCities = allCities.filter((city: any) => 
     city.naziv.toLowerCase().includes(citySearchQuery.toLowerCase())
@@ -232,7 +237,7 @@ export default function HomepageCustom3Cyan() {
       </section>
 
       {/* Blog Section - Latest Health Tips */}
-      {data.blog_posts && data.blog_posts.length > 0 && (
+      {blogPosts && blogPosts.length > 0 && (
         <section className="py-16 bg-gradient-to-br from-cyan-50 via-blue-50 to-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
@@ -245,7 +250,7 @@ export default function HomepageCustom3Cyan() {
 
             {/* Desktop: 3 columns with large images */}
             <div className="hidden md:grid md:grid-cols-3 gap-6">
-              {data.blog_posts.slice(0, 3).map((post: any) => (
+              {blogPosts.slice(0, 3).map((post: any) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
                   <Card className="group h-full hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200 overflow-hidden">
                     {post.slika_url && (
@@ -282,7 +287,7 @@ export default function HomepageCustom3Cyan() {
 
             {/* Mobile: Horizontal layout (small image left, text right) */}
             <div className="md:hidden space-y-4">
-              {data.blog_posts.slice(0, 3).map((post: any) => (
+              {blogPosts.slice(0, 3).map((post: any) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
                   <Card className="hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200">
                     <CardContent className="p-4">

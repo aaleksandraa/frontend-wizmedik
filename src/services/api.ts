@@ -38,7 +38,12 @@ export default api;
 
 // Homepage API - single optimized endpoint
 export const homepageAPI = {
-  getData: () => api.get('/homepage'),
+  getData: () => {
+    // Add cache busting in development
+    const isDev = import.meta.env.DEV;
+    const params = isDev ? { nocache: '1' } : {};
+    return api.get('/homepage', { params });
+  },
 };
 
 export const authAPI = {
