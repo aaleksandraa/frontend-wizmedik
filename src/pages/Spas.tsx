@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Search, Filter, MapPin, Droplet, Heart, Bed, Calendar, X, CheckCircle, HelpCircle, BookOpen, List } from 'lucide-react';
 import { spasAPI } from '@/services/api';
+import { useAllCities } from '@/hooks/useAllCities';
 import { Banja, BanjaFilters, VrstaBanje, Indikacija } from '@/types/spa';
 import SpaCardSoft from '@/components/cards/SpaCardSoft';
 import { MapView } from '@/components/MapView';
@@ -21,10 +22,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 export default function Spas() {
   const { grad } = useParams<{ grad?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { cities: allCities } = useAllCities(); // Get all cities from database
   const [banje, setBanje] = useState<Banja[]>([]);
   const [vrste, setVrste] = useState<VrstaBanje[]>([]);
   const [indikacije, setIndikacije] = useState<Record<string, Indikacija[]>>({});
-  const [gradovi, setGradovi] = useState<Array<{ grad: string; broj_banja: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [gradInput, setGradInput] = useState(grad || '');
@@ -57,6 +58,12 @@ export default function Spas() {
       setGradInput(grad);
     }
   }, [grad]);
+
+  // Convert allCities to gradovi format for compatibility
+  const gradovi = useMemo(() => 
+    allCities.map(city => ({ grad: city.naziv, broj_banja: 0 })),
+    [allCities]
+  );
 
   const filteredGradovi = gradovi.filter(g => 
     g.grad.toLowerCase().includes(gradInput.toLowerCase())
@@ -91,12 +98,7 @@ export default function Spas() {
       });
       setIndikacije(indikacijeByKategorija);
       
-      // Convert gradovi array to expected format
-      const gradoviData = (data.gradovi || []).map((grad: string) => ({
-        grad,
-        broj_banja: 0
-      }));
-      setGradovi(gradoviData);
+      // Cities are now loaded via useAllCities hook
     } catch (error) {
       console.error('Error loading data:', error);
     }

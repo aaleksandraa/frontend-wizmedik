@@ -2,6 +2,7 @@
 import { useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Filter, MapPin, Shield, Activity, Users, Home as HomeIcon, X, ChevronRight, Phone, Star, CheckCircle, BookOpen, List } from 'lucide-react';
+import { useAllCities } from '@/hooks/useAllCities';
 import CareHomeCardSoft from '@/components/cards/CareHomeCardSoft';
 import { MapView } from '@/components/MapView';
 import { Navbar } from '@/components/Navbar';
@@ -81,6 +82,7 @@ interface FilterOptions {
 export default function CareHomes() {
   const { grad } = useParams<{ grad?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { cities: allCities } = useAllCities(); // Get all cities from database
   const [domovi, setDomovi] = useState<Dom[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,13 +99,14 @@ export default function CareHomes() {
     searchParams.get('programi_njege')?.split(',').filter(Boolean) || []
   );
 
-  // Autocomplete for cities
+  // Autocomplete for cities - use all cities from database
   const filteredGradovi = useMemo(() => {
-    if (!filterOptions || !gradInput) return filterOptions?.gradovi || [];
-    return filterOptions.gradovi.filter(grad =>
+    const cityNames = allCities.map(city => city.naziv);
+    if (!gradInput) return cityNames;
+    return cityNames.filter(grad =>
       grad.toLowerCase().includes(gradInput.toLowerCase())
     );
-  }, [filterOptions, gradInput]);
+  }, [allCities, gradInput]);
 
   const [showGradSuggestions, setShowGradSuggestions] = useState(false);
 
