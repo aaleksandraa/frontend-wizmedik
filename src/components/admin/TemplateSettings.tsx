@@ -43,6 +43,7 @@ export function TemplateSettings() {
     { id: 'custom', name: 'Custom', description: 'Prilagođeni dizajn - podesi u "Početna" tabu' },
     { id: 'custom2-cyan', name: 'Custom 2 Cyan', description: 'ZocDoc stil sa svijetlo plavom/cyan bojom' },
     { id: 'custom2-yellow', name: 'Custom 2 Yellow', description: 'ZocDoc stil sa žutom bojom' },
+    { id: 'custom3-cyan', name: 'Custom 3 Cyan', description: 'Minimalistički centrisani dizajn sa cyan bojom' },
     { id: 'pro', name: 'Pro', description: 'Profesionalni dizajn sa ljepšim klinikama i mobile responsive' },
     { id: 'medical', name: 'Medical', description: 'Kompletan medicinski portal sa svim sekcijama' },
     { id: 'modern', name: 'Modern', description: 'Moderan dizajn sa teal bojama i video sekcijom' },

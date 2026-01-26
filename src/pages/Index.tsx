@@ -18,6 +18,7 @@ import { HomepageModern } from "@/components/homepage-templates/HomepageModern";
 import { HomepagePro } from "@/components/homepage-templates/HomepagePro";
 import HomepageCustom2Cyan from "@/components/homepage-templates/HomepageCustom2Cyan";
 import HomepageCustom2Yellow from "@/components/homepage-templates/HomepageCustom2Yellow";
+import HomepageCustom3Cyan from "@/components/homepage-templates/HomepageCustom3Cyan";
 
 const homepageTemplates: Record<string, React.ComponentType> = {
   soft: HomepageSoft,
@@ -25,6 +26,7 @@ const homepageTemplates: Record<string, React.ComponentType> = {
   custom: HomepageCustom,
   'custom2-cyan': HomepageCustom2Cyan,
   'custom2-yellow': HomepageCustom2Yellow,
+  'custom3-cyan': HomepageCustom3Cyan,
   medical: HomepageMedical,
   modern: HomepageModern,
   pro: HomepagePro,

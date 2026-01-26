@@ -17,6 +17,8 @@ interface HomepageData {
   }>;
   doctors: Array<any>;
   clinics: Array<any>;
+  banje?: Array<any>;
+  domovi?: Array<any>;
   cities?: Array<any>;
   pitanja?: Array<any>;
   blog_posts?: Array<any>;

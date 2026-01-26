@@ -125,7 +125,7 @@ export default function HomepageCustom2Cyan() {
                   <form onSubmit={handleSearch} className="space-y-4">
                     <div className="grid md:grid-cols-3 gap-4">
                       {/* Type Select - FIRST - Highest z-index on mobile */}
-                      <div className="relative z-[60] md:z-40">
+                      <div className="relative z-[60] md:z-30">
                         <CustomSelect
                           label="Šta tražite?"
                           value={selectedType}
@@ -141,8 +141,8 @@ export default function HomepageCustom2Cyan() {
                         />
                       </div>
 
-                      {/* Specialty Select - SECOND */}
-                      <div className="relative z-50 md:z-50">
+                      {/* Specialty Select - SECOND - Highest z-index on desktop */}
+                      <div className="relative z-50 md:z-[60]">
                         <CustomSelect
                           label="Oblast medicine"
                           value={selectedSpecialty}
@@ -156,7 +156,7 @@ export default function HomepageCustom2Cyan() {
                       </div>
 
                       {/* City Select - THIRD */}
-                      <div className="relative z-40 md:z-40">
+                      <div className="relative z-40 md:z-20">
                         <CustomSelect
                           label="Grad"
                           value={selectedCity}
@@ -180,10 +180,10 @@ export default function HomepageCustom2Cyan() {
                     <Button 
                       type="submit"
                       size="lg" 
-                      className="w-full h-14 text-lg font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
+                      className="w-full h-14 text-lg font-semibold bg-cyan-600 hover:bg-cyan-700 text-white relative z-10"
                     >
                       <Search className="mr-2 h-5 w-5" />
-                      Pronađite doktora
+                      Pretražite
                     </Button>
                   </form>
                 </div>
