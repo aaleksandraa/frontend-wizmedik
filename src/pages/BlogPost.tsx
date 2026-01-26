@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { useParams, Link } from 'react-router-dom';
-import { blogAPI } from '@/services/api';
+import { blogAPI, settingsAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { Calendar, Clock, ArrowLeft, Share2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const bosnianMonths = [
   'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Juni',
@@ -80,7 +77,7 @@ export default function BlogPost() {
 
   const fetchTypography = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/settings/blog-typography`);
+      const response = await settingsAPI.getBlogTypography();
       setTypography(response.data);
     } catch (error) {
       console.error('Error fetching typography:', error);

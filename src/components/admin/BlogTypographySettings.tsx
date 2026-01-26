@@ -5,9 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Type, Save } from 'lucide-react';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { adminAPI, settingsAPI } from '@/services/api';
 
 export function BlogTypographySettings() {
   const { toast } = useToast();
@@ -27,7 +25,7 @@ export function BlogTypographySettings() {
 
   const fetchSettings = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/settings/blog-typography`);
+      const response = await adminAPI.getBlogTypography();
       setSettings(response.data);
     } catch (error) {
       console.error('Error fetching blog typography:', error);
@@ -37,11 +35,7 @@ export function BlogTypographySettings() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await axios.put(`${API_URL}/api/settings/blog-typography`, settings, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      await settingsAPI.updateBlogTypography(settings);
       toast({
         title: 'Uspjeh',
         description: 'Blog tipografija ažurirana',

@@ -42,11 +42,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { uploadAPI } from '@/services/api';
+import { uploadAPI, settingsAPI } from '@/services/api';
 import { toast } from 'sonner';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 interface RichTextEditorProps {
   content: string;
@@ -72,7 +69,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
   useEffect(() => {
     const fetchTypography = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/settings/blog-typography`);
+        const response = await settingsAPI.getBlogTypography();
         setTypography(response.data);
       } catch (error) {
         console.error('Error fetching typography:', error);
