@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { specialtiesAPI, citiesAPI, doctorsAPI, blogAPI } from '@/services/api';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -140,7 +141,7 @@ export function HomepageModern() {
               {blogPosts.map((post) => (
                 <Link key={post.id} to={'/blog/' + post.slug}>
                   <Card className="hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
-                    {post.thumbnail ? <img src={post.thumbnail} alt={post.naslov} className="w-full h-48 object-cover" /> : <div className="w-full h-48 bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center"><Stethoscope className="h-16 w-16 text-white/30" /></div>}
+                    {post.thumbnail ? <img src={fixImageUrl(post.thumbnail) || ''} alt={post.naslov} className="w-full h-48 object-cover" /> : <div className="w-full h-48 bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center"><Stethoscope className="h-16 w-16 text-white/30" /></div>}
                     <CardContent className="p-6">
                       <h3 className="font-bold text-lg line-clamp-2 mb-2">{post.naslov}</h3>
                       <p className="text-gray-600 line-clamp-2 text-sm">{post.excerpt}</p>

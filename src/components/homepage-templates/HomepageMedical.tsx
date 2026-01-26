@@ -270,7 +270,7 @@ export function HomepageMedical() {
                 <Link key={post.id} to={`/blog/${post.slug}`}>
                   <Card className="h-full hover:shadow-lg transition-all cursor-pointer overflow-hidden">
                     {post.thumbnail ? (
-                      <img src={post.thumbnail} alt={post.naslov} className="w-full h-40 object-cover" />
+                      <img src={fixImageUrl(post.thumbnail) || ''} alt={post.naslov} className="w-full h-40 object-cover" />
                     ) : (
                       <div className="w-full h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                         <Stethoscope className="h-12 w-12 text-white/50" />

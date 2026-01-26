@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { ArrowLeft, Save, Eye, X, Plus, Loader2 } from 'lucide-react';
 import { blogAPI, uploadAPI } from '@/services/api';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 export default function BlogEditor() {
   const { slug } = useParams();
@@ -346,7 +347,7 @@ export default function BlogEditor() {
                 {formData.thumbnail && (
                   <div className="relative">
                     <img
-                      src={formData.thumbnail}
+                      src={fixImageUrl(formData.thumbnail) || ''}
                       alt="Thumbnail"
                       className="w-full h-48 object-cover rounded-lg"
                     />

@@ -9,6 +9,7 @@ import { Navbar } from '@/components/Navbar';
 import { ClinicCard } from '@/components/ClinicCard';
 import { DoctorCard } from '@/components/DoctorCard';
 import { useSmartSearch } from '@/hooks/useSmartSearch';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, MapPin, ChevronRight, Play,
   Stethoscope, Heart, Brain, Eye, Baby, Bone, Clock
@@ -280,7 +281,7 @@ export function HomepagePro() {
                   <Card className="h-full hover:shadow-lg transition-all cursor-pointer overflow-hidden group">
                     <div className="relative h-36 md:h-40 overflow-hidden">
                       {post.thumbnail ? (
-                        <img src={post.thumbnail} alt={post.naslov} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={fixImageUrl(post.thumbnail) || ''} alt={post.naslov} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                           <Stethoscope className="h-10 w-10 md:h-12 md:w-12 text-white/50" />

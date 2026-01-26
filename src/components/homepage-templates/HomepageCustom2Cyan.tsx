@@ -9,6 +9,7 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, Users, Building2, Star, 
   Stethoscope, Heart, Shield, Clock, MapPin, ArrowRight,
@@ -469,7 +470,7 @@ export default function HomepageCustom2Cyan() {
                     {post.slika_url && (
                       <div className="aspect-video overflow-hidden">
                         <img 
-                          src={post.slika_url} 
+                          src={fixImageUrl(post.slika_url) || ''} 
                           alt={post.naslov}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

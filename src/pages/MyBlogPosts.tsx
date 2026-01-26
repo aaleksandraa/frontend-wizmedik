@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 interface BlogPost {
   id: number;
@@ -267,7 +268,7 @@ export default function MyBlogPosts() {
                   {post.thumbnail ? (
                     <div className="aspect-video overflow-hidden bg-muted">
                       <img 
-                        src={post.thumbnail} 
+                        src={fixImageUrl(post.thumbnail) || ''} 
                         alt={post.naslov}
                         className="w-full h-full object-cover"
                       />

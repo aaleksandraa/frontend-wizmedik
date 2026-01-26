@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { specialtiesAPI, citiesAPI, doctorsAPI, blogAPI, clinicsAPI, laboratoriesAPI } from '@/services/api';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -452,7 +453,7 @@ export function HomepageSoft() {
                       {post.thumbnail ? (
                         <div className="aspect-video overflow-hidden">
                           <img 
-                            src={post.thumbnail} 
+                            src={fixImageUrl(post.thumbnail) || ''} 
                             alt={post.naslov} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
                           />

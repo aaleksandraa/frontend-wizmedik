@@ -11,6 +11,7 @@ import { Search, Calendar, Clock, User, ChevronLeft, ChevronRight, BookOpen, Tre
 import { Helmet } from 'react-helmet-async';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 interface BlogPost {
   id: number;
@@ -249,7 +250,7 @@ export default function Blog() {
                       {post.thumbnail ? (
                         <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
                           <img 
-                            src={post.thumbnail} 
+                            src={fixImageUrl(post.thumbnail) || ''} 
                             alt={post.naslov} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
                           />
