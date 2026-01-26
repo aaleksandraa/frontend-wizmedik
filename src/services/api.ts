@@ -273,6 +273,8 @@ export const blogAPI = {
   adminDeletePost: (id: number) => api.delete(`/admin/blog/posts/${id}`),
   adminCreateCategory: (data: any) => api.post('/admin/blog/categories', data),
   adminUpdateCategory: (id: number, data: any) => api.put(`/admin/blog/categories/${id}`, data),
+  adminUpdateCategoriesOrder: (categories: Array<{id: number; sort_order: number}>) => 
+    api.put('/admin/blog/categories-order', { categories }),
   adminDeleteCategory: (id: number) => api.delete(`/admin/blog/categories/${id}`),
   getSettings: () => api.get('/admin/blog/settings'),
   updateSettings: (data: any) => api.put('/admin/blog/settings', data),

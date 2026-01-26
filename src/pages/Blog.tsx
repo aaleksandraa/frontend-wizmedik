@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { Calendar, BookOpen, ChevronRight, Loader2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { format } from 'date-fns';
@@ -221,36 +221,34 @@ export default function Blog() {
             <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
               {/* Category Filter */}
               <div className="flex-1">
-                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:border-primary shadow-sm">
-                    <SelectValue placeholder="Sve kategorije" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Sve kategorije</SelectItem>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.slug}>
-                        {cat.naziv} ({cat.posts_count})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CustomSelect
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  options={[
+                    { value: 'all', label: 'Sve kategorije' },
+                    ...categories.map(cat => ({
+                      value: cat.slug,
+                      label: `${cat.naziv} (${cat.posts_count})`
+                    }))
+                  ]}
+                  placeholder="Sve kategorije"
+                />
               </div>
 
               {/* Author Filter */}
               <div className="flex-1">
-                <Select value={selectedAuthor} onValueChange={handleAuthorChange}>
-                  <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:border-primary shadow-sm">
-                    <SelectValue placeholder="Svi autori" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Svi autori</SelectItem>
-                    {authors.map(author => (
-                      <SelectItem key={author.id} value={author.slug}>
-                        Dr. {author.ime} {author.prezime} ({author.posts_count})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CustomSelect
+                  value={selectedAuthor}
+                  onChange={handleAuthorChange}
+                  options={[
+                    { value: 'all', label: 'Svi autori' },
+                    ...authors.map(author => ({
+                      value: author.slug,
+                      label: `Dr. ${author.ime} ${author.prezime} (${author.posts_count})`
+                    }))
+                  ]}
+                  placeholder="Svi autori"
+                />
               </div>
             </div>
           </motion.div>

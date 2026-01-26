@@ -15,7 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Plus, Edit, Trash2, Users, Building2, Stethoscope, MapPin, Upload, Clock, 
   Palette, Settings, Search, LayoutGrid, List, ChevronRight, Phone, Mail,
-  Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical
+  Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical,
+  FlaskConical, Sparkles, Home, MessageSquare
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -35,6 +36,7 @@ import HomepageSettings from '@/components/admin/HomepageSettings';
 import { BlogTypographySettings } from '@/components/admin/BlogTypographySettings';
 import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSettings';
 import Mkb10Manager from '@/components/admin/Mkb10Manager';
+import { EntitiesManagement } from '@/components/admin/EntitiesManagement';
 import {
   DndContext,
   closestCenter,
@@ -934,6 +936,22 @@ export default function AdminPanel() {
                 <FileText className="h-4 w-4 mr-2 hidden sm:inline" />
                 MKB-10
               </TabsTrigger>
+              <TabsTrigger value="laboratories" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <FlaskConical className="h-4 w-4 mr-2 hidden sm:inline" />
+                Laboratorije
+              </TabsTrigger>
+              <TabsTrigger value="spas" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Sparkles className="h-4 w-4 mr-2 hidden sm:inline" />
+                Banje
+              </TabsTrigger>
+              <TabsTrigger value="care-homes" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Home className="h-4 w-4 mr-2 hidden sm:inline" />
+                Domovi
+              </TabsTrigger>
+              <TabsTrigger value="questions" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <MessageSquare className="h-4 w-4 mr-2 hidden sm:inline" />
+                Pitanja
+              </TabsTrigger>
             </TabsList>
 
             {/* DOCTORS TAB */}
@@ -1247,20 +1265,76 @@ export default function AdminPanel() {
 
                 {/* Blog Categories */}
                 <TabsContent value="categories" className="mt-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Kategorije ({blogCategories.length})</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-lg font-semibold">Kategorije ({blogCategories.length})</h2>
+                      <p className="text-sm text-muted-foreground">Povucite i ispustite za promjenu redoslijeda</p>
+                    </div>
                     <Button onClick={() => openBlogCategoryDialog()} className="gap-2">
                       <Plus className="h-4 w-4" /> Nova kategorija
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {blogCategories.map(cat => (
-                      <Card key={cat.id}>
+                  <div className="space-y-2">
+                    {blogCategories
+                      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+                      .map((cat, index) => (
+                      <Card 
+                        key={cat.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.effectAllowed = 'move';
+                          e.dataTransfer.setData('text/plain', index.toString());
+                          (e.target as HTMLElement).style.opacity = '0.5';
+                        }}
+                        onDragEnd={(e) => {
+                          (e.target as HTMLElement).style.opacity = '1';
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = 'move';
+                        }}
+                        onDrop={async (e) => {
+                          e.preventDefault();
+                          const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                          const toIndex = index;
+                          
+                          if (fromIndex === toIndex) return;
+                          
+                          const newCategories = [...blogCategories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                          const [movedItem] = newCategories.splice(fromIndex, 1);
+                          newCategories.splice(toIndex, 0, movedItem);
+                          
+                          // Update sort_order for all categories
+                          const updatedCategories = newCategories.map((cat, idx) => ({
+                            id: cat.id,
+                            sort_order: idx
+                          }));
+                          
+                          try {
+                            await blogAPI.adminUpdateCategoriesOrder(updatedCategories);
+                            setBlogCategories(newCategories.map((cat, idx) => ({ ...cat, sort_order: idx })));
+                            toast({ title: "Uspjeh", description: "Redoslijed kategorija ažuriran" });
+                          } catch (error) {
+                            toast({ title: "Greška", description: "Nije moguće ažurirati redoslijed", variant: "destructive" });
+                          }
+                        }}
+                        className="cursor-move hover:shadow-md transition-shadow"
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{cat.naziv}</p>
-                              <p className="text-sm text-muted-foreground">{cat.posts_count || 0} članaka</p>
+                            <div className="flex items-center gap-3">
+                              <div className="flex flex-col gap-0.5">
+                                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              </div>
+                              <div>
+                                <p className="font-medium">{cat.naziv}</p>
+                                <p className="text-sm text-muted-foreground">{cat.posts_count || 0} članaka</p>
+                                {cat.opis && (
+                                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{cat.opis}</p>
+                                )}
+                              </div>
                             </div>
                             <div className="flex gap-1">
                               <Button variant="ghost" size="sm" onClick={() => openBlogCategoryDialog(cat)}>
@@ -1361,6 +1435,26 @@ export default function AdminPanel() {
             {/* MKB-10 TAB */}
             <TabsContent value="mkb10">
               <Mkb10Manager />
+            </TabsContent>
+
+            {/* LABORATORIES TAB */}
+            <TabsContent value="laboratories">
+              <EntitiesManagement type="laboratories" />
+            </TabsContent>
+
+            {/* SPAS TAB */}
+            <TabsContent value="spas">
+              <EntitiesManagement type="spas" />
+            </TabsContent>
+
+            {/* CARE HOMES TAB */}
+            <TabsContent value="care-homes">
+              <EntitiesManagement type="care-homes" />
+            </TabsContent>
+
+            {/* QUESTIONS TAB */}
+            <TabsContent value="questions">
+              <EntitiesManagement type="questions" />
             </TabsContent>
           </Tabs>
 
