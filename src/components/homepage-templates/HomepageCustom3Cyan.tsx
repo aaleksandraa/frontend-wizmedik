@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CustomSelect } from '@/components/ui/custom-select';
 import { DoctorCard } from '@/components/DoctorCard';
+import CareHomeCardSoft from '@/components/cards/CareHomeCardSoft';
+import SpaCardSoft from '@/components/cards/SpaCardSoft';
 import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -517,7 +519,7 @@ export default function HomepageCustom3Cyan() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {data.banje.slice(0, 4).map((banja: any) => (
-                <ClinicCard key={banja.id} clinic={banja} />
+                <SpaCardSoft key={banja.id} banja={banja} />
               ))}
             </div>
           </div>
@@ -545,7 +547,7 @@ export default function HomepageCustom3Cyan() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {data.domovi.slice(0, 4).map((dom: any) => (
-                <ClinicCard key={dom.id} clinic={dom} />
+                <CareHomeCardSoft key={dom.id} dom={dom} />
               ))}
             </div>
           </div>
