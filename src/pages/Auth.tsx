@@ -24,6 +24,9 @@ import {
   EyeOff
 } from 'lucide-react';
 import { CitySelect } from '@/components/CitySelect';
+import { useFormValidation } from '@/hooks/useFormValidation';
+import { FormError } from '@/components/ui/form-error';
+import { validateEmail, validateRequired, validatePhone } from '@/utils/validation';
 
 type RegistrationType = 'patient' | 'provider';
 
@@ -96,6 +99,27 @@ export default function Auth() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  // Setup validation for registration
+  const { errors, touched, validateField, validateAllFields, setFieldTouched, clearErrors } = useFormValidation({
+    ime: (value) => !isLogin ? validateRequired(value, 'Ime') : null,
+    prezime: (value) => !isLogin ? validateRequired(value, 'Prezime') : null,
+    email: (value) => validateEmail(value),
+    password: (value) => {
+      if (!value) return 'Lozinka je obavezna';
+      if (!isLogin && value.length < 8) return 'Lozinka mora imati najmanje 8 karaktera';
+      return null;
+    },
+    telefon: (value) => {
+      if (!value) return null; // Optional
+      return validatePhone(value);
+    },
+  });
+
+  // Clear errors when switching between login/register
+  useEffect(() => {
+    clearErrors();
+  }, [isLogin, clearErrors]);
+
   // Redirect if already authenticated
   if (!loading && user) {
     const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
@@ -124,6 +148,14 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form if registering
+    if (!isLogin && registrationType === 'patient') {
+      if (!validateAllFields(formData)) {
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
@@ -141,10 +173,21 @@ export default function Auth() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+
+    // Validate field if touched
+    if (touched[name]) {
+      validateField(name, value, formData);
+    }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setFieldTouched(field);
+    validateField(field, formData[field as keyof typeof formData], formData);
   };
 
   if (loading) {
@@ -246,7 +289,9 @@ export default function Auth() {
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label htmlFor="ime">Ime</Label>
+                        <Label htmlFor="ime">
+                          Ime <span className="text-red-500">*</span>
+                        </Label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
@@ -256,13 +301,17 @@ export default function Auth() {
                             required
                             value={formData.ime}
                             onChange={handleInputChange}
+                            onBlur={() => handleFieldBlur('ime')}
                             placeholder="Ime"
-                            className="pl-10"
+                            className={`pl-10 ${touched.ime && errors.ime ? 'border-red-500' : ''}`}
                           />
                         </div>
+                        <FormError error={touched.ime ? errors.ime : undefined} />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="prezime">Prezime</Label>
+                        <Label htmlFor="prezime">
+                          Prezime <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                           id="prezime"
                           name="prezime"
@@ -270,8 +319,11 @@ export default function Auth() {
                           required
                           value={formData.prezime}
                           onChange={handleInputChange}
+                          onBlur={() => handleFieldBlur('prezime')}
                           placeholder="Prezime"
+                          className={touched.prezime && errors.prezime ? 'border-red-500' : ''}
                         />
+                        <FormError error={touched.prezime ? errors.prezime : undefined} />
                       </div>
                     </div>
 
@@ -286,10 +338,12 @@ export default function Auth() {
                             type="tel"
                             value={formData.telefon}
                             onChange={handleInputChange}
+                            onBlur={() => handleFieldBlur('telefon')}
                             placeholder="+387..."
-                            className="pl-10"
+                            className={`pl-10 ${touched.telefon && errors.telefon ? 'border-red-500' : ''}`}
                           />
                         </div>
+                        <FormError error={touched.telefon ? errors.telefon : undefined} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="grad">Grad</Label>
@@ -305,7 +359,9 @@ export default function Auth() {
                 )}
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email adresa</Label>
+                  <Label htmlFor="email">
+                    Email adresa <span className="text-red-500">*</span>
+                  </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -315,15 +371,19 @@ export default function Auth() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('email')}
                       placeholder="vasa@email.com"
-                      className="pl-10"
+                      className={`pl-10 ${touched.email && errors.email ? 'border-red-500' : ''}`}
                     />
                   </div>
+                  <FormError error={touched.email ? errors.email : undefined} />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Lozinka</Label>
+                    <Label htmlFor="password">
+                      Lozinka <span className="text-red-500">*</span>
+                    </Label>
                     {isLogin && (
                       <Link 
                         to="/forgot-password" 
@@ -342,8 +402,9 @@ export default function Auth() {
                       required
                       value={formData.password}
                       onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('password')}
                       placeholder="••••••••"
-                      className="pl-10 pr-10"
+                      className={`pl-10 pr-10 ${touched.password && errors.password ? 'border-red-500' : ''}`}
                     />
                     <button
                       type="button"
@@ -353,7 +414,8 @@ export default function Auth() {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {!isLogin && (
+                  <FormError error={touched.password ? errors.password : undefined} />
+                  {!isLogin && !errors.password && (
                     <p className="text-xs text-muted-foreground">
                       Minimalno 8 karaktera
                     </p>
@@ -364,7 +426,7 @@ export default function Auth() {
                   type="submit" 
                   className="w-full h-11" 
                   variant="medical"
-                  disabled={submitting}
+                  disabled={submitting || (!isLogin && Object.keys(errors).length > 0)}
                 >
                   {submitting ? (
                     <span className="flex items-center gap-2">
