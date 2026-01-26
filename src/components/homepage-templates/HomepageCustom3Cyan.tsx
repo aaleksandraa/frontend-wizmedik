@@ -9,6 +9,7 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
+import { adminAPI } from '@/services/api';
 import { 
   Search, Heart, Users, Building2, MapPin, ArrowRight,
   HelpCircle, MessageCircle, Eye, CheckCircle2, Lightbulb,
@@ -24,6 +25,11 @@ export default function HomepageCustom3Cyan() {
   const [selectedCity, setSelectedCity] = useState('');
   const [citySearchQuery, setCitySearchQuery] = useState('');
   const [currentWord, setCurrentWord] = useState(0);
+  const [heroBgSettings, setHeroBgSettings] = useState({
+    enabled: false,
+    image: null as string | null,
+    opacity: 20
+  });
 
   // Animated words that change every 2 seconds
   const words = ['ljekara', 'kliniku', 'laboratoriju', 'banju', 'dom', 'savjet'];
@@ -34,6 +40,23 @@ export default function HomepageCustom3Cyan() {
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Load hero background settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await adminAPI.getTemplates();
+        setHeroBgSettings({
+          enabled: response.data.custom3_hero_bg_enabled || false,
+          image: response.data.custom3_hero_bg_image || null,
+          opacity: response.data.custom3_hero_bg_opacity || 20
+        });
+      } catch (error) {
+        console.error('Error loading hero background settings:', error);
+      }
+    };
+    loadSettings();
   }, []);
 
   if (loading || !data) {
@@ -92,6 +115,17 @@ export default function HomepageCustom3Cyan() {
       
       {/* Hero Section - Clean Centered Design */}
       <section className="relative py-20 lg:py-32 pb-32 lg:pb-40">
+        {/* Background Image (if enabled) */}
+        {heroBgSettings.enabled && heroBgSettings.image && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${heroBgSettings.image})`,
+              opacity: heroBgSettings.opacity / 100
+            }}
+          />
+        )}
+
         {/* Subtle Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-400 rounded-full blur-3xl"></div>

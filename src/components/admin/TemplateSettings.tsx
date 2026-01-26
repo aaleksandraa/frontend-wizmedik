@@ -36,6 +36,11 @@ export function TemplateSettings() {
   const [modernCoverValue, setModernCoverValue] = useState('from-primary via-primary/90 to-primary/80');
   const [uploadingCover, setUploadingCover] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const [custom3HeroBgEnabled, setCustom3HeroBgEnabled] = useState(false);
+  const [custom3HeroBgImage, setCustom3HeroBgImage] = useState<string | null>(null);
+  const [custom3HeroBgOpacity, setCustom3HeroBgOpacity] = useState(20);
+  const [uploadingCustom3Bg, setUploadingCustom3Bg] = useState(false);
+  const custom3BgInputRef = useRef<HTMLInputElement>(null);
   const [doctorTemplates, setDoctorTemplates] = useState<Template[]>([]);
   const [clinicTemplates, setClinicTemplates] = useState<Template[]>([]);
   const [homepageTemplates, setHomepageTemplates] = useState<Template[]>([
@@ -77,6 +82,9 @@ export function TemplateSettings() {
       setDoctorsSplitViewEnabled(response.data.doctors_split_view_enabled !== false);
       setModernCoverType(response.data.modern_cover_type || 'gradient');
       setModernCoverValue(response.data.modern_cover_value || 'from-primary via-primary/90 to-primary/80');
+      setCustom3HeroBgEnabled(response.data.custom3_hero_bg_enabled || false);
+      setCustom3HeroBgImage(response.data.custom3_hero_bg_image || null);
+      setCustom3HeroBgOpacity(response.data.custom3_hero_bg_opacity || 20);
       setDoctorTemplates(response.data.available_templates.doctor);
       setClinicTemplates(response.data.available_templates.clinic);
       if (response.data.available_templates.homepage) {
@@ -100,6 +108,9 @@ export function TemplateSettings() {
         doctors_split_view_enabled: doctorsSplitViewEnabled,
         modern_cover_type: modernCoverType,
         modern_cover_value: modernCoverValue,
+        custom3_hero_bg_enabled: custom3HeroBgEnabled,
+        custom3_hero_bg_image: custom3HeroBgImage,
+        custom3_hero_bg_opacity: custom3HeroBgOpacity,
       });
       toast.success('Template postavke sačuvane');
     } catch (error) {
@@ -123,6 +134,23 @@ export function TemplateSettings() {
       toast.error('Greška pri uploadu slike');
     } finally {
       setUploadingCover(false);
+    }
+  };
+
+  const handleCustom3BgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCustom3Bg(true);
+    try {
+      const response = await uploadAPI.uploadImage(file, 'backgrounds');
+      setCustom3HeroBgImage(response.data.url);
+      setCustom3HeroBgEnabled(true);
+      toast.success('Pozadinska slika uspješno uploadovana');
+    } catch (error) {
+      toast.error('Greška pri uploadu slike');
+    } finally {
+      setUploadingCustom3Bg(false);
     }
   };
 
@@ -534,6 +562,140 @@ export function TemplateSettings() {
           )}
         </CardContent>
       </Card>
+
+      {/* Custom 3 Cyan Hero Background */}
+      {homepageTemplate === 'custom3-cyan' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              Custom 3 Cyan - Hero Pozadina
+            </CardTitle>
+            <CardDescription>Dodajte blagu pozadinsku sliku u hero sekciju Custom 3 Cyan template-a</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Enable/Disable Toggle */}
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+              <div className="space-y-1">
+                <Label htmlFor="custom3-bg-toggle" className="text-base font-medium cursor-pointer">
+                  Omogući pozadinsku sliku
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Prikazuje blagu pozadinsku sliku iza hero sekcije
+                </p>
+              </div>
+              <Switch
+                id="custom3-bg-toggle"
+                checked={custom3HeroBgEnabled}
+                onCheckedChange={setCustom3HeroBgEnabled}
+              />
+            </div>
+
+            {custom3HeroBgEnabled && (
+              <>
+                {/* Image Upload */}
+                <div className="space-y-4">
+                  <Label>Pozadinska slika</Label>
+                  <input
+                    ref={custom3BgInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCustom3BgUpload}
+                    className="hidden"
+                  />
+                  {custom3HeroBgImage ? (
+                    <div className="relative">
+                      <img
+                        src={custom3HeroBgImage}
+                        alt="Hero background preview"
+                        className="w-full h-48 object-cover rounded-lg"
+                        style={{ opacity: custom3HeroBgOpacity / 100 }}
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setCustom3HeroBgImage(null);
+                          setCustom3HeroBgEnabled(false);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => custom3BgInputRef.current?.click()}
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                    >
+                      <Upload className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-600">Kliknite za upload pozadinske slike</p>
+                      <p className="text-sm text-gray-400 mt-1">Preporučena veličina: 1920x1080px</p>
+                    </div>
+                  )}
+                  {uploadingCustom3Bg && <p className="text-sm text-muted-foreground">Uploadujem...</p>}
+                </div>
+
+                {/* Opacity Slider */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="opacity-slider">Opacity (Prozirnost)</Label>
+                    <span className="text-sm font-medium text-muted-foreground">{custom3HeroBgOpacity}%</span>
+                  </div>
+                  <input
+                    id="opacity-slider"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={custom3HeroBgOpacity}
+                    onChange={(e) => setCustom3HeroBgOpacity(Number(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Potpuno prozirno</span>
+                    <span>Blago vidljivo</span>
+                    <span>Potpuno vidljivo</span>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                {custom3HeroBgImage && (
+                  <div className="space-y-2">
+                    <Label>Pregled</Label>
+                    <div 
+                      className="relative h-48 rounded-lg overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center"
+                    >
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{
+                          backgroundImage: `url(${custom3HeroBgImage})`,
+                          opacity: custom3HeroBgOpacity / 100
+                        }}
+                      />
+                      <div className="relative z-10 text-white text-center px-4">
+                        <h3 className="text-2xl font-bold mb-2">Pronađite ljekara, kliniku...</h3>
+                        <p className="text-white/90">Pregled kako će izgledati hero sekcija</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Info Box */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 font-medium mb-2">💡 Savjeti za najbolji rezultat</p>
+                  <ul className="text-blue-700 text-sm space-y-1">
+                    <li>• Koristite slike sa blagim, neutralnim tonovima</li>
+                    <li>• Preporučeni opacity: 15-30% za suptilan efekat</li>
+                    <li>• Izbjegavajte slike sa puno detalja ili kontrasta</li>
+                    <li>• Najbolje funkcionišu apstraktni paterni ili gradijenti</li>
+                  </ul>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

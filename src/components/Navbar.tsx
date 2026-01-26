@@ -544,36 +544,29 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-[320px] p-0">
+            <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-br from-cyan-50 via-white to-blue-50">
               <SheetTitle className="sr-only">Navigacija</SheetTitle>
               <SheetDescription className="sr-only">Glavni meni za navigaciju</SheetDescription>
 
               <div className="flex flex-col h-full">
-                {/* Mobile Header */}
-                <div className="flex items-center justify-between p-4 border-b bg-white">
-                  <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                    <Logo className="h-8" />
-                  </Link>
-                </div>
-
-                {/* Mobile User Info */}
+                {/* Mobile User Info - Cyan theme */}
                 {user && (
-                  <div className="p-4 bg-gray-50 border-b">
+                  <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-semibold shadow-sm">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold shadow-lg">
                         {user.name?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-gray-900 truncate">{user.name || 'Korisnik'}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        <p className="font-bold text-sm text-gray-900 truncate">{user.name || 'Korisnik'}</p>
+                        <p className="text-xs text-cyan-600 truncate">{user.email}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Mobile Navigation */}
-                <div className="flex-1 overflow-y-auto py-2 bg-white">
-                  <div className="space-y-1 px-2">
+                {/* Mobile Navigation - Modern design */}
+                <div className="flex-1 overflow-y-auto py-3 bg-white/50 backdrop-blur-sm">
+                  <div className="space-y-1 px-3">
                     {navLinks.map((link) => {
                       const Icon = link.icon;
                       const active = isActive(link.href);
@@ -583,33 +576,40 @@ export function Navbar() {
                           <Link
                             to={link.href}
                             className={[
-                              'flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors',
-                              active ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100',
+                              'flex items-center justify-between px-4 py-2 rounded-xl transition-all duration-200',
+                              active 
+                                ? 'bg-cyan-500 text-white' 
+                                : 'text-gray-700 hover:bg-white hover:shadow-md',
                             ].join(' ')}
                           >
                             <div className="flex items-center gap-3">
-                              <Icon className="w-5 h-5" />
-                              <span className="font-medium text-sm">{link.label}</span>
+                              <div className={[
+                                'w-9 h-9 rounded-lg flex items-center justify-center transition-colors',
+                                active ? 'bg-white/20' : 'bg-cyan-50'
+                              ].join(' ')}>
+                                <Icon className={['w-5 h-5', active ? 'text-white' : 'text-cyan-600'].join(' ')} />
+                              </div>
+                              <span className="font-semibold text-sm">{link.label}</span>
                             </div>
-                            <ChevronRight className={['w-4 h-4', active ? 'opacity-70' : 'opacity-40'].join(' ')} />
+                            <ChevronRight className={['w-5 h-5', active ? 'opacity-80' : 'opacity-30'].join(' ')} />
                           </Link>
                         </SheetClose>
                       );
                     })}
                   </div>
 
-                  {/* Info Links */}
-                  <div className="my-3 mx-2 border-t" />
-                  <div className="px-2 space-y-1">
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Informacije</div>
+                  {/* Info Links - Cyan theme */}
+                  <div className="my-4 mx-3 border-t border-cyan-100" />
+                  <div className="px-3 space-y-1">
+                    <div className="px-4 py-2 text-xs font-bold text-cyan-600 uppercase tracking-wider">Informacije</div>
                     {infoLinks.map((link) => (
                       <SheetClose asChild key={link.href}>
                         <Link
                           to={link.href}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                          className="flex items-center justify-between px-4 py-2.5 rounded-xl text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200"
                         >
                           <span className="font-medium text-sm">{link.label}</span>
-                          <ChevronRight className="w-4 h-4 opacity-40" />
+                          <ChevronRight className="w-4 h-4 opacity-30" />
                         </Link>
                       </SheetClose>
                     ))}
@@ -617,18 +617,20 @@ export function Navbar() {
 
                   {user && (
                     <>
-                      <div className="my-3 mx-2 border-t" />
-                      <div className="px-2 space-y-1">
+                      <div className="my-4 mx-3 border-t border-cyan-100" />
+                      <div className="px-3 space-y-1">
                         <SheetClose asChild>
                           <Link
                             to={dashboardLink}
-                            className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                            className="flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 hover:from-cyan-200 hover:to-blue-200 transition-all duration-200 shadow-sm"
                           >
                             <div className="flex items-center gap-3">
-                              {dashboardIcon}
-                              <span className="font-semibold text-sm">{dashboardLabel}</span>
+                              <div className="w-9 h-9 rounded-lg bg-white/80 flex items-center justify-center">
+                                {dashboardIcon}
+                              </div>
+                              <span className="font-bold text-sm">{dashboardLabel}</span>
                             </div>
-                            <ChevronRight className="w-4 h-4 opacity-70" />
+                            <ChevronRight className="w-5 h-5 opacity-60" />
                           </Link>
                         </SheetClose>
 
@@ -636,13 +638,13 @@ export function Navbar() {
                           <SheetClose asChild>
                             <Link
                               to={`/doktor/${doctorSlug}`}
-                              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200"
                             >
                               <div className="flex items-center gap-3">
-                                <Eye className="w-5 h-5" />
+                                <Eye className="w-5 h-5 text-cyan-600" />
                                 <span className="font-medium text-sm">Pogledaj moj profil</span>
                               </div>
-                              <ChevronRight className="w-4 h-4 opacity-40" />
+                              <ChevronRight className="w-4 h-4 opacity-30" />
                             </Link>
                           </SheetClose>
                         )}
@@ -651,13 +653,13 @@ export function Navbar() {
                           <SheetClose asChild>
                             <Link
                               to="/my-blog-posts"
-                              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                              className="flex items-center justify-between px-4 py-2.5 rounded-xl text-gray-700 hover:bg-white hover:shadow-md transition-all duration-200"
                             >
                               <div className="flex items-center gap-3">
-                                <FileText className="w-5 h-5" />
+                                <FileText className="w-5 h-5 text-cyan-600" />
                                 <span className="font-medium text-sm">Moji blog postovi</span>
                               </div>
-                              <ChevronRight className="w-4 h-4 opacity-40" />
+                              <ChevronRight className="w-4 h-4 opacity-30" />
                             </Link>
                           </SheetClose>
                         )}
@@ -666,8 +668,8 @@ export function Navbar() {
                   )}
                 </div>
 
-                {/* Mobile Footer */}
-                <div className="p-3 border-t bg-white">
+                {/* Mobile Footer - Cyan theme */}
+                <div className="p-3 border-t border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50">
                   {user ? (
                     <Button
                       onClick={() => {
@@ -675,7 +677,7 @@ export function Navbar() {
                         setMobileMenuOpen(false);
                       }}
                       variant="outline"
-                      className="w-full rounded-lg border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-medium"
+                      className="w-full rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold shadow-sm"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Odjavi se
@@ -686,7 +688,7 @@ export function Navbar() {
                         navigate('/auth');
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full rounded-lg bg-primary hover:bg-primary/90 font-medium"
+                      className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 font-semibold shadow-lg shadow-cyan-500/30"
                     >
                       Prijavi se
                     </Button>

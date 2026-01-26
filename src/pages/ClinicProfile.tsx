@@ -223,8 +223,21 @@ export default function ClinicProfile() {
       </Helmet>
       <Navbar />
       <div className="min-h-screen bg-gradient-primary">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center gap-4 mb-6">
+        <div className="max-w-7xl mx-auto p-4 md:p-6">
+          {/* Mobile Layout: Button above, Title and Badge below */}
+          <div className="md:hidden mb-6">
+            <Button variant="outline" onClick={() => navigate('/klinike')} className="mb-3">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Nazad
+            </Button>
+            <h1 className="text-2xl font-bold mb-2">{clinic.naziv}</h1>
+            <Badge variant={currentStatus.color === 'green' ? 'default' : 'destructive'}>
+              {currentStatus.status}
+            </Badge>
+          </div>
+
+          {/* Desktop Layout: All in one row */}
+          <div className="hidden md:flex items-center gap-4 mb-6">
             <Button variant="outline" onClick={() => navigate('/klinike')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Nazad
