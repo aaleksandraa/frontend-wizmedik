@@ -553,11 +553,14 @@ export function Navbar() {
                 {/* Mobile Header - Logo and Close Button */}
                 <div className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
                   <Logo className="h-8" />
-                  <SheetClose asChild>
-                    <Button variant="ghost" size="icon" className="rounded-lg hover:bg-gray-100">
-                      <X className="w-5 h-5 text-gray-600" />
-                    </Button>
-                  </SheetClose>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-lg hover:bg-gray-100"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </Button>
                 </div>
 
                 {/* Mobile User Info - Cyan theme */}
