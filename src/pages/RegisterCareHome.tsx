@@ -173,11 +173,16 @@ export default function RegisterCareHome() {
       // Handle backend validation errors
       if (error.response?.data?.errors) {
         setBackendErrors(error.response.data.errors);
-        const firstError = Object.values(error.response.data.errors)[0];
+        
+        // Scroll to top to show error summary
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        const errorCount = Object.keys(error.response.data.errors).length;
         toast({
-          title: 'Greška validacije',
-          description: Array.isArray(firstError) ? firstError[0] : 'Molimo provjerite unesene podatke',
+          title: `❌ ${errorCount} ${errorCount === 1 ? 'greška' : 'greške'} u formi`,
+          description: 'Molimo pogledajte crvena polja i ispravite greške',
           variant: 'destructive',
+          duration: 8000,
         });
       } else {
         toast({
@@ -194,6 +199,16 @@ export default function RegisterCareHome() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear backend error for this field when user starts typing
+    if (backendErrors[name]) {
+      setBackendErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
     if (touched[name]) {
       validateField(name, value, formData);
     }
@@ -202,6 +217,26 @@ export default function RegisterCareHome() {
   const handleFieldBlur = (field: string) => {
     setFieldTouched(field);
     validateField(field, formData[field as keyof typeof formData], formData);
+  };
+
+  // Helper function to get user-friendly field labels
+  const getFieldLabel = (field: string): string => {
+    const labels: Record<string, string> = {
+      naziv: 'Naziv doma',
+      adresa: 'Adresa',
+      grad: 'Grad',
+      telefon: 'Telefon',
+      email: 'Email za javnost',
+      account_email: 'Email za prijavu',
+      website: 'Website',
+      opis: 'Opis',
+      kontakt_ime: 'Ime kontakt osobe',
+      password: 'Lozinka',
+      password_confirmation: 'Potvrda lozinke',
+      tip_doma_id: 'Tip doma',
+      nivo_njege_id: 'Nivo njege',
+    };
+    return labels[field] || field;
   };
 
   const toggleProgram = (id: number) => {
@@ -274,20 +309,30 @@ export default function RegisterCareHome() {
                   </Alert>
                 )}
 
-                {/* Backend errors */}
+                {/* Backend errors - PROMINENT DISPLAY */}
                 {Object.keys(backendErrors).length > 0 && (
-                  <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      <div className="space-y-1">
-                        {Object.entries(backendErrors).map(([field, messages]) => (
-                          <div key={field}>
-                            <strong>{field}:</strong> {Array.isArray(messages) ? messages.join(', ') : messages}
-                          </div>
-                        ))}
+                  <div className="bg-red-600 text-white p-6 rounded-lg border-2 border-red-700 shadow-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-6 w-6 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold mb-3">Greške u formi - molimo ispravite:</h3>
+                        <div className="space-y-3">
+                          {Object.entries(backendErrors).map(([field, messages]) => (
+                            <div key={field} className="bg-red-700 p-3 rounded">
+                              <div className="font-semibold text-base mb-1">
+                                📌 {getFieldLabel(field)}
+                              </div>
+                              <div className="text-sm">
+                                {Array.isArray(messages) ? messages.map((msg, i) => (
+                                  <div key={i}>• {msg}</div>
+                                )) : messages}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </AlertDescription>
-                  </Alert>
+                    </div>
+                  </div>
                 )}
 
                 {/* Basic Info */}
@@ -326,11 +371,23 @@ export default function RegisterCareHome() {
                       value={formData.grad}
                       onChange={(value) => {
                         setFormData({ ...formData, grad: value });
+                        if (backendErrors.grad) {
+                          setBackendErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.grad;
+                            return newErrors;
+                          });
+                        }
                         if (touched.grad) validateField('grad', value, formData);
                       }}
                       showIcon={false}
                     />
                     <FormError error={touched.grad ? errors.grad : undefined} />
+                    {backendErrors.grad && (
+                      <div className="mt-2 p-2 bg-red-100 border border-red-400 rounded text-red-700 text-sm">
+                        <strong>Greška:</strong> {Array.isArray(backendErrors.grad) ? backendErrors.grad.join(', ') : backendErrors.grad}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="telefon">Telefon *</Label>
@@ -341,10 +398,15 @@ export default function RegisterCareHome() {
                       onChange={handleInputChange}
                       onBlur={() => handleFieldBlur('telefon')}
                       placeholder="+387 xx xxx xxx"
-                      className={touched.telefon && errors.telefon ? 'border-red-500' : ''}
+                      className={`${touched.telefon && errors.telefon ? 'border-red-500' : ''} ${backendErrors.telefon ? 'border-red-600 border-2' : ''}`}
                       required
                     />
                     <FormError error={touched.telefon ? errors.telefon : undefined} />
+                    {backendErrors.telefon && (
+                      <div className="mt-2 p-2 bg-red-100 border border-red-400 rounded text-red-700 text-sm">
+                        <strong>Greška:</strong> {Array.isArray(backendErrors.telefon) ? backendErrors.telefon.join(', ') : backendErrors.telefon}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="email">Email za javnost *</Label>
@@ -356,13 +418,18 @@ export default function RegisterCareHome() {
                       onChange={handleInputChange}
                       onBlur={() => handleFieldBlur('email')}
                       placeholder="info@dom.ba"
-                      className={touched.email && errors.email ? 'border-red-500' : ''}
+                      className={`${touched.email && errors.email ? 'border-red-500' : ''} ${backendErrors.email ? 'border-red-600 border-2' : ''}`}
                       required
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Ovaj email će biti prikazan na vašem profilu
                     </p>
                     <FormError error={touched.email ? errors.email : undefined} />
+                    {backendErrors.email && (
+                      <div className="mt-2 p-2 bg-red-100 border border-red-400 rounded text-red-700 text-sm">
+                        <strong>Greška:</strong> {Array.isArray(backendErrors.email) ? backendErrors.email.join(', ') : backendErrors.email}
+                      </div>
+                    )}
                   </div>
                   <div className="md:col-span-2">
                     <Label htmlFor="website">Website</Label>
@@ -554,13 +621,18 @@ export default function RegisterCareHome() {
                           onChange={handleInputChange}
                           onBlur={() => handleFieldBlur('account_email')}
                           placeholder="vas.email@gmail.com"
-                          className={touched.account_email && errors.account_email ? 'border-red-500' : ''}
+                          className={`${touched.account_email && errors.account_email ? 'border-red-500' : ''} ${backendErrors.account_email ? 'border-red-600 border-2' : ''}`}
                           required
                         />
                         <p className="text-xs text-purple-600 mt-1">
                           Ovaj email koristite za prijavu. Može biti različit od javnog emaila.
                         </p>
                         <FormError error={touched.account_email ? errors.account_email : undefined} />
+                        {backendErrors.account_email && (
+                          <div className="mt-2 p-3 bg-red-100 border-2 border-red-400 rounded text-red-700 text-sm font-medium">
+                            <strong>⚠️ Greška:</strong> {Array.isArray(backendErrors.account_email) ? backendErrors.account_email.join(', ') : backendErrors.account_email}
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -573,10 +645,28 @@ export default function RegisterCareHome() {
                             onChange={handleInputChange}
                             onBlur={() => handleFieldBlur('password')}
                             placeholder="Minimalno 12 karaktera"
-                            className={touched.password && errors.password ? 'border-red-500' : ''}
+                            className={`${touched.password && errors.password ? 'border-red-500' : ''} ${backendErrors.password ? 'border-red-600 border-2 bg-red-50' : ''}`}
                             required
                           />
                           <FormError error={touched.password ? errors.password : undefined} />
+                          {backendErrors.password && (
+                            <div className="mt-2 p-3 bg-red-600 text-white rounded-lg border-2 border-red-700 shadow-md">
+                              <div className="flex items-start gap-2">
+                                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <div className="font-bold text-sm mb-1">🔒 PROBLEM SA LOZINKOM:</div>
+                                  <div className="text-sm">
+                                    {Array.isArray(backendErrors.password) ? backendErrors.password.map((msg, i) => (
+                                      <div key={i} className="mb-1">• {msg}</div>
+                                    )) : backendErrors.password}
+                                  </div>
+                                  <div className="mt-2 text-xs bg-red-700 p-2 rounded">
+                                    💡 Koristite sigurniju lozinku, npr: <strong>W!zm3d!k#S3cur3$2025</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <Label htmlFor="password_confirmation">Potvrdi lozinku *</Label>
@@ -588,10 +678,15 @@ export default function RegisterCareHome() {
                             onChange={handleInputChange}
                             onBlur={() => handleFieldBlur('password_confirmation')}
                             placeholder="Ponovi lozinku"
-                            className={touched.password_confirmation && errors.password_confirmation ? 'border-red-500' : ''}
+                            className={`${touched.password_confirmation && errors.password_confirmation ? 'border-red-500' : ''} ${backendErrors.password_confirmation ? 'border-red-600 border-2' : ''}`}
                             required
                           />
                           <FormError error={touched.password_confirmation ? errors.password_confirmation : undefined} />
+                          {backendErrors.password_confirmation && (
+                            <div className="mt-2 p-2 bg-red-100 border border-red-400 rounded text-red-700 text-sm">
+                              <strong>Greška:</strong> {Array.isArray(backendErrors.password_confirmation) ? backendErrors.password_confirmation.join(', ') : backendErrors.password_confirmation}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
