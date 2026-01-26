@@ -308,14 +308,14 @@ export default function CityLanding() {
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-2 md:py-4">
           <Breadcrumb items={[
             { label: 'Gradovi', href: '/gradovi' },
             { label: city.naziv }
           ]} />
 
-          <header className="mb-12">
-            <div className="flex items-center gap-4 mb-6">
+          <header className="mt-2 mb-8 md:mb-12">
+            <div className="flex items-center gap-4 mb-4 md:mb-6">
               <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0">
                 <MapPin className="w-6 h-6" />
               </div>

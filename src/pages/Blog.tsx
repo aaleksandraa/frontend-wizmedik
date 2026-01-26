@@ -136,25 +136,26 @@ export default function Blog() {
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         <Navbar />
         
-        {/* Hero Section */}
+        {/* Hero Section - Mobile Optimized */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent py-16 px-4"
+          className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent py-6 md:py-16 px-4"
         >
           <div className="max-w-7xl mx-auto text-center">
+            {/* Icon - Desktop only */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-2xl shadow-lg mb-6"
+              className="hidden md:inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-2xl shadow-lg mb-6"
             >
               <BookOpen className="w-10 h-10 text-white" />
             </motion.div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-4">
+            <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent mb-2 md:mb-4">
               Zdravstveni savjeti
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm md:text-xl text-gray-600 max-w-2xl mx-auto">
               Stručni članci i savjeti od naših doktora za vaše zdravlje i dobrobit
             </p>
           </div>
@@ -217,11 +218,11 @@ export default function Blog() {
             </div>
           </motion.div>
 
-          {/* Posts grid */}
+          {/* Posts grid - Mobile: horizontal layout, Desktop: grid */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-96 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl animate-pulse" />
+                <div key={i} className="h-24 md:h-96 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl md:rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : posts.length === 0 ? (
@@ -241,12 +242,62 @@ export default function Blog() {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8"
             >
               {posts.map(post => (
                 <motion.div key={post.id} variants={itemVariants}>
                   <Link to={`/blog/${post.slug}`}>
-                    <Card className="h-full hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl border-0 shadow-md hover:-translate-y-1 group">
+                    {/* Mobile: Horizontal layout (image left, text right) */}
+                    <Card className="md:hidden h-full hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl border-0 shadow-sm hover:scale-[1.02] group">
+                      <div className="flex gap-3 p-3">
+                        {/* Image - Left side, square */}
+                        {post.thumbnail ? (
+                          <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primary/10 to-primary/5">
+                            <img 
+                              src={fixImageUrl(post.thumbnail) || ''} 
+                              alt={post.naslov} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
+                            <BookOpen className="w-8 h-8 text-primary/30" />
+                          </div>
+                        )}
+                        
+                        {/* Content - Right side */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          {/* Categories */}
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {post.categories.slice(0, 1).map(cat => (
+                              <Badge key={cat.id} variant="secondary" className="text-[10px] rounded-full px-2 py-0.5 bg-primary/10 text-primary border-0">
+                                {cat.naziv}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          {/* Title */}
+                          <h2 className="font-semibold text-sm line-clamp-2 text-gray-900 group-hover:text-primary transition-colors mb-1">
+                            {post.naslov}
+                          </h2>
+                          
+                          {/* Meta info */}
+                          <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                            <span className="flex items-center gap-0.5">
+                              <Calendar className="h-2.5 w-2.5" />
+                              {format(new Date(post.published_at), 'dd.MM.yyyy')}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <Clock className="h-2.5 w-2.5" />
+                              {post.reading_time} min
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Desktop: Vertical card layout (original) */}
+                    <Card className="hidden md:block h-full hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl border-0 shadow-md hover:-translate-y-1 group">
                       {post.thumbnail ? (
                         <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
                           <img 

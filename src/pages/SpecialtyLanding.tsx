@@ -445,7 +445,7 @@ export default function SpecialtyLanding() {
       <div className="min-h-screen bg-background">
         <Navbar />
 
-        <main className="container mx-auto px-4 py-6 sm:py-10">
+        <main className="container mx-auto px-4 py-2 md:py-4">
           <Breadcrumb
             items={[
               { label: "Specijalnosti", href: "/specijalnosti" },
@@ -454,7 +454,7 @@ export default function SpecialtyLanding() {
           />
 
           {/* Header */}
-          <header className="mt-3 mb-8 sm:mb-10">
+          <header className="mt-2 mb-6 md:mb-8">
   <div className="flex items-start sm:items-center gap-3 sm:gap-4">
     <div className="hidden sm:flex w-14 h-14 bg-primary text-white rounded-2xl items-center justify-center shrink-0">
       <Stethoscope className="w-7 h-7" />

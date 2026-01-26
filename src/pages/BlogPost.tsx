@@ -168,20 +168,18 @@ export default function BlogPost() {
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <main className="max-w-5xl mx-auto px-4 py-4 md:py-8">
-          {/* Breadcrumb - closer to top on mobile */}
-          <div className="mb-3 md:mb-4">
-            <Breadcrumb items={[
-              { label: 'Blog', href: '/blog' },
-              { label: post.naslov }
-            ]} />
-          </div>
-
+        <main className="max-w-5xl mx-auto px-4 py-2 md:py-4">
           <article>
-            {/* Header */}
+            {/* Header - all in one compact block */}
             <header className="mb-6 md:mb-8">
-              {/* Categories - closer to breadcrumb */}
-              <div className="flex flex-wrap gap-2 mb-3">
+              {/* Breadcrumb */}
+              <Breadcrumb items={[
+                { label: 'Blog', href: '/blog' },
+                { label: post.naslov }
+              ]} />
+              
+              {/* Categories - no gap */}
+              <div className="flex flex-wrap gap-2 mt-1">
                 {post.categories.map(cat => (
                   <Link key={cat.id} to={`/blog?category=${cat.slug}`}>
                     <Badge variant="secondary">{cat.naziv}</Badge>
@@ -189,8 +187,8 @@ export default function BlogPost() {
                 ))}
               </div>
               
-              {/* Title - closer to categories */}
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.naslov}</h1>
+              {/* Title - minimal gap */}
+              <h1 className="text-3xl md:text-4xl font-bold mt-2 mb-4">{post.naslov}</h1>
               
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
                 <span className="flex items-center gap-1">

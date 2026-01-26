@@ -60,14 +60,14 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
       </Helmet>
 
       {/* MOBILE: compact back + current */}
-      <nav aria-label="Breadcrumb" className={"sm:hidden mb-3 " + (className ?? "")}>
+      <nav aria-label="Breadcrumb" className={"sm:hidden mb-0 " + (className ?? "")}>
         <div className="flex items-center gap-2 min-w-0 text-left">
           <Link
             to={backTarget?.href || "/"}
-            className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-muted/30 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 h-7 px-2 rounded-md bg-muted/20 text-muted-foreground hover:text-foreground transition-colors shrink-0"
             aria-label={`Nazad: ${backTarget?.label || "Početna"}`}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
             <span className="text-xs font-medium leading-none">
               {backTarget?.label || "Početna"}
             </span>
@@ -84,12 +84,12 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
       {/* DESKTOP+: full breadcrumb, LEFT aligned, no weird baseline issues */}
       <nav
         aria-label="Breadcrumb"
-        className={"hidden sm:block mb-5 text-left " + (className ?? "")}
+        className={"hidden sm:block mb-0 text-left " + (className ?? "")}
       >
-        <div className="w-full bg-muted/30 rounded-xl px-4 py-2">
+        <div className="w-full bg-muted/20 rounded-lg px-3 py-1.5">
           <ol
             className="
-              flex items-center justify-start gap-1.5
+              flex items-center justify-start gap-1
               text-sm text-muted-foreground
               flex-nowrap whitespace-nowrap
               overflow-x-auto
@@ -100,10 +100,10 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
             <li className="inline-flex items-center">
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 h-8 px-2 rounded-lg hover:bg-background transition-colors"
+                className="inline-flex items-center gap-1.5 h-7 px-1.5 rounded-md hover:bg-background transition-colors"
                 aria-label="Početna"
               >
-                <Home className="w-4 h-4" />
+                <Home className="w-3.5 h-3.5" />
                 <span className="leading-none">Početna</span>
               </Link>
             </li>
@@ -114,18 +114,18 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
               return (
                 <li key={`${item.label}-${index}`} className="inline-flex items-center">
                   {/* Separator */}
-                  <ChevronRight className="w-4 h-4 opacity-60 mx-1" aria-hidden="true" />
+                  <ChevronRight className="w-3.5 h-3.5 opacity-60 mx-0.5" aria-hidden="true" />
 
                   {/* Item */}
                   {item.href && !isLast ? (
                     <Link
                       to={item.href}
-                      className="inline-flex items-center h-8 px-2 rounded-lg hover:bg-background transition-colors leading-none"
+                      className="inline-flex items-center h-7 px-1.5 rounded-md hover:bg-background transition-colors leading-none"
                     >
                       {item.label}
                     </Link>
                   ) : (
-                    <span className="inline-flex items-center h-8 px-2 font-medium text-foreground leading-none">
+                    <span className="inline-flex items-center h-7 px-1.5 font-medium text-foreground leading-none">
                       {item.label}
                     </span>
                   )}

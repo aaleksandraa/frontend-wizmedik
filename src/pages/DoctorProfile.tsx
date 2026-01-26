@@ -560,20 +560,18 @@ export default function DoctorProfile() {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-4 md:py-8">
-          {/* Breadcrumb - closer to navbar */}
-          <div className="mb-3 md:mb-6">
-            <Breadcrumb items={[
-              { label: 'Doktori', href: '/' },
-              { label: doctor.specijalnost, href: `/doktori/specijalnost/${doctor.specijalnost.toLowerCase().replace(/\s+/g, '-')}` },
-              { label: `Dr. ${doctor.ime} ${doctor.prezime}` }
-            ]} />
-          </div>
+        <div className="container mx-auto px-4 py-2 md:py-4">
+          {/* Breadcrumb and content - no wrapper gaps */}
+          <Breadcrumb items={[
+            { label: 'Doktori', href: '/' },
+            { label: doctor.specijalnost, href: `/doktori/specijalnost/${doctor.specijalnost.toLowerCase().replace(/\s+/g, '-')}` },
+            { label: `Dr. ${doctor.ime} ${doctor.prezime}` }
+          ]} />
 
-          <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid lg:grid-cols-3 gap-4 md:gap-6 mt-2">
             <div className="lg:col-span-2 flex flex-col">
               {/* Doctor Info Card - Mobile Optimized */}
-              <Card className="mb-6 md:mb-8 shadow-medium overflow-hidden">
+              <Card className="mb-4 md:mb-6 shadow-medium overflow-hidden">
                 <CardHeader className="pb-4">
                   {/* Mobile Layout */}
                   <div className="flex flex-col sm:flex-row sm:items-start gap-4">
