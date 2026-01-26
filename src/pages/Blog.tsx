@@ -5,9 +5,9 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Calendar, Clock, User, ChevronLeft, ChevronRight, BookOpen, TrendingUp } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar, BookOpen, ChevronRight, Loader2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -30,6 +30,15 @@ interface Category {
   id: number;
   naziv: string;
   slug: string;
+  opis?: string;
+  posts_count: number;
+}
+
+interface Author {
+  id: number;
+  ime: string;
+  prezime: string;
+  slug: string;
   posts_count: number;
 }
 
@@ -37,35 +46,54 @@ export default function Blog() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [selectedAuthor, setSelectedAuthor] = useState(searchParams.get('author') || 'all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const postsPerPage = 10;
 
   useEffect(() => {
     fetchCategories();
+    fetchAuthors();
   }, []);
 
   useEffect(() => {
-    fetchPosts();
-  }, [selectedCategory, currentPage]);
+    setCurrentPage(1);
+    fetchPosts(1, true);
+  }, [selectedCategory, selectedAuthor]);
 
-  const fetchPosts = async () => {
-    setLoading(true);
+  const fetchPosts = async (page: number = 1, reset: boolean = false) => {
+    if (page === 1) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+    
     try {
       const response = await blogAPI.getPosts({
-        category: selectedCategory || undefined,
-        search: searchTerm || undefined,
-        page: currentPage,
-        per_page: 12
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        author: selectedAuthor !== 'all' ? selectedAuthor : undefined,
+        page,
+        per_page: postsPerPage
       });
-      setPosts(response.data.data || []);
-      setTotalPages(response.data.last_page || 1);
+      
+      const newPosts = response.data.data || [];
+      
+      if (reset || page === 1) {
+        setPosts(newPosts);
+      } else {
+        setPosts(prev => [...prev, ...newPosts]);
+      }
+      
+      setHasMore(response.data.current_page < response.data.last_page);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -78,16 +106,37 @@ export default function Blog() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-    fetchPosts();
+  const fetchAuthors = async () => {
+    try {
+      const response = await blogAPI.getAuthors();
+      setAuthors(response.data || []);
+    } catch (error) {
+      console.error('Error fetching authors:', error);
+    }
   };
 
-  const handleCategoryChange = (slug: string) => {
-    setSelectedCategory(slug);
-    setCurrentPage(1);
-    setSearchParams(slug ? { category: slug } : {});
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchPosts(nextPage, false);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    if (value !== 'all') {
+      setSearchParams({ category: value });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  const handleAuthorChange = (value: string) => {
+    setSelectedAuthor(value);
+    if (value !== 'all') {
+      setSearchParams({ author: value });
+    } else {
+      setSearchParams({});
+    }
   };
 
   const structuredData = {
@@ -161,260 +210,258 @@ export default function Blog() {
           </div>
         </motion.div>
         
-        <main className="max-w-7xl mx-auto px-4 py-12">
-          {/* Search and filters */}
+        <main className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+          {/* Filters - Categories and Authors */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-8"
+            className="mb-12"
           >
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 max-w-3xl mx-auto">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  placeholder="Pretražite članke..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 rounded-xl border-gray-200 focus:border-primary shadow-sm"
-                />
+            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+              {/* Category Filter */}
+              <div className="flex-1">
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:border-primary shadow-sm">
+                    <SelectValue placeholder="Sve kategorije" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Sve kategorije</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.slug}>
+                        {cat.naziv} ({cat.posts_count})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Button type="submit" className="h-12 px-8 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-md">
-                <Search className="w-4 h-4 mr-2" />
-                Traži
-              </Button>
-            </form>
+
+              {/* Author Filter */}
+              <div className="flex-1">
+                <Select value={selectedAuthor} onValueChange={handleAuthorChange}>
+                  <SelectTrigger className="h-12 rounded-xl border-gray-200 focus:border-primary shadow-sm">
+                    <SelectValue placeholder="Svi autori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Svi autori</SelectItem>
+                    {authors.map(author => (
+                      <SelectItem key={author.id} value={author.slug}>
+                        Dr. {author.ime} {author.prezime} ({author.posts_count})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </motion.div>
 
-          {/* Categories */}
-          <motion.div 
+          {/* Latest Posts Section */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mb-12"
+            className="mb-16"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold text-gray-900">Kategorije</h2>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={!selectedCategory ? "default" : "outline"}
-                className="cursor-pointer px-4 py-2 rounded-full text-sm hover:scale-105 transition-transform"
-                onClick={() => handleCategoryChange('')}
-              >
-                Sve kategorije
-              </Badge>
-              {categories.map(cat => (
-                <Badge
-                  key={cat.id}
-                  variant={selectedCategory === cat.slug ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2 rounded-full text-sm hover:scale-105 transition-transform"
-                  onClick={() => handleCategoryChange(cat.slug)}
-                >
-                  {cat.naziv} <span className="ml-1 opacity-70">({cat.posts_count})</span>
-                </Badge>
-              ))}
-            </div>
-          </motion.div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+              {selectedCategory !== 'all' || selectedAuthor !== 'all' ? 'Filtrirani članci' : 'Najnoviji članci'}
+            </h2>
 
-          {/* Posts grid - Mobile: horizontal layout, Desktop: grid */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-24 md:h-96 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl md:rounded-2xl animate-pulse" />
-              ))}
-            </div>
-          ) : posts.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-20"
-            >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                <Search className="w-8 h-8 text-gray-400" />
+            {/* Posts grid - Mobile: horizontal layout, Desktop: grid */}
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="h-24 md:h-96 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl md:rounded-2xl animate-pulse" />
+                ))}
               </div>
-              <p className="text-xl text-gray-600">Nema pronađenih članaka</p>
-              <p className="text-sm text-gray-500 mt-2">Pokušajte promijeniti filter ili pretragu</p>
-            </motion.div>
-          ) : (
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8"
-            >
-              {posts.map(post => (
-                <motion.div key={post.id} variants={itemVariants}>
-                  <Link to={`/blog/${post.slug}`}>
-                    {/* Mobile: Horizontal layout (image left, text right) */}
-                    <Card className="md:hidden h-full hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl border-0 shadow-sm hover:scale-[1.02] group">
-                      <div className="flex gap-3 p-3">
-                        {/* Image - Left side, square */}
-                        {post.thumbnail ? (
-                          <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primary/10 to-primary/5">
-                            <img 
-                              src={fixImageUrl(post.thumbnail) || ''} 
-                              alt={post.naslov} 
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
-                            <BookOpen className="w-8 h-8 text-primary/30" />
-                          </div>
-                        )}
-                        
-                        {/* Content - Right side */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          {/* Categories */}
-                          <div className="flex flex-wrap gap-1 mb-1">
-                            {post.categories.slice(0, 1).map(cat => (
-                              <Badge key={cat.id} variant="secondary" className="text-[10px] rounded-full px-2 py-0.5 bg-primary/10 text-primary border-0">
-                                {cat.naziv}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          {/* Title */}
-                          <h2 className="font-semibold text-sm line-clamp-2 text-gray-900 group-hover:text-primary transition-colors mb-1">
-                            {post.naslov}
-                          </h2>
-                          
-                          {/* Meta info */}
-                          <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                            <span className="flex items-center gap-0.5">
-                              <Calendar className="h-2.5 w-2.5" />
-                              {format(new Date(post.published_at), 'dd.MM.yyyy')}
-                            </span>
-                            <span className="flex items-center gap-0.5">
-                              <Clock className="h-2.5 w-2.5" />
-                              {post.reading_time} min
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-
-                    {/* Desktop: Vertical card layout (original) */}
-                    <Card className="hidden md:block h-full hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl border-0 shadow-md hover:-translate-y-1 group">
-                      {post.thumbnail ? (
-                        <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
-                          <img 
-                            src={fixImageUrl(post.thumbnail) || ''} 
-                            alt={post.naslov} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                          />
-                        </div>
-                      ) : (
-                        <div className="aspect-video bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center">
-                          <BookOpen className="w-16 h-16 text-primary/30" />
-                        </div>
-                      )}
-                      <CardContent className="p-6">
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {post.categories.slice(0, 2).map(cat => (
-                            <Badge key={cat.id} variant="secondary" className="text-xs rounded-full px-3 py-1 bg-primary/10 text-primary border-0">
-                              {cat.naziv}
-                            </Badge>
-                          ))}
-                        </div>
-                        <h2 className="font-bold text-xl mb-3 line-clamp-2 text-gray-900 group-hover:text-primary transition-colors">
-                          {post.naslov}
-                        </h2>
-                        <p className="text-sm text-gray-600 line-clamp-3 mb-4 leading-relaxed">
-                          {post.excerpt}
-                        </p>
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                          {post.doktor ? (
-                            <div className="flex items-center gap-2">
-                              {post.doktor.slika_profila ? (
+            ) : posts.length === 0 ? (
+              <div className="text-center py-20">
+                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-xl text-gray-600">Nema pronađenih članaka</p>
+                <p className="text-sm text-gray-500 mt-2">Pokušajte promijeniti filter</p>
+              </div>
+            ) : (
+              <>
+                <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8"
+                >
+                  {posts.map(post => (
+                    <motion.div key={post.id} variants={itemVariants}>
+                      <Link to={`/blog/${post.slug}`}>
+                        {/* Mobile: Horizontal layout (image left, text right) */}
+                        <Card className="md:hidden h-full hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl border-0 shadow-sm hover:scale-[1.02] group">
+                          <div className="flex gap-3 p-3">
+                            {/* Image - Left side, square */}
+                            {post.thumbnail ? (
+                              <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primary/10 to-primary/5">
                                 <img 
-                                  src={post.doktor.slika_profila} 
-                                  alt={`Dr. ${post.doktor.ime} ${post.doktor.prezime}`}
-                                  className="w-8 h-8 rounded-full object-cover"
+                                  src={fixImageUrl(post.thumbnail) || ''} 
+                                  alt={post.naslov} 
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
                                 />
-                              ) : (
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-xs font-medium">
-                                  {post.doktor.ime[0]}{post.doktor.prezime[0]}
-                                </div>
-                              )}
-                              <span className="text-sm font-medium text-gray-700">
-                                Dr. {post.doktor.ime} {post.doktor.prezime}
-                              </span>
+                              </div>
+                            ) : (
+                              <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
+                                <BookOpen className="w-8 h-8 text-primary/30" />
+                              </div>
+                            )}
+                            
+                            {/* Content - Right side */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between">
+                              {/* Categories */}
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                {post.categories.slice(0, 1).map(cat => (
+                                  <Badge key={cat.id} variant="secondary" className="text-[10px] rounded-full px-2 py-0.5 bg-primary/10 text-primary border-0">
+                                    {cat.naziv}
+                                  </Badge>
+                                ))}
+                              </div>
+                              
+                              {/* Title */}
+                              <h2 className="font-semibold text-sm line-clamp-2 text-gray-900 group-hover:text-primary transition-colors mb-1">
+                                {post.naslov}
+                              </h2>
+                              
+                              {/* Meta info */}
+                              <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                <span className="flex items-center gap-0.5">
+                                  <Calendar className="h-2.5 w-2.5" />
+                                  {format(new Date(post.published_at), 'dd.MM.yyyy')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+
+                        {/* Desktop: Vertical card layout (original) */}
+                        <Card className="hidden md:block h-full hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl border-0 shadow-md hover:-translate-y-1 group">
+                          {post.thumbnail ? (
+                            <div className="aspect-video overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+                              <img 
+                                src={fixImageUrl(post.thumbnail) || ''} 
+                                alt={post.naslov} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                              />
                             </div>
                           ) : (
-                            <div></div>
+                            <div className="aspect-video bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center">
+                              <BookOpen className="w-16 h-16 text-primary/30" />
+                            </div>
                           )}
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {format(new Date(post.published_at), 'dd.MM.yyyy')}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {post.reading_time} min
-                            </span>
-                          </div>
+                          <CardContent className="p-6">
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {post.categories.slice(0, 2).map(cat => (
+                                <Badge key={cat.id} variant="secondary" className="text-xs rounded-full px-3 py-1 bg-primary/10 text-primary border-0">
+                                  {cat.naziv}
+                                </Badge>
+                              ))}
+                            </div>
+                            <h2 className="font-bold text-xl mb-3 line-clamp-2 text-gray-900 group-hover:text-primary transition-colors">
+                              {post.naslov}
+                            </h2>
+                            <p className="text-sm text-gray-600 line-clamp-3 mb-4 leading-relaxed">
+                              {post.excerpt}
+                            </p>
+                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                              {post.doktor ? (
+                                <div className="flex items-center gap-2">
+                                  {post.doktor.slika_profila ? (
+                                    <img 
+                                      src={post.doktor.slika_profila} 
+                                      alt={`Dr. ${post.doktor.ime} ${post.doktor.prezime}`}
+                                      className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-xs font-medium">
+                                      {post.doktor.ime[0]}{post.doktor.prezime[0]}
+                                    </div>
+                                  )}
+                                  <span className="text-sm font-medium text-gray-700">
+                                    Dr. {post.doktor.ime} {post.doktor.prezime}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div></div>
+                              )}
+                              <div className="flex items-center gap-3 text-xs text-gray-500">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(post.published_at), 'dd.MM.yyyy')}
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="flex justify-center mt-12">
+                    <Button
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      size="lg"
+                      className="rounded-xl px-8"
+                    >
+                      {loadingMore ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Učitavanje...
+                        </>
+                      ) : (
+                        <>
+                          Učitaj još članaka
+                          <ChevronRight className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </motion.div>
+
+          {/* Categories Section - Only show when no filters active */}
+          {selectedCategory === 'all' && selectedAuthor === 'all' && !loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-20"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold mb-8">Pregledaj po kategorijama</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categories.map(category => (
+                  <Link key={category.id} to={`/blog?category=${category.slug}`}>
+                    <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">
+                            {category.naziv}
+                          </h3>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">
+                            {category.posts_count}
+                          </Badge>
+                        </div>
+                        {category.opis && (
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                            {category.opis}
+                          </p>
+                        )}
+                        <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
+                          Pogledaj članke
+                          <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </CardContent>
                     </Card>
                   </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex justify-center items-center gap-3 mt-12"
-            >
-              <Button
-                variant="outline"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => p - 1)}
-                className="rounded-xl border-gray-200 hover:border-primary hover:bg-primary/5"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Prethodna
-              </Button>
-              <div className="flex items-center gap-2">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className="w-10 h-10 rounded-xl"
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
+                ))}
               </div>
-              <Button
-                variant="outline"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => p + 1)}
-                className="rounded-xl border-gray-200 hover:border-primary hover:bg-primary/5"
-              >
-                Sljedeća
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
             </motion.div>
           )}
         </main>

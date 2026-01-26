@@ -258,6 +258,7 @@ export const blogAPI = {
   getPostBySlug: (slug: string) => api.get(`/blog/${slug}`),
   getHomepagePosts: () => api.get('/blog/homepage'),
   getCategories: () => api.get('/blog/categories'),
+  getAuthors: () => api.get('/blog/authors'),
   getDoctorPosts: (doctorSlug: string) => api.get(`/blog/doctor/${doctorSlug}`),
   canDoctorsWrite: () => api.get('/blog/can-doctors-write'),
   // Doctor
