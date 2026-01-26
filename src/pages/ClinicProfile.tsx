@@ -14,6 +14,7 @@ import { reviewsAPI as newReviewsAPI, Recenzija } from '@/services/reviewsAPI';
 import { ReviewCard } from '@/components/ReviewCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { ImageLightbox } from '@/components/ImageLightbox';
+import { Breadcrumb } from '@/components/Breadcrumb';
 
 interface Clinic {
   id: number;
@@ -223,33 +224,33 @@ export default function ClinicProfile() {
       </Helmet>
       <Navbar />
       <div className="min-h-screen bg-gradient-primary">
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
-          {/* Mobile Layout: Button above, Title and Badge below */}
-          <div className="md:hidden mb-6">
-            <Button variant="outline" onClick={() => navigate('/klinike')} className="mb-3">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Nazad
-            </Button>
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
+          {/* Breadcrumb - closer to navbar */}
+          <div className="mb-3 md:mb-4">
+            <Breadcrumb items={[
+              { label: 'Klinike', href: '/klinike' },
+              { label: clinic.naziv }
+            ]} />
+          </div>
+
+          {/* Mobile Layout: Title and Badge */}
+          <div className="md:hidden mb-4">
             <h1 className="text-2xl font-bold mb-2">{clinic.naziv}</h1>
             <Badge variant={currentStatus.color === 'green' ? 'default' : 'destructive'}>
               {currentStatus.status}
             </Badge>
           </div>
 
-          {/* Desktop Layout: All in one row */}
+          {/* Desktop Layout: Title and Badge in one row */}
           <div className="hidden md:flex items-center gap-4 mb-6">
-            <Button variant="outline" onClick={() => navigate('/klinike')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Nazad
-            </Button>
             <h1 className="text-3xl font-bold">{clinic.naziv}</h1>
             <Badge variant={currentStatus.color === 'green' ? 'default' : 'destructive'}>
               {currentStatus.status}
             </Badge>
           </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {clinic.slike && clinic.slike.length > 0 && (
               <Card className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Galerija</h2>

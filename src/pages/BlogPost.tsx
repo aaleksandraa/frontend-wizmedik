@@ -168,16 +168,20 @@ export default function BlogPost() {
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <main className="max-w-4xl mx-auto px-4 py-8">
-          <Breadcrumb items={[
-            { label: 'Blog', href: '/blog' },
-            { label: post.naslov }
-          ]} />
+        <main className="max-w-5xl mx-auto px-4 py-4 md:py-8">
+          {/* Breadcrumb - closer to top on mobile */}
+          <div className="mb-3 md:mb-4">
+            <Breadcrumb items={[
+              { label: 'Blog', href: '/blog' },
+              { label: post.naslov }
+            ]} />
+          </div>
 
-          <article className="mt-6">
+          <article>
             {/* Header */}
-            <header className="mb-8">
-              <div className="flex flex-wrap gap-2 mb-4">
+            <header className="mb-6 md:mb-8">
+              {/* Categories - closer to breadcrumb */}
+              <div className="flex flex-wrap gap-2 mb-3">
                 {post.categories.map(cat => (
                   <Link key={cat.id} to={`/blog?category=${cat.slug}`}>
                     <Badge variant="secondary">{cat.naziv}</Badge>
@@ -185,6 +189,7 @@ export default function BlogPost() {
                 ))}
               </div>
               
+              {/* Title - closer to categories */}
               <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.naslov}</h1>
               
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
@@ -229,6 +234,9 @@ export default function BlogPost() {
 
             {/* Content */}
             <style>{`
+              .blog-content {
+                max-width: 100% !important;
+              }
               .blog-content h1 {
                 font-size: ${typography.h1_size}px !important;
                 font-weight: 700;
@@ -263,14 +271,58 @@ export default function BlogPost() {
               .blog-content ul,
               .blog-content ol {
                 margin: 0.75rem 0;
+                padding-left: 1.5rem;
               }
               .blog-content ul li,
               .blog-content ol li {
                 margin: 0.25rem 0;
+                font-size: ${typography.p_size}px !important;
+                line-height: ${typography.p_line_height}px !important;
+                color: ${typography.p_color} !important;
+              }
+              .blog-content img {
+                max-width: 100%;
+                height: auto;
+                margin: 1.5rem 0;
+                border-radius: 0.5rem;
+              }
+              .blog-content blockquote {
+                border-left: 4px solid #0ea5e9;
+                padding-left: 1rem;
+                margin: 1.5rem 0;
+                font-style: italic;
+                color: #64748b;
+              }
+              .blog-content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1.5rem 0;
+              }
+              .blog-content table th,
+              .blog-content table td {
+                border: 1px solid #e2e8f0;
+                padding: 0.75rem;
+                text-align: left;
+              }
+              .blog-content table th {
+                background-color: #f8fafc;
+                font-weight: 600;
+              }
+              .blog-content a {
+                color: #0ea5e9;
+                text-decoration: underline;
+              }
+              .blog-content a:hover {
+                color: #0284c7;
+              }
+              .blog-content hr {
+                margin: 2rem 0;
+                border: none;
+                border-top: 1px solid #e2e8f0;
               }
             `}</style>
             <div 
-              className="blog-content prose prose-lg max-w-none mb-8"
+              className="blog-content prose prose-lg w-full mb-8"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.sadrzaj) }}
             />
 

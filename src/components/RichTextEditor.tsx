@@ -159,6 +159,9 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     <div className="border rounded-lg overflow-hidden">
       {/* Dynamic Typography Styles */}
       <style>{`
+        .ProseMirror {
+          max-width: 100% !important;
+        }
         .ProseMirror h1 {
           font-size: ${typography.h1_size}px !important;
           font-weight: 700;
@@ -193,10 +196,54 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         .ProseMirror ul,
         .ProseMirror ol {
           margin: 0.75rem 0;
+          padding-left: 1.5rem;
         }
         .ProseMirror ul li,
         .ProseMirror ol li {
           margin: 0.25rem 0;
+          font-size: ${typography.p_size}px !important;
+          line-height: ${typography.p_line_height}px !important;
+          color: ${typography.p_color} !important;
+        }
+        .ProseMirror img {
+          max-width: 100%;
+          height: auto;
+          margin: 1.5rem 0;
+          border-radius: 0.5rem;
+        }
+        .ProseMirror blockquote {
+          border-left: 4px solid #0ea5e9;
+          padding-left: 1rem;
+          margin: 1.5rem 0;
+          font-style: italic;
+          color: #64748b;
+        }
+        .ProseMirror table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1.5rem 0;
+        }
+        .ProseMirror table th,
+        .ProseMirror table td {
+          border: 1px solid #e2e8f0;
+          padding: 0.75rem;
+          text-align: left;
+        }
+        .ProseMirror table th {
+          background-color: #f8fafc;
+          font-weight: 600;
+        }
+        .ProseMirror a {
+          color: #0ea5e9;
+          text-decoration: underline;
+        }
+        .ProseMirror a:hover {
+          color: #0284c7;
+        }
+        .ProseMirror hr {
+          margin: 2rem 0;
+          border: none;
+          border-top: 1px solid #e2e8f0;
         }
       `}</style>
       {/* Toolbar */}
