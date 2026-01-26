@@ -545,7 +545,7 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-br from-cyan-50 via-white to-blue-50">
+            <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-br from-cyan-50 via-white to-blue-50 [&>button]:hidden">
               <SheetTitle className="sr-only">Navigacija</SheetTitle>
               <SheetDescription className="sr-only">Glavni meni za navigaciju</SheetDescription>
 
