@@ -14,6 +14,9 @@ import {
 import { registrationAPI } from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CitySelect } from '@/components/CitySelect';
+import { useFormValidation } from '@/hooks/useFormValidation';
+import { FormError } from '@/components/ui/form-error';
+import { validateEmail, validatePhone, validatePassword, validatePasswordConfirmation, validateRequired } from '@/utils/validation';
 
 interface FormData {
   // Step 1: Basic Info
@@ -63,46 +66,58 @@ export function LaboratoryRegistrationForm() {
     message: '',
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  // Setup validation
+  const { errors, touched, validateField, validateAllFields, setFieldTouched } = useFormValidation({
+    naziv: (value) => validateRequired(value, 'Naziv'),
+    email: (value) => validateEmail(value),
+    telefon: (value) => validatePhone(value),
+    adresa: (value) => validateRequired(value, 'Adresa'),
+    grad: (value) => validateRequired(value, 'Grad'),
+    ime: (value) => validateRequired(value, 'Ime kontakt osobe'),
+    account_email: (value) => validateEmail(value),
+    password: (value) => validatePassword(value),
+    password_confirmation: (value, formData) => validatePasswordConfirmation(formData?.password || '', value),
+  });
 
   const updateFormData = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+    // Validate field if touched
+    if (touched[field]) {
+      validateField(field, value, formData);
     }
   };
 
+  const handleFieldBlur = (field: keyof FormData) => {
+    setFieldTouched(field);
+    validateField(field, formData[field], formData);
+  };
+
   const validateStep = (step: number): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const fieldsToValidate: (keyof FormData)[] = [];
 
     switch (step) {
       case 1:
-        if (!formData.naziv.trim()) newErrors.naziv = 'Naziv je obavezan';
-        if (!formData.email.trim()) newErrors.email = 'Email za javnost je obavezan';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Nevažeći email format';
-        if (!formData.telefon.trim()) newErrors.telefon = 'Telefon je obavezan';
+        fieldsToValidate.push('naziv', 'email', 'telefon');
         break;
       case 2:
-        if (!formData.adresa.trim()) newErrors.adresa = 'Adresa je obavezna';
-        if (!formData.grad.trim()) newErrors.grad = 'Grad je obavezan';
+        fieldsToValidate.push('adresa', 'grad');
         break;
       case 3:
-        if (!formData.ime.trim()) newErrors.ime = 'Ime kontakt osobe je obavezno';
+        fieldsToValidate.push('ime');
         break;
       case 4:
-        if (!formData.account_email.trim()) newErrors.account_email = 'Email za prijavu je obavezan';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.account_email)) newErrors.account_email = 'Nevažeći email format';
-        if (!formData.password) newErrors.password = 'Lozinka je obavezna';
-        else if (formData.password.length < 12) newErrors.password = 'Lozinka mora imati najmanje 12 karaktera';
-        if (formData.password !== formData.password_confirmation) {
-          newErrors.password_confirmation = 'Lozinke se ne poklapaju';
-        }
+        fieldsToValidate.push('account_email', 'password', 'password_confirmation');
         break;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // Mark fields as touched and validate
+    fieldsToValidate.forEach(field => {
+      setFieldTouched(field);
+      validateField(field, formData[field], formData);
+    });
+
+    // Check if any of the fields have errors
+    return fieldsToValidate.every(field => !errors[field]);
   };
 
   const handleNext = () => {
@@ -116,7 +131,15 @@ export function LaboratoryRegistrationForm() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return;
+    // Validate all fields before submit
+    if (!validateAllFields(formData)) {
+      toast({
+        title: 'Greška',
+        description: 'Molimo ispravite greške u formi',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -235,12 +258,14 @@ export function LaboratoryRegistrationForm() {
                     <Label htmlFor="naziv">Naziv Laboratorije *</Label>
                     <Input
                       id="naziv"
+                      name="naziv"
                       placeholder="npr. Laboratorija Sarajevo"
                       value={formData.naziv}
                       onChange={(e) => updateFormData('naziv', e.target.value)}
-                      className={errors.naziv ? 'border-red-500' : ''}
+                      onBlur={() => handleFieldBlur('naziv')}
+                      className={touched.naziv && errors.naziv ? 'border-red-500' : ''}
                     />
-                    {errors.naziv && <p className="text-sm text-red-500">{errors.naziv}</p>}
+                    <FormError error={touched.naziv ? errors.naziv : undefined} />
                   </div>
 
                   <div className="space-y-2">
@@ -249,14 +274,16 @@ export function LaboratoryRegistrationForm() {
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id="email"
+                        name="email"
                         type="email"
                         placeholder="info@laboratorija.ba"
                         value={formData.email}
                         onChange={(e) => updateFormData('email', e.target.value)}
-                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                        onBlur={() => handleFieldBlur('email')}
+                        className={`pl-10 ${touched.email && errors.email ? 'border-red-500' : ''}`}
                       />
                     </div>
-                    {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                    <FormError error={touched.email ? errors.email : undefined} />
                     <p className="text-xs text-gray-500">Ovaj email će biti prikazan na vašem profilu</p>
                   </div>
 
@@ -266,14 +293,16 @@ export function LaboratoryRegistrationForm() {
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id="telefon"
+                        name="telefon"
                         type="tel"
                         placeholder="+387 33 123 456"
                         value={formData.telefon}
                         onChange={(e) => updateFormData('telefon', e.target.value)}
-                        className={`pl-10 ${errors.telefon ? 'border-red-500' : ''}`}
+                        onBlur={() => handleFieldBlur('telefon')}
+                        className={`pl-10 ${touched.telefon && errors.telefon ? 'border-red-500' : ''}`}
                       />
                     </div>
-                    {errors.telefon && <p className="text-sm text-red-500">{errors.telefon}</p>}
+                    <FormError error={touched.telefon ? errors.telefon : undefined} />
                   </div>
                 </>
               )}
@@ -287,25 +316,29 @@ export function LaboratoryRegistrationForm() {
                       <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                       <Textarea
                         id="adresa"
+                        name="adresa"
                         placeholder="Ulica i broj"
                         value={formData.adresa}
                         onChange={(e) => updateFormData('adresa', e.target.value)}
-                        className={`pl-10 ${errors.adresa ? 'border-red-500' : ''}`}
+                        onBlur={() => handleFieldBlur('adresa')}
+                        className={`pl-10 ${touched.adresa && errors.adresa ? 'border-red-500' : ''}`}
                         rows={3}
                       />
                     </div>
-                    {errors.adresa && <p className="text-sm text-red-500">{errors.adresa}</p>}
+                    <FormError error={touched.adresa ? errors.adresa : undefined} />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="grad">Grad *</Label>
                     <CitySelect
                       value={formData.grad}
-                      onChange={(value) => updateFormData('grad', value)}
-                      error={!!errors.grad}
+                      onChange={(value) => {
+                        updateFormData('grad', value);
+                        if (touched.grad) validateField('grad', value, formData);
+                      }}
                       showIcon={false}
                     />
-                    {errors.grad && <p className="text-sm text-red-500">{errors.grad}</p>}
+                    <FormError error={touched.grad ? errors.grad : undefined} />
                   </div>
                 </>
               )}
@@ -317,12 +350,14 @@ export function LaboratoryRegistrationForm() {
                     <Label htmlFor="ime">Ime i Prezime Kontakt Osobe *</Label>
                     <Input
                       id="ime"
+                      name="ime"
                       placeholder="npr. Marko Marković"
                       value={formData.ime}
                       onChange={(e) => updateFormData('ime', e.target.value)}
-                      className={errors.ime ? 'border-red-500' : ''}
+                      onBlur={() => handleFieldBlur('ime')}
+                      className={touched.ime && errors.ime ? 'border-red-500' : ''}
                     />
-                    {errors.ime && <p className="text-sm text-red-500">{errors.ime}</p>}
+                    <FormError error={touched.ime ? errors.ime : undefined} />
                     <p className="text-sm text-gray-500">
                       Osoba koja će biti odgovorna za upravljanje nalogom
                     </p>
@@ -339,14 +374,16 @@ export function LaboratoryRegistrationForm() {
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id="account_email"
+                        name="account_email"
                         type="email"
                         placeholder="vas.email@gmail.com"
                         value={formData.account_email}
                         onChange={(e) => updateFormData('account_email', e.target.value)}
-                        className={`pl-10 ${errors.account_email ? 'border-red-500' : ''}`}
+                        onBlur={() => handleFieldBlur('account_email')}
+                        className={`pl-10 ${touched.account_email && errors.account_email ? 'border-red-500' : ''}`}
                       />
                     </div>
-                    {errors.account_email && <p className="text-sm text-red-500">{errors.account_email}</p>}
+                    <FormError error={touched.account_email ? errors.account_email : undefined} />
                     <p className="text-xs text-gray-500">Ovaj email koristite za prijavu. Može biti različit od javnog emaila.</p>
                   </div>
 
@@ -356,14 +393,16 @@ export function LaboratoryRegistrationForm() {
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id="password"
+                        name="password"
                         type="password"
                         placeholder="Minimalno 12 karaktera"
                         value={formData.password}
                         onChange={(e) => updateFormData('password', e.target.value)}
-                        className={`pl-10 ${errors.password ? 'border-red-500' : ''}`}
+                        onBlur={() => handleFieldBlur('password')}
+                        className={`pl-10 ${touched.password && errors.password ? 'border-red-500' : ''}`}
                       />
                     </div>
-                    {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                    <FormError error={touched.password ? errors.password : undefined} />
                   </div>
 
                   <div className="space-y-2">
@@ -372,21 +411,21 @@ export function LaboratoryRegistrationForm() {
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input
                         id="password_confirmation"
+                        name="password_confirmation"
                         type="password"
                         placeholder="Ponovi lozinku"
                         value={formData.password_confirmation}
                         onChange={(e) => updateFormData('password_confirmation', e.target.value)}
-                        className={`pl-10 ${errors.password_confirmation ? 'border-red-500' : ''}`}
+                        onBlur={() => handleFieldBlur('password_confirmation')}
+                        className={`pl-10 ${touched.password_confirmation && errors.password_confirmation ? 'border-red-500' : ''}`}
                       />
                     </div>
-                    {errors.password_confirmation && (
-                      <p className="text-sm text-red-500">{errors.password_confirmation}</p>
-                    )}
+                    <FormError error={touched.password_confirmation ? errors.password_confirmation : undefined} />
                   </div>
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p className="text-sm text-blue-800">
-                      <strong>Sigurnost:</strong> Koristite jaku lozinku sa kombinacijom velikih i malih slova, brojeva i specijalnih karaktera.
+                      <strong>Sigurnost:</strong> Lozinka mora imati 12+ karaktera, velika i mala slova, brojeve i specijalne karaktere.
                     </p>
                   </div>
                 </>
@@ -430,12 +469,20 @@ export function LaboratoryRegistrationForm() {
             </Button>
 
             {currentStep < STEPS.length ? (
-              <Button onClick={handleNext} disabled={loading} className="gap-2">
+              <Button 
+                onClick={handleNext} 
+                disabled={loading || (currentStep === 4 && Object.keys(errors).length > 0)} 
+                className="gap-2"
+              >
                 Dalje
                 <ArrowRight className="w-4 h-4" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={loading} className="gap-2">
+              <Button 
+                onClick={handleSubmit} 
+                disabled={loading || Object.keys(errors).length > 0} 
+                className="gap-2"
+              >
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />

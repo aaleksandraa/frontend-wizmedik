@@ -10,9 +10,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Droplet, CheckCircle, Loader2 } from 'lucide-react';
+import { Droplet, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import api from '@/services/api';
 import { CitySelect } from '@/components/CitySelect';
+import { useFormValidation } from '@/hooks/useFormValidation';
+import { FormError } from '@/components/ui/form-error';
+import { validateEmail, validatePhone, validatePassword, validatePasswordConfirmation, validateRequired, validateUrl } from '@/utils/validation';
+import { HoneypotField } from '@/components/HoneypotField';
+import { checkRateLimit, recordAttempt, formatTimeRemaining, validateHoneypot, calculateSubmissionTime, isSuspiciouslyFast } from '@/utils/antispam';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function RegisterSpa() {
   const navigate = useNavigate();
@@ -20,6 +26,10 @@ export default function RegisterSpa() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [vrste, setVrste] = useState<any[]>([]);
+  const [honeypot, setHoneypot] = useState('');
+  const [formStartTime] = useState(Date.now());
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
 
   const [formData, setFormData] = useState({
     naziv: '',
@@ -41,6 +51,30 @@ export default function RegisterSpa() {
     prihvatam_uslove: false,
   });
 
+  // Setup validation
+  const { errors, touched, validateField, validateAllFields, setFieldTouched } = useFormValidation({
+    naziv: (value) => validateRequired(value, 'Naziv banje'),
+    adresa: (value) => validateRequired(value, 'Adresa'),
+    grad: (value) => validateRequired(value, 'Grad'),
+    telefon: (value) => validatePhone(value),
+    email: (value) => validateEmail(value),
+    website: (value) => validateUrl(value),
+    opis: (value) => validateRequired(value, 'Opis'),
+    kontakt_ime: (value) => validateRequired(value, 'Ime'),
+    kontakt_prezime: (value) => validateRequired(value, 'Prezime'),
+    account_email: (value) => validateEmail(value),
+    password: (value) => validatePassword(value),
+    password_confirmation: (value, formData) => validatePasswordConfirmation(formData?.password || '', value),
+  });
+
+  useEffect(() => {
+    const rateLimit = checkRateLimit('spa');
+    if (!rateLimit.allowed && rateLimit.resetTime) {
+      const timeRemaining = formatTimeRemaining(rateLimit.resetTime);
+      setRateLimitError(`Previše pokušaja registracije. Pokušajte ponovo za ${timeRemaining}.`);
+    }
+  }, []);
+
   useEffect(() => {
     fetchVrste();
   }, []);
@@ -58,6 +92,52 @@ export default function RegisterSpa() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBackendErrors({});
+
+    const rateLimit = checkRateLimit('spa');
+    if (!rateLimit.allowed && rateLimit.resetTime) {
+      const timeRemaining = formatTimeRemaining(rateLimit.resetTime);
+      setRateLimitError(`Previše pokušaja registracije. Pokušajte ponovo za ${timeRemaining}.`);
+      toast({
+        title: 'Previše pokušaja',
+        description: `Molimo sačekajte ${timeRemaining} prije ponovnog pokušaja.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!validateHoneypot(honeypot)) {
+      console.warn('Honeypot triggered');
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        toast({
+          title: 'Greška',
+          description: 'Došlo je do greške. Molimo pokušajte ponovo.',
+          variant: 'destructive',
+        });
+      }, 2000);
+      return;
+    }
+
+    const submissionTime = calculateSubmissionTime(formStartTime);
+    if (isSuspiciouslyFast(submissionTime)) {
+      toast({
+        title: 'Greška',
+        description: 'Molimo popunite formu pažljivo.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!validateAllFields(formData)) {
+      toast({
+        title: 'Greška',
+        description: 'Molimo ispravite greške u formi',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (!formData.prihvatam_uslove) {
       toast({
@@ -69,6 +149,8 @@ export default function RegisterSpa() {
     }
 
     setLoading(true);
+    recordAttempt('spa');
+
     try {
       await api.post('/register/spa', formData);
       setSubmitted(true);
@@ -77,14 +159,37 @@ export default function RegisterSpa() {
         description: 'Vaš zahtjev za registraciju je poslan. Kontaktiraćemo vas uskoro.',
       });
     } catch (error: any) {
-      toast({
-        title: 'Greška',
-        description: error.response?.data?.message || 'Greška pri slanju zahtjeva',
-        variant: 'destructive',
-      });
+      if (error.response?.data?.errors) {
+        setBackendErrors(error.response.data.errors);
+        const firstError = Object.values(error.response.data.errors)[0];
+        toast({
+          title: 'Greška validacije',
+          description: Array.isArray(firstError) ? firstError[0] : 'Molimo provjerite unesene podatke',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Greška',
+          description: error.response?.data?.message || 'Greška pri slanju zahtjeva',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (touched[name]) {
+      validateField(name, value, formData);
+    }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setFieldTouched(field);
+    validateField(field, formData[field as keyof typeof formData], formData);
   };
 
   const toggleVrsta = (id: number) => {
@@ -146,68 +251,122 @@ export default function RegisterSpa() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Honeypot field (anti-spam) */}
+                <HoneypotField value={honeypot} onChange={setHoneypot} />
+
+                {/* Rate limit warning */}
+                {rateLimitError && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>{rateLimitError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Backend errors */}
+                {Object.keys(backendErrors).length > 0 && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      <div className="space-y-1">
+                        {Object.entries(backendErrors).map(([field, messages]) => (
+                          <div key={field}>
+                            <strong>{field}:</strong> {Array.isArray(messages) ? messages.join(', ') : messages}
+                          </div>
+                        ))}
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <Label htmlFor="naziv">Naziv banje *</Label>
                     <Input
                       id="naziv"
+                      name="naziv"
                       value={formData.naziv}
-                      onChange={(e) => setFormData({ ...formData, naziv: e.target.value })}
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('naziv')}
                       placeholder="npr. Banja Vrućica"
+                      className={touched.naziv && errors.naziv ? 'border-red-500' : ''}
                       required
                     />
+                    <FormError error={touched.naziv ? errors.naziv : undefined} />
                   </div>
                   <div>
                     <Label htmlFor="adresa">Adresa *</Label>
                     <Input
                       id="adresa"
+                      name="adresa"
                       value={formData.adresa}
-                      onChange={(e) => setFormData({ ...formData, adresa: e.target.value })}
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('adresa')}
                       placeholder="npr. Banjska ulica 1"
+                      className={touched.adresa && errors.adresa ? 'border-red-500' : ''}
                       required
                     />
+                    <FormError error={touched.adresa ? errors.adresa : undefined} />
                   </div>
                   <div>
                     <Label htmlFor="grad">Grad *</Label>
                     <CitySelect
                       value={formData.grad}
-                      onChange={(value) => setFormData({ ...formData, grad: value })}
+                      onChange={(value) => {
+                        setFormData({ ...formData, grad: value });
+                        if (touched.grad) validateField('grad', value, formData);
+                      }}
                       showIcon={false}
                     />
+                    <FormError error={touched.grad ? errors.grad : undefined} />
                   </div>
                   <div>
                     <Label htmlFor="telefon">Telefon *</Label>
                     <Input
                       id="telefon"
+                      name="telefon"
                       value={formData.telefon}
-                      onChange={(e) => setFormData({ ...formData, telefon: e.target.value })}
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('telefon')}
                       placeholder="+387 xx xxx xxx"
+                      className={touched.telefon && errors.telefon ? 'border-red-500' : ''}
                       required
                     />
+                    <FormError error={touched.telefon ? errors.telefon : undefined} />
                   </div>
                   <div>
                     <Label htmlFor="email">Email za javnost *</Label>
                     <Input
                       id="email"
+                      name="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('email')}
                       placeholder="info@banja.ba"
+                      className={touched.email && errors.email ? 'border-red-500' : ''}
                       required
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Ovaj email će biti prikazan na vašem profilu
                     </p>
+                    <FormError error={touched.email ? errors.email : undefined} />
                   </div>
                   <div className="md:col-span-2">
                     <Label htmlFor="website">Website</Label>
                     <Input
                       id="website"
+                      name="website"
                       value={formData.website}
-                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                      placeholder="https://www.banja.ba"
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('website')}
+                      placeholder="wizmedik.com"
+                      className={touched.website && errors.website ? 'border-red-500' : ''}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Možete unijeti bez https://
+                    </p>
+                    <FormError error={touched.website ? errors.website : undefined} />
                   </div>
                 </div>
 
@@ -216,12 +375,16 @@ export default function RegisterSpa() {
                   <Label htmlFor="opis">Opis banje *</Label>
                   <Textarea
                     id="opis"
+                    name="opis"
                     value={formData.opis}
-                    onChange={(e) => setFormData({ ...formData, opis: e.target.value })}
+                    onChange={handleInputChange}
+                    onBlur={() => handleFieldBlur('opis')}
                     placeholder="Opišite vašu banju, usluge koje nudite, specijalizacije..."
                     rows={4}
+                    className={touched.opis && errors.opis ? 'border-red-500' : ''}
                     required
                   />
+                  <FormError error={touched.opis ? errors.opis : undefined} />
                 </div>
 
                 {/* Vrste */}
@@ -268,21 +431,29 @@ export default function RegisterSpa() {
                       <Label htmlFor="kontakt_ime">Ime *</Label>
                       <Input
                         id="kontakt_ime"
+                        name="kontakt_ime"
                         value={formData.kontakt_ime}
-                        onChange={(e) => setFormData({ ...formData, kontakt_ime: e.target.value })}
+                        onChange={handleInputChange}
+                        onBlur={() => handleFieldBlur('kontakt_ime')}
                         placeholder="Vaše ime"
+                        className={touched.kontakt_ime && errors.kontakt_ime ? 'border-red-500' : ''}
                         required
                       />
+                      <FormError error={touched.kontakt_ime ? errors.kontakt_ime : undefined} />
                     </div>
                     <div>
                       <Label htmlFor="kontakt_prezime">Prezime *</Label>
                       <Input
                         id="kontakt_prezime"
+                        name="kontakt_prezime"
                         value={formData.kontakt_prezime}
-                        onChange={(e) => setFormData({ ...formData, kontakt_prezime: e.target.value })}
+                        onChange={handleInputChange}
+                        onBlur={() => handleFieldBlur('kontakt_prezime')}
                         placeholder="Vaše prezime"
+                        className={touched.kontakt_prezime && errors.kontakt_prezime ? 'border-red-500' : ''}
                         required
                       />
+                      <FormError error={touched.kontakt_prezime ? errors.kontakt_prezime : undefined} />
                     </div>
                   </div>
                   
@@ -296,43 +467,55 @@ export default function RegisterSpa() {
                         <Label htmlFor="account_email">Email za prijavu *</Label>
                         <Input
                           id="account_email"
+                          name="account_email"
                           type="email"
                           value={formData.account_email}
-                          onChange={(e) => setFormData({ ...formData, account_email: e.target.value })}
+                          onChange={handleInputChange}
+                          onBlur={() => handleFieldBlur('account_email')}
                           placeholder="vas.email@gmail.com"
+                          className={touched.account_email && errors.account_email ? 'border-red-500' : ''}
                           required
                         />
                         <p className="text-xs text-blue-600 mt-1">
                           Ovaj email koristite za prijavu. Može biti različit od javnog emaila.
                         </p>
+                        <FormError error={touched.account_email ? errors.account_email : undefined} />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="password">Lozinka *</Label>
                           <Input
                             id="password"
+                            name="password"
                             type="password"
                             value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            onChange={handleInputChange}
+                            onBlur={() => handleFieldBlur('password')}
                             placeholder="Minimalno 12 karaktera"
+                            className={touched.password && errors.password ? 'border-red-500' : ''}
                             required
                           />
+                          <FormError error={touched.password ? errors.password : undefined} />
                         </div>
                         <div>
                           <Label htmlFor="password_confirmation">Potvrdi lozinku *</Label>
                           <Input
                             id="password_confirmation"
+                            name="password_confirmation"
                             type="password"
                             value={formData.password_confirmation}
-                            onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                            onChange={handleInputChange}
+                            onBlur={() => handleFieldBlur('password_confirmation')}
                             placeholder="Ponovi lozinku"
+                            className={touched.password_confirmation && errors.password_confirmation ? 'border-red-500' : ''}
                             required
                           />
+                          <FormError error={touched.password_confirmation ? errors.password_confirmation : undefined} />
                         </div>
                       </div>
                     </div>
                     <p className="text-xs text-blue-600 mt-2">
-                      Lozinka mora sadržavati velika i mala slova, brojeve i specijalne karaktere.
+                      Lozinka mora imati 12+ karaktera, velika i mala slova, brojeve i specijalne karaktere.
                     </p>
                   </div>
                 </div>
@@ -364,7 +547,12 @@ export default function RegisterSpa() {
                   </label>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  size="lg" 
+                  disabled={loading || Object.keys(errors).length > 0}
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
