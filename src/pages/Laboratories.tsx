@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useSearchParams, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useAllCities } from '@/hooks/useAllCities';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -67,12 +68,12 @@ interface KategorijaAnalize {
 export default function Laboratories() {
   const { grad } = useParams<{ grad?: string }>();
   const { template } = useListingTemplate('laboratories');
+  const { cities: allCities } = useAllCities(); // Get all cities from database
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [laboratories, setLaboratories] = useState<Laboratory[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [gradovi, setGradovi] = useState<Array<{ grad: string; broj_laboratorija: number }>>([]);
   const [kategorije, setKategorije] = useState<KategorijaAnalize[]>([]);
   
   // Filter states from URL params (prioritize URL path param over query param)
@@ -87,15 +88,19 @@ export default function Laboratories() {
   // Debounce search
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Load initial data (gradovi, kategorije) - only once
+  // Convert allCities to gradovi format for compatibility
+  const gradovi = useMemo(() => {
+    return allCities.map(city => ({
+      grad: city.naziv,
+      broj_laboratorija: 0 // We don't need count for filter dropdown
+    }));
+  }, [allCities]);
+
+  // Load initial data (kategorije) - only once
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [gradoviRes, kategorijeRes] = await Promise.all([
-          laboratoriesAPI.getGradovi(),
-          laboratoriesAPI.getKategorije(),
-        ]);
-        setGradovi(gradoviRes.data || []);
+        const kategorijeRes = await laboratoriesAPI.getKategorije();
         setKategorije(kategorijeRes.data || []);
       } catch (error) {
         console.error('Error loading initial data:', error);

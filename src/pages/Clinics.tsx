@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { clinicsAPI, specialtiesAPI } from '@/services/api';
+import { useAllCities } from '@/hooks/useAllCities';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ClinicCard } from '@/components/ClinicCard';
@@ -40,6 +41,7 @@ type SortOption = 'name' | 'rating' | 'distance';
 export default function Clinics() {
   const { grad, specijalnost } = useParams<{ grad?: string; specijalnost?: string }>();
   const { template } = useListingTemplate('clinics');
+  const { cities: allCities } = useAllCities(); // Get all cities from database
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [filteredClinics, setFilteredClinics] = useState<Clinic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,9 +113,10 @@ export default function Clinics() {
     return hierarchicalSpecialties.find(s => s.id.toString() === selectedParentSpecialty);
   }, [selectedParentSpecialty, hierarchicalSpecialties]);
 
+  // Use all cities from database instead of extracting from clinics
   const uniqueCities = useMemo(() => {
-    return [...new Set(clinics.map(clinic => clinic.grad))].filter(city => city && city.trim() !== '').sort();
-  }, [clinics]);
+    return allCities.map(city => city.naziv).sort();
+  }, [allCities]);
 
   const filteredCities = useMemo(() => {
     if (!citySearch) return uniqueCities;
