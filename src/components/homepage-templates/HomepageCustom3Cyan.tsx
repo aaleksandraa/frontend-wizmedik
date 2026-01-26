@@ -460,7 +460,7 @@ export default function HomepageCustom3Cyan() {
       )}
 
       {/* Cities Section */}
-      {cities.length > 0 && (
+      {allCities.length > 0 && (
         <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative">
           {/* Medical Background Symbols */}
           <div className="absolute inset-0 opacity-5 overflow-hidden">
