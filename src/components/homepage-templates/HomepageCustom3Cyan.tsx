@@ -10,6 +10,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
 import { adminAPI } from '@/services/api';
+import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, Heart, Users, Building2, MapPin, ArrowRight,
   HelpCircle, MessageCircle, Eye, CheckCircle2, Lightbulb,
@@ -461,7 +462,7 @@ export default function HomepageCustom3Cyan() {
                     {post.slika_url && (
                       <div className="aspect-video overflow-hidden">
                         <img 
-                          src={post.slika_url} 
+                          src={fixImageUrl(post.slika_url) || ''} 
                           alt={post.naslov}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

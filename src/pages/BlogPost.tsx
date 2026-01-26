@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { Calendar, Clock, ArrowLeft, Share2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 const bosnianMonths = [
   'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Juni',
@@ -158,7 +159,7 @@ export default function BlogPost() {
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`https://wizmedik.com/blog/${post.slug}`} />
-        {post.thumbnail && <meta property="og:image" content={post.thumbnail} />}
+        {post.thumbnail && <meta property="og:image" content={fixImageUrl(post.thumbnail) || ''} />}
         <meta property="article:published_time" content={post.published_at} />
         <meta property="article:author" content={post.autor_name} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
@@ -222,7 +223,7 @@ export default function BlogPost() {
             {/* Thumbnail */}
             {post.thumbnail && (
               <div className="mb-8 rounded-lg overflow-hidden">
-                <img src={post.thumbnail} alt={post.naslov} className="w-full h-auto" />
+                <img src={fixImageUrl(post.thumbnail) || ''} alt={post.naslov} className="w-full h-auto" />
               </div>
             )}
 
@@ -296,7 +297,7 @@ export default function BlogPost() {
                     <Card className="h-full hover:shadow-md transition-shadow">
                       {r.thumbnail && (
                         <div className="aspect-video overflow-hidden">
-                          <img src={r.thumbnail} alt={r.naslov} className="w-full h-full object-cover" />
+                          <img src={fixImageUrl(r.thumbnail) || ''} alt={r.naslov} className="w-full h-full object-cover" />
                         </div>
                       )}
                       <CardContent className="p-4">
