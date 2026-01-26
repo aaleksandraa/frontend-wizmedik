@@ -19,7 +19,8 @@ interface HomepageData {
   clinics: Array<any>;
   banje?: Array<any>;
   domovi?: Array<any>;
-  cities?: Array<any>;
+  cities?: Array<any>; // Top cities with doctor counts for display
+  all_cities?: Array<any>; // ALL cities for dropdown filters
   pitanja?: Array<any>;
   blog_posts?: Array<any>;
   filters: {

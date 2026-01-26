@@ -57,10 +57,11 @@ export default function HomepageCustom3Cyan() {
   const doctors = data.doctors || [];
   const clinics = data.clinics || [];
   const specialties = data.specialties || [];
-  const cities = data.cities || [];
+  const cities = data.cities || []; // For display with doctor counts
+  const allCities = data.all_cities || []; // For dropdown filters
   const pitanja = data.pitanja || [];
 
-  const filteredCities = cities.filter((city: any) => 
+  const filteredCities = allCities.filter((city: any) => 
     city.naziv.toLowerCase().includes(citySearchQuery.toLowerCase())
   );
 
@@ -125,6 +126,7 @@ export default function HomepageCustom3Cyan() {
                       value={selectedType}
                       onChange={setSelectedType}
                       placeholder="Odaberite tip"
+                      hideLabelOnMobile={true}
                       options={[
                         { value: 'doktori', label: 'Doktori' },
                         { value: 'klinike', label: 'Klinike' },
@@ -142,6 +144,7 @@ export default function HomepageCustom3Cyan() {
                       value={selectedSpecialty}
                       onChange={setSelectedSpecialty}
                       placeholder="Odaberite specijalnost..."
+                      hideLabelOnMobile={true}
                       options={specialties.map((specialty) => ({
                         value: specialty.slug,
                         label: specialty.naziv,
@@ -156,7 +159,8 @@ export default function HomepageCustom3Cyan() {
                       value={selectedCity}
                       onChange={setSelectedCity}
                       placeholder="Odaberite grad"
-                      options={cities.map((city: any) => ({
+                      hideLabelOnMobile={true}
+                      options={allCities.map((city: any) => ({
                         value: city.slug,
                         label: city.naziv,
                       }))}

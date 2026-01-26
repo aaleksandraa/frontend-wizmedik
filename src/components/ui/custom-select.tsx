@@ -14,6 +14,7 @@ interface CustomSelectProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  hideLabelOnMobile?: boolean; // Hide label on mobile devices
 }
 
 export function CustomSelect({
@@ -23,6 +24,7 @@ export function CustomSelect({
   placeholder = 'Odaberite...',
   label,
   className,
+  hideLabelOnMobile = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,7 +56,10 @@ export function CustomSelect({
   return (
     <div ref={containerRef} className={cn('relative', className)}>
       {label && (
-        <label className="text-sm font-medium text-gray-700 block mb-2">
+        <label className={cn(
+          'text-sm font-medium text-gray-700 block mb-2',
+          hideLabelOnMobile && 'hidden md:block'
+        )}>
           {label}
         </label>
       )}
