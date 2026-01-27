@@ -45,6 +45,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogEditor from "./pages/BlogEditor";
 import MyBlogPosts from "./pages/MyBlogPosts";
+import MedicalCalendar from "./pages/MedicalCalendar";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RegistrationOptions from "./pages/RegistrationOptions";
@@ -138,6 +139,9 @@ const App = () => {
               {/* Blog routes */}
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              
+              {/* Medical Calendar */}
+              <Route path="/medicinski-kalendar" element={<MedicalCalendar />} />
               
               {/* Blog Management */}
               <Route path="/my-blog-posts" element={

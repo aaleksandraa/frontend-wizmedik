@@ -37,6 +37,7 @@ import { BlogTypographySettings } from '@/components/admin/BlogTypographySetting
 import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSettings';
 import Mkb10Manager from '@/components/admin/Mkb10Manager';
 import { EntitiesManagement } from '@/components/admin/EntitiesManagement';
+import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import {
   DndContext,
   closestCenter,
@@ -952,6 +953,10 @@ export default function AdminPanel() {
                 <MessageSquare className="h-4 w-4 mr-2 hidden sm:inline" />
                 Pitanja
               </TabsTrigger>
+              <TabsTrigger value="medical-calendar" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Clock className="h-4 w-4 mr-2 hidden sm:inline" />
+                Med. Kalendar
+              </TabsTrigger>
             </TabsList>
 
             {/* DOCTORS TAB */}
@@ -1455,6 +1460,11 @@ export default function AdminPanel() {
             {/* QUESTIONS TAB */}
             <TabsContent value="questions">
               <EntitiesManagement type="questions" />
+            </TabsContent>
+
+            {/* MEDICAL CALENDAR TAB */}
+            <TabsContent value="medical-calendar">
+              <MedicalCalendarManagement />
             </TabsContent>
           </Tabs>
 
