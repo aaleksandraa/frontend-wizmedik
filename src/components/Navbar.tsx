@@ -526,11 +526,7 @@ export function Navbar() {
             ) : (
               <Button
                 onClick={() => navigate('/auth')}
-                className={`rounded-lg shadow-sm hover:shadow transition-all font-medium h-10 px-4 ${
-                  isColored 
-                    ? `${theme.buttonBg} ${theme.buttonHoverBg}` 
-                    : 'bg-primary hover:bg-primary/90 text-white'
-                }`}
+                className="rounded-none shadow-sm hover:shadow transition-all font-medium h-10 px-4 bg-[#0A91B2] hover:bg-[#0A91B2]/90 text-white"
               >
                 Prijavi se
               </Button>
@@ -702,7 +698,7 @@ export function Navbar() {
                         navigate('/auth');
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 font-semibold shadow-lg shadow-cyan-500/30"
+                      className="w-full rounded-none bg-[#0A91B2] hover:bg-[#0A91B2]/90 font-semibold shadow-lg"
                     >
                       Prijavi se
                     </Button>
