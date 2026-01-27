@@ -67,9 +67,23 @@
     <meta name="msapplication-navbutton-color" content="#0066cc" />
     <meta name="apple-mobile-web-app-status-bar-style" content="#0066cc" />
     
-    <!-- Preconnect -->
+    <!-- Preconnect to Critical Origins (PageSpeed Insight Recommendation) -->
+    <link rel="preconnect" href="https://api.wizmedik.com" />
+    <link rel="preconnect" href="https://ui-avatars.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- DNS Prefetch for Additional Resources -->
+    <link rel="dns-prefetch" href="https://api.wizmedik.com" />
+    <link rel="dns-prefetch" href="https://ui-avatars.com" />
+    
+    <!-- Preload Critical CSS (Inline or External) -->
+    <link rel="preload" href="/assets/index-C-os-rxa.css" as="style" />
+    
+    <!-- Preload Critical Font (Poppins) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
     
     <!-- Schema.org Organization -->
     <script type="application/ld+json">
