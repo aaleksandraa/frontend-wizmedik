@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Filter, Search, Tag, Clock, MapPin } from 'lucide-react';
 import axios from 'axios';
-import SEO from '../components/SEO';
+import { SEO } from '../components/SEO';
 
 interface CalendarEvent {
   id: number;
