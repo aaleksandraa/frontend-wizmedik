@@ -55,6 +55,27 @@ export default function Blog() {
   const [hasMore, setHasMore] = useState(false);
   const postsPerPage = 10;
 
+  // Sync state with URL parameters when they change
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    const authorParam = searchParams.get('author');
+    
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    } else {
+      setSelectedCategory('all');
+    }
+    
+    if (authorParam) {
+      setSelectedAuthor(authorParam);
+    } else {
+      setSelectedAuthor('all');
+    }
+    
+    // Scroll to top when URL params change (user clicked on category link)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [searchParams]);
+
   useEffect(() => {
     fetchCategories();
     fetchAuthors();

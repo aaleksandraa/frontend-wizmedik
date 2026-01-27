@@ -25,10 +25,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only clear auth data on 401, but don't redirect
+    // Let ProtectedRoute component handle redirects for protected pages
+    // Public pages should continue to work even if some API calls return 401
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
-      window.location.href = '/auth';
     }
     return Promise.reject(error);
   }
