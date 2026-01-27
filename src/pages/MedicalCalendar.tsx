@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Filter, Search, Tag, Clock, MapPin } from 'lucide-react';
+import { Calendar, Filter, Search, Tag, Clock, X } from 'lucide-react';
 import axios from 'axios';
 import { SEO } from '../components/SEO';
+import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 
 interface CalendarEvent {
   id: number;
@@ -144,33 +146,36 @@ const MedicalCalendar: React.FC = () => {
         description="Kompletni medicinski kalendar za 2026. godinu sa svjetskim danima zdravlja, kampanjama i edukativnim događajima. Korisno za zdravstvene ustanove, ordinacije i edukaciju."
         keywords="medicinski kalendar, svjetski dani zdravlja, zdravstvene kampanje, medicinski događaji 2026"
       />
+      <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <div className="flex items-center justify-center mb-4">
-              <Calendar className="w-12 h-12 text-blue-600 mr-3" />
-              <h1 className="text-4xl font-bold text-gray-900">Medicinski Kalendar {selectedYear}</h1>
+              <Calendar className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mr-2 sm:mr-3" />
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                Medicinski Kalendar {selectedYear}
+              </h1>
             </div>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
               Svjetski, evropski i tematski dani, sedmice i mjeseci posvećeni zdravlju.
               Korisno za edukaciju, kampanje, objave, ordinacije i škole.
             </p>
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Search */}
-              <div className="relative">
+              <div className="relative sm:col-span-2 lg:col-span-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Pretraži događaje..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 />
               </div>
 
@@ -178,7 +183,7 @@ const MedicalCalendar: React.FC = () => {
               <select
                 value={selectedMonth === null ? 'all' : selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value === 'all' ? null : parseInt(e.target.value))}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Svi mjeseci</option>
                 {monthNames.map((month, index) => (
@@ -190,7 +195,7 @@ const MedicalCalendar: React.FC = () => {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Svi tipovi</option>
                 {Object.entries(typeLabels).map(([value, label]) => (
@@ -202,7 +207,7 @@ const MedicalCalendar: React.FC = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Sve kategorije</option>
                 {categories.map(category => (
@@ -213,8 +218,8 @@ const MedicalCalendar: React.FC = () => {
               </select>
             </div>
 
-            <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-              <span>Pronađeno: {filteredEvents.length} događaja</span>
+            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-gray-600">
+              <span>Pronađeno: <span className="font-semibold text-gray-900">{filteredEvents.length}</span> događaja</span>
               {(selectedMonth !== null || selectedType !== 'all' || selectedCategory !== 'all' || searchQuery) && (
                 <button
                   onClick={() => {
@@ -223,8 +228,9 @@ const MedicalCalendar: React.FC = () => {
                     setSelectedCategory('all');
                     setSearchQuery('');
                   }}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
+                  <X className="w-4 h-4" />
                   Resetuj filtere
                 </button>
               )}
@@ -243,48 +249,48 @@ const MedicalCalendar: React.FC = () => {
               <p className="text-xl text-gray-600">Nema događaja za odabrane filtere</p>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {Object.entries(groupedEvents).map(([month, monthEvents]) => (
                 <div key={month} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4">
-                    <h2 className="text-2xl font-bold text-white">
+                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 sm:px-6 py-3 sm:py-4">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white">
                       {monthNames[parseInt(month)]} {selectedYear}
                     </h2>
                   </div>
-                  <div className="p-6 space-y-4">
+                  <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                     {monthEvents.map(event => (
                       <div
                         key={event.id}
-                        className="border-l-4 pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r-lg"
+                        className="border-l-4 pl-3 sm:pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r-lg"
                         style={{ borderColor: event.color }}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-semibold text-gray-900">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
                                 {event.title}
                               </h3>
                               <span
-                                className="px-3 py-1 rounded-full text-xs font-medium text-white"
+                                className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium text-white whitespace-nowrap"
                                 style={{ backgroundColor: event.color }}
                               >
                                 {typeLabels[event.type]}
                               </span>
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-2">
                               <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {formatDateRange(event.date, event.end_date)}
+                                <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                <span className="break-words">{formatDateRange(event.date, event.end_date)}</span>
                               </span>
                               {event.category && (
                                 <span className="flex items-center gap-1">
-                                  <Tag className="w-4 h-4" />
-                                  {categoryLabels[event.category] || event.category}
+                                  <Tag className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="break-words">{categoryLabels[event.category] || event.category}</span>
                                 </span>
                               )}
                             </div>
                             {event.description && (
-                              <p className="text-gray-700 leading-relaxed">
+                              <p className="text-sm sm:text-base text-gray-700 leading-relaxed break-words">
                                 {event.description}
                               </p>
                             )}
@@ -299,6 +305,8 @@ const MedicalCalendar: React.FC = () => {
           )}
         </div>
       </div>
+
+      <Footer />
     </>
   );
 };
