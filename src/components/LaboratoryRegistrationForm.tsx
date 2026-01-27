@@ -7,9 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   FlaskConical, Building2, MapPin, Phone, Mail, Lock, 
-  ArrowRight, ArrowLeft, CheckCircle, Loader2 
+  ArrowRight, ArrowLeft, CheckCircle, Loader2, AlertTriangle
 } from 'lucide-react';
 import { registrationAPI } from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,6 +54,7 @@ export function LaboratoryRegistrationForm() {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState<FormData>({
     naziv: '',
     email: '',
@@ -80,16 +82,27 @@ export function LaboratoryRegistrationForm() {
   });
 
   const updateFormData = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const updatedFormData = { ...formData, [field]: value };
+    setFormData(updatedFormData);
+    
+    // Clear backend error for this field when user starts typing
+    if (backendErrors[field]) {
+      setBackendErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+    
     // Validate field if touched
     if (touched[field]) {
-      validateField(field, value, formData);
+      validateField(field, value);
     }
   };
 
   const handleFieldBlur = (field: keyof FormData) => {
     setFieldTouched(field);
-    validateField(field, formData[field], formData);
+    validateField(field, formData[field]);
   };
 
   const validateStep = (step: number): boolean => {
@@ -113,7 +126,7 @@ export function LaboratoryRegistrationForm() {
     // Mark fields as touched and validate
     fieldsToValidate.forEach(field => {
       setFieldTouched(field);
-      validateField(field, formData[field], formData);
+      validateField(field, formData[field]);
     });
 
     // Check if any of the fields have errors
@@ -157,11 +170,28 @@ export function LaboratoryRegistrationForm() {
       });
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast({
-        title: 'Greška',
-        description: error.response?.data?.message || 'Došlo je do greške prilikom registracije',
-        variant: 'destructive',
-      });
+      
+      // Handle backend validation errors
+      if (error.response?.data?.errors) {
+        setBackendErrors(error.response.data.errors);
+        
+        // Scroll to top to show errors
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        const errorCount = Object.keys(error.response.data.errors).length;
+        toast({
+          title: `❌ ${errorCount} ${errorCount === 1 ? 'greška' : 'greške'} u formi`,
+          description: 'Molimo pogledajte crvena polja i ispravite greške',
+          variant: 'destructive',
+          duration: 8000,
+        });
+      } else {
+        toast({
+          title: 'Greška',
+          description: error.response?.data?.message || 'Došlo je do greške prilikom registracije',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -222,6 +252,28 @@ export function LaboratoryRegistrationForm() {
           );
         })}
       </div>
+
+      {/* Backend errors - PROMINENT DISPLAY */}
+      {Object.keys(backendErrors).length > 0 && (
+        <Alert variant="destructive" className="mb-6 bg-red-600 text-white border-red-700">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertDescription>
+            <div className="font-bold mb-2">Greške u formi - molimo ispravite:</div>
+            <div className="space-y-2">
+              {Object.entries(backendErrors).map(([field, messages]) => (
+                <div key={field} className="bg-red-700 p-2 rounded">
+                  <div className="font-semibold">📌 {field}</div>
+                  <div className="text-sm">
+                    {Array.isArray(messages) ? messages.map((msg, i) => (
+                      <div key={i}>• {msg}</div>
+                    )) : messages}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Form Steps */}
       <Card>
@@ -334,7 +386,6 @@ export function LaboratoryRegistrationForm() {
                       value={formData.grad}
                       onChange={(value) => {
                         updateFormData('grad', value);
-                        if (touched.grad) validateField('grad', value, formData);
                       }}
                       showIcon={false}
                     />

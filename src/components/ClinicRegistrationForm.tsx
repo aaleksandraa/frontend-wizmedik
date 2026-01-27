@@ -99,9 +99,11 @@ export function ClinicRegistrationForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Handle validation errors
+        // Handle validation errors with detailed display
         if (result.errors) {
-          const errorMessages = Object.values(result.errors).flat().join(' ');
+          const errorMessages = Object.entries(result.errors)
+            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+            .join('\n');
           throw new Error(errorMessages);
         }
         throw new Error(result.message || 'Greška prilikom registracije');
@@ -110,6 +112,8 @@ export function ClinicRegistrationForm() {
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Došlo je do greške. Pokušajte ponovo.');
+      // Scroll to top to show error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
     }
@@ -175,9 +179,12 @@ export function ClinicRegistrationForm() {
       </div>
 
       {error && (
-        <Alert className="mb-6 bg-red-50 border-red-200">
-          <AlertCircle className="h-5 w-5 text-red-600" />
-          <AlertDescription className="text-red-800">{error}</AlertDescription>
+        <Alert className="mb-6 bg-red-600 text-white border-red-700">
+          <AlertCircle className="h-5 w-5" />
+          <AlertDescription>
+            <div className="font-bold mb-2">⚠️ Greške u formi:</div>
+            <div className="whitespace-pre-line text-sm">{error}</div>
+          </AlertDescription>
         </Alert>
       )}
 
