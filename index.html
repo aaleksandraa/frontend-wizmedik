@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WizMedik - Pronađite doktore, klinike, banje, domove u Bosni i Hercegovini | Online zakazivanje</title>
-    <meta name="description" content="WizMedik je vodeća platforma za pronalaženje doktora i online zakazivanje termina u BiH. Pretražite 500+ doktora, 50+ specijalnosti u Sarajevu, Banja Luci, Tuzli i drugim gradovima.">
+    <meta name="description" content="Pronađite i zakažite termin kod doktora online u BiH. 500+ doktora, 50+ specijalnosti u Sarajevu, Banja Luci, Tuzli. Brzo, jednostavno, besplatno. WizMedik - Vaš zdravstveni portal.">
     <meta name="keywords" content="doktor sarajevo, doktor banja luka, doktor tuzla, kardiolog, pedijatar, ginekolog, stomatolog, online zakazivanje, zdravstvo bih, privatne klinike">
     <meta name="author" content="WizMedik" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     <link rel="canonical" href="https://wizmedik.com/" />
+    
     
     <!-- Google Search Console Verification -->
     <!-- Dodaj ovdje verification meta tag nakon što kreiraš property u Search Console -->
@@ -41,17 +42,14 @@
     <meta name="twitter:description" content="Online zakazivanje termina kod doktora u Bosni i Hercegovini" />
     <meta name="twitter:image" content="https://wizmedik.com/og-image.jpg" />
     
-    <!-- Favicon - Multiple sizes for better browser support -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/heart-icon.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <!-- Favicon - Multiple sizes for better browser support (v2 - cache busting) -->
+    <link rel="icon" type="image/svg+xml" href="/heart-icon.svg?v=2" />
+    <link rel="shortcut icon" href="/heart-icon.svg?v=2" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon" />
     
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/heart-icon.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/heart-icon.svg" />
+    <link rel="apple-touch-icon" href="/heart-icon.svg?v=2" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/heart-icon.svg?v=2" />
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
@@ -65,7 +63,6 @@
     <meta name="theme-color" content="#0066cc" />
     <meta name="msapplication-TileColor" content="#0066cc" />
     <meta name="msapplication-navbutton-color" content="#0066cc" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="#0066cc" />
     
     <!-- Preconnect to Critical Origins (PageSpeed Insight Recommendation) -->
     <link rel="preconnect" href="https://api.wizmedik.com" />
@@ -77,10 +74,7 @@
     <link rel="dns-prefetch" href="https://api.wizmedik.com" />
     <link rel="dns-prefetch" href="https://ui-avatars.com" />
     
-    <!-- Preload Critical CSS (Inline or External) -->
-    <link rel="preload" href="/assets/index-C-os-rxa.css" as="style" />
-    
-    <!-- Preload Critical Font (Poppins) -->
+    <!-- Async Font Loading (Poppins) -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
@@ -116,6 +110,67 @@
         "@type": "SearchAction",
         "target": "https://wizmedik.com/doktori?search={search_term_string}",
         "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- Schema.org WebPage (YMYL Enhancement) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "WizMedik - Pronađite doktore u Bosni i Hercegovini",
+      "url": "https://wizmedik.com/",
+      "inLanguage": "bs",
+      "description": "Pronađite i zakažite termin kod doktora online u BiH. 500+ doktora, 50+ specijalnosti u Sarajevu, Banja Luci, Tuzli. Brzo, jednostavno, besplatno.",
+      "publisher": {
+        "@type": "MedicalBusiness",
+        "name": "WizMedik",
+        "url": "https://wizmedik.com",
+        "logo": "https://wizmedik.com/logo.png"
+      },
+      "mainEntity": {
+        "@type": "ItemList",
+        "name": "Zdravstvene usluge u BiH",
+        "description": "Doktori, klinike, laboratorije, banje i domovi za njegu",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "url": "https://wizmedik.com/doktori",
+            "name": "Doktori"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "url": "https://wizmedik.com/klinike",
+            "name": "Klinike"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "url": "https://wizmedik.com/laboratorije",
+            "name": "Laboratorije"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "url": "https://wizmedik.com/banje",
+            "name": "Banje"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "url": "https://wizmedik.com/domovi",
+            "name": "Domovi za njegu"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "url": "https://wizmedik.com/blog",
+            "name": "Zdravstveni savjeti"
+          }
+        ]
       }
     }
     </script>
