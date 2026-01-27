@@ -526,7 +526,7 @@ export function Navbar() {
             ) : (
               <Button
                 onClick={() => navigate('/auth')}
-                className="rounded-none shadow-sm hover:shadow transition-all font-medium h-10 px-4 bg-[#0A91B2] hover:bg-[#0A91B2]/90 text-white"
+                className="rounded-md shadow-sm hover:shadow transition-all font-medium h-10 px-4 bg-[#0A91B2] hover:bg-[#0A91B2]/90 text-white"
               >
                 Prijavi se
               </Button>
@@ -698,7 +698,7 @@ export function Navbar() {
                         navigate('/auth');
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full rounded-none bg-[#0A91B2] hover:bg-[#0A91B2]/90 font-semibold shadow-lg"
+                      className="w-full rounded-md bg-[#0A91B2] hover:bg-[#0A91B2]/90 font-semibold shadow-lg"
                     >
                       Prijavi se
                     </Button>
