@@ -63,6 +63,7 @@ const navLinks = [
 const infoLinks = [
   { href: '/about', label: 'O wizMedik' },
   { href: '/gradovi', label: 'Gradovi' }, // prebačeno u Informacije
+  { href: '/medicinski-kalendar', label: 'Medicinski Kalendar' },
   { href: '/register/doctor', label: 'Za Doktore' },
   { href: '/register/clinic', label: 'Za Klinike' },
   { href: '/register/laboratory', label: 'Za Laboratorije' },

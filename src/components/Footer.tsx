@@ -32,6 +32,7 @@ const searchLinks = [
 const resourceLinks = [
   { to: '/blog', label: 'Blog', icon: FileText },
   { to: '/pitanja', label: 'Pitanja', icon: HelpCircle },
+  { to: '/medicinski-kalendar', label: 'Med. Kalendar', icon: BookOpen },
   { to: '/kalkulatori', label: 'Kalkulatori', icon: Calculator },
   { to: '/mkb10', label: 'MKB-10', icon: BookOpen },
   { to: '/banje/indikacije-terapije', label: 'Indikacije', icon: Droplet },
