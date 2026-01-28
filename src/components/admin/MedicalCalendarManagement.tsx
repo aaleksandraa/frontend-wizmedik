@@ -26,6 +26,9 @@ const MedicalCalendarManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterActive, setFilterActive] = useState('all');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [newCategoryValue, setNewCategoryValue] = useState('');
+  const [newCategoryLabel, setNewCategoryLabel] = useState('');
 
   const [formData, setFormData] = useState<CalendarEvent>({
     date: '',
@@ -83,12 +86,14 @@ const MedicalCalendarManagement: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/admin/medical-calendar`, {
+      const response = await axios.get(`${API_URL}/admin/medical-calendar?per_page=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setEvents(response.data.data || response.data);
+      const data = response.data.data || response.data;
+      setEvents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching events:', error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -180,7 +185,30 @@ const MedicalCalendarManagement: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('sr-RS');
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
+  const addNewCategory = () => {
+    if (newCategoryValue && newCategoryLabel) {
+      categoryOptions.push({
+        value: newCategoryValue,
+        label: newCategoryLabel
+      });
+      setFormData({ ...formData, category: newCategoryValue });
+      setShowNewCategoryInput(false);
+      setNewCategoryValue('');
+      setNewCategoryLabel('');
+    }
   };
 
   return (
@@ -189,7 +217,10 @@ const MedicalCalendarManagement: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Calendar className="w-8 h-8 text-blue-600" />
-          <h2 className="text-2xl font-bold text-gray-900">Medicinski Kalendar</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Medicinski Kalendar</h2>
+            <p className="text-sm text-gray-600">Ukupno: {events.length} događaja</p>
+          </div>
         </div>
         <button
           onClick={() => openModal()}
@@ -330,7 +361,7 @@ const MedicalCalendarManagement: React.FC = () => {
                     <input
                       type="date"
                       required
-                      value={formData.date}
+                      value={formatDateForInput(formData.date)}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -341,7 +372,7 @@ const MedicalCalendarManagement: React.FC = () => {
                     </label>
                     <input
                       type="date"
-                      value={formData.end_date || ''}
+                      value={formatDateForInput(formData.end_date || '')}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
@@ -393,16 +424,64 @@ const MedicalCalendarManagement: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Kategorija
                     </label>
-                    <select
-                      value={formData.category || ''}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Bez kategorije</option>
-                      {categoryOptions.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+                    <div className="space-y-2">
+                      <select
+                        value={formData.category || ''}
+                        onChange={(e) => {
+                          if (e.target.value === '__new__') {
+                            setShowNewCategoryInput(true);
+                          } else {
+                            setFormData({ ...formData, category: e.target.value });
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Bez kategorije</option>
+                        {categoryOptions.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                        <option value="__new__">+ Dodaj novu kategoriju</option>
+                      </select>
+                      
+                      {showNewCategoryInput && (
+                        <div className="p-3 border border-blue-200 rounded-lg bg-blue-50 space-y-2">
+                          <input
+                            type="text"
+                            placeholder="Slug (npr. 'public-health')"
+                            value={newCategoryValue}
+                            onChange={(e) => setNewCategoryValue(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Naziv (npr. 'Javno zdravlje')"
+                            value={newCategoryLabel}
+                            onChange={(e) => setNewCategoryLabel(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={addNewCategory}
+                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                            >
+                              Dodaj
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowNewCategoryInput(false);
+                                setNewCategoryValue('');
+                                setNewCategoryLabel('');
+                              }}
+                              className="px-3 py-1 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50"
+                            >
+                              Otkaži
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

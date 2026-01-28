@@ -151,14 +151,14 @@ const MedicalCalendar: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-8 sm:mb-12">
-            <div className="flex items-center justify-center mb-4">
-              <Calendar className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mr-2 sm:mr-3" />
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <div className="text-center mb-6 sm:mb-12">
+            <div className="flex items-center justify-center mb-3 sm:mb-4">
+              <Calendar className="hidden sm:block w-12 h-12 text-blue-600 mr-3" />
+              <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">
                 Medicinski Kalendar {selectedYear}
               </h1>
             </div>
-            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
+            <p className="text-sm sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
               Svjetski, evropski i tematski dani, sedmice i mjeseci posvećeni zdravlju.
               Korisno za edukaciju, kampanje, objave, ordinacije i škole.
             </p>
