@@ -29,8 +29,12 @@ export function CookieConsent() {
           setSettings(data);
           setVisible(true);
         }
-      } catch (error) {
-        console.error('Error fetching cookie settings:', error);
+      } catch (error: any) {
+        // Silently fail if endpoint doesn't exist (404) or other errors
+        // Cookie consent is optional feature
+        if (error.response?.status !== 404) {
+          console.error('Error fetching cookie settings:', error);
+        }
       }
     };
 
