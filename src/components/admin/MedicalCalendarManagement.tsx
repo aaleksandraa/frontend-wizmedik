@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Edit2, Trash2, Search, Filter, Save, X } from 'lucide-react';
+import { Calendar, Plus, Edit2, Trash2, Search, X, Save, Clock } from 'lucide-react';
 import axios from 'axios';
 
 interface CalendarEvent {
@@ -89,10 +89,14 @@ const MedicalCalendarManagement: React.FC = () => {
       const response = await axios.get(`${API_URL}/admin/medical-calendar?per_page=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const data = response.data.data || response.data;
-      setEvents(Array.isArray(data) ? data : []);
-    } catch (error) {
+      
+      // Laravel paginate vraća {data: [], current_page, ...}
+      const eventsData = response.data.data || response.data;
+      console.log('Fetched events:', eventsData); // Debug
+      setEvents(Array.isArray(eventsData) ? eventsData : []);
+    } catch (error: any) {
       console.error('Error fetching events:', error);
+      console.error('Error response:', error.response?.data); // Debug
       setEvents([]);
     } finally {
       setLoading(false);
@@ -185,6 +189,7 @@ const MedicalCalendarManagement: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -194,8 +199,16 @@ const MedicalCalendarManagement: React.FC = () => {
 
   const formatDateForInput = (dateString: string) => {
     if (!dateString) return '';
+    // Ako je već u ISO formatu (YYYY-MM-DD), vrati direktno
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    // Inače konvertuj
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const addNewCategory = () => {
@@ -271,6 +284,19 @@ const MedicalCalendarManagement: React.FC = () => {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-600">Učitavanje...</p>
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="text-center py-12">
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-xl text-gray-600 mb-2">
+              {events.length === 0 ? 'Nema događaja u bazi' : 'Nema rezultata za odabrane filtere'}
+            </p>
+            {events.length === 0 && (
+              <p className="text-sm text-gray-500">
+                Pokrenite seeder: php artisan db:seed --class=MedicalCalendarSeeder
+              </p>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
