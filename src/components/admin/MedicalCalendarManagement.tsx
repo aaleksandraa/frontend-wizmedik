@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, Edit2, Trash2, Search, X, Save, Clock } from 'lucide-react';
-import axios from 'axios';
+import { createPortal } from 'react-dom';
+import { Calendar, Plus, Edit2, Trash2, Search, X, Save } from 'lucide-react';
+import api from '@/services/api';
 
 interface CalendarEvent {
   id?: number;
@@ -15,8 +16,6 @@ interface CalendarEvent {
   sort_order: number;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
 const MedicalCalendarManagement: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<CalendarEvent[]>([]);
@@ -29,6 +28,26 @@ const MedicalCalendarManagement: React.FC = () => {
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryValue, setNewCategoryValue] = useState('');
   const [newCategoryLabel, setNewCategoryLabel] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState([
+    { value: 'cancer', label: 'Rak' },
+    { value: 'mental-health', label: 'Mentalno zdravlje' },
+    { value: 'cardiovascular', label: 'Kardiovaskularno' },
+    { value: 'infectious-disease', label: 'Zarazne bolesti' },
+    { value: 'prevention', label: 'Prevencija' },
+    { value: 'womens-health', label: 'Žensko zdravlje' },
+    { value: 'mens-health', label: 'Muško zdravlje' },
+    { value: 'disability', label: 'Invaliditet' },
+    { value: 'elderly-care', label: 'Njega starijih' },
+    { value: 'maternal-health', label: 'Majčinsko zdravlje' },
+    { value: 'healthcare-workers', label: 'Zdravstveni radnici' },
+    { value: 'general-health', label: 'Opšte zdravlje' },
+    { value: 'neurological', label: 'Neurološko' },
+    { value: 'respiratory', label: 'Respiratorno' },
+    { value: 'metabolic', label: 'Metaboličko' },
+    { value: 'nutrition', label: 'Ishrana' },
+    { value: 'bone-health', label: 'Zdravlje kostiju' }
+  ]);
 
   const [formData, setFormData] = useState<CalendarEvent>({
     date: '',
@@ -49,26 +68,6 @@ const MedicalCalendarManagement: React.FC = () => {
     { value: 'campaign', label: 'Kampanja' }
   ];
 
-  const categoryOptions = [
-    { value: 'cancer', label: 'Rak' },
-    { value: 'mental-health', label: 'Mentalno zdravlje' },
-    { value: 'cardiovascular', label: 'Kardiovaskularno' },
-    { value: 'infectious-disease', label: 'Zarazne bolesti' },
-    { value: 'prevention', label: 'Prevencija' },
-    { value: 'womens-health', label: 'Žensko zdravlje' },
-    { value: 'mens-health', label: 'Muško zdravlje' },
-    { value: 'disability', label: 'Invaliditet' },
-    { value: 'elderly-care', label: 'Njega starijih' },
-    { value: 'maternal-health', label: 'Majčinsko zdravlje' },
-    { value: 'healthcare-workers', label: 'Zdravstveni radnici' },
-    { value: 'general-health', label: 'Opšte zdravlje' },
-    { value: 'neurological', label: 'Neurološko' },
-    { value: 'respiratory', label: 'Respiratorno' },
-    { value: 'metabolic', label: 'Metaboličko' },
-    { value: 'nutrition', label: 'Ishrana' },
-    { value: 'bone-health', label: 'Zdravlje kostiju' }
-  ];
-
   const colorPresets = [
     '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
     '#ec4899', '#06b6d4', '#64748b', '#dc2626', '#9333ea'
@@ -85,18 +84,23 @@ const MedicalCalendarManagement: React.FC = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/admin/medical-calendar?per_page=1000`, {
-        headers: { Authorization: `Bearer ${token}` }
+      
+      const response = await api.get('/admin/medical-calendar', {
+        params: { per_page: 1000 }
       });
       
       // Laravel paginate vraća {data: [], current_page, ...}
       const eventsData = response.data.data || response.data;
-      console.log('Fetched events:', eventsData); // Debug
       setEvents(Array.isArray(eventsData) ? eventsData : []);
     } catch (error: any) {
-      console.error('Error fetching events:', error);
-      console.error('Error response:', error.response?.data); // Debug
+      if (error.response?.status === 401) {
+        setError('Niste autorizovani. Molimo prijavite se ponovo.');
+      } else if (error.response?.status === 403) {
+        setError('Nemate admin privilegije za pristup ovoj stranici.');
+      } else {
+        setError('Greška pri učitavanju podataka.');
+      }
+      
       setEvents([]);
     } finally {
       setLoading(false);
@@ -130,13 +134,10 @@ const MedicalCalendarManagement: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
       if (editingEvent?.id) {
-        await axios.put(`${API_URL}/admin/medical-calendar/${editingEvent.id}`, formData, config);
+        await api.put(`/admin/medical-calendar/${editingEvent.id}`, formData);
       } else {
-        await axios.post(`${API_URL}/admin/medical-calendar`, formData, config);
+        await api.post('/admin/medical-calendar', formData);
       }
 
       fetchEvents();
@@ -151,10 +152,7 @@ const MedicalCalendarManagement: React.FC = () => {
     if (!confirm('Da li ste sigurni da želite obrisati ovaj događaj?')) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/admin/medical-calendar/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/admin/medical-calendar/${id}`);
       fetchEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
@@ -163,29 +161,51 @@ const MedicalCalendarManagement: React.FC = () => {
   };
 
   const openModal = (event?: CalendarEvent) => {
-    if (event) {
-      setEditingEvent(event);
-      setFormData(event);
-    } else {
-      setEditingEvent(null);
-      setFormData({
-        date: '',
-        end_date: '',
-        title: '',
-        description: '',
-        type: 'day',
-        category: '',
-        color: '#3b82f6',
-        is_active: true,
-        sort_order: 0
-      });
+    try {
+      if (event) {
+        setEditingEvent(event);
+        
+        // Ensure all fields are properly set
+        const formDataToSet = {
+          date: event.date || '',
+          end_date: event.end_date || '',
+          title: event.title || '',
+          description: event.description || '',
+          type: event.type || 'day',
+          category: event.category || '',
+          color: event.color || '#3b82f6',
+          is_active: event.is_active !== undefined ? event.is_active : true,
+          sort_order: event.sort_order || 0
+        };
+        
+        setFormData(formDataToSet);
+      } else {
+        setEditingEvent(null);
+        setFormData({
+          date: '',
+          end_date: '',
+          title: '',
+          description: '',
+          type: 'day',
+          category: '',
+          color: '#3b82f6',
+          is_active: true,
+          sort_order: 0
+        });
+      }
+      
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error opening modal:', error);
     }
-    setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
     setEditingEvent(null);
+    setShowNewCategoryInput(false);
+    setNewCategoryValue('');
+    setNewCategoryLabel('');
   };
 
   const formatDate = (dateString: string) => {
@@ -213,10 +233,10 @@ const MedicalCalendarManagement: React.FC = () => {
 
   const addNewCategory = () => {
     if (newCategoryValue && newCategoryLabel) {
-      categoryOptions.push({
+      setCategories([...categories, {
         value: newCategoryValue,
         label: newCategoryLabel
-      });
+      }]);
       setFormData({ ...formData, category: newCategoryValue });
       setShowNewCategoryInput(false);
       setNewCategoryValue('');
@@ -226,6 +246,30 @@ const MedicalCalendarManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800">Greška</h3>
+              <p className="mt-1 text-sm text-red-700">{error}</p>
+              <p className="mt-2 text-xs text-red-600">Provjerite browser console (F12) za više detalja.</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="flex-shrink-0 text-red-400 hover:text-red-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -331,7 +375,7 @@ const MedicalCalendarManagement: React.FC = () => {
                       {typeOptions.find(t => t.value === event.type)?.label}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {categoryOptions.find(c => c.value === event.category)?.label || event.category}
+                      {categories.find(c => c.value === event.category)?.label || event.category}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -344,14 +388,28 @@ const MedicalCalendarManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => openModal(event)}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openModal(event);
+                        }}
                         className="text-blue-600 hover:text-blue-900 mr-3"
+                        title="Uredi događaj"
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={() => event.id && handleDelete(event.id)}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (event.id) {
+                            handleDelete(event.id);
+                          }
+                        }}
                         className="text-red-600 hover:text-red-900"
+                        title="Obriši događaj"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -364,10 +422,22 @@ const MedicalCalendarManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      {/* Modal - Rendered using Portal to escape parent overflow */}
+      {showModal && createPortal(
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+          style={{ zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeModal();
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            style={{ zIndex: 10000 }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">
@@ -463,7 +533,7 @@ const MedicalCalendarManagement: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Bez kategorije</option>
-                        {categoryOptions.map(opt => (
+                        {categories.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                         <option value="__new__">+ Dodaj novu kategoriju</option>
@@ -568,7 +638,8 @@ const MedicalCalendarManagement: React.FC = () => {
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
