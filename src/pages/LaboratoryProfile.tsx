@@ -168,9 +168,9 @@ export default function LaboratoryProfile() {
         <Navbar />
 
         {/* Hero Section with Featured Image */}
-        <section className="relative">
+        <section className="relative pt-16 md:pt-20">
           {laboratory.featured_slika ? (
-            <div className="h-72 md:h-96 overflow-hidden">
+            <div className="h-48 md:h-64 overflow-hidden">
               <img
                 src={laboratory.featured_slika}
                 alt={laboratory.naziv}
@@ -179,45 +179,45 @@ export default function LaboratoryProfile() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             </div>
           ) : (
-            <div className="h-72 md:h-96 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5" />
+            <div className="h-48 md:h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5" />
           )}
 
           <div className="container mx-auto px-4">
-            <div className="relative -mt-32 md:-mt-40">
+            <div className="relative -mt-20 md:-mt-24">
               <Card className="shadow-2xl border-2">
-                <CardContent className="p-6 md:p-8">
-                  <div className="flex flex-col md:flex-row gap-6">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                     {/* Profile Image - Use Featured Image */}
                     <div className="flex-shrink-0">
                       {laboratory.featured_slika ? (
                         <img
                           src={laboratory.featured_slika}
                           alt={laboratory.naziv}
-                          className="w-32 h-32 md:w-40 md:h-40 rounded-2xl object-cover shadow-xl ring-4 ring-white"
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-2xl object-cover shadow-xl ring-4 ring-white"
                         />
                       ) : (
-                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl ring-4 ring-white">
-                          <FlaskConical className="w-16 h-16 md:w-20 md:h-20 text-white" />
+                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl ring-4 ring-white">
+                          <FlaskConical className="w-12 h-12 md:w-14 md:h-14 text-white" />
                         </div>
                       )}
                     </div>
 
                     {/* Info */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                             {laboratory.naziv}
                           </h1>
-                          <div className="flex items-center gap-2 flex-wrap mb-3">
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
                             {laboratory.verified && (
-                              <Badge className="gap-1">
+                              <Badge className="gap-1 text-xs">
                                 <CheckCircle className="w-3 h-3" />
                                 Verifikovano
                               </Badge>
                             )}
                             {laboratory.online_rezultati && (
-                              <Badge variant="secondary" className="gap-1">
+                              <Badge variant="secondary" className="gap-1 text-xs">
                                 <Download className="w-3 h-3" />
                                 Online rezultati
                               </Badge>
@@ -228,37 +228,37 @@ export default function LaboratoryProfile() {
 
                       {/* Rating */}
                       {laboratory.broj_recenzija > 0 && (
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                           <div className="flex items-center gap-1">
                             <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xl font-bold text-gray-900">{Number(laboratory.prosjecna_ocjena).toFixed(1)}</span>
+                            <span className="text-lg md:text-xl font-bold text-gray-900">{Number(laboratory.prosjecna_ocjena).toFixed(1)}</span>
                           </div>
-                          <span className="text-gray-600">
+                          <span className="text-sm text-gray-600">
                             ({laboratory.broj_recenzija} {laboratory.broj_recenzija === 1 ? 'recenzija' : 'recenzija'})
                           </span>
                         </div>
                       )}
 
-                      {/* Contact Info */}
-                      <div className="grid md:grid-cols-2 gap-3">
-                        <div className="flex items-center gap-2 text-gray-700">
+                      {/* Contact Info - FIXED ALIGNMENT */}
+                      <div className="grid gap-2 md:gap-3">
+                        <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
                           <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
-                          <span>{laboratory.adresa}, {laboratory.grad}</span>
+                          <span className="break-words">{laboratory.adresa}, {laboratory.grad}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-700">
+                        <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
                           <Phone className="w-5 h-5 text-primary flex-shrink-0" />
                           <a href={`tel:${laboratory.telefon}`} className="hover:text-primary transition-colors">
                             {laboratory.telefon}
                           </a>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-700">
+                        <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
                           <Mail className="w-5 h-5 text-primary flex-shrink-0" />
-                          <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors">
+                          <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors break-all">
                             {laboratory.email}
                           </a>
                         </div>
                         {laboratory.website && (
-                          <div className="flex items-center gap-2 text-gray-700">
+                          <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
                             <Globe className="w-5 h-5 text-primary flex-shrink-0" />
                             <a 
                               href={laboratory.website} 
@@ -281,14 +281,14 @@ export default function LaboratoryProfile() {
         </section>
 
         {/* Main Content */}
-        <section className="py-8">
+        <section className="py-6 md:py-8">
           <div className="container mx-auto px-4">
-            <Tabs defaultValue="analize" className="space-y-6">
+            <Tabs defaultValue="analize" className="space-y-4 md:space-y-6">
               <TabsList className="grid w-full grid-cols-4 max-w-2xl">
-                <TabsTrigger value="analize">Analize</TabsTrigger>
-                <TabsTrigger value="paketi">Paketi</TabsTrigger>
-                <TabsTrigger value="info">Informacije</TabsTrigger>
-                <TabsTrigger value="galerija">Galerija</TabsTrigger>
+                <TabsTrigger value="analize" className="text-xs md:text-sm">Analize</TabsTrigger>
+                <TabsTrigger value="paketi" className="text-xs md:text-sm">Paketi</TabsTrigger>
+                <TabsTrigger value="info" className="text-xs md:text-sm">Info</TabsTrigger>
+                <TabsTrigger value="galerija" className="text-xs md:text-sm">Galerija</TabsTrigger>
               </TabsList>
 
               {/* Analize Tab */}
