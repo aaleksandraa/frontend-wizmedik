@@ -33,8 +33,11 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console
-    console.error('Error caught by boundary:', error, errorInfo);
+    // Log error to console (ALWAYS, even in production for debugging)
+    console.error('❌ ERROR CAUGHT BY BOUNDARY:', error);
+    console.error('📍 Component Stack:', errorInfo.componentStack);
+    console.error('📝 Error Message:', error.message);
+    console.error('🔍 Error Stack:', error.stack);
     
     // Send to Sentry
     Sentry.captureException(error, {
@@ -74,7 +77,8 @@ class ErrorBoundary extends Component<Props, State> {
                 Izvinjavamo se, došlo je do neočekivane greške. Naš tim je obaviješten i radi na rješenju problema.
               </p>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {/* Show error details in production for debugging */}
+              {this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
                   <p className="font-mono text-sm text-red-800 mb-2">
                     <strong>Error:</strong> {this.state.error.toString()}
