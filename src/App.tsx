@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,23 +12,20 @@ import { CookieConsent } from "@/components/CookieConsent";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { initSentry } from "@/config/sentry";
 import { initGA, trackPageView } from "@/config/analytics";
+import { Loader2 } from "lucide-react";
+
+// Public pages - static import (always needed)
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel";
-import DoctorDashboard from "./pages/DoctorDashboard";
-import DoctorProfile from "./pages/DoctorProfile";
 import CitySpecialtyDoctors from "./pages/CitySpecialtyDoctors";
 import SpecialtyLanding from "./pages/SpecialtyLanding";
 import CityLanding from "./pages/CityLanding";
 import Cities from "./pages/Cities";
 import Clinics from "./pages/Clinics";
 import ClinicProfile from "./pages/ClinicProfile";
-import ClinicDashboard from "./pages/ClinicDashboard";
-import LaboratoryDashboard from "./pages/LaboratoryDashboard";
-import SpaDashboard from "./pages/SpaDashboard";
 import ClinicsBySpecialty from "./pages/ClinicsBySpecialty";
 import Specialties from "./pages/Specialties";
 import Doctors from "./pages/Doctors";
@@ -43,11 +40,26 @@ import PitanjeDetalji from "./pages/PitanjeDetalji";
 import PostaviPitanje from "./pages/PostaviPitanje";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
-import BlogEditor from "./pages/BlogEditor";
-import MyBlogPosts from "./pages/MyBlogPosts";
-import MedicalCalendar from "./pages/MedicalCalendar";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+
+// Admin & Dashboard pages - lazy import (only load when needed)
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const DoctorDashboard = lazy(() => import("./pages/DoctorDashboard"));
+const DoctorProfile = lazy(() => import("./pages/DoctorProfile"));
+const ClinicDashboard = lazy(() => import("./pages/ClinicDashboard"));
+const LaboratoryDashboard = lazy(() => import("./pages/LaboratoryDashboard"));
+const SpaDashboard = lazy(() => import("./pages/SpaDashboard"));
+const BlogEditor = lazy(() => import("./pages/BlogEditor"));
+const MyBlogPosts = lazy(() => import("./pages/MyBlogPosts"));
+const MedicalCalendar = lazy(() => import("./pages/MedicalCalendar"));
+
+// Loading component for lazy-loaded pages
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
 import RegistrationOptions from "./pages/RegistrationOptions";
 import RegisterDoctor from "./pages/RegisterDoctor";
 import RegisterClinic from "./pages/RegisterClinic";
@@ -109,7 +121,11 @@ const App = () => {
               <Route path="/specijalnosti" element={<Specialties />} />
               <Route path="/doktori" element={<Doctors />} />
               <Route path="/doktori/lista" element={<DoctorsCompactList />} />
-              <Route path="/doktor/:slug" element={<DoctorProfile />} />
+              <Route path="/doktor/:slug" element={
+                <Suspense fallback={<PageLoader />}>
+                  <DoctorProfile />
+                </Suspense>
+              } />
               <Route path="/laboratorije" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />
               <Route path="/laboratorije/:grad" element={<Laboratories />} />
@@ -141,24 +157,34 @@ const App = () => {
               <Route path="/blog/:slug" element={<BlogPost />} />
               
               {/* Medical Calendar */}
-              <Route path="/medicinski-kalendar" element={<MedicalCalendar />} />
+              <Route path="/medicinski-kalendar" element={
+                <Suspense fallback={<PageLoader />}>
+                  <MedicalCalendar />
+                </Suspense>
+              } />
               
               {/* Blog Management */}
               <Route path="/my-blog-posts" element={
                 <ProtectedRoute>
-                  <MyBlogPosts />
+                  <Suspense fallback={<PageLoader />}>
+                    <MyBlogPosts />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               
               {/* Blog Editor - Admin & Doctors */}
               <Route path="/blog/editor" element={
                 <ProtectedRoute>
-                  <BlogEditor />
+                  <Suspense fallback={<PageLoader />}>
+                    <BlogEditor />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               <Route path="/blog/editor/:slug" element={
                 <ProtectedRoute>
-                  <BlogEditor />
+                  <Suspense fallback={<PageLoader />}>
+                    <BlogEditor />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               
@@ -228,12 +254,16 @@ const App = () => {
               {/* Admin-only routes */}
               <Route path="/admin" element={
                 <ProtectedRoute requiredRole="admin">
-                  <AdminPanel />
+                  <Suspense fallback={<PageLoader />}>
+                    <AdminPanel />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               <Route path="/admin/*" element={
                 <ProtectedRoute requiredRole="admin">
-                  <AdminPanel />
+                  <Suspense fallback={<PageLoader />}>
+                    <AdminPanel />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
