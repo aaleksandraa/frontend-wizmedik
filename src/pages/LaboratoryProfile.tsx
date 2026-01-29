@@ -167,116 +167,99 @@ export default function LaboratoryProfile() {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
 
-        {/* Hero Section with Featured Image */}
-        <section className="relative pt-16 md:pt-20">
-          {laboratory.featured_slika ? (
-            <div className="h-48 md:h-64 overflow-hidden">
-              <img
-                src={laboratory.featured_slika}
-                alt={laboratory.naziv}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-            </div>
-          ) : (
-            <div className="h-48 md:h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5" />
-          )}
-
+        {/* Hero Section - NO extra spacing, starts right after navbar */}
+        <section className="pt-20 md:pt-24">
           <div className="container mx-auto px-4">
-            <div className="relative -mt-20 md:-mt-24">
-              <Card className="shadow-2xl border-2">
-                <CardContent className="p-4 md:p-6">
-                  <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                    {/* Profile Image - Use Featured Image */}
-                    <div className="flex-shrink-0">
-                      {laboratory.featured_slika ? (
-                        <img
-                          src={laboratory.featured_slika}
-                          alt={laboratory.naziv}
-                          className="w-24 h-24 md:w-28 md:h-28 rounded-2xl object-cover shadow-xl ring-4 ring-white"
-                        />
-                      ) : (
-                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl ring-4 ring-white">
-                          <FlaskConical className="w-12 h-12 md:w-14 md:h-14 text-white" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                            {laboratory.naziv}
-                          </h1>
-                          <div className="flex items-center gap-2 flex-wrap mb-2">
-                            {laboratory.verified && (
-                              <Badge className="gap-1 text-xs">
-                                <CheckCircle className="w-3 h-3" />
-                                Verifikovano
-                              </Badge>
-                            )}
-                            {laboratory.online_rezultati && (
-                              <Badge variant="secondary" className="gap-1 text-xs">
-                                <Download className="w-3 h-3" />
-                                Online rezultati
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
+            <Card className="shadow-md border">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                  {/* Profile Image - Smaller and cleaner */}
+                  <div className="flex-shrink-0">
+                    {laboratory.featured_slika ? (
+                      <img
+                        src={laboratory.featured_slika}
+                        alt={laboratory.naziv}
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+                        <FlaskConical className="w-8 h-8 md:w-10 md:h-10 text-white" />
                       </div>
+                    )}
+                  </div>
 
-                      {/* Rating */}
-                      {laboratory.broj_recenzija > 0 && (
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                            <span className="text-lg md:text-xl font-bold text-gray-900">{Number(laboratory.prosjecna_ocjena).toFixed(1)}</span>
-                          </div>
-                          <span className="text-sm text-gray-600">
-                            ({laboratory.broj_recenzija} {laboratory.broj_recenzija === 1 ? 'recenzija' : 'recenzija'})
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Contact Info - FIXED ALIGNMENT */}
-                      <div className="grid gap-2 md:gap-3">
-                        <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
-                          <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
-                          <span className="break-words">{laboratory.adresa}, {laboratory.grad}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
-                          <Phone className="w-5 h-5 text-primary flex-shrink-0" />
-                          <a href={`tel:${laboratory.telefon}`} className="hover:text-primary transition-colors">
-                            {laboratory.telefon}
-                          </a>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
-                          <Mail className="w-5 h-5 text-primary flex-shrink-0" />
-                          <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors break-all">
-                            {laboratory.email}
-                          </a>
-                        </div>
-                        {laboratory.website && (
-                          <div className="flex items-center gap-3 text-sm md:text-base text-gray-700">
-                            <Globe className="w-5 h-5 text-primary flex-shrink-0" />
-                            <a 
-                              href={laboratory.website} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="hover:text-primary transition-colors flex items-center gap-1"
-                            >
-                              Web stranica
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="mb-3">
+                      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                        {laboratory.naziv}
+                      </h1>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {laboratory.verified && (
+                          <Badge className="gap-1 text-xs">
+                            <CheckCircle className="w-3 h-3" />
+                            Verifikovano
+                          </Badge>
+                        )}
+                        {laboratory.online_rezultati && (
+                          <Badge variant="secondary" className="gap-1 text-xs">
+                            <Download className="w-3 h-3" />
+                            Online rezultati
+                          </Badge>
                         )}
                       </div>
                     </div>
+
+                    {/* Rating */}
+                    {laboratory.broj_recenzija > 0 && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                          <span className="text-lg font-bold text-gray-900">{Number(laboratory.prosjecna_ocjena).toFixed(1)}</span>
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          ({laboratory.broj_recenzija} {laboratory.broj_recenzija === 1 ? 'recenzija' : 'recenzija'})
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Contact Info - PERFECTLY CENTERED icons with text */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-start gap-2.5 text-sm md:text-base text-gray-700">
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
+                        <span className="break-words leading-snug">{laboratory.adresa}, {laboratory.grad}</span>
+                      </div>
+                      <div className="flex items-center gap-2.5 text-sm md:text-base text-gray-700">
+                        <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                        <a href={`tel:${laboratory.telefon}`} className="hover:text-primary transition-colors leading-snug">
+                          {laboratory.telefon}
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-2.5 text-sm md:text-base text-gray-700">
+                        <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                        <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors break-all leading-snug">
+                          {laboratory.email}
+                        </a>
+                      </div>
+                      {laboratory.website && (
+                        <div className="flex items-center gap-2.5 text-sm md:text-base text-gray-700">
+                          <Globe className="w-4 h-4 text-primary flex-shrink-0" />
+                          <a 
+                            href={laboratory.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="hover:text-primary transition-colors flex items-center gap-1 leading-snug"
+                          >
+                            Web stranica
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
