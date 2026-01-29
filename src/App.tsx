@@ -65,6 +65,7 @@ import RegisterDoctor from "./pages/RegisterDoctor";
 import RegisterClinic from "./pages/RegisterClinic";
 import RegisterLaboratory from "./pages/RegisterLaboratory";
 import RegisterSpa from "./pages/RegisterSpa";
+import VerifyEmail from "./pages/VerifyEmail";
 import CareHomes from "./pages/CareHomes";
 import CareHomeProfile from "./pages/CareHomeProfile";
 import CareHomeDashboard from "./pages/CareHomeDashboard";
@@ -195,6 +196,7 @@ const App = () => {
               <Route path="/register/laboratory" element={<RegisterLaboratory />} />
               <Route path="/register/spa" element={<RegisterSpa />} />
               <Route path="/register/care-home" element={<RegisterCareHome />} />
+              <Route path="/register/verify/:token" element={<VerifyEmail />} />
               
               {/* Info pages */}
               <Route path="/about" element={<About />} />
