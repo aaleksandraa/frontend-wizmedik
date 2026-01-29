@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import api, { adminAPI, doctorsAPI, clinicsAPI, citiesAPI, specialtiesAPI, uploadAPI, blogAPI } from '@/services/api';
+import api, { doctorsAPI, clinicsAPI, citiesAPI, specialtiesAPI, uploadAPI, blogAPI } from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

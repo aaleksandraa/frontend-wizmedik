@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { adminAPI, specialtiesAPI } from '@/services/api';
+import { specialtiesAPI } from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

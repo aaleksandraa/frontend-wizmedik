@@ -11,7 +11,7 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
-import { adminAPI } from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, Heart, Users, Building2, MapPin, ArrowRight,

@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Type, Save } from 'lucide-react';
-import { adminAPI, settingsAPI } from '@/services/api';
+import { settingsAPI } from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 
 export function BlogTypographySettings() {
   const { toast } = useToast();
