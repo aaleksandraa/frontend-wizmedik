@@ -167,8 +167,8 @@ export default function LaboratoryProfile() {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
 
-        {/* Hero Section - NO extra spacing, starts right after navbar */}
-        <section className="pt-20 md:pt-24">
+        {/* Hero Section - MINIMAL spacing from navbar */}
+        <section className="pt-4 md:pt-6">
           <div className="container mx-auto px-4">
             <Card className="shadow-md border">
               <CardContent className="p-4 md:p-6">
@@ -223,32 +223,32 @@ export default function LaboratoryProfile() {
                       </div>
                     )}
 
-                    {/* Contact Info - PERFECTLY CENTERED icons with text */}
+                    {/* Contact Info - PERFECTLY ALIGNED icons with text */}
                     <div className="space-y-1.5">
-                      <div className="flex items-start gap-2.5 text-sm md:text-base text-gray-700">
-                        <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                        <span className="break-words leading-snug">{laboratory.adresa}, {laboratory.grad}</span>
+                      <div className="flex gap-2.5 text-sm md:text-base text-gray-700">
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0 translate-y-[3px]" />
+                        <span className="break-words leading-[1.4]">{laboratory.adresa}, {laboratory.grad}</span>
                       </div>
-                      <div className="flex items-center gap-2.5 text-sm md:text-base text-gray-700">
-                        <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                        <a href={`tel:${laboratory.telefon}`} className="hover:text-primary transition-colors leading-snug">
+                      <div className="flex gap-2.5 text-sm md:text-base text-gray-700">
+                        <Phone className="w-4 h-4 text-primary flex-shrink-0 translate-y-[3px]" />
+                        <a href={`tel:${laboratory.telefon}`} className="hover:text-primary transition-colors leading-[1.4]">
                           {laboratory.telefon}
                         </a>
                       </div>
-                      <div className="flex items-center gap-2.5 text-sm md:text-base text-gray-700">
-                        <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                        <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors break-all leading-snug">
+                      <div className="flex gap-2.5 text-sm md:text-base text-gray-700">
+                        <Mail className="w-4 h-4 text-primary flex-shrink-0 translate-y-[3px]" />
+                        <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors break-all leading-[1.4]">
                           {laboratory.email}
                         </a>
                       </div>
                       {laboratory.website && (
-                        <div className="flex items-center gap-2.5 text-sm md:text-base text-gray-700">
-                          <Globe className="w-4 h-4 text-primary flex-shrink-0" />
+                        <div className="flex gap-2.5 text-sm md:text-base text-gray-700">
+                          <Globe className="w-4 h-4 text-primary flex-shrink-0 translate-y-[3px]" />
                           <a 
                             href={laboratory.website} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="hover:text-primary transition-colors flex items-center gap-1 leading-snug"
+                            className="hover:text-primary transition-colors flex items-center gap-1 leading-[1.4]"
                           >
                             Web stranica
                             <ExternalLink className="w-3 h-3" />
