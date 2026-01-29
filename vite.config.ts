@@ -76,24 +76,41 @@ export default defineConfig(({ mode }) => ({
     // Code splitting
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Vendor chunks
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          'query-vendor': ['@tanstack/react-query'],
-          'map-vendor': ['leaflet', 'react-leaflet'],
-          // Feature chunks
-          'admin': [
-            './src/pages/AdminPanel.tsx',
-            './src/components/admin/TemplateSettings.tsx',
-            './src/components/admin/DoctorCardSettings.tsx',
-          ],
-          'doctor-dashboard': [
-            './src/pages/DoctorDashboard.tsx',
-          ],
-          'clinic-dashboard': [
-            './src/pages/ClinicDashboard.tsx',
-          ],
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'query-vendor';
+            }
+            if (id.includes('leaflet')) {
+              return 'map-vendor';
+            }
+          }
+          
+          // Admin pages - ONLY load on admin routes
+          if (id.includes('/src/pages/AdminPanel')) {
+            return 'admin';
+          }
+          if (id.includes('/src/components/admin/')) {
+            return 'admin';
+          }
+          if (id.includes('/src/services/adminApi')) {
+            return 'admin';
+          }
+          
+          // Dashboard chunks
+          if (id.includes('/src/pages/DoctorDashboard')) {
+            return 'doctor-dashboard';
+          }
+          if (id.includes('/src/pages/ClinicDashboard')) {
+            return 'clinic-dashboard';
+          }
         },
       },
     },
