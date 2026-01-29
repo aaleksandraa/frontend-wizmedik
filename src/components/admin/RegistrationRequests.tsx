@@ -108,7 +108,7 @@ export function RegistrationRequests() {
       const token = localStorage.getItem('auth_token');
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
       await axios.post(`${API_URL}/admin/registration-requests/${id}/reject`, {
-        reason: 'Zahtjev odbijen i obrisan od strane administratora'
+        rejection_reason: 'Zahtjev odbijen i obrisan od strane administratora'
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -118,11 +118,11 @@ export function RegistrationRequests() {
       });
       fetchRequests();
       setShowDetails(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting request:', error);
       toast({
         title: 'Greška',
-        description: 'Nije moguće obrisati zahtjev',
+        description: error.response?.data?.message || 'Nije moguće obrisati zahtjev',
         variant: 'destructive',
       });
     } finally {
