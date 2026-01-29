@@ -28,28 +28,7 @@ import { DoctorRegistrationForm } from '@/components/DoctorRegistrationForm';
 export default function RegisterDoctor() {
   const [showForm, setShowForm] = useState(false);
 
-  if (showForm) {
-    return (
-      <>
-        <Helmet>
-          <title>Registracija doktora | wizMedik</title>
-          <meta
-            name="description"
-            content="Registrujte se kao doktor na wizMedik platformi. 30 dana besplatno, zatim 30 KM mjesečno ili 240 KM godišnje (ušteda 120 KM)."
-          />
-          <link rel="canonical" href="https://wizmedik.com/register/doctor" />
-        </Helmet>
-        <div className="min-h-screen bg-background">
-          <Navbar />
-          <div className="pt-20">
-            <DoctorRegistrationForm />
-          </div>
-          <Footer />
-        </div>
-      </>
-    );
-  }
-
+  // Hooks MORAJU biti prije bilo kakvog early return-a!
   const benefits = useMemo(
     () => [
       {
@@ -112,7 +91,6 @@ export default function RegisterDoctor() {
     []
   );
 
-  // EDIT: zadržavam "stats" blok (kao social proof), ali bez obećanja koje ne možeš dokazati.
   const stats = useMemo(
     () => [
       { number: '500+', label: 'Doktora' },
@@ -131,6 +109,29 @@ export default function RegisterDoctor() {
       'Registrujte se kao doktor na wizMedik platformi. 30 dana besplatno, zatim 30 KM mjesečno ili 240 KM godišnje (ušteda 120 KM).',
     url: 'https://wizmedik.com/register/doctor',
   };
+
+  // Early return POSLIJE svih hooks!
+  if (showForm) {
+    return (
+      <>
+        <Helmet>
+          <title>Registracija doktora | wizMedik</title>
+          <meta
+            name="description"
+            content="Registrujte se kao doktor na wizMedik platformi. 30 dana besplatno, zatim 30 KM mjesečno ili 240 KM godišnje (ušteda 120 KM)."
+          />
+          <link rel="canonical" href="https://wizmedik.com/register/doctor" />
+        </Helmet>
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <div className="pt-20">
+            <DoctorRegistrationForm />
+          </div>
+          <Footer />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
