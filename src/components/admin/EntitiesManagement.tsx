@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 interface Entity {
   id: number;
   naziv?: string;
+  naslov?: string;
   ime?: string;
   prezime?: string;
   email?: string;
@@ -30,6 +31,14 @@ interface Entity {
   aktivan?: boolean;
   status?: string;
   created_at?: string;
+  user?: {
+    id: number;
+    ime: string;
+    prezime: string;
+    email: string;
+  };
+  ime_korisnika?: string;
+  email_korisnika?: string;
 }
 
 interface EntitiesManagementProps {
@@ -85,9 +94,13 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
         const searchLower = searchTerm.toLowerCase();
         return (
           entity.naziv?.toLowerCase().includes(searchLower) ||
+          entity.naslov?.toLowerCase().includes(searchLower) ||
           entity.ime?.toLowerCase().includes(searchLower) ||
           entity.email?.toLowerCase().includes(searchLower) ||
-          entity.grad?.toLowerCase().includes(searchLower)
+          entity.grad?.toLowerCase().includes(searchLower) ||
+          entity.user?.ime?.toLowerCase().includes(searchLower) ||
+          entity.user?.prezime?.toLowerCase().includes(searchLower) ||
+          entity.ime_korisnika?.toLowerCase().includes(searchLower)
         );
       });
       setFilteredEntities(filtered);
@@ -205,7 +218,7 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold truncate">
-                        {entity.naziv || `${entity.ime} ${entity.prezime}`}
+                        {entity.naslov || entity.naziv || `${entity.ime} ${entity.prezime}`}
                       </h3>
                       {entity.aktivan !== undefined && (
                         <Badge variant={entity.aktivan ? 'default' : 'secondary'}>
@@ -219,6 +232,12 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
                       )}
                     </div>
                     <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      {/* Show user info for questions */}
+                      {type === 'questions' && (entity.user || entity.ime_korisnika) && (
+                        <span className="flex items-center gap-1">
+                          👤 {entity.user ? `${entity.user.ime} ${entity.user.prezime}` : entity.ime_korisnika}
+                        </span>
+                      )}
                       {entity.grad && (
                         <span className="flex items-center gap-1">
                           📍 {entity.grad}
@@ -229,9 +248,9 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
                           📞 {entity.telefon}
                         </span>
                       )}
-                      {entity.email && (
+                      {(entity.email || (type === 'questions' && (entity.user?.email || entity.email_korisnika))) && (
                         <span className="flex items-center gap-1 truncate">
-                          ✉️ {entity.email}
+                          ✉️ {entity.email || entity.user?.email || entity.email_korisnika}
                         </span>
                       )}
                     </div>
