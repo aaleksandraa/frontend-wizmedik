@@ -170,6 +170,18 @@ export function DoctorRegistrationForm() {
     );
   }
 
+  // Show loading state while specialties are loading
+  if (specialtiesLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+          <p className="text-gray-600">Učitavanje forme...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* API Error Alert */}
