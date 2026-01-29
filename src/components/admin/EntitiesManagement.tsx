@@ -8,7 +8,7 @@ import {
   Search, Edit, Trash2, Ban, CheckCircle, Eye, 
   FlaskConical, Sparkles, Home as HomeIcon, MessageSquare 
 } from 'lucide-react';
-import api from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 import {
   Dialog,
   DialogContent,
@@ -112,7 +112,7 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
   const fetchEntities = async () => {
     setLoading(true);
     try {
-      const response = await api.get(config.endpoint, { params: { per_page: 1000 } });
+      const response = await adminAPI.get(config.endpoint, { params: { per_page: 1000 } });
       const data = response.data?.data || response.data || [];
       setEntities(Array.isArray(data) ? data : []);
       setFilteredEntities(Array.isArray(data) ? data : []);
@@ -130,7 +130,7 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
 
   const handleToggleStatus = async (entity: Entity) => {
     try {
-      await api.put(`${config.endpoint}/${entity.id}`, {
+      await adminAPI.put(`${config.endpoint}/${entity.id}`, {
         aktivan: !entity.aktivan,
       });
       toast({
@@ -151,7 +151,7 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
     if (!confirm('Da li ste sigurni da želite obrisati ovaj entitet?')) return;
 
     try {
-      await api.delete(`${config.endpoint}/${id}`);
+      await adminAPI.delete(`${config.endpoint}/${id}`);
       toast({
         title: 'Uspjeh',
         description: 'Entitet obrisan',

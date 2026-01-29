@@ -2,11 +2,24 @@ import api from './api';
 
 // Admin API - separated to avoid bundling with public pages
 export const adminAPI = {
+  // Generic admin methods
+  get: (url: string, config?: any) => api.get(url, config),
+  post: (url: string, data?: any, config?: any) => api.post(url, data, config),
+  put: (url: string, data?: any, config?: any) => api.put(url, data, config),
+  delete: (url: string, config?: any) => api.delete(url, config),
+  
+  // User management
   getUsers: (params?: any) => api.get('/admin/users', { params }),
   updateUserRole: (id: number, role: string) => api.put(`/admin/users/${id}/role`, { role }),
+  
+  // Doctor management
+  getDoctors: (params?: any) => api.get('/admin/doctors', { params }),
   createDoctor: (data: any) => api.post('/admin/doctors', data),
   updateDoctor: (id: number, data: any) => api.put(`/admin/doctors/${id}`, data),
   deleteDoctor: (id: number) => api.delete(`/admin/doctors/${id}`),
+  
+  // Clinic management
+  getClinics: (params?: any) => api.get('/admin/clinics', { params }),
   createClinic: (data: any) => api.post('/admin/clinics', data),
   updateClinic: (id: number, data: any) => api.put(`/admin/clinics/${id}`, data),
   deleteClinic: (id: number) => api.delete(`/admin/clinics/${id}`),

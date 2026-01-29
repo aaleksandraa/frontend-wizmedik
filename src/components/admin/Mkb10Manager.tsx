@@ -20,7 +20,7 @@ import {
   Plus, Edit, Trash2, Upload, Download, Search, Loader2,
   FileText, FolderOpen, ChevronRight, RefreshCw
 } from 'lucide-react';
-import api from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 
 interface Kategorija {
   id: number;
@@ -125,8 +125,8 @@ export default function Mkb10Manager() {
     try {
       setLoading(true);
       const [katRes, settingsRes] = await Promise.all([
-        api.get('/admin/mkb10/kategorije'),
-        api.get('/admin/mkb10/settings'),
+        adminAPI.get('/admin/mkb10/kategorije'),
+        adminAPI.get('/admin/mkb10/settings'),
       ]);
       if (katRes.data.success) {
         setKategorije(katRes.data.data);
@@ -143,7 +143,7 @@ export default function Mkb10Manager() {
 
   const loadPodkategorije = async (kategorijaId: number) => {
     try {
-      const res = await api.get(`/admin/mkb10/kategorije/${kategorijaId}/podkategorije`);
+      const res = await adminAPI.get(`/admin/mkb10/kategorije/${kategorijaId}/podkategorije`);
       if (res.data.success) {
         setPodkategorije(res.data.data);
       }
@@ -159,7 +159,7 @@ export default function Mkb10Manager() {
       if (selectedPodkategorija) params.podkategorija_id = selectedPodkategorija;
       if (searchTerm) params.search = searchTerm;
 
-      const res = await api.get('/admin/mkb10/dijagnoze', { params });
+      const res = await adminAPI.get('/admin/mkb10/dijagnoze', { params });
       if (res.data.success) {
         setDijagnoze(res.data.data.data || []);
         setTotalPages(res.data.data.last_page || 1);
@@ -189,10 +189,10 @@ export default function Mkb10Manager() {
     setSaving(true);
     try {
       if (editingKategorija) {
-        await api.put(`/admin/mkb10/kategorije/${editingKategorija.id}`, kategorijaForm);
+        await adminAPI.put(`/admin/mkb10/kategorije/${editingKategorija.id}`, kategorijaForm);
         toast({ title: 'Uspjeh', description: 'Kategorija ažurirana' });
       } else {
-        await api.post('/admin/mkb10/kategorije', kategorijaForm);
+        await adminAPI.post('/admin/mkb10/kategorije', kategorijaForm);
         toast({ title: 'Uspjeh', description: 'Kategorija kreirana' });
       }
       setKategorijaDialog(false);
@@ -207,7 +207,7 @@ export default function Mkb10Manager() {
   const deleteKategorija = async (id: number) => {
     if (!confirm('Da li ste sigurni? Ovo će obrisati i sve podkategorije i dijagnoze!')) return;
     try {
-      await api.delete(`/admin/mkb10/kategorije/${id}`);
+      await adminAPI.delete(`/admin/mkb10/kategorije/${id}`);
       toast({ title: 'Uspjeh', description: 'Kategorija obrisana' });
       loadKategorije();
     } catch (error) {
@@ -237,10 +237,10 @@ export default function Mkb10Manager() {
     setSaving(true);
     try {
       if (editingPodkategorija) {
-        await api.put(`/admin/mkb10/podkategorije/${editingPodkategorija.id}`, podkategorijaForm);
+        await adminAPI.put(`/admin/mkb10/podkategorije/${editingPodkategorija.id}`, podkategorijaForm);
         toast({ title: 'Uspjeh', description: 'Podkategorija ažurirana' });
       } else {
-        await api.post('/admin/mkb10/podkategorije', podkategorijaForm);
+        await adminAPI.post('/admin/mkb10/podkategorije', podkategorijaForm);
         toast({ title: 'Uspjeh', description: 'Podkategorija kreirana' });
       }
       setPodkategorijaDialog(false);
@@ -255,7 +255,7 @@ export default function Mkb10Manager() {
   const deletePodkategorija = async (id: number) => {
     if (!confirm('Da li ste sigurni?')) return;
     try {
-      await api.delete(`/admin/mkb10/podkategorije/${id}`);
+      await adminAPI.delete(`/admin/mkb10/podkategorije/${id}`);
       toast({ title: 'Uspjeh', description: 'Podkategorija obrisana' });
       if (selectedKategorija) loadPodkategorije(selectedKategorija);
     } catch (error) {
@@ -285,10 +285,10 @@ export default function Mkb10Manager() {
     setSaving(true);
     try {
       if (editingDijagnoza) {
-        await api.put(`/admin/mkb10/dijagnoze/${editingDijagnoza.id}`, dijagnozaForm);
+        await adminAPI.put(`/admin/mkb10/dijagnoze/${editingDijagnoza.id}`, dijagnozaForm);
         toast({ title: 'Uspjeh', description: 'Dijagnoza ažurirana' });
       } else {
-        await api.post('/admin/mkb10/dijagnoze', dijagnozaForm);
+        await adminAPI.post('/admin/mkb10/dijagnoze', dijagnozaForm);
         toast({ title: 'Uspjeh', description: 'Dijagnoza kreirana' });
       }
       setDijagnozaDialog(false);
@@ -303,7 +303,7 @@ export default function Mkb10Manager() {
   const deleteDijagnoza = async (id: number) => {
     if (!confirm('Da li ste sigurni?')) return;
     try {
-      await api.delete(`/admin/mkb10/dijagnoze/${id}`);
+      await adminAPI.delete(`/admin/mkb10/dijagnoze/${id}`);
       toast({ title: 'Uspjeh', description: 'Dijagnoza obrisana' });
       loadDijagnoze();
     } catch (error) {
@@ -319,7 +319,7 @@ export default function Mkb10Manager() {
 
     try {
       setSaving(true);
-      const res = await api.post(`/admin/mkb10/import/${type}`, formData, {
+      const res = await adminAPI.post(`/admin/mkb10/import/${type}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast({
@@ -340,7 +340,7 @@ export default function Mkb10Manager() {
   const toggleShowCategoryName = async () => {
     try {
       const newValue = !showCategoryNameInTabs;
-      await api.put('/admin/mkb10/settings', { show_category_name_in_tabs: newValue });
+      await adminAPI.put('/admin/mkb10/settings', { show_category_name_in_tabs: newValue });
       setShowCategoryNameInTabs(newValue);
       toast({ title: 'Uspjeh', description: 'Postavka ažurirana' });
     } catch (error) {

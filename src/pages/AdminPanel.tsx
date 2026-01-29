@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import api, { doctorsAPI, clinicsAPI, citiesAPI, specialtiesAPI, uploadAPI, blogAPI } from '@/services/api';
+import { doctorsAPI, clinicsAPI, citiesAPI, specialtiesAPI, uploadAPI, blogAPI } from '@/services/api';
 import { adminAPI } from '@/services/adminApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -288,8 +288,8 @@ export default function AdminPanel() {
     setLoading(true);
     try {
       const [doctorsRes, clinicsRes, specialtiesRes, citiesRes] = await Promise.all([
-        api.get('/admin/doctors', { params: { per_page: 1000 } }), // Use admin route
-        api.get('/admin/clinics', { params: { per_page: 1000 } }), // Use admin route
+        adminAPI.getDoctors({ per_page: 1000 }),
+        adminAPI.getClinics({ per_page: 1000 }),
         specialtiesAPI.getAll(), 
         adminAPI.getCities()
       ]);

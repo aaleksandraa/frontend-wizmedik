@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar, Plus, Edit2, Trash2, Search, X, Save } from 'lucide-react';
-import api from '@/services/api';
+import { adminAPI } from '@/services/adminApi';
 
 interface CalendarEvent {
   id?: number;
@@ -85,7 +85,7 @@ const MedicalCalendarManagement: React.FC = () => {
     try {
       setLoading(true);
       
-      const response = await api.get('/admin/medical-calendar', {
+      const response = await adminAPI.get('/admin/medical-calendar', {
         params: { per_page: 1000 }
       });
       
@@ -135,9 +135,9 @@ const MedicalCalendarManagement: React.FC = () => {
     e.preventDefault();
     try {
       if (editingEvent?.id) {
-        await api.put(`/admin/medical-calendar/${editingEvent.id}`, formData);
+        await adminAPI.put(`/admin/medical-calendar/${editingEvent.id}`, formData);
       } else {
-        await api.post('/admin/medical-calendar', formData);
+        await adminAPI.post('/admin/medical-calendar', formData);
       }
 
       fetchEvents();
@@ -152,7 +152,7 @@ const MedicalCalendarManagement: React.FC = () => {
     if (!confirm('Da li ste sigurni da želite obrisati ovaj događaj?')) return;
 
     try {
-      await api.delete(`/admin/medical-calendar/${id}`);
+      await adminAPI.delete(`/admin/medical-calendar/${id}`);
       fetchEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
