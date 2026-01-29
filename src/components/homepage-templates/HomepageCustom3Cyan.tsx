@@ -11,7 +11,7 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
-import { adminAPI } from '@/services/adminApi';
+import { settingsAPI } from '@/services/api';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, Heart, Users, Building2, MapPin, ArrowRight,
@@ -49,7 +49,7 @@ export default function HomepageCustom3Cyan() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await adminAPI.getTemplates();
+        const response = await settingsAPI.getTemplates();
         setHeroBgSettings({
           enabled: response.data.custom3_hero_bg_enabled || false,
           image: response.data.custom3_hero_bg_image || null,
