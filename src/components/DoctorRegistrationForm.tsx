@@ -56,9 +56,12 @@ export function DoctorRegistrationForm() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: specialties } = useQuery({
+  const { data: specialties, isLoading: specialtiesLoading, isError: specialtiesError } = useQuery({
     queryKey: ['specialties'],
     queryFn: () => specialtiesAPI.getAll(),
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { register, handleSubmit, formState: { errors }, setValue, watch, trigger } = useForm<RegistrationFormData>({
@@ -169,6 +172,19 @@ export function DoctorRegistrationForm() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {/* API Error Alert */}
+      {specialtiesError && (
+        <Alert className="mb-6 bg-red-50 border-red-200">
+          <AlertCircle className="h-5 w-5 text-red-600" />
+          <AlertDescription className="text-red-800">
+            <div className="font-bold mb-2">Greška pri učitavanju podataka</div>
+            <p className="text-sm">
+              Trenutno ne možemo učitati listu specijalnosti. Molimo osvježite stranicu ili pokušajte kasnije.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
