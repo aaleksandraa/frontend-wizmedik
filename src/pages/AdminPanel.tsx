@@ -17,7 +17,7 @@ import {
   Plus, Edit, Trash2, Users, Building2, Stethoscope, MapPin, Upload, Clock, 
   Palette, Settings, Search, LayoutGrid, List, ChevronRight, Phone, Mail,
   Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical,
-  FlaskConical, Sparkles, Home, MessageSquare
+  FlaskConical, Sparkles, Home, MessageSquare, User
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -39,6 +39,7 @@ import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSetti
 import Mkb10Manager from '@/components/admin/Mkb10Manager';
 import { EntitiesManagement } from '@/components/admin/EntitiesManagement';
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
+import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import {
   DndContext,
   closestCenter,
@@ -958,6 +959,10 @@ export default function AdminPanel() {
                 <Clock className="h-4 w-4 mr-2 hidden sm:inline" />
                 Med. Kalendar
               </TabsTrigger>
+              <TabsTrigger value="profile-settings" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <User className="h-4 w-4 mr-2 hidden sm:inline" />
+                Profil
+              </TabsTrigger>
             </TabsList>
 
             {/* DOCTORS TAB */}
@@ -1466,6 +1471,11 @@ export default function AdminPanel() {
             {/* MEDICAL CALENDAR TAB */}
             <TabsContent value="medical-calendar">
               <MedicalCalendarManagement />
+            </TabsContent>
+
+            {/* PROFILE SETTINGS TAB */}
+            <TabsContent value="profile-settings">
+              <AdminProfileSettings />
             </TabsContent>
           </Tabs>
 
