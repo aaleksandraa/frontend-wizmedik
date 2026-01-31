@@ -9,6 +9,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { initSentry } from "@/config/sentry";
 import { initGA, trackPageView } from "@/config/analytics";
@@ -108,6 +109,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <PageViewTracker />
+              <ScrollToTop />
               <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
