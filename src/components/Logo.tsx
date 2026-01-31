@@ -27,7 +27,7 @@ export function Logo({ className, size = 'md' }: LogoProps) {
       alt="WizMedik"
       className={cn('transition-transform group-hover:scale-105', className)}
       style={{ 
-        height: '70px',
+        height: `${settings.logo_height_desktop || 70}px`,
         width: 'auto',
         objectFit: 'contain'
       }}
@@ -65,7 +65,7 @@ export function LogoCompact({ className }: { className?: string }) {
       alt="WizMedik"
       className={cn(className)}
       style={{ 
-        height: '50px',
+        height: `${settings.logo_height_mobile || 50}px`,
         width: 'auto',
         objectFit: 'contain'
       }}

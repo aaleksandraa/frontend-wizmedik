@@ -104,8 +104,21 @@ export function Footer() {
           <img
             src={logoSettings.footer_logo_url}
             alt="wizMedik"
+            className="hidden md:block"
             style={{
-              height: '70px',
+              height: `${logoSettings.footer_logo_height_desktop || 70}px`,
+              width: 'auto',
+              objectFit: 'contain'
+            }}
+          />
+        )}
+        {logoSettings.footer_logo_type === 'image' && logoSettings.footer_logo_url && (
+          <img
+            src={logoSettings.footer_logo_url}
+            alt="wizMedik"
+            className="block md:hidden"
+            style={{
+              height: `${logoSettings.footer_logo_height_mobile || 50}px`,
               width: 'auto',
               objectFit: 'contain'
             }}

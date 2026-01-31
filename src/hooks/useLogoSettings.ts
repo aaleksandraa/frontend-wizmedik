@@ -12,6 +12,10 @@ interface LogoSettings {
   footer_logo_type: 'image' | 'text';
   show_heart_icon: boolean;
   show_heart_icon_header: boolean;
+  logo_height_desktop: number;
+  logo_height_mobile: number;
+  footer_logo_height_desktop: number;
+  footer_logo_height_mobile: number;
 }
 
 export function useLogoSettings() {
@@ -24,6 +28,10 @@ export function useLogoSettings() {
     footer_logo_type: 'text',
     show_heart_icon: true,
     show_heart_icon_header: true,
+    logo_height_desktop: 70,
+    logo_height_mobile: 50,
+    footer_logo_height_desktop: 70,
+    footer_logo_height_mobile: 50,
   });
   const [loading, setLoading] = useState(true);
 

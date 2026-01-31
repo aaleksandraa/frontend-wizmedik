@@ -20,6 +20,10 @@ interface LogoSettings {
   footer_logo_type: 'image' | 'text';
   show_heart_icon: boolean;
   show_heart_icon_header: boolean;
+  logo_height_desktop: number;
+  logo_height_mobile: number;
+  footer_logo_height_desktop: number;
+  footer_logo_height_mobile: number;
 }
 
 export function LogoSettings() {
@@ -32,6 +36,10 @@ export function LogoSettings() {
     footer_logo_type: 'text',
     show_heart_icon: true,
     show_heart_icon_header: true,
+    logo_height_desktop: 70,
+    logo_height_mobile: 50,
+    footer_logo_height_desktop: 70,
+    footer_logo_height_mobile: 50,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -300,6 +308,44 @@ export function LogoSettings() {
               />
             </div>
 
+            {/* Logo Height Controls */}
+            <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="font-semibold text-blue-900 dark:text-blue-100">Visina Logotipa</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="logo-height-desktop">Desktop (px)</Label>
+                  <input
+                    id="logo-height-desktop"
+                    type="number"
+                    min="20"
+                    max="200"
+                    value={settings.logo_height_desktop}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, logo_height_desktop: parseInt(e.target.value) || 70 }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-muted-foreground">Preporučeno: 60-80px</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="logo-height-mobile">Mobilni (px)</Label>
+                  <input
+                    id="logo-height-mobile"
+                    type="number"
+                    min="20"
+                    max="200"
+                    value={settings.logo_height_mobile}
+                    onChange={(e) => setSettings((prev) => ({ ...prev, logo_height_mobile: parseInt(e.target.value) || 50 }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-muted-foreground">Preporučeno: 40-60px</p>
+                </div>
+              </div>
+            </div>
+
             {/* Preview */}
             <div className="space-y-3">
               <Label className="flex items-center gap-2">
@@ -449,6 +495,44 @@ export function LogoSettings() {
                     setSettings((prev) => ({ ...prev, show_heart_icon: checked }))
                   }
                 />
+              </div>
+
+              {/* Footer Logo Height Controls */}
+              <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <ImageIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  <h3 className="font-semibold text-slate-900 dark:text-slate-100">Visina Footer Logotipa</h3>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="footer-logo-height-desktop">Desktop (px)</Label>
+                    <input
+                      id="footer-logo-height-desktop"
+                      type="number"
+                      min="20"
+                      max="200"
+                      value={settings.footer_logo_height_desktop}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, footer_logo_height_desktop: parseInt(e.target.value) || 70 }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    />
+                    <p className="text-xs text-muted-foreground">Preporučeno: 60-80px</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="footer-logo-height-mobile">Mobilni (px)</Label>
+                    <input
+                      id="footer-logo-height-mobile"
+                      type="number"
+                      min="20"
+                      max="200"
+                      value={settings.footer_logo_height_mobile}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, footer_logo_height_mobile: parseInt(e.target.value) || 50 }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    />
+                    <p className="text-xs text-muted-foreground">Preporučeno: 40-60px</p>
+                  </div>
+                </div>
               </div>
 
               {/* Footer Logo Type Selection */}
