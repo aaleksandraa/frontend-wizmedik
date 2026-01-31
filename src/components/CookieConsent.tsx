@@ -95,7 +95,10 @@ export function CookieConsent() {
   if (!visible || !settings) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] animate-in slide-in-from-bottom duration-300">
+    <div 
+      className="fixed bottom-0 left-0 right-0 animate-in slide-in-from-bottom duration-300"
+      style={{ zIndex: 99999 }}
+    >
       <div className="bg-white border-t border-gray-200 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-3">
           {!showCustomize ? (
