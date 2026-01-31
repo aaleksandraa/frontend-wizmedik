@@ -95,17 +95,9 @@ export function CookieConsent() {
   if (!visible || !settings) return null;
 
   return (
-    <>
-      {/* Overlay/Backdrop - GDPR compliant dark background */}
-      <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] animate-in fade-in duration-300"
-        onClick={() => {}} // Prevent closing by clicking backdrop (GDPR requirement)
-      />
-
-      {/* Cookie Consent Modal - Centered on screen */}
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in zoom-in-95 duration-300">
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] p-4 animate-in slide-in-from-bottom duration-300">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200">
             {/* Header */}
             <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 border-b border-gray-200">
               <div className="flex items-start gap-4">
@@ -288,9 +280,8 @@ export function CookieConsent() {
                 </Link>
               </p>
             </div>
-          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
