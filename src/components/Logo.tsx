@@ -26,7 +26,13 @@ export function Logo({ className, size = 'md' }: LogoProps) {
       src={settings.logo_url}
       alt="WizMedik"
       className={cn('transition-transform group-hover:scale-105', className)}
-      style={{ width: 'auto', height: 'auto', maxWidth: '220px' }}
+      style={{ 
+        width: 'auto', 
+        height: 'auto', 
+        maxWidth: '220px',
+        maxHeight: '40px',
+        objectFit: 'contain'
+      }}
     />
   );
 
@@ -60,7 +66,13 @@ export function LogoCompact({ className }: { className?: string }) {
       src={settings.logo_url}
       alt="WizMedik"
       className={cn(className)}
-      style={{ width: 'auto', height: 'auto', maxWidth: '180px' }}
+      style={{ 
+        width: 'auto', 
+        height: 'auto', 
+        maxWidth: '180px',
+        maxHeight: '32px',
+        objectFit: 'contain'
+      }}
     />
   );
 

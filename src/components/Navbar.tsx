@@ -301,7 +301,7 @@ export function Navbar() {
         <div className="flex h-20 items-center justify-between gap-3">{/* Increased from h-14 to h-20 */}
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <Logo className="h-10" />
+            <Logo />
           </Link>
 
           {/* Desktop Navigation */}
@@ -549,7 +549,7 @@ export function Navbar() {
               <div className="flex flex-col h-full">
                 {/* Mobile Header - Logo and Close Button */}
                 <div className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
-                  <Logo className="h-8" />
+                  <LogoCompact />
                   <Button 
                     variant="ghost" 
                     size="icon" 

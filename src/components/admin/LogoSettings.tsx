@@ -320,7 +320,13 @@ export function LogoSettings() {
                       <img
                         src={previewUrl}
                         alt="Logo"
-                        className="max-h-16 w-auto object-contain"
+                        style={{
+                          width: 'auto',
+                          height: 'auto',
+                          maxWidth: '220px',
+                          maxHeight: '64px',
+                          objectFit: 'contain'
+                        }}
                       />
                       <Button
                         size="sm"
@@ -500,7 +506,13 @@ export function LogoSettings() {
                         <img
                           src={footerPreviewUrl}
                           alt="Footer Logo"
-                          className="max-h-16 w-auto object-contain"
+                          style={{
+                            width: 'auto',
+                            height: 'auto',
+                            maxWidth: '220px',
+                            maxHeight: '64px',
+                            objectFit: 'contain'
+                          }}
                         />
                         <Button
                           size="sm"
