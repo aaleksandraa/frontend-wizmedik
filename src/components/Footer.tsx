@@ -104,7 +104,11 @@ export function Footer() {
           <img
             src={logoSettings.footer_logo_url}
             alt="wizMedik"
-            className="h-10 w-auto object-contain"
+            style={{
+              height: '70px',
+              width: 'auto',
+              objectFit: 'contain'
+            }}
           />
         )}
       </div>
