@@ -321,10 +321,8 @@ export function LogoSettings() {
                         src={previewUrl}
                         alt="Logo"
                         style={{
+                          height: '70px',
                           width: 'auto',
-                          height: 'auto',
-                          maxWidth: '220px',
-                          maxHeight: '64px',
                           objectFit: 'contain'
                         }}
                       />
@@ -380,7 +378,7 @@ export function LogoSettings() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Širina: 220px (visina srazmerna originalnom odnosu). Max 2MB. Format: PNG, JPG, SVG, WebP
+                  Visina: 70px (širina proporcionalna). Max 2MB. Format: PNG, JPG, SVG, WebP
                 </p>
               </div>
             )}
@@ -507,10 +505,8 @@ export function LogoSettings() {
                           src={footerPreviewUrl}
                           alt="Footer Logo"
                           style={{
+                            height: '70px',
                             width: 'auto',
-                            height: 'auto',
-                            maxWidth: '220px',
-                            maxHeight: '64px',
                             objectFit: 'contain'
                           }}
                         />
