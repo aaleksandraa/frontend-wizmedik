@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { doctorsAPI, notifikacijeAPI } from '@/services/api';
 import { useNavbarTheme } from '@/hooks/useNavbarTheme';
-import { Logo } from '@/components/Logo';
+import { Logo, LogoCompact } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
