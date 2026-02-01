@@ -99,7 +99,7 @@ export function RegistrationRequests() {
   };
 
   const handleReject = async (id: number) => {
-    if (!confirm('Da li ste sigurni da želite obrisati ovaj zahtjev? Ova akcija se ne može poništiti.')) {
+    if (!confirm('Da li ste sigurni da želite potpuno obrisati ovaj zahtjev? Ova akcija će obrisati korisnika, email i sve povezane podatke. Ova akcija se ne može poništiti.')) {
       return;
     }
     
@@ -107,19 +107,17 @@ export function RegistrationRequests() {
     try {
       const token = localStorage.getItem('auth_token');
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-      await axios.post(`${API_URL}/admin/registration-requests/${id}/reject`, {
-        rejection_reason: 'Zahtjev odbijen i obrisan od strane administratora'
-      }, {
+      await axios.delete(`${API_URL}/admin/registration-requests/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast({
         title: 'Obrisano',
-        description: 'Zahtjev za registraciju je obrisan',
+        description: 'Zahtjev i svi povezani podaci su potpuno obrisani',
       });
       fetchRequests();
       setShowDetails(false);
     } catch (error: any) {
-      console.error('Error rejecting request:', error);
+      console.error('Error deleting request:', error);
       toast({
         title: 'Greška',
         description: error.response?.data?.message || 'Nije moguće obrisati zahtjev',

@@ -309,7 +309,7 @@ export default function Mkb10() {
       <>
         <Navbar />
         <main className="min-h-screen bg-gray-50 p-8" role="main">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-full mx-auto px-4 md:px-6 lg:px-8">
             <Skeleton className="h-12 w-96 mb-8" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24" />)}
@@ -369,7 +369,7 @@ export default function Mkb10() {
       <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50" role="main">
         {/* Breadcrumbs navigacija */}
         <nav aria-label="Breadcrumb" className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="max-w-full mx-auto px-4 md:px-6 lg:px-8 py-3">
             <ol className="flex items-center space-x-2 text-sm" itemScope itemType="https://schema.org/BreadcrumbList">
               <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
                 <Link to="/" className="text-muted-foreground hover:text-primary flex items-center" itemProp="item">
@@ -389,7 +389,7 @@ export default function Mkb10() {
 
         {/* Hero sekcija sa semantičkim HTML */}
         <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
-          <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-full mx-auto px-4 md:px-6 lg:px-8">
             <div className="flex items-center gap-4 mb-4">
               <BookOpen className="h-10 w-10" aria-hidden="true" />
               <h1 className="text-3xl md:text-4xl font-bold">
@@ -419,7 +419,7 @@ export default function Mkb10() {
         </header>
 
         {/* Glavni sadržaj */}
-        <article className="max-w-7xl mx-auto px-4 py-8">
+        <article className="max-w-full mx-auto px-4 md:px-6 lg:px-8 py-8">
           {/* Uvodni tekst za SEO */}
           <section className="mb-8 prose prose-blue max-w-none" aria-labelledby="intro-heading">
             <h2 id="intro-heading" className="sr-only">O MKB-10 klasifikaciji</h2>
