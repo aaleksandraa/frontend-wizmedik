@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { legalAPI } from '@/services/api';
 import { Cookie, X, Shield, BarChart3, Target, CheckCircle2 } from 'lucide-react';
 
@@ -190,18 +191,10 @@ export function CookieConsent() {
                       <p className="text-xs text-gray-500">Anonimni podaci za poboljšanje</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => togglePreference('analytics')}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      preferences.analytics ? 'bg-primary' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                        preferences.analytics ? 'translate-x-5' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+                  <Switch
+                    checked={preferences.analytics}
+                    onCheckedChange={() => togglePreference('analytics')}
+                  />
                 </div>
 
                 {/* Marketing Cookies */}
@@ -213,18 +206,10 @@ export function CookieConsent() {
                       <p className="text-xs text-gray-500">Relevantni oglasi</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => togglePreference('marketing')}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      preferences.marketing ? 'bg-primary' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                        preferences.marketing ? 'translate-x-5' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+                  <Switch
+                    checked={preferences.marketing}
+                    onCheckedChange={() => togglePreference('marketing')}
+                  />
                 </div>
               </div>
 
