@@ -28,12 +28,18 @@ export default function Spas() {
   const [indikacije, setIndikacije] = useState<Record<string, Indikacija[]>>({});
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [gradInput, setGradInput] = useState(grad || '');
+  const [gradInput, setGradInput] = useState(() => {
+    const gradParam = searchParams.get('grad') || '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+  });
   const [showGradSuggestions, setShowGradSuggestions] = useState(false);
   
   const [filters, setFilters] = useState<BanjaFilters>({
     search: searchParams.get('search') || '',
-    grad: grad || searchParams.get('grad') || '',
+    grad: (() => {
+      const gradParam = searchParams.get('grad') || '';
+      return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+    })(),
     vrsta_id: searchParams.get('vrsta_id') ? Number(searchParams.get('vrsta_id')) : undefined,
     indikacija_id: searchParams.get('indikacija_id') ? Number(searchParams.get('indikacija_id')) : undefined,
     medicinski_nadzor: searchParams.get('medicinski_nadzor') === 'true',
@@ -51,13 +57,12 @@ export default function Spas() {
     loadBanje();
   }, [filters]);
 
-  // Update filter when URL param changes
+  // Set gradInput when filters.grad is loaded from URL
   useEffect(() => {
-    if (grad) {
-      setFilters(prev => ({ ...prev, grad }));
-      setGradInput(grad);
+    if (filters.grad) {
+      setGradInput(filters.grad);
     }
-  }, [grad]);
+  }, [filters.grad]);
 
   // Convert allCities to gradovi format for compatibility
   const gradovi = useMemo(() => 
@@ -165,11 +170,18 @@ export default function Spas() {
 
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
+  // Dynamic page title
+  const pageTitle = useMemo(() => {
+    let title = 'Banje';
+    if (filters.grad) title += ` - ${filters.grad}`;
+    return title;
+  }, [filters.grad]);
+
   return (
     <>
       <Helmet>
-        <title>Banje i Rehabilitacija - wizMedik</title>
-        <meta name="description" content="Pronađite najbolje banje i rehabilitacione centre u Bosni i Hercegovini. Termalne, mineralne, sumporne banje sa medicinskim nadzorom." />
+        <title>{pageTitle} | WizMedik</title>
+        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
       </Helmet>
 
       <Navbar />
@@ -185,11 +197,11 @@ export default function Spas() {
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Droplet className="w-12 h-12 hidden md:block" />
                 <h1 className="text-4xl md:text-5xl font-bold">
-                  Banje i Rehabilitacija
+                  {pageTitle}
                 </h1>
               </div>
               <p className="text-xl text-blue-100 mb-8">
-                Pronađite najbolje banje i rehabilitacione centre za vaše zdravlje
+                Pregledajte profile, zakažite termin online ili kontaktirajte.
               </p>
               
               {/* Link to Indikacije page */}

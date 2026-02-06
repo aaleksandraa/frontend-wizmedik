@@ -89,10 +89,16 @@ export default function CareHomes() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
-  // Filter states (prioritize URL path param over query param)
+  // Filter states (prioritize URL query param over path param)
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [gradInput, setGradInput] = useState(grad || searchParams.get('grad') || '');
-  const [selectedGrad, setSelectedGrad] = useState(grad || searchParams.get('grad') || '');
+  const [gradInput, setGradInput] = useState(() => {
+    const gradParam = searchParams.get('grad') || '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+  });
+  const [selectedGrad, setSelectedGrad] = useState(() => {
+    const gradParam = searchParams.get('grad') || '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+  });
   const [selectedTipDoma, setSelectedTipDoma] = useState(searchParams.get('tip_doma') || '');
   const [selectedNivoNjege, setSelectedNivoNjege] = useState(searchParams.get('nivo_njege') || '');
   const [selectedProgrami, setSelectedProgrami] = useState<string[]>(
@@ -118,13 +124,12 @@ export default function CareHomes() {
     fetchDomovi();
   }, [selectedGrad, selectedTipDoma, selectedNivoNjege, selectedProgrami, search]);
 
-  // Update filter when URL param changes
+  // Set gradInput when selectedGrad is loaded from URL
   useEffect(() => {
-    if (grad) {
-      setSelectedGrad(grad);
-      setGradInput(grad);
+    if (selectedGrad) {
+      setGradInput(selectedGrad);
     }
-  }, [grad]);
+  }, [selectedGrad]);
 
   const fetchFilterOptions = async () => {
     try {
@@ -196,6 +201,12 @@ export default function CareHomes() {
   ].filter(Boolean).length;
 
   // SEO: Dynamic title and description based on filters
+  const pageTitle = useMemo(() => {
+    let title = 'Domovi za njegu';
+    if (selectedGrad) title += ` - ${selectedGrad}`;
+    return title;
+  }, [selectedGrad]);
+
   const seoTitle = useMemo(() => {
     const parts = ['Domovi za starija i bolesna lica'];
     if (selectedGrad) parts.push(`u ${selectedGrad}u`);
@@ -337,13 +348,13 @@ export default function CareHomes() {
   return (
     <>
       <Helmet>
-        <title>{seoTitle}</title>
-        <meta name="description" content={seoDescription} />
+        <title>{pageTitle} | WizMedik</title>
+        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
         <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, starački dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontološki centar, smještaj starijih osoba`} />
         
         {/* Open Graph */}
-        <meta property="og:title" content={seoTitle} />
-        <meta property="og:description" content={seoDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="WizMedik" />
@@ -352,8 +363,8 @@ export default function CareHomes() {
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={seoTitle} />
-        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
         
         {/* Canonical */}
         <link rel="canonical" href={canonicalUrl} />
@@ -392,12 +403,11 @@ export default function CareHomes() {
               <div className="flex items-center justify-center gap-3 mb-4">
                 <HomeIcon className="h-12 w-12 hidden md:block" aria-hidden="true" />
                 <h1 className="text-4xl md:text-5xl font-bold">
-                  Domovi za starija i bolesna lica
-                  {selectedGrad && <span className="block text-2xl md:text-3xl mt-2 font-normal opacity-90">u {selectedGrad}u</span>}
+                  {pageTitle}
                 </h1>
               </div>
               <p className="text-xl opacity-90 max-w-3xl mx-auto mb-8">
-                Pronađite kvalitetnu njegu i smještaj za vaše najdraže. Uporedite {domovi.length > 0 ? domovi.length : ''} verificiranih domova u Bosni i Hercegovini.
+                Pregledajte profile, zakažite termin online ili kontaktirajte.
               </p>
               
               {/* Link to Vodic page */}
