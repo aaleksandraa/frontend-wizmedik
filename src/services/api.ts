@@ -370,6 +370,8 @@ export const domoviAPI = {
   getBySlug: (slug: string) => api.get(`/domovi-njega/${slug}`),
   getByGrad: (grad: string) => api.get('/domovi-njega', { params: { grad } }),
   getFilterOptions: () => api.get('/domovi-njega/filter-options'),
+  posaljiUpit: (id: number, data: any) => api.post(`/domovi-njega/${id}/upit`, data),
+  dodajRecenziju: (id: number, data: any) => api.post(`/domovi-njega/${id}/recenzija`, data),
 };
 
 

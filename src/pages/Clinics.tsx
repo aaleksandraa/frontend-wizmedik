@@ -40,6 +40,7 @@ type SortOption = 'name' | 'rating' | 'distance';
 
 export default function Clinics() {
   const { grad, specijalnost } = useParams<{ grad?: string; specijalnost?: string }>();
+  const [searchParams] = useSearchParams();
   const { template } = useListingTemplate('clinics');
   const { cities: allCities } = useAllCities(); // Get all cities from database
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -47,7 +48,10 @@ export default function Clinics() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [citySearch, setCitySearch] = useState('');
-  const [selectedCity, setSelectedCity] = useState<string>(grad || '');
+  const [selectedCity, setSelectedCity] = useState<string>(() => {
+    const gradParam = searchParams.get('grad') || '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+  });
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [selectedParentSpecialty, setSelectedParentSpecialty] = useState<string>(specijalnost || '');
   const [selectedSubSpecialties, setSelectedSubSpecialties] = useState<string[]>([]);
@@ -103,6 +107,13 @@ export default function Clinics() {
       setSelectedParentSpecialty(specijalnost);
     }
   }, [grad, specijalnost]);
+
+  // Set citySearch when selectedCity is loaded from URL
+  useEffect(() => {
+    if (selectedCity) {
+      setCitySearch(selectedCity);
+    }
+  }, [selectedCity]);
 
   useEffect(() => {
     filterClinics();
@@ -274,6 +285,13 @@ export default function Clinics() {
     );
   }
 
+  // Dynamic page title
+  const pageTitle = useMemo(() => {
+    let title = 'Klinike';
+    if (selectedCity) title += ` - ${selectedCity}`;
+    return title;
+  }, [selectedCity]);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -295,12 +313,12 @@ export default function Clinics() {
   return (
     <>
       <Helmet>
-        <title>Privatne klinike u BiH - Zdravstvene ustanove | WizMedik</title>
-        <meta name="description" content="Pronađite privatne klinike u Bosni i Hercegovini. Sarajevo, Banja Luka, Tuzla, Mostar. Moderne zdravstvene ustanove sa stručnim osobljem." />
+        <title>{pageTitle} | WizMedik</title>
+        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
         <meta name="keywords" content="privatne klinike bih, klinika sarajevo, klinika banja luka, zdravstvene ustanove, poliklinika, medicinski centar" />
         <link rel="canonical" href="https://wizmedik.com/klinike" />
-        <meta property="og:title" content="Privatne klinike u BiH" />
-        <meta property="og:description" content="Pronađite privatne klinike u Bosni i Hercegovini. Moderne zdravstvene ustanove." />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
         <meta property="og:url" content="https://wizmedik.com/klinike" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
@@ -313,7 +331,7 @@ export default function Clinics() {
             {/* Mobile: No icon, smaller font */}
             <div className="md:hidden mb-4">
               <h1 className="text-2xl font-bold text-foreground">
-                Privatne klinike u Bosni i Hercegovini
+                {pageTitle}
               </h1>
             </div>
             
@@ -321,12 +339,12 @@ export default function Clinics() {
             <div className="hidden md:flex items-center justify-center gap-3 mb-4">
               <Building2 className="h-10 w-10 text-primary" />
               <h1 className="text-4xl font-bold text-foreground">
-                Privatne klinike u Bosni i Hercegovini
+                {pageTitle}
               </h1>
             </div>
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Pronađite najbližu kliniku sa stručnim osobljem i modernom opremom
+              Pregledajte profile, zakažite termin online ili kontaktirajte.
             </p>
           </div>
 

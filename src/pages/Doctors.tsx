@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { doctorsAPI, specialtiesAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -39,12 +40,17 @@ type SortOption = 'name' | 'rating' | 'distance';
 
 export default function Doctors() {
   const { template } = useListingTemplate('doctors');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [citySearch, setCitySearch] = useState('');
-  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [selectedCity, setSelectedCity] = useState<string>(() => {
+    const gradParam = searchParams.get('grad') || '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+  });
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [selectedParentSpecialty, setSelectedParentSpecialty] = useState<string>('');
   const [selectedSubSpecialties, setSelectedSubSpecialties] = useState<string[]>([]);
@@ -60,6 +66,13 @@ export default function Doctors() {
     fetchSpecialties();
     fetchSplitViewSetting();
   }, []);
+
+  // Set citySearch when selectedCity is loaded from URL
+  useEffect(() => {
+    if (selectedCity) {
+      setCitySearch(selectedCity);
+    }
+  }, [selectedCity]);
 
   const fetchDoctors = async () => {
     try {
@@ -272,10 +285,15 @@ export default function Doctors() {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Stethoscope className="hidden md:block h-10 w-10 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">Doktori u Bosni i Hercegovini</h1>
+              <h1 className="text-4xl font-bold text-foreground">
+                {selectedCity ? `Doktori - ${selectedCity}` : 'Doktori u Bosni i Hercegovini'}
+              </h1>
             </div>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Pronađite najboljeg doktora za vaše potrebe - kardiolozi, pedijatri, ginekolozi i drugi specijalisti
+              {selectedCity 
+                ? `Pregledajte profile, zakažite termin online ili kontaktirajte.`
+                : 'Pronađite najboljeg doktora za vaše potrebe - kardiolozi, pedijatri, ginekolozi i drugi specijalisti'
+              }
             </p>
           </div>
 

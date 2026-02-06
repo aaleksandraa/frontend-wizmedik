@@ -1,17 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { format } from 'date-fns';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   MapPin, Phone, Mail, Globe, Clock, Heart, Shield, Activity, 
-  Users, Home, Star, ChevronLeft, CheckCircle, Navigation
+  Users, Home, Star, ChevronLeft, CheckCircle, Navigation, Send
 } from 'lucide-react';
 import { LocationMapCard } from '@/components/LocationMapCard';
+import { domoviAPI } from '@/services/api';
+import { DomUpitFormData } from '@/types/careHome';
+import { toast } from 'sonner';
 
 interface Dom {
   id: number;
@@ -24,6 +32,7 @@ interface Dom {
   email?: string;
   website?: string;
   opis: string;
+  online_upit?: boolean;
   tip_doma: { id: number; naziv: string; slug: string };
   nivo_njege: { id: number; naziv: string; slug: string };
   programi_njege: Array<{ id: number; naziv: string; slug: string }>;
@@ -54,6 +63,18 @@ export default function CareHomeProfile() {
   const [dom, setDom] = useState<Dom | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showUpitForm, setShowUpitForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [upitForm, setUpitForm] = useState<DomUpitFormData>({
+    ime: '',
+    email: '',
+    telefon: '',
+    poruka: '',
+    opis_potreba: '',
+    zelja_posjeta: '',
+    tip: 'upit',
+  });
 
   useEffect(() => {
     fetchDom();
@@ -62,10 +83,9 @@ export default function CareHomeProfile() {
   const fetchDom = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/domovi-njega/${slug}`);
-      const data = await response.json();
-      if (data.success) {
-        setDom(data.data);
+      const response = await domoviAPI.getBySlug(slug!);
+      if (response.data.success) {
+        setDom(response.data.data);
       } else {
         setError('Dom nije pronađen');
       }
@@ -73,6 +93,31 @@ export default function CareHomeProfile() {
       setError('Greška pri učitavanju podataka');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpitSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dom) return;
+
+    setSubmitting(true);
+    try {
+      await domoviAPI.posaljiUpit(dom.id, upitForm);
+      toast.success('Upit je uspješno poslat!');
+      setShowUpitForm(false);
+      setUpitForm({
+        ime: '',
+        email: '',
+        telefon: '',
+        poruka: '',
+        opis_potreba: '',
+        zelja_posjeta: '',
+        tip: 'upit',
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Greška pri slanju upita');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -349,6 +394,99 @@ export default function CareHomeProfile() {
                 googleMapsLink={dom.google_maps_link}
                 markerColor="green"
               />
+
+              {/* Action Button */}
+              {dom.online_upit && (
+                <Button 
+                  onClick={() => setShowUpitForm(!showUpitForm)} 
+                  className="w-full"
+                  size="lg"
+                >
+                  <Send className="w-5 h-5 mr-2" />
+                  Pošalji upit
+                </Button>
+              )}
+
+              {/* Upit Form */}
+              {showUpitForm && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pošalji upit</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleUpitSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="ime">Ime i prezime *</Label>
+                        <Input
+                          id="ime"
+                          value={upitForm.ime}
+                          onChange={(e) => setUpitForm({ ...upitForm, ime: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={upitForm.email}
+                          onChange={(e) => setUpitForm({ ...upitForm, email: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="telefon">Telefon</Label>
+                        <Input
+                          id="telefon"
+                          value={upitForm.telefon}
+                          onChange={(e) => setUpitForm({ ...upitForm, telefon: e.target.value })}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="opis_potreba">Opis potreba</Label>
+                        <Textarea
+                          id="opis_potreba"
+                          rows={3}
+                          value={upitForm.opis_potreba}
+                          onChange={(e) => setUpitForm({ ...upitForm, opis_potreba: e.target.value })}
+                          placeholder="Opišite potrebe za njegom..."
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="zelja_posjeta">Želja za posjetom</Label>
+                        <DatePicker
+                          date={upitForm.zelja_posjeta ? new Date(upitForm.zelja_posjeta) : undefined}
+                          onSelect={(date) => setUpitForm({ 
+                            ...upitForm, 
+                            zelja_posjeta: date ? format(date, 'yyyy-MM-dd') : '' 
+                          })}
+                          placeholder="Odaberite datum posjete"
+                          minDate={new Date()}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="poruka">Poruka *</Label>
+                        <Textarea
+                          id="poruka"
+                          rows={4}
+                          value={upitForm.poruka}
+                          onChange={(e) => setUpitForm({ ...upitForm, poruka: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <Button type="submit" className="w-full" disabled={submitting}>
+                        {submitting ? 'Slanje...' : 'Pošalji upit'}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </main>

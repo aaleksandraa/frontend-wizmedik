@@ -77,7 +77,15 @@ export default function Laboratories() {
   const [kategorije, setKategorije] = useState<KategorijaAnalize[]>([]);
   
   // Filter states from URL params (prioritize URL path param over query param)
-  const [selectedGrad, setSelectedGrad] = useState(grad || searchParams.get('grad') || '');
+  const [selectedGrad, setSelectedGrad] = useState(() => {
+    const gradParam = grad || searchParams.get('grad') || '';
+    // Ako je gradParam slug (sadrži crtice), pokušaj da nađeš pravi naziv
+    if (gradParam.includes('-') || gradParam.includes('+')) {
+      const decodedGrad = decodeURIComponent(gradParam.replace(/\+/g, ' '));
+      return decodedGrad;
+    }
+    return gradParam;
+  });
   const [selectedKategorija, setSelectedKategorija] = useState(searchParams.get('kategorija') || '');
   
   // Popover states
@@ -199,7 +207,7 @@ export default function Laboratories() {
   const jsonLd = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": selectedGrad ? `Laboratorije u ${selectedGrad}u` : "Medicinske laboratorije",
+    "name": selectedGrad ? `Laboratorije - ${selectedGrad}` : "Medicinske laboratorije",
     "description": metaDescription,
     "numberOfItems": filteredLaboratories.length,
     "itemListElement": filteredLaboratories.slice(0, 10).map((lab, index) => ({
@@ -253,7 +261,7 @@ export default function Laboratories() {
               className="max-w-4xl mx-auto text-center"
             >
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                {selectedGrad ? `Laboratorije u ${selectedGrad}u` : 'Medicinske Laboratorije'}
+                {selectedGrad ? `Laboratorije - ${selectedGrad}` : 'Medicinske Laboratorije'}
               </h1>
               <p className="text-gray-600 mb-6">
                 {selectedKategorijaName 
@@ -469,7 +477,7 @@ export default function Laboratories() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                {selectedGrad ? `Laboratorije u ${selectedGrad}u` : 'Sve Laboratorije'}
+                {selectedGrad ? `Laboratorije - ${selectedGrad}` : 'Sve Laboratorije'}
                 {selectedKategorijaName && ` - ${selectedKategorijaName}`}
               </h2>
               <p className="text-sm text-gray-500">
