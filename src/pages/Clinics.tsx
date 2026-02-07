@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { clinicsAPI, specialtiesAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
@@ -117,7 +117,7 @@ export default function Clinics() {
 
   useEffect(() => {
     filterClinics();
-  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, hierarchicalSpecialties]);
+  }, [filterClinics]);
 
   const selectedParentData = useMemo(() => {
     if (!selectedParentSpecialty) return null;
@@ -163,7 +163,7 @@ export default function Clinics() {
     }
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -172,9 +172,9 @@ export default function Clinics() {
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
-  };
+  }, []);
 
-  const filterClinics = () => {
+  const filterClinics = useCallback(() => {
     let filtered = clinics.map(clinic => ({
       ...clinic,
       distance: userLocation && clinic.latitude && clinic.longitude
@@ -237,7 +237,7 @@ export default function Clinics() {
     });
 
     setFilteredClinics(filtered);
-  };
+  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, hierarchicalSpecialties, calculateDistance]);
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
