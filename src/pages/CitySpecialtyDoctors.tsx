@@ -162,7 +162,7 @@ export default function CitySpecialtyDoctors() {
     : specialtyName 
     ? `${specialtyName} - Doktori specijalisti`
     : cityName
-    ? `Doktori u ${cityName}u`
+    ? `Doktori - ${cityName}`
     : 'Pretraga doktora';
 
   const pageDescription = specialtyName && cityName
@@ -170,7 +170,7 @@ export default function CitySpecialtyDoctors() {
     : specialtyName
     ? `Lista doktora specijalista iz oblasti ${specialtyName.toLowerCase()}. Zakažite pregled kod stručnjaka sa najboljim ocjenama.`
     : cityName
-    ? `Svi doktori u ${cityName}u. Pregledajte profile, ocjene pacijenata i zakažite termin online.`
+    ? `Pregledajte profile, zakažite termin online ili kontaktirajte.`
     : 'Pretražite doktore po gradu i specijalnosti.';
 
   return (
@@ -199,7 +199,7 @@ export default function CitySpecialtyDoctors() {
                   { label: cityName }
                 ]
               : cityName 
-              ? [{ label: `Doktori u ${cityName}u` }]
+              ? [{ label: `Doktori - ${cityName}` }]
               : specialtyName
               ? [{ label: specialtyName }]
               : []
@@ -217,7 +217,7 @@ export default function CitySpecialtyDoctors() {
               {!specialtyName && cityName && (
                 <>
                   <MapPin className="inline w-8 h-8 mr-2 text-primary" />
-                  Doktori u {cityName}u
+                  Doktori - {cityName}
                 </>
               )}
               {specialtyName && !cityName && (
