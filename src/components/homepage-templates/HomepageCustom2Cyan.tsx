@@ -62,23 +62,11 @@ export default function HomepageCustom2Cyan() {
     else if (selectedType === 'banje') url = '/banje';
     else if (selectedType === 'domovi') url = '/domovi-njega';
     
-    // Convert city name to URL-friendly slug for path parameter
+    // Add city as query parameter
     if (selectedCity) {
       const selectedCityData = allCities.find((city: any) => city.slug === selectedCity);
       if (selectedCityData) {
-        // Create URL-friendly slug from city name
-        const citySlug = selectedCityData.naziv
-          .toLowerCase()
-          .replace(/\s+/g, '-')           // Replace spaces with hyphens
-          .replace(/[čć]/g, 'c')          // Replace č, ć with c
-          .replace(/[šž]/g, 's')          // Replace š, ž with s  
-          .replace(/đ/g, 'd')             // Replace đ with d
-          .replace(/[^a-z0-9-]/g, '')     // Remove any other special characters
-          .replace(/-+/g, '-')            // Replace multiple hyphens with single
-          .replace(/^-|-$/g, '');         // Remove leading/trailing hyphens
-        
-        // Add city as path parameter
-        url = `${url}/${citySlug}`;
+        params.set('grad', selectedCityData.naziv);
       }
     }
     
@@ -87,7 +75,7 @@ export default function HomepageCustom2Cyan() {
       params.set('specijalnost', selectedSpecialty);
     }
     
-    // Generate final URL with query parameters if any
+    // Generate final URL with query parameters
     const queryString = params.toString();
     const finalUrl = queryString ? `${url}?${queryString}` : url;
     
