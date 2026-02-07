@@ -119,8 +119,6 @@ const App = () => {
               <Route path="/klinike" element={<Clinics />} />
               <Route path="/klinika/:slug" element={<ClinicProfile />} />
               <Route path="/klinike/specijalnost/:specijalnost" element={<ClinicsBySpecialty />} />
-              <Route path="/klinike/:grad" element={<Clinics />} />
-              <Route path="/klinike/:grad/:specijalnost" element={<Clinics />} />
               <Route path="/specijalnosti" element={<Specialties />} />
               <Route path="/doktori" element={<Doctors />} />
               <Route path="/doktori/lista" element={<DoctorsCompactList />} />
@@ -131,17 +129,14 @@ const App = () => {
               } />
               <Route path="/laboratorije" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />
-              <Route path="/laboratorije/:grad" element={<Laboratories />} />
               
               <Route path="/banje" element={<Spas />} />
               <Route path="/banje/indikacije-terapije" element={<SpaIndikacije />} />
               <Route path="/banja/:slug" element={<SpaProfile />} />
-              <Route path="/banje/:grad" element={<Spas />} />
               
               <Route path="/domovi-njega" element={<CareHomes />} />
               <Route path="/domovi-njega/vodic" element={<CareHomesVodic />} />
               <Route path="/dom-njega/:slug" element={<CareHomeProfile />} />
-              <Route path="/domovi-njega/:grad" element={<CareHomes />} />
               <Route path="/mkb10" element={<Mkb10 />} />
               <Route path="/specijalnost/:naziv" element={<SpecialtyLanding />} />
               <Route path="/gradovi" element={<Cities />} />
