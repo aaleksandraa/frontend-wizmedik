@@ -61,29 +61,6 @@ export default function Clinics() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
-  const fetchClinics = async () => {
-    try {
-      const response = await clinicsAPI.getAll();
-      const clinicsList = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data?.data || []);
-      setClinics(clinicsList);
-    } catch (error) {
-      console.error('Error fetching clinics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSpecialties = async () => {
-    try {
-      const response = await specialtiesAPI.getAll();
-      setSpecialties(response.data || []);
-    } catch (error) {
-      console.error('Error fetching specialties:', error);
-    }
-  };
-
   // API already returns top-level specialties with children included
   const hierarchicalSpecialties = useMemo(() => {
     return specialties.map((parent: any) => ({
@@ -91,77 +68,6 @@ export default function Clinics() {
       children: parent.children || []
     }));
   }, [specialties]);
-
-  useEffect(() => {
-    fetchClinics();
-    fetchSpecialties();
-  }, []);
-
-  // Update filters when URL params change
-  useEffect(() => {
-    if (grad) {
-      setSelectedCity(grad);
-      setCitySearch(grad);
-    }
-    if (specijalnost) {
-      setSelectedParentSpecialty(specijalnost);
-    }
-  }, [grad, specijalnost]);
-
-  // Set citySearch when selectedCity is loaded from URL
-  useEffect(() => {
-    if (selectedCity) {
-      setCitySearch(selectedCity);
-    }
-  }, [selectedCity]);
-
-  useEffect(() => {
-    filterClinics();
-  }, [filterClinics]);
-
-  const selectedParentData = useMemo(() => {
-    if (!selectedParentSpecialty) return null;
-    return hierarchicalSpecialties.find(s => s.id.toString() === selectedParentSpecialty);
-  }, [selectedParentSpecialty, hierarchicalSpecialties]);
-
-  // Use all cities from database instead of extracting from clinics
-  const uniqueCities = useMemo(() => {
-    return allCities.map(city => city.naziv).sort();
-  }, [allCities]);
-
-  const filteredCities = useMemo(() => {
-    if (!citySearch) return uniqueCities;
-    return uniqueCities.filter(city => 
-      city.toLowerCase().includes(citySearch.toLowerCase())
-    );
-  }, [uniqueCities, citySearch]);
-
-  const toggleLocation = () => {
-    if (useLocation) {
-      setUseLocation(false);
-      setUserLocation(null);
-      setSortBy('name');
-    } else {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            });
-            setUseLocation(true);
-            setSortBy('distance');
-          },
-          (error) => {
-            console.error('Error getting location:', error);
-            alert('Nije moguće pristupiti vašoj lokaciji.');
-          }
-        );
-      } else {
-        alert('Vaš browser ne podržava geolokaciju.');
-      }
-    }
-  };
 
   const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371;
@@ -239,6 +145,107 @@ export default function Clinics() {
     setFilteredClinics(filtered);
   }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, calculateDistance]);
 
+  const fetchClinics = async () => {
+    try {
+      const response = await clinicsAPI.getAll();
+      const clinicsList = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data?.data || []);
+      setClinics(clinicsList);
+    } catch (error) {
+      console.error('Error fetching clinics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await specialtiesAPI.getAll();
+      setSpecialties(response.data || []);
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchClinics();
+    fetchSpecialties();
+  }, []);
+
+  // Update filters when URL params change
+  useEffect(() => {
+    if (grad) {
+      setSelectedCity(grad);
+      setCitySearch(grad);
+    }
+    if (specijalnost) {
+      setSelectedParentSpecialty(specijalnost);
+    }
+  }, [grad, specijalnost]);
+
+  // Set citySearch when selectedCity is loaded from URL
+  useEffect(() => {
+    if (selectedCity) {
+      setCitySearch(selectedCity);
+    }
+  }, [selectedCity]);
+
+  useEffect(() => {
+    filterClinics();
+  }, [filterClinics]);
+
+  const selectedParentData = useMemo(() => {
+    if (!selectedParentSpecialty) return null;
+    return hierarchicalSpecialties.find(s => s.id.toString() === selectedParentSpecialty);
+  }, [selectedParentSpecialty, hierarchicalSpecialties]);
+
+  // Use all cities from database instead of extracting from clinics
+  const uniqueCities = useMemo(() => {
+    return allCities.map(city => city.naziv).sort();
+  }, [allCities]);
+
+  const filteredCities = useMemo(() => {
+    if (!citySearch) return uniqueCities;
+    return uniqueCities.filter(city => 
+      city.toLowerCase().includes(citySearch.toLowerCase())
+    );
+  }, [uniqueCities, citySearch]);
+
+  // Dynamic page title - MOVED BEFORE LOADING CHECK
+  const pageTitle = useMemo(() => {
+    let title = 'Klinike';
+    if (selectedCity) title += ` - ${selectedCity}`;
+    return title;
+  }, [selectedCity]);
+
+  const toggleLocation = () => {
+    if (useLocation) {
+      setUseLocation(false);
+      setUserLocation(null);
+      setSortBy('name');
+    } else {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+            setUseLocation(true);
+            setSortBy('distance');
+          },
+          (error) => {
+            console.error('Error getting location:', error);
+            alert('Nije moguće pristupiti vašoj lokaciji.');
+          }
+        );
+      } else {
+        alert('Vaš browser ne podržava geolokaciju.');
+      }
+    }
+  };
+
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
     setCitySearch(city);
@@ -284,13 +291,6 @@ export default function Clinics() {
       </div>
     );
   }
-
-  // Dynamic page title
-  const pageTitle = useMemo(() => {
-    let title = 'Klinike';
-    if (selectedCity) title += ` - ${selectedCity}`;
-    return title;
-  }, [selectedCity]);
 
   const structuredData = {
     "@context": "https://schema.org",
