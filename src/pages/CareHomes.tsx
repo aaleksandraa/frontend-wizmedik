@@ -89,14 +89,14 @@ export default function CareHomes() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
-  // Filter states (prioritize URL query param over path param)
+  // Filter states (prioritize URL path param over query param)
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [gradInput, setGradInput] = useState(() => {
-    const gradParam = searchParams.get('grad') || '';
+    const gradParam = grad || searchParams.get('grad') || '';
     return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
   });
   const [selectedGrad, setSelectedGrad] = useState(() => {
-    const gradParam = searchParams.get('grad') || '';
+    const gradParam = grad || searchParams.get('grad') || '';
     return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
   });
   const [selectedTipDoma, setSelectedTipDoma] = useState(searchParams.get('tip_doma') || '');
@@ -123,6 +123,15 @@ export default function CareHomes() {
   useEffect(() => {
     fetchDomovi();
   }, [selectedGrad, selectedTipDoma, selectedNivoNjege, selectedProgrami, search]);
+
+  // Update filters when URL path param changes
+  useEffect(() => {
+    if (grad) {
+      const decodedGrad = decodeURIComponent(grad.replace(/\+/g, ' '));
+      setGradInput(decodedGrad);
+      setSelectedGrad(decodedGrad);
+    }
+  }, [grad]);
 
   // Set gradInput when selectedGrad is loaded from URL
   useEffect(() => {

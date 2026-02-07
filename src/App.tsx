@@ -117,6 +117,7 @@ const App = () => {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/klinike" element={<Clinics />} />
+              <Route path="/klinike/:grad" element={<Clinics />} />
               <Route path="/klinika/:slug" element={<ClinicProfile />} />
               <Route path="/klinike/specijalnost/:specijalnost" element={<ClinicsBySpecialty />} />
               <Route path="/specijalnosti" element={<Specialties />} />
@@ -128,13 +129,16 @@ const App = () => {
                 </Suspense>
               } />
               <Route path="/laboratorije" element={<Laboratories />} />
+              <Route path="/laboratorije/:grad" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />
               
               <Route path="/banje" element={<Spas />} />
+              <Route path="/banje/:grad" element={<Spas />} />
               <Route path="/banje/indikacije-terapije" element={<SpaIndikacije />} />
               <Route path="/banja/:slug" element={<SpaProfile />} />
               
               <Route path="/domovi-njega" element={<CareHomes />} />
+              <Route path="/domovi-njega/:grad" element={<CareHomes />} />
               <Route path="/domovi-njega/vodic" element={<CareHomesVodic />} />
               <Route path="/dom-njega/:slug" element={<CareHomeProfile />} />
               <Route path="/mkb10" element={<Mkb10 />} />

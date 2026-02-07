@@ -49,7 +49,7 @@ export default function Clinics() {
   const [searchTerm, setSearchTerm] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [selectedCity, setSelectedCity] = useState<string>(() => {
-    const gradParam = searchParams.get('grad') || '';
+    const gradParam = grad || searchParams.get('grad') || '';
     return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
   });
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);

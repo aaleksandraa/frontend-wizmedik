@@ -29,7 +29,7 @@ export default function Spas() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [gradInput, setGradInput] = useState(() => {
-    const gradParam = searchParams.get('grad') || '';
+    const gradParam = grad || searchParams.get('grad') || '';
     return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
   });
   const [showGradSuggestions, setShowGradSuggestions] = useState(false);
@@ -37,7 +37,7 @@ export default function Spas() {
   const [filters, setFilters] = useState<BanjaFilters>({
     search: searchParams.get('search') || '',
     grad: (() => {
-      const gradParam = searchParams.get('grad') || '';
+      const gradParam = grad || searchParams.get('grad') || '';
       return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
     })(),
     vrsta_id: searchParams.get('vrsta_id') ? Number(searchParams.get('vrsta_id')) : undefined,
@@ -56,6 +56,15 @@ export default function Spas() {
   useEffect(() => {
     loadBanje();
   }, [filters]);
+
+  // Update filters when URL path param changes
+  useEffect(() => {
+    if (grad) {
+      const decodedGrad = decodeURIComponent(grad.replace(/\+/g, ' '));
+      setGradInput(decodedGrad);
+      updateFilters({ grad: decodedGrad });
+    }
+  }, [grad]);
 
   // Set gradInput when filters.grad is loaded from URL
   useEffect(() => {
