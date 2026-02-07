@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { doctorsAPI, specialtiesAPI } from '@/services/api';
+import { useAllCities } from '@/hooks/useAllCities';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { DoctorCard } from '@/components/DoctorCard';
@@ -40,6 +41,7 @@ type SortOption = 'name' | 'rating' | 'distance';
 
 export default function Doctors() {
   const { template } = useListingTemplate('doctors');
+  const { cities: allCities } = useAllCities(); // Get all cities from database
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -66,6 +68,37 @@ export default function Doctors() {
     fetchSpecialties();
     fetchSplitViewSetting();
   }, []);
+
+  const hierarchicalSpecialties = useMemo(() => {
+    return specialties.map((parent: any) => ({
+      ...parent,
+      children: parent.children || []
+    }));
+  }, [specialties]);
+
+  // Update filters when URL params change
+  useEffect(() => {
+    const gradParam = searchParams.get('grad') || '';
+    const specialnostParam = searchParams.get('specijalnost') || '';
+    
+    if (gradParam) {
+      const decodedGrad = decodeURIComponent(gradParam.replace(/\+/g, ' '));
+      setSelectedCity(decodedGrad);
+      setCitySearch(decodedGrad);
+    }
+    
+    if (specialnostParam && hierarchicalSpecialties.length > 0) {
+      const decodedSpecijalnost = decodeURIComponent(specialnostParam.replace(/\+/g, ' '));
+      // Find specialty by slug
+      const foundSpecialty = hierarchicalSpecialties.find(spec => 
+        spec.slug === decodedSpecijalnost || 
+        spec.naziv.toLowerCase().replace(/\s+/g, '-') === decodedSpecijalnost
+      );
+      if (foundSpecialty) {
+        setSelectedParentSpecialty(foundSpecialty.id.toString());
+      }
+    }
+  }, [searchParams, hierarchicalSpecialties]);
 
   // Set citySearch when selectedCity is loaded from URL
   useEffect(() => {
@@ -104,21 +137,15 @@ export default function Doctors() {
     }
   };
 
-  const hierarchicalSpecialties = useMemo(() => {
-    return specialties.map((parent: any) => ({
-      ...parent,
-      children: parent.children || []
-    }));
-  }, [specialties]);
-
   const selectedParentData = useMemo(() => {
     if (!selectedParentSpecialty) return null;
     return hierarchicalSpecialties.find(s => s.id.toString() === selectedParentSpecialty);
   }, [selectedParentSpecialty, hierarchicalSpecialties]);
 
+  // Use all cities from database instead of extracting from doctors
   const uniqueCities = useMemo(() => {
-    return [...new Set(doctors.map(d => d.grad))].filter(city => city && city.trim() !== '').sort();
-  }, [doctors]);
+    return allCities.map(city => city.naziv).sort();
+  }, [allCities]);
 
   const filteredCities = useMemo(() => {
     if (!citySearch) return uniqueCities;

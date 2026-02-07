@@ -15,6 +15,7 @@ interface CustomSelectProps {
   label?: string;
   className?: string;
   hideLabelOnMobile?: boolean; // Hide label on mobile devices
+  disabled?: boolean; // Add disabled prop
 }
 
 export function CustomSelect({
@@ -25,6 +26,7 @@ export function CustomSelect({
   label,
   className,
   hideLabelOnMobile = false,
+  disabled = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +36,15 @@ export function CustomSelect({
   const filteredOptions = options.filter((opt) =>
     opt.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Enhanced useEffect to handle disabled state changes
+  useEffect(() => {
+    // Close dropdown if component becomes disabled
+    if (disabled && isOpen) {
+      setIsOpen(false);
+      setSearchQuery('');
+    }
+  }, [disabled, isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,30 +78,37 @@ export function CustomSelect({
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
         className={cn(
-          'w-full h-12 px-4 rounded-lg border-2 bg-white text-left',
+          'w-full h-12 px-4 rounded-lg border-2 text-left',
           'flex items-center justify-between',
           'transition-all duration-200',
-          isOpen
+          disabled 
+            ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
+            : 'bg-white hover:bg-gray-50',
+          !disabled && isOpen
             ? 'border-cyan-500 ring-2 ring-cyan-500/20'
-            : 'border-gray-200 hover:border-gray-300',
-          !selectedOption && 'text-gray-500'
+            : !disabled && 'border-gray-200 hover:border-gray-300',
+          !selectedOption && !disabled && 'text-gray-500'
         )}
+        aria-disabled={disabled}
+        tabIndex={disabled ? -1 : 0}
       >
         <span className="truncate">
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption ? selectedOption.label : (disabled ? 'Nedostupno za ovaj tip' : placeholder)}
         </span>
         <ChevronDown
           className={cn(
-            'w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2',
-            isOpen && 'transform rotate-180'
+            'w-5 h-5 transition-transform duration-200 flex-shrink-0 ml-2',
+            disabled ? 'text-gray-300' : 'text-gray-400',
+            !disabled && isOpen && 'transform rotate-180'
           )}
         />
       </button>
 
       {/* Dropdown */}
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-[9999] w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-hidden">
           {/* Search Input (for long lists) */}
           {options.length > 5 && (

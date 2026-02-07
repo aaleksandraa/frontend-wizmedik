@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +25,26 @@ export default function HomepageCustom2Cyan() {
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [citySearchQuery, setCitySearchQuery] = useState('');
+
+  // Computed values for better readability and debugging
+  const isSpecialtyDisabled = selectedType && !['doktori', 'klinike'].includes(selectedType);
+  
+  // Enhanced useEffect with better dependency management and debugging
+  useEffect(() => {
+    // Debug logging for development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Homepage: selectedType changed to:', selectedType);
+      console.log('Homepage: isSpecialtyDisabled:', isSpecialtyDisabled);
+    }
+    
+    // Clear specialty when non-medical entity type is selected
+    if (isSpecialtyDisabled && selectedSpecialty) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Homepage: Clearing specialty because selectedType is:', selectedType);
+      }
+      setSelectedSpecialty('');
+    }
+  }, [selectedType, selectedSpecialty, isSpecialtyDisabled]);
 
   if (loading || !data) {
     return (
@@ -70,8 +90,8 @@ export default function HomepageCustom2Cyan() {
       }
     }
     
-    // Add specialty as query parameter for doctors only
-    if (selectedSpecialty && selectedType === 'doktori') {
+    // Add specialty as query parameter for doctors and clinics
+    if (selectedSpecialty && ['doktori', 'klinike'].includes(selectedType)) {
       params.set('specijalnost', selectedSpecialty);
     }
     
@@ -160,6 +180,7 @@ export default function HomepageCustom2Cyan() {
                           value={selectedSpecialty}
                           onChange={setSelectedSpecialty}
                           placeholder="Odaberite specijalnost"
+                          disabled={isSpecialtyDisabled}
                           options={specialties.map((specialty) => ({
                             value: specialty.slug,
                             label: specialty.naziv,
