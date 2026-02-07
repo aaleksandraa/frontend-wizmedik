@@ -237,7 +237,7 @@ export default function Clinics() {
     });
 
     setFilteredClinics(filtered);
-  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, hierarchicalSpecialties, calculateDistance]);
+  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, calculateDistance]);
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);

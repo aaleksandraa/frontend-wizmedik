@@ -100,21 +100,31 @@ export default function HomepageCustom3Cyan() {
     e.preventDefault();
     
     let url = '/doktori';
+    const params = new URLSearchParams();
     
     if (selectedType === 'klinike') url = '/klinike';
     else if (selectedType === 'laboratorije') url = '/laboratorije';
     else if (selectedType === 'banje') url = '/banje';
     else if (selectedType === 'domovi') url = '/domovi-njega';
     
-    if (selectedSpecialty && selectedCity) {
-      url = `${url}/${selectedCity}/${selectedSpecialty}`;
-    } else if (selectedSpecialty) {
-      url = selectedType === 'doktori' ? `/doktori/specijalnost/${selectedSpecialty}` : url;
-    } else if (selectedCity) {
-      url = `${url}/${selectedCity}`;
+    // Add city as query parameter
+    if (selectedCity) {
+      const selectedCityData = allCities.find((city: any) => city.slug === selectedCity);
+      if (selectedCityData) {
+        params.set('grad', selectedCityData.naziv);
+      }
     }
     
-    navigate(url);
+    // Add specialty as query parameter for doctors only
+    if (selectedSpecialty && selectedType === 'doktori') {
+      params.set('specijalnost', selectedSpecialty);
+    }
+    
+    // Generate final URL with query parameters
+    const queryString = params.toString();
+    const finalUrl = queryString ? `${url}?${queryString}` : url;
+    
+    navigate(finalUrl);
   };
 
   return (
