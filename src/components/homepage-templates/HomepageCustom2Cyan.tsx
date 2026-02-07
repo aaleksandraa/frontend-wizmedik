@@ -62,20 +62,32 @@ export default function HomepageCustom2Cyan() {
     else if (selectedType === 'banje') url = '/banje';
     else if (selectedType === 'domovi') url = '/domovi-njega';
     
-    // Dodaj grad kao query parametar
+    // Convert city name to URL-friendly slug for path parameter
     if (selectedCity) {
       const selectedCityData = allCities.find((city: any) => city.slug === selectedCity);
       if (selectedCityData) {
-        params.set('grad', selectedCityData.naziv);
+        // Create URL-friendly slug from city name
+        const citySlug = selectedCityData.naziv
+          .toLowerCase()
+          .replace(/\s+/g, '-')           // Replace spaces with hyphens
+          .replace(/[čć]/g, 'c')          // Replace č, ć with c
+          .replace(/[šž]/g, 's')          // Replace š, ž with s  
+          .replace(/đ/g, 'd')             // Replace đ with d
+          .replace(/[^a-z0-9-]/g, '')     // Remove any other special characters
+          .replace(/-+/g, '-')            // Replace multiple hyphens with single
+          .replace(/^-|-$/g, '');         // Remove leading/trailing hyphens
+        
+        // Add city as path parameter
+        url = `${url}/${citySlug}`;
       }
     }
     
-    // Dodaj specijalnost kao query parametar za doktore
+    // Add specialty as query parameter for doctors only
     if (selectedSpecialty && selectedType === 'doktori') {
       params.set('specijalnost', selectedSpecialty);
     }
     
-    // Generiši finalni URL
+    // Generate final URL with query parameters if any
     const queryString = params.toString();
     const finalUrl = queryString ? `${url}?${queryString}` : url;
     
