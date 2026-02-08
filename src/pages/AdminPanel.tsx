@@ -825,11 +825,11 @@ export default function AdminPanel() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-200/50">
+            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-200/50">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Stethoscope className="h-5 w-5 text-blue-600" />
+                  <div className="p-2 bg-cyan-500/20 rounded-lg">
+                    <Stethoscope className="h-5 w-5 text-cyan-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{doctors.length}</p>

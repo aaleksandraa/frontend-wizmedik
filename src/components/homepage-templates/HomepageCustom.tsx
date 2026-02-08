@@ -34,7 +34,7 @@ export default function HomepageCustom() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-indigo-50">
         <Navbar />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
@@ -89,7 +89,7 @@ export default function HomepageCustom() {
   );
 
   const quickServices = [
-    { icon: Stethoscope, label: 'Doktori', href: '/doktori', color: 'from-blue-500 to-blue-600', count: stats.doctors },
+    { icon: Stethoscope, label: 'Doktori', href: '/doktori', color: 'from-cyan-500 to-cyan-600', count: stats.doctors },
     { icon: Building2, label: 'Klinike', href: '/klinike', color: 'from-purple-500 to-purple-600', count: stats.clinics },
     { icon: FlaskConical, label: 'Laboratorije', href: '/laboratorije', color: 'from-emerald-500 to-emerald-600' },
     { icon: Droplet, label: 'Banje', href: '/banje', color: 'from-cyan-500 to-cyan-600' },
@@ -117,9 +117,9 @@ export default function HomepageCustom() {
       {/* Hero Section */}
       {settings.hero_enabled && (
         <section ref={heroRef} className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-blue-700 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-cyan-700 overflow-hidden">
             <div className="absolute top-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-pulse max-md:w-48 max-md:h-48 max-md:-left-24"></div>
-            <div className="absolute bottom-20 -right-20 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse delay-1000 max-md:w-64 max-md:h-64 max-md:-right-32"></div>
+            <div className="absolute bottom-20 -right-20 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000 max-md:w-64 max-md:h-64 max-md:-right-32"></div>
             <div className="absolute inset-0 opacity-10" style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             }}></div>
@@ -451,7 +451,7 @@ export default function HomepageCustom() {
           </div>
 
           {/* Animated Pulse Circles */}
-          <div className="absolute top-20 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse overflow-hidden"></div>
+          <div className="absolute top-20 right-1/4 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse overflow-hidden"></div>
           <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000 overflow-hidden"></div>
 
           <div className={`container mx-auto px-4 relative z-10 transition-all duration-300 ${citySearchQuery && filteredCities.length > 0 ? 'pb-96' : 'pb-0'}`}>
@@ -529,9 +529,9 @@ export default function HomepageCustom() {
       {settings.cta_enabled && (
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-blue-700 p-8 md:p-16">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-cyan-700 p-8 md:p-16">
               <div className="absolute -top-48 -right-48 w-96 h-96 bg-white/10 rounded-full blur-3xl max-md:hidden"></div>
-              <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl max-md:hidden"></div>
+              <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl max-md:hidden"></div>
               <div className="relative text-center max-w-3xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white text-sm mb-6"><Sparkles className="w-4 h-4 text-yellow-300" /><span>Započnite danas</span></div>
                 <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">{settings.cta_title || 'Spremni ste za bolju zdravstvenu njegu?'}</h2>

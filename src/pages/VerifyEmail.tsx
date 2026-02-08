@@ -99,8 +99,8 @@ export default function VerifyEmail() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-sm text-blue-800">
+                      <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                        <p className="text-sm text-cyan-800">
                           <strong>Sljedeći korak:</strong> Vaš zahtjev za registraciju će biti pregledan od strane administratora. 
                           Dobićete email obavještenje kada vaš nalog bude odobren.
                         </p>

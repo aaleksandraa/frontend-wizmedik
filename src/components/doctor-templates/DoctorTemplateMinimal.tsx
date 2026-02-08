@@ -120,11 +120,11 @@ export function DoctorTemplateMinimal({
             <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Gostovanja u klinikama</h2>
             <div className="space-y-3">
               {guestVisits.map((visit) => (
-                <div key={visit.id} className="p-4 border border-blue-100 bg-blue-50/50 rounded-lg">
+                <div key={visit.id} className="p-4 border border-cyan-100 bg-cyan-50/50 rounded-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Link to={`/klinika/${visit.klinika.slug}`} className="font-medium text-blue-700 hover:underline">
+                        <Link to={`/klinika/${visit.klinika.slug}`} className="font-medium text-cyan-700 hover:underline">
                           {visit.klinika.naziv}
                         </Link>
                         {!visit.prihvata_online_rezervacije && (

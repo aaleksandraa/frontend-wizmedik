@@ -252,7 +252,7 @@ export default function RegisterCareHome() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-cyan-50 flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
             <CardContent className="p-8 text-center">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -279,7 +279,7 @@ export default function RegisterCareHome() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-cyan-50 py-12">
         <div className="max-w-3xl mx-auto px-4">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">

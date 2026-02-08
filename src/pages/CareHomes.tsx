@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Filter, MapPin, Shield, Activity, Users, Home as HomeIcon, X, ChevronRight, Phone, Star, CheckCircle, BookOpen, List } from 'lucide-react';
@@ -228,14 +228,14 @@ export default function CareHomes() {
   }, [selectedGrad, selectedTipDoma, filterOptions]);
 
   const seoDescription = useMemo(() => {
-    let desc = 'Pronađite kvalitetne domove za starija i bolesna lica';
+    let desc = 'Pronadite kvalitetne domove za starija i bolesna lica';
     if (selectedGrad) desc += ` u ${selectedGrad}u`;
     desc += ' u Bosni i Hercegovini. ';
     if (selectedNivoNjege) {
       const nivo = filterOptions?.nivoi_njege.find(n => n.slug === selectedNivoNjege);
       if (nivo) desc += `${nivo.naziv} njega. `;
     }
-    desc += 'Uporedite cijene, usluge, medicinski kadar i smještajne uslove. Besplatna pretraga i kontakt.';
+    desc += 'Uporedite cijene, usluge, medicinski kadar i smje�tajne uslove. Besplatna pretraga i kontakt.';
     return desc;
   }, [selectedGrad, selectedNivoNjege, filterOptions]);
 
@@ -287,7 +287,7 @@ export default function CareHomes() {
           {
             "@type": "ListItem",
             "position": 1,
-            "name": "Početna",
+            "name": "Pocetna",
             "item": baseUrl
           },
           {
@@ -310,15 +310,15 @@ export default function CareHomes() {
           "name": "Kako odabrati pravi dom za starije osobe?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Pri odabiru doma za starije osobe, važno je razmotriti: nivo potrebne njege, lokaciju, dostupnost medicinskog osoblja 24/7, kvalitet smještaja, programe aktivnosti, te cijenu i način plaćanja. Preporučujemo posjet domu prije donošenja odluke."
+            "text": "Pri odabiru doma za starije osobe, va�no je razmotriti: nivo potrebne njege, lokaciju, dostupnost medicinskog osoblja 24/7, kvalitet smje�taja, programe aktivnosti, te cijenu i nacin placanja. Preporucujemo posjet domu prije dono�enja odluke."
           }
         },
         {
           "@type": "Question",
-          "name": "Koliko košta smještaj u domu za starije?",
+          "name": "Koliko ko�ta smje�taj u domu za starije?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cijene smještaja u domovima za starije u BiH variraju od 800 do 2500 KM mjesečno, ovisno o nivou njege, lokaciji i uslugama. Osnovni smještaj je jeftiniji, dok specijalizirana njega (demencija, palijativna njega) košta više."
+            "text": "Cijene smje�taja u domovima za starije u BiH variraju od 800 do 2500 KM mjesecno, ovisno o nivou njege, lokaciji i uslugama. Osnovni smje�taj je jeftiniji, dok specijalizirana njega (demencija, palijativna njega) ko�ta vi�e."
           }
         },
         {
@@ -326,7 +326,7 @@ export default function CareHomes() {
           "name": "Koje usluge nude domovi za starije osobe?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Domovi za starije nude: smještaj i ishranu, medicinsku njegu, fizioterapiju, radnu terapiju, socijalne aktivnosti, pomoć pri svakodnevnim aktivnostima, te specijalizirane programe za demenciju i Alzheimerovu bolest."
+            "text": "Domovi za starije nude: smje�taj i ishranu, medicinsku njegu, fizioterapiju, radnu terapiju, socijalne aktivnosti, pomoc pri svakodnevnim aktivnostima, te specijalizirane programe za demenciju i Alzheimerovu bolest."
           }
         },
         {
@@ -334,7 +334,7 @@ export default function CareHomes() {
           "name": "Da li domovi primaju osobe sa demencijom?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Mnogi domovi u BiH imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom bolešću. Ovi odjeli imaju obučeno osoblje i prilagođene prostore za sigurnu njegu osoba sa kognitivnim poremećajima."
+            "text": "Mnogi domovi u BiH imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom bole�cu. Ovi odjeli imaju obuceno osoblje i prilagodene prostore za sigurnu njegu osoba sa kognitivnim poremecajima."
           }
         }
       ]
@@ -358,12 +358,12 @@ export default function CareHomes() {
     <>
       <Helmet>
         <title>{pageTitle} | WizMedik</title>
-        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
-        <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, starački dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontološki centar, smještaj starijih osoba`} />
+        <meta name="description" content="Pregledajte profile, zaka�ite termin online ili kontaktirajte." />
+        <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, staracki dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontolo�ki centar, smje�taj starijih osoba`} />
         
         {/* Open Graph */}
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
+        <meta property="og:description" content="Pregledajte profile, zaka�ite termin online ili kontaktirajte." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="WizMedik" />
@@ -373,7 +373,7 @@ export default function CareHomes() {
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
+        <meta name="twitter:description" content="Pregledajte profile, zaka�ite termin online ili kontaktirajte." />
         
         {/* Canonical */}
         <link rel="canonical" href={canonicalUrl} />
@@ -388,15 +388,15 @@ export default function CareHomes() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-purple-50">
         {/* Hero Section with SEO-optimized content */}
-        <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16">
+        <header className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white py-16">
           <div className="max-w-7xl mx-auto px-4">
             {/* Breadcrumb - hidden on mobile */}
             <nav aria-label="Breadcrumb" className="mb-6 hidden md:block">
               <ol className="flex items-center gap-2 text-sm text-white/80">
                 <li>
-                  <Link to="/" className="hover:text-white transition-colors">Početna</Link>
+                  <Link to="/" className="hover:text-white transition-colors">Pocetna</Link>
                 </li>
                 <ChevronRight className="h-4 w-4" />
                 <li aria-current="page" className="text-white font-medium">
@@ -416,7 +416,7 @@ export default function CareHomes() {
                 </h1>
               </div>
               <p className="text-xl opacity-90 max-w-3xl mx-auto mb-8">
-                Pregledajte profile, zakažite termin online ili kontaktirajte.
+                Pregledajte profile, zaka�ite termin online ili kontaktirajte.
               </p>
               
               {/* Link to Vodic page */}
@@ -426,7 +426,7 @@ export default function CareHomes() {
                   className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors text-sm"
                 >
                   <BookOpen className="w-4 h-4" />
-                  Vodič: Tipovi domova, nivoi njege i programi →
+                  Vodic: Tipovi domova, nivoi njege i programi ?
                 </Link>
               </div>
               
@@ -475,7 +475,7 @@ export default function CareHomes() {
                     {activeFiltersCount > 0 && (
                       <Button variant="ghost" size="sm" onClick={clearFilters}>
                         <X className="h-4 w-4 mr-1" />
-                        Očisti
+                        Ocisti
                       </Button>
                     )}
                   </div>
@@ -484,7 +484,7 @@ export default function CareHomes() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">Pretraga</label>
                     <Input
-                      placeholder="Pretražite domove..."
+                      placeholder="Pretra�ite domove..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
@@ -559,7 +559,7 @@ export default function CareHomes() {
                               onClick={() => setSelectedTipDoma('')}
                               className="w-full mt-2"
                             >
-                              Poništi izbor
+                              Poni�ti izbor
                             </Button>
                           )}
                         </div>
@@ -600,7 +600,7 @@ export default function CareHomes() {
                               onClick={() => setSelectedNivoNjege('')}
                               className="w-full mt-2"
                             >
-                              Poništi izbor
+                              Poni�ti izbor
                             </Button>
                           )}
                         </div>
@@ -688,7 +688,7 @@ export default function CareHomes() {
               <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map')} className="space-y-6">
                 <div className="flex items-center justify-between">
                   <p className="text-muted-foreground">
-                    Pronađeno <span className="font-semibold text-foreground">{domovi.length}</span> domova
+                    Pronadeno <span className="font-semibold text-foreground">{domovi.length}</span> domova
                   </p>
                   <TabsList className="grid w-[200px] grid-cols-2">
                     <TabsTrigger value="list">
@@ -729,9 +729,9 @@ export default function CareHomes() {
                         <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                         <h3 className="text-xl font-semibold mb-2">Nema rezultata</h3>
                         <p className="text-muted-foreground mb-4">
-                          Nismo pronašli domove koji odgovaraju vašim kriterijima.
+                          Nismo prona�li domove koji odgovaraju va�im kriterijima.
                         </p>
-                        <Button onClick={clearFilters}>Očisti filtere</Button>
+                        <Button onClick={clearFilters}>Ocisti filtere</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -764,7 +764,7 @@ export default function CareHomes() {
         <section className="bg-white py-16 border-t" aria-labelledby="faq-heading">
           <div className="max-w-4xl mx-auto px-4">
             <h2 id="faq-heading" className="text-3xl font-bold text-center mb-8">
-              Često postavljana pitanja o domovima za njegu
+              Cesto postavljana pitanja o domovima za njegu
             </h2>
             
             <Accordion type="single" collapsible className="w-full">
@@ -773,31 +773,31 @@ export default function CareHomes() {
                   Kako odabrati pravi dom za starije osobe?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Pri odabiru doma za starije osobe, važno je razmotriti nekoliko ključnih faktora:</p>
+                  <p>Pri odabiru doma za starije osobe, va�no je razmotriti nekoliko kljucnih faktora:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Nivo potrebne njege (osnovna, pojačana, specijalizirana)</li>
+                    <li>Nivo potrebne njege (osnovna, pojacana, specijalizirana)</li>
                     <li>Lokacija i blizina porodici</li>
                     <li>Dostupnost medicinskog osoblja 24/7</li>
-                    <li>Kvalitet smještaja i opremljenost</li>
+                    <li>Kvalitet smje�taja i opremljenost</li>
                     <li>Programi aktivnosti i socijalizacije</li>
-                    <li>Cijena i način plaćanja</li>
+                    <li>Cijena i nacin placanja</li>
                   </ul>
-                  <p className="mt-2">Preporučujemo posjet domu i razgovor sa osobljem prije donošenja konačne odluke.</p>
+                  <p className="mt-2">Preporucujemo posjet domu i razgovor sa osobljem prije dono�enja konacne odluke.</p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="faq-2">
                 <AccordionTrigger className="text-left font-medium">
-                  Koliko košta smještaj u domu za starije?
+                  Koliko ko�ta smje�taj u domu za starije?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Cijene smještaja u domovima za starije u Bosni i Hercegovini variraju ovisno o više faktora:</p>
+                  <p>Cijene smje�taja u domovima za starije u Bosni i Hercegovini variraju ovisno o vi�e faktora:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Osnovni smještaj: 800 - 1200 KM mjesečno</li>
-                    <li>Pojačana njega: 1200 - 1800 KM mjesečno</li>
-                    <li>Specijalizirana njega (demencija, palijativa): 1500 - 2500 KM mjesečno</li>
+                    <li>Osnovni smje�taj: 800 - 1200 KM mjesecno</li>
+                    <li>Pojacana njega: 1200 - 1800 KM mjesecno</li>
+                    <li>Specijalizirana njega (demencija, palijativa): 1500 - 2500 KM mjesecno</li>
                   </ul>
-                  <p className="mt-2">Cijene zavise od lokacije, nivoa njege, tipa sobe (jednokrevetna/višekrevetna) i dodatnih usluga.</p>
+                  <p className="mt-2">Cijene zavise od lokacije, nivoa njege, tipa sobe (jednokrevetna/vi�ekrevetna) i dodatnih usluga.</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -806,14 +806,14 @@ export default function CareHomes() {
                   Koje usluge nude domovi za starije osobe?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Domovi za starije osobe u BiH tipično nude sljedeće usluge:</p>
+                  <p>Domovi za starije osobe u BiH tipicno nude sljedece usluge:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Smještaj i puna pansionska ishrana</li>
+                    <li>Smje�taj i puna pansionska ishrana</li>
                     <li>24-satna medicinska njega i nadzor</li>
                     <li>Fizioterapija i rehabilitacija</li>
                     <li>Radna i okupaciona terapija</li>
                     <li>Socijalne i rekreativne aktivnosti</li>
-                    <li>Pomoć pri svakodnevnim aktivnostima (kupanje, oblačenje, hranjenje)</li>
+                    <li>Pomoc pri svakodnevnim aktivnostima (kupanje, oblacenje, hranjenje)</li>
                     <li>Specijalizirani programi za demenciju i Alzheimerovu bolest</li>
                     <li>Palijativna njega</li>
                   </ul>
@@ -825,29 +825,29 @@ export default function CareHomes() {
                   Da li domovi primaju osobe sa demencijom?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Da, mnogi domovi u Bosni i Hercegovini imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom bolešću. Ovi odjeli karakteriše:</p>
+                  <p>Da, mnogi domovi u Bosni i Hercegovini imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom bole�cu. Ovi odjeli karakteri�e:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Posebno obučeno osoblje za rad sa osobama sa kognitivnim poremećajima</li>
-                    <li>Sigurni i prilagođeni prostori koji sprječavaju lutanje</li>
-                    <li>Strukturirane dnevne aktivnosti koje stimuliraju pamćenje</li>
-                    <li>Pojačan nadzor i individualizirana njega</li>
+                    <li>Posebno obuceno osoblje za rad sa osobama sa kognitivnim poremecajima</li>
+                    <li>Sigurni i prilagodeni prostori koji sprjecavaju lutanje</li>
+                    <li>Strukturirane dnevne aktivnosti koje stimuliraju pamcenje</li>
+                    <li>Pojacan nadzor i individualizirana njega</li>
                   </ul>
-                  <p className="mt-2">Koristite filter "Programi njege" da pronađete domove sa specijaliziranom njegom za demenciju.</p>
+                  <p className="mt-2">Koristite filter "Programi njege" da pronadete domove sa specijaliziranom njegom za demenciju.</p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="faq-5">
                 <AccordionTrigger className="text-left font-medium">
-                  Kako mogu posjetiti dom prije donošenja odluke?
+                  Kako mogu posjetiti dom prije dono�enja odluke?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Većina domova nudi mogućnost posjete i razgledanja prostora. Preporučujemo:</p>
+                  <p>Vecina domova nudi mogucnost posjete i razgledanja prostora. Preporucujemo:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Kontaktirajte dom telefonom ili putem naše platforme</li>
-                    <li>Zakažite termin za obilazak u vrijeme kada su aktivnosti u toku</li>
+                    <li>Kontaktirajte dom telefonom ili putem na�e platforme</li>
+                    <li>Zaka�ite termin za obilazak u vrijeme kada su aktivnosti u toku</li>
                     <li>Pripremite pitanja o njezi, osoblju, aktivnostima i cijenama</li>
-                    <li>Obratite pažnju na čistoću, atmosferu i odnos osoblja prema štićenicima</li>
-                    <li>Pitajte za probni boravak ako je moguć</li>
+                    <li>Obratite pa�nju na cistocu, atmosferu i odnos osoblja prema �ticenicima</li>
+                    <li>Pitajte za probni boravak ako je moguc</li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -863,16 +863,16 @@ export default function CareHomes() {
             </h2>
             <div className="prose prose-gray max-w-none">
               <p>
-                WizMedik vam pomaže pronaći idealan dom za njegu vaših najdražih. Naša platforma okuplja verificirane domove za starije i bolesne osobe širom Bosne i Hercegovine, omogućavajući vam da uporedite usluge, cijene i recenzije na jednom mjestu.
+                WizMedik vam poma�e pronaci idealan dom za njegu va�ih najdra�ih. Na�a platforma okuplja verificirane domove za starije i bolesne osobe �irom Bosne i Hercegovine, omogucavajuci vam da uporedite usluge, cijene i recenzije na jednom mjestu.
               </p>
               <p>
-                Bilo da tražite dom sa osnovnom njegom za samostalne starije osobe, pojačanu njegu za one kojima je potrebna svakodnevna pomoć, ili specijaliziranu njegu za osobe sa demencijom i Alzheimerovom bolešću - na pravom ste mjestu.
+                Bilo da tra�ite dom sa osnovnom njegom za samostalne starije osobe, pojacanu njegu za one kojima je potrebna svakodnevna pomoc, ili specijaliziranu njegu za osobe sa demencijom i Alzheimerovom bole�cu - na pravom ste mjestu.
               </p>
-              <h3 className="text-xl font-semibold mt-6 mb-3">Zašto koristiti WizMedik za pronalazak doma?</h3>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Za�to koristiti WizMedik za pronalazak doma?</h3>
               <ul className="list-disc list-inside space-y-2">
                 <li>Svi domovi su verificirani i provjereni</li>
                 <li>Detaljne informacije o uslugama, osoblju i cijenama</li>
-                <li>Autentične recenzije od porodica štićenika</li>
+                <li>Autenticne recenzije od porodica �ticenika</li>
                 <li>Jednostavno filtriranje po lokaciji, tipu njege i uslugama</li>
                 <li>Besplatan kontakt sa domovima</li>
               </ul>

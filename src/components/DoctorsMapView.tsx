@@ -137,7 +137,7 @@ export function DoctorsMapView({ doctors, className = '' }: DoctorsMapViewProps)
       const rating = Number(doctor.rating) || 0;
       const reviewCount = Number(doctor.reviewCount) || 0;
       
-      const color = rating >= 4.5 ? '#10b981' : rating >= 4 ? '#3b82f6' : '#8b5cf6';
+      const color = rating >= 4.5 ? '#10b981' : rating >= 4 ? '#0891b2' : '#8b5cf6';
       const marker = L.marker([lat, lng], {
         icon: createCustomIcon(color),
       }).addTo(mapRef.current!);
@@ -164,7 +164,7 @@ export function DoctorsMapView({ doctors, className = '' }: DoctorsMapViewProps)
             📞 ${doctor.phone}
           </p>
           ${doctor.acceptsOnline ? 
-            '<span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px;">💻 Online konsultacije</span>' 
+            '<span style="display: inline-block; background: #0891b2; color: #0891b2; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px;">💻 Online konsultacije</span>' 
             : ''
           }
           <button 
@@ -214,7 +214,7 @@ export function DoctorsMapView({ doctors, className = '' }: DoctorsMapViewProps)
             <span className="text-foreground">Ocjena 4.5+</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
             <span className="text-foreground">Ocjena 4.0+</span>
           </div>
           <div className="flex items-center gap-2">

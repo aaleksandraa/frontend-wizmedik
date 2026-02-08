@@ -63,12 +63,12 @@ export function HomepageZocdoc() {
       <Navbar />
       
       {/* Hero Section - ZocDoc Style */}
-      <section className="relative bg-gradient-to-b from-[#f0f7f4] to-white">
+      <section className="relative bg-gradient-to-b from-[#e0f2fe] to-white">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Pronađite i zakažite
-              <span className="text-[#00856f] block mt-2">najboljeg doktora</span>
+              <span className="text-[#0891b2] block mt-2">najboljeg doktora</span>
             </h1>
             <p className="text-xl text-gray-600 mb-10">
               Hiljade doktora. Stotine specijalnosti. Jedan klik do termina.
@@ -99,7 +99,7 @@ export function HomepageZocdoc() {
                 </div>
                 <Button 
                   onClick={handleSearch}
-                  className="h-14 px-8 text-lg bg-[#00856f] hover:bg-[#006d5b] rounded-xl"
+                  className="h-14 px-8 text-lg bg-[#0891b2] hover:bg-[#0891b2] rounded-xl"
                 >
                   <Search className="mr-2 h-5 w-5" />
                   Pretraži
@@ -125,7 +125,7 @@ export function HomepageZocdoc() {
               <h2 className="text-3xl font-bold text-gray-900">Popularne specijalnosti</h2>
               <p className="text-gray-600 mt-2">Pronađite doktora po specijalnosti</p>
             </div>
-            <Button asChild variant="ghost" className="text-[#00856f] hover:text-[#006d5b]">
+            <Button asChild variant="ghost" className="text-[#0891b2] hover:text-[#0891b2]">
               <Link to="/specijalnosti">
                 Sve specijalnosti <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
@@ -141,10 +141,10 @@ export function HomepageZocdoc() {
                   to={`/specijalnost/${spec.slug || spec.naziv.toLowerCase().replace(/\s+/g, '-')}`}
                   className="group"
                 >
-                  <Card className="h-full hover:shadow-lg transition-all hover:border-[#00856f] cursor-pointer">
+                  <Card className="h-full hover:shadow-lg transition-all hover:border-[#0891b2] cursor-pointer">
                     <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-[#f0f7f4] rounded-2xl flex items-center justify-center group-hover:bg-[#00856f] transition-colors">
-                        <IconComponent className="h-8 w-8 text-[#00856f] group-hover:text-white transition-colors" />
+                      <div className="w-16 h-16 mx-auto mb-4 bg-[#e0f2fe] rounded-2xl flex items-center justify-center group-hover:bg-[#0891b2] transition-colors">
+                        <IconComponent className="h-8 w-8 text-[#0891b2] group-hover:text-white transition-colors" />
                       </div>
                       <h3 className="font-semibold text-gray-900">{spec.naziv}</h3>
                       {spec.broj_doktora && (
@@ -167,7 +167,7 @@ export function HomepageZocdoc() {
               <h2 className="text-3xl font-bold text-gray-900">Istaknuti doktori</h2>
               <p className="text-gray-600 mt-2">Najbolje ocijenjeni stručnjaci</p>
             </div>
-            <Button asChild variant="ghost" className="text-[#00856f] hover:text-[#006d5b]">
+            <Button asChild variant="ghost" className="text-[#0891b2] hover:text-[#0891b2]">
               <Link to="/doktori">
                 Svi doktori <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
@@ -180,9 +180,9 @@ export function HomepageZocdoc() {
                 <Card className="h-full hover:shadow-lg transition-all cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <Avatar className="h-16 w-16 border-2 border-[#f0f7f4]">
+                      <Avatar className="h-16 w-16 border-2 border-[#e0f2fe]">
                         <AvatarImage src={doctor.slika_profila} />
-                        <AvatarFallback className="bg-[#f0f7f4] text-[#00856f]">
+                        <AvatarFallback className="bg-[#e0f2fe] text-[#0891b2]">
                           {doctor.ime?.[0]}{doctor.prezime?.[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -190,7 +190,7 @@ export function HomepageZocdoc() {
                         <h3 className="font-semibold text-gray-900 truncate">
                           Dr. {doctor.ime} {doctor.prezime}
                         </h3>
-                        <p className="text-[#00856f] text-sm">{doctor.specijalnost}</p>
+                        <p className="text-[#0891b2] text-sm">{doctor.specijalnost}</p>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
                           <MapPin className="h-4 w-4" />
                           <span className="truncate">{doctor.grad}</span>
@@ -208,7 +208,7 @@ export function HomepageZocdoc() {
                       ) : (
                         <span className="text-sm text-gray-500">Novi doktor</span>
                       )}
-                      <Button size="sm" className="bg-[#00856f] hover:bg-[#006d5b]">
+                      <Button size="sm" className="bg-[#0891b2] hover:bg-[#0891b2]">
                         <Calendar className="mr-1 h-4 w-4" />
                         Zakaži
                       </Button>
@@ -236,9 +236,9 @@ export function HomepageZocdoc() {
                 to={`/grad/${grad.slug || grad.naziv.toLowerCase()}`}
                 className="group"
               >
-                <Card className="hover:shadow-md transition-all hover:border-[#00856f]">
+                <Card className="hover:shadow-md transition-all hover:border-[#0891b2]">
                   <CardContent className="p-4 text-center">
-                    <MapPin className="h-8 w-8 mx-auto mb-2 text-[#00856f]" />
+                    <MapPin className="h-8 w-8 mx-auto mb-2 text-[#0891b2]" />
                     <h3 className="font-semibold text-gray-900">{grad.naziv}</h3>
                   </CardContent>
                 </Card>
@@ -249,7 +249,7 @@ export function HomepageZocdoc() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-[#00856f]">
+      <section className="py-20 bg-[#0891b2]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Imate pitanje za doktora?
@@ -257,7 +257,7 @@ export function HomepageZocdoc() {
           <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
             Postavite pitanje i dobijte odgovor od stručnih doktora potpuno besplatno.
           </p>
-          <Button asChild size="lg" variant="secondary" className="text-[#00856f]">
+          <Button asChild size="lg" variant="secondary" className="text-[#0891b2]">
             <Link to="/postavi-pitanje">
               Postavi pitanje
             </Link>

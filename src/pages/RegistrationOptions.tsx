@@ -17,7 +17,7 @@ export default function RegistrationOptions() {
       title: 'Doktor',
       description: 'Registrujte se kao doktor i proširite svoju praksu. Omogućite pacijentima da vas pronađu i zakažu preglede online.',
       link: '/register/doctor',
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-cyan-500 to-cyan-600',
       benefits: [
         'Online zakazivanje termina',
         'Upravljanje radnim vremenom',
@@ -107,7 +107,7 @@ export default function RegistrationOptions() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-blue-700 py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-cyan-700 py-20">
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
@@ -186,7 +186,7 @@ export default function RegistrationOptions() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-primary to-blue-700">
+      <section className="py-16 bg-gradient-to-br from-primary to-cyan-700">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">

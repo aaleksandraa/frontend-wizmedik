@@ -20,11 +20,11 @@ interface Props {
 }
 
 const gradients = [
-  "from-blue-500/10 to-cyan-500/10",
+  "from-cyan-500/10 to-cyan-500/10",
   "from-purple-500/10 to-pink-500/10",
   "from-green-500/10 to-emerald-500/10",
   "from-orange-500/10 to-red-500/10",
-  "from-indigo-500/10 to-blue-500/10",
+  "from-indigo-500/10 to-cyan-500/10",
   "from-rose-500/10 to-pink-500/10",
 ];
 

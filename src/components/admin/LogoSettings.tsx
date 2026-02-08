@@ -309,10 +309,10 @@ export function LogoSettings() {
             </div>
 
             {/* Logo Height Controls */}
-            <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="space-y-4 p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <h3 className="font-semibold text-blue-900 dark:text-blue-100">Visina Logotipa</h3>
+                <ImageIcon className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                <h3 className="font-semibold text-cyan-900 dark:text-cyan-100">Visina Logotipa</h3>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -325,7 +325,7 @@ export function LogoSettings() {
                     max="200"
                     value={settings.logo_height_desktop}
                     onChange={(e) => setSettings((prev) => ({ ...prev, logo_height_desktop: parseInt(e.target.value) || 70 }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                   <p className="text-xs text-muted-foreground">Preporučeno: 60-80px</p>
                 </div>
@@ -339,7 +339,7 @@ export function LogoSettings() {
                     max="200"
                     value={settings.logo_height_mobile}
                     onChange={(e) => setSettings((prev) => ({ ...prev, logo_height_mobile: parseInt(e.target.value) || 50 }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                   <p className="text-xs text-muted-foreground">Preporučeno: 40-60px</p>
                 </div>

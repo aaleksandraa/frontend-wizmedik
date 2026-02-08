@@ -359,7 +359,7 @@ export default function CityLanding() {
               </Card>
               <Card className="hover:shadow-md transition-shadow">
                 <CardContent className="p-3 flex items-center gap-3">
-                  <FlaskConical className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                  <FlaskConical className="w-6 h-6 text-cyan-600 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-lg font-bold text-foreground">{laboratories.length}+</p>
                     <p className="text-xs text-muted-foreground truncate">Lab.</p>

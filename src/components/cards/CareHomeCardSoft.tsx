@@ -65,7 +65,7 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
     <Link to={dom.url || `/dom-njega/${dom.slug}`}>
       <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden h-full border-0 bg-white">
         {/* Image */}
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-cyan-50 to-purple-50">
           {dom.featured_slika ? (
             <img
               src={dom.featured_slika}
@@ -74,14 +74,14 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Heart className="w-16 h-16 text-blue-200" />
+              <Heart className="w-16 h-16 text-cyan-200" />
             </div>
           )}
           
           {/* Overlay badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {dom.tip_doma?.naziv && (
-              <Badge className="bg-white/95 text-blue-700 hover:bg-white shadow-lg">
+              <Badge className="bg-white/95 text-cyan-700 hover:bg-white shadow-lg">
                 {dom.tip_doma.naziv}
               </Badge>
             )}
@@ -105,7 +105,7 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
         <CardContent className="p-5">
           {/* Title and Location */}
           <div className="mb-3">
-            <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+            <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors line-clamp-2">
               {dom.naziv}
             </h3>
             <div className="flex items-center text-gray-600 text-sm mb-2">
@@ -150,7 +150,7 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
           {/* Staff Info */}
           <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
             <div className="flex items-center text-gray-600">
-              <Users className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
+              <Users className="w-3.5 h-3.5 mr-1.5 text-cyan-500" />
               <div>
                 <p className="font-medium text-gray-900">Sestre</p>
                 <p>{dom.nurses_availability_label}</p>
@@ -178,14 +178,14 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
                 </div>
               )}
               {dom.formatted_price && (
-                <p className="text-sm font-semibold text-blue-600">
+                <p className="text-sm font-semibold text-cyan-600">
                   {dom.formatted_price}
                 </p>
               )}
             </div>
             <Button 
               size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg"
             >
               Pogledaj
             </Button>

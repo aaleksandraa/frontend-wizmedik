@@ -35,7 +35,7 @@ const createSlug = (name: string): string => {
 const colorMap: { [key: string]: string } = {
   "Kardiologija": "bg-red-500",
   "Neurologija": "bg-purple-500",
-  "Oftalmologija": "bg-blue-500",
+  "Oftalmologija": "bg-cyan-500",
   "Ortopedija": "bg-orange-500",
   "Pedijatrija": "bg-pink-500",
   "Opća medicina": "bg-green-500",

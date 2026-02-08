@@ -1276,8 +1276,8 @@ export default function SpaDashboard() {
               <CardContent>
                 {spa.galerija && spa.galerija.length > 0 ? (
                   <>
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-800">
+                    <div className="mb-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
+                      <p className="text-sm text-cyan-800">
                         <strong>Profilna slika:</strong> Kliknite na <Star className="h-3 w-3 inline" /> da postavite sliku kao profilnu.
                         Profilna slika se prikazuje na rezultatima pretrage.
                       </p>

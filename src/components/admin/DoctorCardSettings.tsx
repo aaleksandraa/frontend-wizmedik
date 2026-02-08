@@ -12,7 +12,7 @@ import { DoctorCard, DoctorCardSettings as CardSettings, DOCTOR_CARD_VARIANTS } 
 import { clearCardSettingsCache } from '@/hooks/useCardSettings';
 
 const COLOR_PRESETS = [
-  { name: 'Primary', primary: '#0ea5e9', accent: '#10b981' },
+  { name: 'Primary', primary: '#0891b2', accent: '#10b981' },
   { name: 'Indigo', primary: '#6366f1', accent: '#8b5cf6' },
   { name: 'Rose', primary: '#f43f5e', accent: '#ec4899' },
   { name: 'Amber', primary: '#f59e0b', accent: '#eab308' },
@@ -43,7 +43,7 @@ export function DoctorCardSettings() {
     showSpecialty: true,
     showOnlineStatus: true,
     showBookButton: true,
-    primaryColor: '#0ea5e9',
+    primaryColor: '#0891b2',
     accentColor: '#10b981',
   });
   const [loading, setLoading] = useState(true);

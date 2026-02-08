@@ -52,7 +52,7 @@ const indikacije = [
     id: 'ortopedska',
     naziv: 'Ortopedska i lokomotorna stanja',
     ikona: Activity,
-    boja: 'bg-blue-100 text-blue-700',
+    boja: 'bg-cyan-100 text-cyan-700',
     opis: 'Rehabilitacija lokomotornog sistema kroz kombinaciju hidroterapije, kineziterapije i fizikalnih procedura pomaže u obnovi pokretljivosti i smanjenju bola.',
     stanja: [
       'Bolovi u leđima (lumbalni sindrom)',
@@ -240,7 +240,7 @@ const terapije = [
     id: 'balneo',
     kategorija: 'Vode / Balneo terapije',
     ikona: Droplets,
-    boja: 'bg-blue-500',
+    boja: 'bg-cyan-500',
     tretmani: [
       {
         naziv: 'Balneoterapija',
@@ -520,9 +520,9 @@ export default function SpaIndikacije() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
         {/* Hero */}
-        <header className="bg-gradient-to-r from-teal-600 to-blue-600 text-white py-10 md:py-16">
+        <header className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-10 md:py-16">
           <div className="max-w-7xl mx-auto px-4">
             {/* Breadcrumb - hidden on mobile */}
             <nav aria-label="Breadcrumb" className="mb-6 hidden md:block">
@@ -631,7 +631,7 @@ export default function SpaIndikacije() {
                           
                           <div>
                             <h4 className="font-semibold mb-2 flex items-center gap-2">
-                              <Droplets className="h-4 w-4 text-blue-600" />
+                              <Droplets className="h-4 w-4" style={{ color: '#0891b2' }} />
                               Preporučene terapije:
                             </h4>
                             <div className="flex flex-wrap gap-2 mb-4">
@@ -805,7 +805,7 @@ export default function SpaIndikacije() {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-gradient-to-r from-teal-600 to-blue-600 text-white py-12">
+        <section className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-12">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <h2 className="text-2xl font-bold mb-4">Pronađite pravu banju za vaše stanje</h2>
             <p className="text-lg opacity-90 mb-6">

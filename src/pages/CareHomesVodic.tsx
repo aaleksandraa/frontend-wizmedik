@@ -36,7 +36,7 @@ const tipoviDomova = [
     id: 'stariji',
     naziv: 'Dom za starije osobe',
     ikona: Users,
-    boja: 'bg-blue-100 text-blue-700',
+    boja: 'bg-cyan-100 text-cyan-700',
     opis: 'Ustanove namijenjene osobama starije životne dobi koje su relativno samostalne, ali im je potrebna određena podrška u svakodnevnom životu.',
     zaKoga: [
       'Osobe starije od 65 godina',
@@ -269,7 +269,7 @@ const programiNjege = [
     id: 'rehabilitacija',
     naziv: 'Program rehabilitacije',
     ikona: Activity,
-    boja: 'bg-blue-100 text-blue-700',
+    boja: 'bg-cyan-100 text-cyan-700',
     opis: 'Program usmjeren na oporavak funkcionalnih sposobnosti nakon bolesti, operacije ili povrede.',
     ciljnaGrupa: 'Osobe u oporavku nakon moždanog udara, operacija kuka/koljena, fraktura, ili dugotrajne hospitalizacije',
     komponente: [
@@ -540,9 +540,9 @@ export default function CareHomesVodic() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-cyan-50">
         {/* Hero */}
-        <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-10 md:py-16">
+        <header className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white py-10 md:py-16">
           <div className="max-w-7xl mx-auto px-4">
             {/* Breadcrumb - hidden on mobile */}
             <nav aria-label="Breadcrumb" className="mb-6 hidden md:block">
@@ -574,12 +574,12 @@ export default function CareHomesVodic() {
 
         {/* Important Notice */}
         <div className="max-w-7xl mx-auto px-4 -mt-8">
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-cyan-50 border-cyan-200">
             <CardContent className="p-4 flex items-start gap-3">
-              <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
+              <Info className="h-6 w-6 text-cyan-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-blue-800">Kako koristiti ovaj vodič</p>
-                <p className="text-sm text-blue-700">
+                <p className="font-medium text-cyan-800">Kako koristiti ovaj vodič</p>
+                <p className="text-sm text-cyan-700">
                   Ovaj vodič će vam pomoći da razumijete različite opcije njege i odaberete pravu ustanovu za vaše potrebe. 
                   Preporučujemo da posjetite više domova prije donošenja odluke i razgovarate sa osobljem o specifičnim potrebama.
                 </p>
@@ -779,8 +779,8 @@ export default function CareHomesVodic() {
                         <CardContent className="p-6">
                           <p className="text-muted-foreground mb-4">{program.opis}</p>
                           
-                          <div className="bg-blue-50 rounded-lg p-3 mb-6">
-                            <p className="text-sm text-blue-800">
+                          <div className="bg-cyan-50 rounded-lg p-3 mb-6">
+                            <p className="text-sm text-cyan-800">
                               <strong>Ciljna grupa:</strong> {program.ciljnaGrupa}
                             </p>
                           </div>
@@ -973,7 +973,7 @@ export default function CareHomesVodic() {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-12">
+        <section className="bg-gradient-to-r from-purple-600 to-cyan-600 text-white py-12">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <h2 className="text-2xl font-bold mb-4">Pronađite pravi dom za vaše potrebe</h2>
             <p className="text-lg opacity-90 mb-6">

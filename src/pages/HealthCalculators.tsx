@@ -222,7 +222,7 @@ function BMICalculator() {
   };
 
   const getBMIColor = (bmiValue: number) => {
-    if (bmiValue < 18.5) return 'text-blue-600 dark:text-blue-400';
+    if (bmiValue < 18.5) return 'text-cyan-600 dark:text-cyan-400';
     if (bmiValue < 25) return 'text-green-600 dark:text-green-400';
     if (bmiValue < 30) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
@@ -283,7 +283,7 @@ function BMICalculator() {
             
             <div className="mt-6 space-y-2 text-sm">
               <p className="font-semibold mb-3">WHO Klasifikacija BMI:</p>
-              <div className="flex justify-between p-2 rounded bg-blue-50 dark:bg-blue-950/20">
+              <div className="flex justify-between p-2 rounded bg-cyan-50 dark:bg-cyan-950/20">
                 <span>Pothranjenost</span>
                 <span className="font-semibold">&lt; 18.5</span>
               </div>

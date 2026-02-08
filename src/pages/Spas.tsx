@@ -195,9 +195,9 @@ export default function Spas() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-teal-600 text-white py-16">
+        <div className="bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               {/* Icon above title on mobile */}
@@ -209,7 +209,7 @@ export default function Spas() {
                   {pageTitle}
                 </h1>
               </div>
-              <p className="text-xl text-blue-100 mb-8">
+              <p className="text-xl text-cyan-100 mb-8">
                 Pregledajte profile, zakažite termin online ili kontaktirajte.
               </p>
               
@@ -244,7 +244,7 @@ export default function Spas() {
                   <Filter className="w-5 h-5 mr-2" />
                   Filteri
                   {activeFiltersCount > 0 && (
-                    <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">
+                    <span className="ml-2 px-2 py-0.5 text-white text-xs rounded-full" style={{ backgroundColor: '#0891b2' }}>
                       {activeFiltersCount}
                     </span>
                   )}
@@ -393,7 +393,7 @@ export default function Spas() {
                     onCheckedChange={(checked) => updateFilters({ ima_smjestaj: checked as boolean })}
                   />
                   <Label htmlFor="ima_smjestaj" className="cursor-pointer flex items-center gap-2">
-                    <Bed className="w-4 h-4 text-blue-500" />
+                    <Bed className="w-4 h-4" style={{ color: '#0891b2' }} />
                     Sa smještajem
                   </Label>
                 </div>
@@ -492,7 +492,7 @@ export default function Spas() {
                   slug: b.slug,
                 }))}
                 itemType="banja"
-                itemIcon={<Droplet className="h-5 w-5 text-blue-500" />}
+                itemIcon={<Droplet className="h-5 w-5" style={{ color: '#0891b2' }} />}
                 emptyMessage="Nema banja sa GPS koordinatama"
                 height="550px"
               />
@@ -503,10 +503,10 @@ export default function Spas() {
         {/* Edukativni sadržaj */}
         <div className="container mx-auto px-4 py-16 space-y-12">
           {/* Uvodni blok */}
-          <Card className="border-2 border-blue-100">
+          <Card className="border-2 border-cyan-100">
             <CardHeader>
               <CardTitle className="text-3xl flex items-center gap-3">
-                <Droplet className="w-8 h-8 text-blue-600" />
+                <Droplet className="w-8 h-8" style={{ color: '#0891b2' }} />
                 Banje i rehabilitacija
               </CardTitle>
             </CardHeader>
@@ -521,8 +521,8 @@ export default function Spas() {
                 operacija ili povreda, kao i kod hroničnih oboljenja koja zahtijevaju dugoročnu terapiju i 
                 očuvanje funkcionalnosti organizma.
               </p>
-              <div className="bg-blue-50 p-6 rounded-lg">
-                <h3 className="font-semibold text-lg mb-3 text-blue-900">
+              <div className="bg-cyan-50 p-6 rounded-lg">
+                <h3 className="font-semibold text-lg mb-3 text-cyan-900">
                   Cilj banjskog i rehabilitacionog liječenja nije samo ublažavanje simptoma, već:
                 </h3>
                 <ul className="space-y-2">
@@ -558,7 +558,7 @@ export default function Spas() {
                   'kod dugotrajnih bolnih sindroma i smanjene pokretljivosti'
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                    <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#0891b2' }} />
                     <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
@@ -635,7 +635,7 @@ export default function Spas() {
                     opis: 'Specijalizovane ustanove koje kombinuju prirodne terapijske faktore i medicinski nadzor u cilju liječenja i oporavka.'
                   }
                 ].map((vrsta, i) => (
-                  <div key={i} className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                  <div key={i} className="p-4 border border-gray-200 rounded-lg hover:border-cyan-300 transition-colors">
                     <h4 className="font-semibold text-lg text-gray-900 mb-2">{vrsta.naziv}</h4>
                     <p className="text-sm text-gray-600">{vrsta.opis}</p>
                   </div>
@@ -648,7 +648,7 @@ export default function Spas() {
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl flex items-center gap-2">
-                <HelpCircle className="w-6 h-6 text-blue-600" />
+                <HelpCircle className="w-6 h-6" style={{ color: '#0891b2' }} />
                 Često postavljana pitanja
               </CardTitle>
             </CardHeader>

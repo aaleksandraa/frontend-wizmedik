@@ -48,7 +48,7 @@ export default function HomepageCustom2Cyan() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-cyan-50 to-teal-50">
         <Navbar />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
@@ -108,7 +108,7 @@ export default function HomepageCustom2Cyan() {
 
   const quickServices = [
     { icon: Stethoscope, label: 'Opšta medicina', href: '/specijalnost/opsta-medicina-i-porodicna-medicina', color: 'bg-cyan-100 text-cyan-600' },
-    { icon: Heart, label: 'Kardiologija', href: '/specijalnost/kardiologija', color: 'bg-blue-100 text-blue-600' },
+    { icon: Heart, label: 'Kardiologija', href: '/specijalnost/kardiologija', color: 'bg-cyan-100 text-cyan-600' },
     { icon: Activity, label: 'Interna medicina', href: '/specijalnost/interna-medicina', color: 'bg-teal-100 text-teal-600' },
     { icon: FlaskConical, label: 'Laboratorije', href: '/laboratorije', color: 'bg-emerald-100 text-emerald-600' },
     { icon: Droplet, label: 'Banje', href: '/banje', color: 'bg-sky-100 text-sky-600' },
@@ -127,7 +127,7 @@ export default function HomepageCustom2Cyan() {
       <Navbar />
       
       {/* Hero Section - ZocDoc Style with Cyan */}
-      <section className="relative bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+      <section className="relative bg-gradient-to-br from-cyan-50 via-cyan-50 to-teal-50">
         {/* Decorative Elements */}
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-20 pointer-events-none">
           <svg viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -249,8 +249,8 @@ export default function HomepageCustom2Cyan() {
                           <div className="text-sm text-gray-600">Kardiolog</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-4 p-4 bg-cyan-50 rounded-xl">
+                        <div className="w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center">
                           <Heart className="w-6 h-6 text-white" />
                         </div>
                         <div>
@@ -406,7 +406,7 @@ export default function HomepageCustom2Cyan() {
 
           {/* Animated Pulse Circles */}
           <div className="absolute top-20 right-1/4 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse overflow-hidden"></div>
-          <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000 overflow-hidden"></div>
+          <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000 overflow-hidden"></div>
 
           <div className={`container mx-auto px-4 relative z-10 transition-all duration-300 ${citySearchQuery && filteredCities.length > 0 ? 'pb-96' : 'pb-0'}`}>
             <div className="text-center mb-12">
@@ -535,7 +535,7 @@ export default function HomepageCustom2Cyan() {
 
       {/* Questions Section */}
       {pitanja.length > 0 && (
-        <section className="py-16 bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+        <section className="py-16 bg-gradient-to-br from-cyan-50 via-cyan-50 to-teal-50">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
               <div>
@@ -584,7 +584,7 @@ export default function HomepageCustom2Cyan() {
               ))}
             </div>
             <div className="mt-10 text-center">
-              <Card className="inline-block border-0 bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+              <Card className="inline-block border-0 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white">
                 <CardContent className="p-6 flex flex-col sm:flex-row items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
                     <MessageCircle className="w-7 h-7" />
@@ -608,9 +608,9 @@ export default function HomepageCustom2Cyan() {
       {/* CTA */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-600 via-blue-600 to-teal-600 p-8 md:p-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-600 via-cyan-600 to-teal-600 p-8 md:p-16">
             <div className="absolute -top-48 -right-48 w-96 h-96 bg-white/10 rounded-full blur-3xl max-md:hidden"></div>
-            <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl max-md:hidden"></div>
+            <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl max-md:hidden"></div>
             <div className="relative text-center max-w-3xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Spremni ste za bolju zdravstvenu njegu?</h2>
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">

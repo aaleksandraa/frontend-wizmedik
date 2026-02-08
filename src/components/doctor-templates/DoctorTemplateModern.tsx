@@ -159,10 +159,10 @@ export function DoctorTemplateModern({
 
             {/* Guest Visits */}
             {guestVisits.length > 0 && (
-              <Card className="border-l-4 border-l-blue-500">
+              <Card className="border-l-4 border-l-cyan-500">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-blue-600" />
+                    <Building2 className="h-5 w-5 text-cyan-600" />
                     Gostovanja u klinikama
                   </h2>
                   <p className="text-sm text-gray-500 mb-4">
@@ -170,11 +170,11 @@ export function DoctorTemplateModern({
                   </p>
                   <div className="space-y-3">
                     {guestVisits.map((visit) => (
-                      <div key={visit.id} className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <div key={visit.id} className="p-4 bg-cyan-50 rounded-lg border border-cyan-100">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <Link to={`/klinika/${visit.klinika.slug}`} className="font-semibold text-blue-700 hover:underline">
+                              <Link to={`/klinika/${visit.klinika.slug}`} className="font-semibold text-cyan-700 hover:underline">
                                 {visit.klinika.naziv}
                               </Link>
                               <Badge variant="outline" className="text-xs">Gostovanje</Badge>

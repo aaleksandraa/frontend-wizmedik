@@ -56,7 +56,7 @@ const MedicalCalendarManagement: React.FC = () => {
     description: '',
     type: 'day',
     category: '',
-    color: '#3b82f6',
+    color: '#0891b2',
     is_active: true,
     sort_order: 0
   });
@@ -69,7 +69,7 @@ const MedicalCalendarManagement: React.FC = () => {
   ];
 
   const colorPresets = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+    '#0891b2', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
     '#ec4899', '#06b6d4', '#64748b', '#dc2626', '#9333ea'
   ];
 
@@ -173,7 +173,7 @@ const MedicalCalendarManagement: React.FC = () => {
           description: event.description || '',
           type: event.type || 'day',
           category: event.category || '',
-          color: event.color || '#3b82f6',
+          color: event.color || '#0891b2',
           is_active: event.is_active !== undefined ? event.is_active : true,
           sort_order: event.sort_order || 0
         };
@@ -188,7 +188,7 @@ const MedicalCalendarManagement: React.FC = () => {
           description: '',
           type: 'day',
           category: '',
-          color: '#3b82f6',
+          color: '#0891b2',
           is_active: true,
           sort_order: 0
         });
@@ -273,7 +273,7 @@ const MedicalCalendarManagement: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-8 h-8 text-blue-600" />
+          <Calendar className="w-8 h-8 text-cyan-600" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Medicinski Kalendar</h2>
             <p className="text-sm text-gray-600">Ukupno: {events.length} događaja</p>
@@ -281,7 +281,7 @@ const MedicalCalendarManagement: React.FC = () => {
         </div>
         <button
           onClick={() => openModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
         >
           <Plus className="w-5 h-5" />
           Dodaj događaj
@@ -298,13 +298,13 @@ const MedicalCalendarManagement: React.FC = () => {
               placeholder="Pretraži..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
           >
             <option value="all">Svi tipovi</option>
             {typeOptions.map(opt => (
@@ -314,7 +314,7 @@ const MedicalCalendarManagement: React.FC = () => {
           <select
             value={filterActive}
             onChange={(e) => setFilterActive(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
           >
             <option value="all">Svi statusi</option>
             <option value="active">Aktivni</option>
@@ -327,7 +327,7 @@ const MedicalCalendarManagement: React.FC = () => {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
             <p className="mt-4 text-gray-600">Učitavanje...</p>
           </div>
         ) : filteredEvents.length === 0 ? (
@@ -394,7 +394,7 @@ const MedicalCalendarManagement: React.FC = () => {
                           e.stopPropagation();
                           openModal(event);
                         }}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        className="text-cyan-600 hover:text-cyan-900 mr-3"
                         title="Uredi događaj"
                       >
                         <Edit2 className="w-5 h-5" />
@@ -459,7 +459,7 @@ const MedicalCalendarManagement: React.FC = () => {
                       required
                       value={formatDateForInput(formData.date)}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                     />
                   </div>
                   <div>
@@ -470,7 +470,7 @@ const MedicalCalendarManagement: React.FC = () => {
                       type="date"
                       value={formatDateForInput(formData.end_date || '')}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                     />
                   </div>
                 </div>
@@ -484,7 +484,7 @@ const MedicalCalendarManagement: React.FC = () => {
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
 
@@ -496,7 +496,7 @@ const MedicalCalendarManagement: React.FC = () => {
                     rows={3}
                     value={formData.description || ''}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
 
@@ -509,7 +509,7 @@ const MedicalCalendarManagement: React.FC = () => {
                       required
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                     >
                       {typeOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -530,7 +530,7 @@ const MedicalCalendarManagement: React.FC = () => {
                             setFormData({ ...formData, category: e.target.value });
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                       >
                         <option value="">Bez kategorije</option>
                         {categories.map(opt => (
@@ -540,26 +540,26 @@ const MedicalCalendarManagement: React.FC = () => {
                       </select>
                       
                       {showNewCategoryInput && (
-                        <div className="p-3 border border-blue-200 rounded-lg bg-blue-50 space-y-2">
+                        <div className="p-3 border border-cyan-200 rounded-lg bg-cyan-50 space-y-2">
                           <input
                             type="text"
                             placeholder="Slug (npr. 'public-health')"
                             value={newCategoryValue}
                             onChange={(e) => setNewCategoryValue(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 text-sm"
                           />
                           <input
                             type="text"
                             placeholder="Naziv (npr. 'Javno zdravlje')"
                             value={newCategoryLabel}
                             onChange={(e) => setNewCategoryLabel(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 text-sm"
                           />
                           <div className="flex gap-2">
                             <button
                               type="button"
                               onClick={addNewCategory}
-                              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                              className="px-3 py-1 bg-cyan-600 text-white rounded text-sm hover:bg-cyan-700"
                             >
                               Dodaj
                             </button>
@@ -612,7 +612,7 @@ const MedicalCalendarManagement: React.FC = () => {
                     id="is_active"
                     checked={formData.is_active}
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
                   />
                   <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
                     Aktivan
@@ -622,7 +622,7 @@ const MedicalCalendarManagement: React.FC = () => {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
                   >
                     <Save className="w-5 h-5" />
                     Sačuvaj

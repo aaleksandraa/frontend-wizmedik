@@ -64,14 +64,14 @@ All colors MUST be HSL.
     --medical-emergency: 0 75% 55%;
     
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(210 100% 45%), hsl(180 70% 50%));
+    --gradient-hero: linear-gradient(135deg, #0891b2, hsl(180 70% 50%));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
-    --gradient-accent: linear-gradient(90deg, hsl(180 70% 50%), hsl(210 100% 45%));
+    --gradient-accent: linear-gradient(90deg, hsl(180 70% 50%), #0891b2);
 
     /* Shadows */
-    --shadow-soft: 0 2px 20px -5px hsl(210 50% 30% / 0.1);
-    --shadow-medium: 0 4px 30px -10px hsl(210 50% 30% / 0.15);
-    --shadow-strong: 0 8px 40px -15px hsl(210 50% 30% / 0.2);
+    --shadow-soft: 0 2px 20px -5px #0891b2 / 0.1;
+    --shadow-medium: 0 4px 30px -10px #0891b2 / 0.15;
+    --shadow-strong: 0 8px 40px -15px #0891b2 / 0.2;
 
     --radius: 0.75rem;
 
@@ -350,13 +350,13 @@ All colors MUST be HSL.
 /* Note: List margins and H3 spacing are dynamically applied via inline styles in BlogPost and RichTextEditor */
 
 .ProseMirror a {
-  color: #3b82f6;
+  color: #0891b2;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .ProseMirror a:hover {
-  color: #1d4ed8;
+  color: #0891b2;
 }
 
 .ProseMirror mark {

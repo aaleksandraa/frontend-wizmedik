@@ -91,7 +91,7 @@ const defaultSettings: DoctorCardSettings = {
   showSpecialty: true,
   showOnlineStatus: true,
   showBookButton: true,
-  primaryColor: '#0ea5e9',
+  primaryColor: '#0891b2',
   accentColor: '#10b981',
 };
 

@@ -283,7 +283,7 @@ export default function BlogPost() {
                 border-radius: 0.5rem;
               }
               .blog-content blockquote {
-                border-left: 4px solid #0ea5e9;
+                border-left: 4px solid #0891b2;
                 padding-left: 1rem;
                 margin: 1.5rem 0;
                 font-style: italic;
@@ -305,11 +305,11 @@ export default function BlogPost() {
                 font-weight: 600;
               }
               .blog-content a {
-                color: #0ea5e9;
+                color: #0891b2;
                 text-decoration: underline;
               }
               .blog-content a:hover {
-                color: #0284c7;
+                color: #0891b2;
               }
               .blog-content hr {
                 margin: 2rem 0;

@@ -185,7 +185,7 @@ export function CookieConsent() {
                 {/* Analytics Cookies */}
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-blue-600" />
+                    <BarChart3 className="h-4 w-4 text-cyan-600" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Analitički</p>
                       <p className="text-xs text-gray-500">Anonimni podaci za poboljšanje</p>

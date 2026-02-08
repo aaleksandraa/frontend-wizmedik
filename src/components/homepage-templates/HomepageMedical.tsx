@@ -86,7 +86,7 @@ export function HomepageMedical() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-cyan-600 via-cyan-700 to-indigo-800 overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
         <div className="container mx-auto px-4 py-20 md:py-28 relative z-10">
           <div className="max-w-4xl mx-auto text-center text-white">
@@ -94,7 +94,7 @@ export function HomepageMedical() {
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
               Vaše zdravlje je naš prioritet
             </h1>
-            <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-cyan-100 mb-10 max-w-2xl mx-auto">
               Pronađite najboljeg doktora, zakažite termin online i dobijte stručne savjete - sve na jednom mjestu.
             </p>
             
@@ -117,10 +117,10 @@ export function HomepageMedical() {
                       {suggestions.map((spec) => (
                         <div
                           key={spec.id}
-                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center gap-3 text-left"
+                          className="px-4 py-3 hover:bg-cyan-50 cursor-pointer flex items-center gap-3 text-left"
                           onMouseDown={() => handleSuggestionClick(spec)}
                         >
-                          <Stethoscope className="h-5 w-5 text-blue-600" />
+                          <Stethoscope className="h-5 w-5 text-cyan-600" />
                           <div>
                             <div className="font-medium text-gray-900">{spec.naziv}</div>
                             <div className="text-xs text-gray-500">Specijalnost</div>
@@ -130,14 +130,14 @@ export function HomepageMedical() {
                     </div>
                   )}
                 </div>
-                <Button onClick={handleSearch} size="lg" className="h-14 px-8 bg-blue-600 hover:bg-blue-700 rounded-xl">
+                <Button onClick={handleSearch} size="lg" className="h-14 px-8 bg-cyan-600 hover:bg-cyan-700 rounded-xl">
                   Pretraži
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-4 justify-center">
                 <span className="text-sm text-gray-500">Popularno:</span>
                 {['Kardiolog', 'Dermatolog', 'Stomatolog', 'Ginekolog'].map(term => (
-                  <Link key={term} to={`/doktori/specijalnost/${term.toLowerCase()}`} className="text-sm text-blue-600 hover:underline">{term}</Link>
+                  <Link key={term} to={`/doktori/specijalnost/${term.toLowerCase()}`} className="text-sm text-cyan-600 hover:underline">{term}</Link>
                 ))}
               </div>
             </div>
@@ -149,10 +149,10 @@ export function HomepageMedical() {
       <section className="bg-white border-b py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div><div className="text-3xl font-bold text-blue-600">{doctors.length * 50}+</div><div className="text-gray-600">Doktora</div></div>
-            <div><div className="text-3xl font-bold text-blue-600">{clinics.length * 25}+</div><div className="text-gray-600">Klinika</div></div>
-            <div><div className="text-3xl font-bold text-blue-600">{specijalnosti.length * 5}+</div><div className="text-gray-600">Specijalnosti</div></div>
-            <div><div className="text-3xl font-bold text-blue-600">50K+</div><div className="text-gray-600">Zadovoljnih pacijenata</div></div>
+            <div><div className="text-3xl font-bold text-cyan-600">{doctors.length * 50}+</div><div className="text-gray-600">Doktora</div></div>
+            <div><div className="text-3xl font-bold text-cyan-600">{clinics.length * 25}+</div><div className="text-gray-600">Klinika</div></div>
+            <div><div className="text-3xl font-bold text-cyan-600">{specijalnosti.length * 5}+</div><div className="text-gray-600">Specijalnosti</div></div>
+            <div><div className="text-3xl font-bold text-cyan-600">50K+</div><div className="text-gray-600">Zadovoljnih pacijenata</div></div>
           </div>
         </div>
       </section>
@@ -172,10 +172,10 @@ export function HomepageMedical() {
               const IconComponent = specialtyIcons[spec.naziv] || specialtyIcons.default;
               return (
                 <Link key={spec.id} to={`/specijalnost/${spec.slug}`} className="group">
-                  <Card className="h-full hover:shadow-lg transition-all hover:border-blue-500 cursor-pointer bg-white">
+                  <Card className="h-full hover:shadow-lg transition-all hover:border-cyan-500 cursor-pointer bg-white">
                     <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                        <IconComponent className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors" />
+                      <div className="w-16 h-16 mx-auto mb-4 bg-cyan-50 rounded-2xl flex items-center justify-center group-hover:bg-cyan-600 transition-colors">
+                        <IconComponent className="h-8 w-8 text-cyan-600 group-hover:text-white transition-colors" />
                       </div>
                       <h3 className="font-semibold text-gray-900">{spec.naziv}</h3>
                       <p className="text-sm text-gray-500 mt-1">{spec.broj_doktora || Math.floor(Math.random() * 50) + 10} doktora</p>
@@ -198,8 +198,8 @@ export function HomepageMedical() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {gradovi.map((grad) => (
               <Link key={grad.id} to={`/grad/${grad.slug}`} className="group">
-                <Card className="hover:shadow-lg transition-all hover:border-blue-500 overflow-hidden">
-                  <div className="h-24 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <Card className="hover:shadow-lg transition-all hover:border-cyan-500 overflow-hidden">
+                  <div className="h-24 bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center">
                     <MapPin className="h-10 w-10 text-white" />
                   </div>
                   <CardContent className="p-4 text-center">
@@ -230,12 +230,12 @@ export function HomepageMedical() {
                 <Card className="h-full hover:shadow-lg transition-all cursor-pointer">
                   <CardContent className="p-6">
                     <div className="text-center mb-4">
-                      <Avatar className="h-20 w-20 mx-auto border-4 border-blue-100">
+                      <Avatar className="h-20 w-20 mx-auto border-4 border-cyan-100">
                         <AvatarImage src={doctor.slika_profila} />
-                        <AvatarFallback className="bg-blue-100 text-blue-600 text-xl">{doctor.ime?.[0]}{doctor.prezime?.[0]}</AvatarFallback>
+                        <AvatarFallback className="bg-cyan-100 text-cyan-600 text-xl">{doctor.ime?.[0]}{doctor.prezime?.[0]}</AvatarFallback>
                       </Avatar>
                       <h3 className="font-semibold text-gray-900 mt-3">Dr. {doctor.ime} {doctor.prezime}</h3>
-                      <p className="text-blue-600 text-sm">{doctor.specijalnost}</p>
+                      <p className="text-cyan-600 text-sm">{doctor.specijalnost}</p>
                       <div className="flex items-center justify-center gap-1 mt-2 text-sm text-gray-500">
                         <MapPin className="h-3 w-3" /><span>{doctor.grad}</span>
                       </div>
@@ -244,7 +244,7 @@ export function HomepageMedical() {
                       {doctor.ocjena > 0 ? (
                         <div className="flex items-center gap-1"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /><span className="font-semibold">{formatRating(doctor.ocjena)}</span></div>
                       ) : <span className="text-sm text-gray-500">Novi</span>}
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700"><Calendar className="mr-1 h-4 w-4" />Zakaži</Button>
+                      <Button size="sm" className="bg-cyan-600 hover:bg-cyan-700"><Calendar className="mr-1 h-4 w-4" />Zakaži</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -272,7 +272,7 @@ export function HomepageMedical() {
                     {post.thumbnail ? (
                       <img src={fixImageUrl(post.thumbnail) || ''} alt={post.naslov} className="w-full h-40 object-cover" />
                     ) : (
-                      <div className="w-full h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                      <div className="w-full h-40 bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center">
                         <Stethoscope className="h-12 w-12 text-white/50" />
                       </div>
                     )}
@@ -311,7 +311,7 @@ export function HomepageMedical() {
               { title: 'Važnost redovnih pregleda', duration: '4:48', views: '15K' },
             ].map((video, i) => (
               <Card key={i} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-all cursor-pointer overflow-hidden group">
-                <div className="relative h-48 bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
+                <div className="relative h-48 bg-gradient-to-br from-cyan-600 to-indigo-700 flex items-center justify-center">
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"></div>
                   <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Play className="h-8 w-8 text-white ml-1" />
@@ -343,8 +343,8 @@ export function HomepageMedical() {
               <Link key={clinic.id} to={`/klinika/${clinic.slug}`}>
                 <Card className="h-full hover:shadow-lg transition-all cursor-pointer">
                   <CardContent className="p-6">
-                    <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                      <Building2 className="h-8 w-8 text-blue-600" />
+                    <div className="w-16 h-16 bg-cyan-100 rounded-xl flex items-center justify-center mb-4">
+                      <Building2 className="h-8 w-8 text-cyan-600" />
                     </div>
                     <h3 className="font-semibold text-gray-900">{clinic.naziv}</h3>
                     <div className="flex items-center gap-1 mt-2 text-sm text-gray-500">
@@ -362,10 +362,10 @@ export function HomepageMedical() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
+      <section className="py-20 bg-gradient-to-r from-cyan-600 to-indigo-700">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Imate pitanje za doktora?</h2>
-          <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">Postavite pitanje i dobijte odgovor od stručnih doktora potpuno besplatno.</p>
+          <p className="text-cyan-100 text-lg mb-8 max-w-2xl mx-auto">Postavite pitanje i dobijte odgovor od stručnih doktora potpuno besplatno.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" variant="secondary"><Link to="/postavi-pitanje">Postavi pitanje</Link></Button>
             <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10"><Link to="/pitanja">Pregledaj pitanja</Link></Button>

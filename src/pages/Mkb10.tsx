@@ -366,7 +366,7 @@ export default function Mkb10() {
 
       <Navbar />
 
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50" role="main">
+      <main className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50" role="main">
         {/* Breadcrumbs navigacija */}
         <nav aria-label="Breadcrumb" className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 py-3">
@@ -388,7 +388,7 @@ export default function Mkb10() {
         </nav>
 
         {/* Hero sekcija sa semantičkim HTML */}
-        <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+        <header className="bg-gradient-to-r from-cyan-600 to-indigo-700 text-white py-12">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center gap-4 mb-4">
               <BookOpen className="h-10 w-10" aria-hidden="true" />
@@ -396,7 +396,7 @@ export default function Mkb10() {
                 MKB-10 Šifarnik bolesti
               </h1>
             </div>
-            <p className="text-blue-100 text-lg max-w-3xl">
+            <p className="text-cyan-100 text-lg max-w-3xl">
               <strong>Međunarodna klasifikacija bolesti</strong> - deseta revizija (ICD-10). 
               Kompletna baza medicinskih dijagnoza na srpskom jeziku. 
               Pretražujte dijagnoze po šifri ili nazivu bolesti.
@@ -407,11 +407,11 @@ export default function Mkb10() {
               <div className="flex flex-wrap gap-6 mt-6" role="group" aria-label="Statistika MKB-10 baze">
                 <div className="bg-white/10 rounded-lg px-4 py-2">
                   <span className="text-2xl font-bold">{statistika.ukupno_kategorija}</span>
-                  <span className="text-blue-200 ml-2">kategorija</span>
+                  <span className="text-cyan-200 ml-2">kategorija</span>
                 </div>
                 <div className="bg-white/10 rounded-lg px-4 py-2">
                   <span className="text-2xl font-bold">{statistika.ukupno_dijagnoza.toLocaleString()}</span>
-                  <span className="text-blue-200 ml-2">dijagnoza</span>
+                  <span className="text-cyan-200 ml-2">dijagnoza</span>
                 </div>
               </div>
             )}
@@ -497,7 +497,7 @@ export default function Mkb10() {
                                   </p>
                                 )}
                                 {dijagnoza.kategorija && (
-                                  <p className="text-xs text-blue-600 mt-1">
+                                  <p className="text-xs text-cyan-600 mt-1">
                                     Kategorija: {dijagnoza.kategorija.kod_od} - {dijagnoza.kategorija.naziv}
                                   </p>
                                 )}
@@ -713,7 +713,7 @@ export default function Mkb10() {
             <h2 id="about-mkb10" className="text-2xl font-bold mb-4">
               O Međunarodnoj klasifikaciji bolesti MKB-10
             </h2>
-            <div className="bg-blue-50 rounded-lg p-6 text-muted-foreground max-w-none">
+            <div className="bg-cyan-50 rounded-lg p-6 text-muted-foreground max-w-none">
               <p className="mb-4">
                 <strong>Međunarodna klasifikacija bolesti (MKB)</strong>, poznata i kao ICD (International Classification of Diseases), 
                 je globalni standard za dijagnostičku klasifikaciju koji je razvila Svjetska zdravstvena organizacija (WHO). 

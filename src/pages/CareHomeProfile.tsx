@@ -125,7 +125,7 @@ export default function CareHomeProfile() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-purple-50">
           <div className="max-w-6xl mx-auto px-4 py-8">
             <Skeleton className="h-8 w-48 mb-4" />
             <Skeleton className="h-64 w-full mb-6" />
@@ -141,7 +141,7 @@ export default function CareHomeProfile() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-purple-50 flex items-center justify-center">
           <Card className="max-w-md">
             <CardContent className="p-8 text-center">
               <Home className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -169,7 +169,7 @@ export default function CareHomeProfile() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-purple-50">
         {/* Breadcrumb */}
         <div className="bg-white border-b">
           <div className="max-w-6xl mx-auto px-4 py-3">

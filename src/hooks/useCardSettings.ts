@@ -36,7 +36,7 @@ const defaultDoctorSettings: DoctorCardSettings = {
   showSpecialty: true,
   showOnlineStatus: true,
   showBookButton: true,
-  primaryColor: '#0ea5e9',
+  primaryColor: '#0891b2',
   accentColor: '#10b981',
 };
 
@@ -51,7 +51,7 @@ const defaultClinicSettings: ClinicCardSettings = {
   showWorkingHours: true,
   showDoctorsCount: true,
   showDistance: true,
-  primaryColor: '#0ea5e9',
+  primaryColor: '#0891b2',
   accentColor: '#8b5cf6',
 };
 

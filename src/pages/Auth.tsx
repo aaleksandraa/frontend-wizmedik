@@ -46,7 +46,7 @@ const providerOptions: ProviderOption[] = [
     description: 'Registrujte svoju privatnu praksu',
     icon: <Stethoscope className="w-6 h-6" />,
     href: '/register/doctor',
-    color: 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100'
+    color: 'bg-cyan-50 text-cyan-600 border-cyan-200 hover:bg-cyan-100'
   },
   {
     id: 'clinic',

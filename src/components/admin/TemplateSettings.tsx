@@ -17,8 +17,8 @@ interface Template {
 }
 
 const GRADIENT_PRESETS = [
-  { name: 'Primary', value: 'from-primary via-primary/90 to-primary/80', preview: 'bg-gradient-to-br from-[#0ea5e9] via-[#0ea5e9]/90 to-[#0ea5e9]/80' },
-  { name: 'Ocean', value: 'from-blue-600 via-blue-500 to-cyan-400', preview: 'bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400' },
+  { name: 'Primary', value: 'from-primary via-primary/90 to-primary/80', preview: 'bg-gradient-to-br from-[#0891b2] via-[#0891b2]/90 to-[#0891b2]/80' },
+  { name: 'Ocean', value: 'from-cyan-600 via-cyan-500 to-cyan-400', preview: 'bg-gradient-to-br from-cyan-600 via-cyan-500 to-cyan-400' },
   { name: 'Sunset', value: 'from-orange-500 via-pink-500 to-purple-600', preview: 'bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600' },
   { name: 'Forest', value: 'from-green-600 via-emerald-500 to-teal-400', preview: 'bg-gradient-to-br from-green-600 via-emerald-500 to-teal-400' },
   { name: 'Royal', value: 'from-purple-600 via-violet-500 to-indigo-400', preview: 'bg-gradient-to-br from-purple-600 via-violet-500 to-indigo-400' },
@@ -264,7 +264,7 @@ export function TemplateSettings() {
                   <Input
                     value={modernCoverValue}
                     onChange={(e) => setModernCoverValue(e.target.value)}
-                    placeholder="from-blue-500 via-purple-500 to-pink-500"
+                    placeholder="from-cyan-500 via-purple-500 to-pink-500"
                     className="mt-2"
                   />
                 </div>
@@ -506,9 +506,9 @@ export function TemplateSettings() {
             </div>
           </div>
 
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 font-medium mb-2">ℹ️ Kako radi?</p>
-            <ul className="text-blue-700 text-sm space-y-1">
+          <div className="mt-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+            <p className="text-cyan-800 font-medium mb-2">ℹ️ Kako radi?</p>
+            <ul className="text-cyan-700 text-sm space-y-1">
               <li><strong>Automatski:</strong> Ako template ima definisane boje (npr. Custom 2 Yellow), navbar će biti obojen. Inače bijeli.</li>
               <li><strong>Uvijek Obojen:</strong> Navbar će uvijek koristiti boje template-a ako su dostupne.</li>
               <li><strong>Standardni:</strong> Navbar će uvijek biti bijeli, bez obzira na template.</li>
@@ -543,9 +543,9 @@ export function TemplateSettings() {
             />
           </div>
 
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 font-medium mb-2">ℹ️ O Split View-u</p>
-            <ul className="text-blue-700 text-sm space-y-1">
+          <div className="mt-4 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+            <p className="text-cyan-800 font-medium mb-2">ℹ️ O Split View-u</p>
+            <ul className="text-cyan-700 text-sm space-y-1">
               <li>• <strong>Lijevo (40%):</strong> Scrollable lista doktora sa osnovnim informacijama</li>
               <li>• <strong>Desno (60%):</strong> Interaktivna Leaflet mapa sa pinovima</li>
               <li>• <strong>Interakcija:</strong> Klik na doktora centrira mapu, klik na pin otvara popup</li>
@@ -665,7 +665,7 @@ export function TemplateSettings() {
                   <div className="space-y-2">
                     <Label>Pregled</Label>
                     <div 
-                      className="relative h-48 rounded-lg overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center"
+                      className="relative h-48 rounded-lg overflow-hidden bg-gradient-to-r from-cyan-500 to-cyan-500 flex items-center justify-center"
                     >
                       <div 
                         className="absolute inset-0 bg-cover bg-center"
@@ -683,9 +683,9 @@ export function TemplateSettings() {
                 )}
 
                 {/* Info Box */}
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-blue-800 font-medium mb-2">💡 Savjeti za najbolji rezultat</p>
-                  <ul className="text-blue-700 text-sm space-y-1">
+                <div className="p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+                  <p className="text-cyan-800 font-medium mb-2">💡 Savjeti za najbolji rezultat</p>
+                  <ul className="text-cyan-700 text-sm space-y-1">
                     <li>• Koristite slike sa blagim, neutralnim tonovima</li>
                     <li>• Preporučeni opacity: 15-30% za suptilan efekat</li>
                     <li>• Izbjegavajte slike sa puno detalja ili kontrasta</li>
@@ -855,31 +855,31 @@ function HomepageTemplatePreview({ type }: { type: string }) {
     ),
     pro: (
       <div className="w-full h-full flex flex-col bg-white">
-        <div className="h-1/3 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-t flex items-center justify-center">
+        <div className="h-1/3 bg-gradient-to-br from-cyan-600 to-indigo-700 rounded-t flex items-center justify-center">
           <div className="w-12 h-3 bg-white rounded-lg" />
         </div>
         <div className="flex-1 p-1 space-y-1">
           <div className="grid grid-cols-4 gap-1 h-1/4">
-            {[...Array(4)].map((_, i) => <div key={i} className="bg-blue-50 rounded flex items-center justify-center"><div className="w-2 h-2 bg-blue-500 rounded" /></div>)}
+            {[...Array(4)].map((_, i) => <div key={i} className="bg-cyan-50 rounded flex items-center justify-center"><div className="w-2 h-2 bg-cyan-500 rounded" /></div>)}
           </div>
           <div className="grid grid-cols-3 gap-1 h-1/3">
-            {[...Array(3)].map((_, i) => <div key={i} className="bg-gray-100 rounded overflow-hidden"><div className="h-1/2 bg-blue-400" /></div>)}
+            {[...Array(3)].map((_, i) => <div key={i} className="bg-gray-100 rounded overflow-hidden"><div className="h-1/2 bg-cyan-400" /></div>)}
           </div>
-          <div className="h-1/4 bg-blue-600 rounded" />
+          <div className="h-1/4 bg-cyan-600 rounded" />
         </div>
       </div>
     ),
     medical: (
       <div className="w-full h-full flex flex-col bg-white">
-        <div className="h-1/3 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-t flex items-center justify-center">
+        <div className="h-1/3 bg-gradient-to-br from-cyan-600 to-indigo-700 rounded-t flex items-center justify-center">
           <div className="w-10 h-2 bg-white rounded" />
         </div>
         <div className="bg-white py-1 flex justify-center gap-1">
-          {[...Array(4)].map((_, i) => <div key={i} className="w-4 h-3 bg-blue-100 rounded text-[6px] text-center text-blue-600">📊</div>)}
+          {[...Array(4)].map((_, i) => <div key={i} className="w-4 h-3 bg-cyan-100 rounded text-[6px] text-center text-cyan-600">📊</div>)}
         </div>
         <div className="flex-1 p-1 space-y-1">
           <div className="grid grid-cols-4 gap-1 h-1/3">
-            {[...Array(4)].map((_, i) => <div key={i} className="bg-blue-50 rounded flex items-center justify-center"><div className="w-2 h-2 bg-blue-400 rounded" /></div>)}
+            {[...Array(4)].map((_, i) => <div key={i} className="bg-cyan-50 rounded flex items-center justify-center"><div className="w-2 h-2 bg-cyan-400 rounded" /></div>)}
           </div>
           <div className="grid grid-cols-3 gap-1 h-1/3">
             {[...Array(3)].map((_, i) => <div key={i} className="bg-gray-100 rounded" />)}
@@ -927,23 +927,23 @@ function HomepageTemplatePreview({ type }: { type: string }) {
     ),
     zocdoc: (
       <div className="w-full h-full flex flex-col">
-        <div className="h-1/2 bg-[#00856f]/30 rounded-t flex flex-col items-center justify-center gap-1">
-          <div className="w-12 h-2 bg-[#00856f] rounded" />
+        <div className="h-1/2 bg-[#0891b2]/30 rounded-t flex flex-col items-center justify-center gap-1">
+          <div className="w-12 h-2 bg-[#0891b2] rounded" />
           <div className="w-16 h-3 bg-white rounded border border-gray-200" />
         </div>
         <div className="flex-1 p-2 space-y-1">
           <div className="grid grid-cols-4 gap-1 h-full">
-            <div className="bg-[#f0f7f4] rounded flex items-center justify-center">
-              <div className="w-3 h-3 bg-[#00856f]/50 rounded" />
+            <div className="bg-[#e0f2fe] rounded flex items-center justify-center">
+              <div className="w-3 h-3 bg-[#0891b2]/50 rounded" />
             </div>
-            <div className="bg-[#f0f7f4] rounded flex items-center justify-center">
-              <div className="w-3 h-3 bg-[#00856f]/50 rounded" />
+            <div className="bg-[#e0f2fe] rounded flex items-center justify-center">
+              <div className="w-3 h-3 bg-[#0891b2]/50 rounded" />
             </div>
-            <div className="bg-[#f0f7f4] rounded flex items-center justify-center">
-              <div className="w-3 h-3 bg-[#00856f]/50 rounded" />
+            <div className="bg-[#e0f2fe] rounded flex items-center justify-center">
+              <div className="w-3 h-3 bg-[#0891b2]/50 rounded" />
             </div>
-            <div className="bg-[#f0f7f4] rounded flex items-center justify-center">
-              <div className="w-3 h-3 bg-[#00856f]/50 rounded" />
+            <div className="bg-[#e0f2fe] rounded flex items-center justify-center">
+              <div className="w-3 h-3 bg-[#0891b2]/50 rounded" />
             </div>
           </div>
         </div>

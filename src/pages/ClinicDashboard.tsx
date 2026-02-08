@@ -706,10 +706,10 @@ export default function ClinicDashboard() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <Stethoscope className="h-8 w-8 text-blue-600" />
+                  <Stethoscope className="h-8 w-8 text-cyan-600" />
                   <div>
                     <p className="text-2xl font-bold">{clinicDoctors.length}</p>
                     <p className="text-xs text-muted-foreground">Stalnih doktora</p>
@@ -1350,8 +1350,8 @@ export default function ClinicDashboard() {
                 <CardContent>
                   {profile?.slike && profile.slike.length > 0 ? (
                     <>
-                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800">
+                      <div className="mb-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
+                        <p className="text-sm text-cyan-800">
                           <strong>Profilna slika:</strong> Prva slika u galeriji se koristi kao profilna slika klinike.
                           Kliknite na <Star className="h-3 w-3 inline" /> da postavite sliku kao profilnu.
                         </p>

@@ -100,7 +100,7 @@ export function HomepageClean() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50">
+      <section className="relative min-h-[85vh] flex items-center bg-gradient-to-br from-teal-50 via-cyan-50 to-cyan-50">
         <div className="container mx-auto px-4 py-20">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -429,7 +429,7 @@ export function HomepageClean() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50">
+      <section className="py-20 bg-gradient-to-br from-teal-50 via-cyan-50 to-cyan-50">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -447,7 +447,7 @@ export function HomepageClean() {
                 icon: Users,
                 title: 'Provjereni stručnjaci',
                 description: 'Svi naši doktori su verifikovani i imaju potrebne licence',
-                color: 'from-blue-500 to-cyan-500'
+                color: 'from-cyan-500 to-cyan-500'
               },
               {
                 icon: Calendar,

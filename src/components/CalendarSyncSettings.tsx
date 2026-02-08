@@ -333,15 +333,15 @@ export function CalendarSyncSettings() {
       </Card>
 
       {/* Info Card */}
-      <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+      <Card className="bg-cyan-50 dark:bg-cyan-950 border-cyan-200 dark:border-cyan-800">
         <CardContent className="p-4">
           <div className="flex gap-3">
-            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <Info className="h-5 w-5 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
             <div className="space-y-2 text-sm">
-              <p className="font-semibold text-blue-900 dark:text-blue-100">
+              <p className="font-semibold text-cyan-900 dark:text-cyan-100">
                 Kako radi sinhronizacija?
               </p>
-              <ul className="space-y-1 text-blue-800 dark:text-blue-200">
+              <ul className="space-y-1 text-cyan-800 dark:text-cyan-200">
                 <li>• Vaši termini se automatski sinhronizuju sa kalendarom</li>
                 <li>• Kalendar se ažurira svaki put kada neko pristupi iCal URL-u</li>
                 <li>• Promjene u terminima se odmah reflektuju u kalendaru</li>

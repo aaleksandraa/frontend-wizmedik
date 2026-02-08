@@ -176,17 +176,17 @@ export function DoctorTemplateCard({
 
           {/* Guest Visits */}
           {guestVisits.length > 0 && (
-            <Card className="md:col-span-2 border-l-4 border-l-blue-500">
+            <Card className="md:col-span-2 border-l-4 border-l-cyan-500">
               <CardContent className="p-6">
                 <h2 className="text-lg font-semibold mb-3 text-gray-800 flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
+                  <Building2 className="h-5 w-5 text-cyan-600" />
                   Gostovanja u klinikama
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {guestVisits.map((visit) => (
-                    <div key={visit.id} className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div key={visit.id} className="p-4 bg-cyan-50 rounded-lg border border-cyan-100">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <Link to={`/klinika/${visit.klinika.slug}`} className="font-semibold text-blue-700 hover:underline">
+                        <Link to={`/klinika/${visit.klinika.slug}`} className="font-semibold text-cyan-700 hover:underline">
                           {visit.klinika.naziv}
                         </Link>
                         {!visit.prihvata_online_rezervacije && (

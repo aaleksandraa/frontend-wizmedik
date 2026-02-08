@@ -255,12 +255,12 @@ export function GuestVisitBookingDialog({
 
         <div className="space-y-4">
           {/* Guest visit info banner */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
             <div className="flex items-start gap-2">
-              <Building2 className="w-5 h-5 text-blue-600 mt-0.5" />
+              <Building2 className="w-5 h-5 text-cyan-600 mt-0.5" />
               <div>
-                <p className="font-medium text-blue-800">Termin u gostujućoj klinici</p>
-                <p className="text-sm text-blue-700">
+                <p className="font-medium text-cyan-800">Termin u gostujućoj klinici</p>
+                <p className="text-sm text-cyan-700">
                   {guestVisit.klinika.naziv} - {guestVisit.klinika.lokacija}, {guestVisit.klinika.grad}
                 </p>
               </div>

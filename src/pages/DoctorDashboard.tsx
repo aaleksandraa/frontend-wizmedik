@@ -897,10 +897,10 @@ export default function DoctorDashboard() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <CalendarClock className="h-8 w-8 text-blue-600" />
+                  <CalendarClock className="h-8 w-8 text-cyan-600" />
                   <div>
                     <p className="text-2xl font-bold">{todayAppointments.length}</p>
                     <p className="text-xs text-muted-foreground">Danas</p>
@@ -946,10 +946,10 @@ export default function DoctorDashboard() {
 
           {/* Clinic Invitations Alert */}
           {clinicInvitations.filter(i => i.status === 'pending').length > 0 && (
-            <Card className="border-blue-200 bg-blue-50/50 mb-6">
+            <Card className="border-cyan-200 bg-cyan-50/50 mb-6">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
+                  <Building2 className="h-5 w-5 text-cyan-600" />
                   Pozivi od klinika ({clinicInvitations.filter(i => i.status === 'pending').length})
                 </CardTitle>
               </CardHeader>
@@ -960,8 +960,8 @@ export default function DoctorDashboard() {
                       {inv.klinika?.slike?.[0] ? (
                         <img src={inv.klinika.slike[0]} alt="" className="w-12 h-12 rounded-lg object-cover" />
                       ) : (
-                        <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                          <Building2 className="h-6 w-6 text-blue-600" />
+                        <div className="w-12 h-12 rounded-lg bg-cyan-100 flex items-center justify-center">
+                          <Building2 className="h-6 w-6 text-cyan-600" />
                         </div>
                       )}
                       <div>

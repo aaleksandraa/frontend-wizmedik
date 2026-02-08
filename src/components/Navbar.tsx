@@ -527,7 +527,7 @@ export function Navbar() {
             ) : (
               <Button
                 onClick={() => navigate('/auth')}
-                className="rounded-md shadow-sm hover:shadow transition-all font-medium h-10 px-4 bg-[#0A91B2] hover:bg-[#0A91B2]/90 text-white"
+                className="rounded-md shadow-sm hover:shadow transition-all font-medium h-10 px-4 bg-[#0891b2] hover:bg-[#0891b2]/90 text-white"
               >
                 Prijavi se
               </Button>
@@ -542,7 +542,7 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-br from-cyan-50 via-white to-blue-50 [&>button]:hidden">
+            <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-br from-cyan-50 via-white to-cyan-50 [&>button]:hidden">
               <SheetTitle className="sr-only">Navigacija</SheetTitle>
               <SheetDescription className="sr-only">Glavni meni za navigaciju</SheetDescription>
 
@@ -562,9 +562,9 @@ export function Navbar() {
 
                 {/* Mobile User Info - Cyan theme */}
                 {user && (
-                  <div className="p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-b border-cyan-100">
+                  <div className="p-4 bg-gradient-to-r from-cyan-50 to-cyan-50 border-b border-cyan-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold shadow-lg">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg">
                         {user.name?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -633,7 +633,7 @@ export function Navbar() {
                         <SheetClose asChild>
                           <Link
                             to={dashboardLink}
-                            className="flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 hover:from-cyan-200 hover:to-blue-200 transition-all duration-200 shadow-sm"
+                            className="flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-100 to-cyan-100 text-cyan-700 hover:from-cyan-200 hover:to-cyan-200 transition-all duration-200 shadow-sm"
                           >
                             <div className="flex items-center gap-3">
                               <div className="w-9 h-9 rounded-lg bg-white/80 flex items-center justify-center">
@@ -680,7 +680,7 @@ export function Navbar() {
                 </div>
 
                 {/* Mobile Footer - Cyan theme */}
-                <div className="p-3 border-t border-cyan-100 bg-gradient-to-r from-cyan-50 to-blue-50">
+                <div className="p-3 border-t border-cyan-100 bg-gradient-to-r from-cyan-50 to-cyan-50">
                   {user ? (
                     <Button
                       onClick={() => {
@@ -699,7 +699,7 @@ export function Navbar() {
                         navigate('/auth');
                         setMobileMenuOpen(false);
                       }}
-                      className="w-full rounded-md bg-[#0A91B2] hover:bg-[#0A91B2]/90 font-semibold shadow-lg"
+                      className="w-full rounded-md bg-[#0891b2] hover:bg-[#0891b2]/90 font-semibold shadow-lg"
                     >
                       Prijavi se
                     </Button>

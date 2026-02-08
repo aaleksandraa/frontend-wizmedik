@@ -82,7 +82,7 @@ interface HomepageSettingsData {
 }
 
 const defaultSettings: HomepageSettingsData = {
-  primary_color: '#0ea5e9',
+  primary_color: '#0891b2',
   secondary_color: '#8b5cf6',
   accent_color: '#10b981',
   background_color: '#ffffff',

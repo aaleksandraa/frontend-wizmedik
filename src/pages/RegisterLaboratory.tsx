@@ -182,9 +182,9 @@ export default function RegisterLaboratory() {
                     </div>
                   </div>
 
-                  <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>Napomena:</strong> Već imate nalog? <Link to="/auth" className="underline hover:text-blue-900">Prijavite se ovdje</Link>
+                  <div className="mt-8 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+                    <p className="text-sm text-cyan-800">
+                      <strong>Napomena:</strong> Već imate nalog? <Link to="/auth" className="underline hover:text-cyan-900">Prijavite se ovdje</Link>
                     </p>
                   </div>
                 </CardContent>

@@ -160,8 +160,8 @@ export function DoctorRegistrationForm() {
           <p className="text-gray-500 mb-6">
             Molimo provjerite vaš email za verifikaciju. Provjerite i spam folder ako ne vidite email.
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
+          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+            <p className="text-sm text-cyan-800">
               📧 Verifikacioni email je poslat na <strong>{watch('email')}</strong>
             </p>
           </div>

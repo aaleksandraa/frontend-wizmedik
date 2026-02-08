@@ -96,8 +96,8 @@ END:VCALENDAR`;
 
     // Background gradient
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#0ea5e9');
-    gradient.addColorStop(1, '#0284c7');
+    gradient.addColorStop(0, '#0891b2');
+    gradient.addColorStop(1, '#0891b2');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -151,7 +151,7 @@ END:VCALENDAR`;
     ctx.fillText('Termin zakazan', canvas.width / 2, cardY + 100);
 
     // Doctor name
-    ctx.fillStyle = '#0ea5e9';
+    ctx.fillStyle = '#0891b2';
     ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
     ctx.fillText(appointment.doctorName, canvas.width / 2, cardY + 200);
 
@@ -176,7 +176,7 @@ END:VCALENDAR`;
     let infoY = cardY + 420;
 
     // Calendar icon placeholder + Date
-    ctx.fillStyle = '#0ea5e9';
+    ctx.fillStyle = '#0891b2';
     ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
     ctx.fillText('📅', infoX, infoY);
     ctx.fillStyle = '#1e293b';
@@ -185,7 +185,7 @@ END:VCALENDAR`;
 
     // Time
     infoY += 90;
-    ctx.fillStyle = '#0ea5e9';
+    ctx.fillStyle = '#0891b2';
     ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
     ctx.fillText('🕐', infoX, infoY);
     ctx.fillStyle = '#1e293b';
@@ -194,7 +194,7 @@ END:VCALENDAR`;
 
     // Location
     infoY += 90;
-    ctx.fillStyle = '#0ea5e9';
+    ctx.fillStyle = '#0891b2';
     ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
     ctx.fillText('📍', infoX, infoY);
     ctx.fillStyle = '#1e293b';
@@ -221,7 +221,7 @@ END:VCALENDAR`;
     // Service if provided
     if (appointment.serviceName) {
       infoY += 90;
-      ctx.fillStyle = '#0ea5e9';
+      ctx.fillStyle = '#0891b2';
       ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
       ctx.fillText('💼', infoX, infoY);
       ctx.fillStyle = '#1e293b';

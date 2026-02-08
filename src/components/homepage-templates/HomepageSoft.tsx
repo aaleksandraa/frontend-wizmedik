@@ -47,9 +47,9 @@ const healthTopics = [
     id: 'dijabetes',
     title: 'Dijabetes',
     icon: '📅',
-    color: 'from-blue-100 to-indigo-100',
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-600',
+    color: 'from-cyan-100 to-indigo-100',
+    iconBg: 'bg-cyan-50',
+    iconColor: 'text-cyan-600',
     articles: 18
   },
   {
@@ -141,8 +141,8 @@ export function HomepageSoft() {
       
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 opacity-60" />
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl max-md:w-48 max-md:h-48 max-md:-left-24" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-purple-50 to-pink-50 opacity-60" />
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-cyan-200/20 rounded-full blur-3xl max-md:w-48 max-md:h-48 max-md:-left-24" />
         <div className="absolute bottom-20 -right-20 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl max-md:w-64 max-md:h-64 max-md:-right-32" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -163,7 +163,7 @@ export function HomepageSoft() {
             </motion.div>
 
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Pronađite <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">idealnog</span>
+              Pronađite <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-purple-600">idealnog</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">zdravstvenog stručnjaka</span>
             </h1>
@@ -249,7 +249,7 @@ export function HomepageSoft() {
             className="grid grid-cols-3 gap-8 mt-16 max-w-3xl mx-auto"
           >
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-600 to-purple-600 bg-clip-text text-transparent mb-2">
                 {stats.doctors >= 1000 ? Math.floor(stats.doctors / 1000) + '000+' : stats.doctors + '+'}
               </div>
               <div className="text-gray-600 text-sm md:text-base">Doktora</div>
@@ -513,7 +513,7 @@ export function HomepageSoft() {
                 icon: Users,
                 title: 'Provjereni stručnjaci',
                 description: 'Svi naši doktori su verifikovani i imaju potrebne licence',
-                gradient: 'from-blue-500 to-cyan-500'
+                gradient: 'from-cyan-500 to-cyan-500'
               },
               {
                 icon: Calendar,

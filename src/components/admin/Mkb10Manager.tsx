@@ -90,7 +90,7 @@ export default function Mkb10Manager() {
 
   // Form data
   const [kategorijaForm, setKategorijaForm] = useState({
-    kod_od: '', kod_do: '', naziv: '', opis: '', boja: '#3b82f6', ikona: '', redoslijed: 0
+    kod_od: '', kod_do: '', naziv: '', opis: '', boja: '#0891b2', ikona: '', redoslijed: 0
   });
   const [podkategorijaForm, setPodkategorijaForm] = useState({
     kategorija_id: 0, kod_od: '', kod_do: '', naziv: '', opis: '', redoslijed: 0
@@ -175,12 +175,12 @@ export default function Mkb10Manager() {
       setEditingKategorija(kat);
       setKategorijaForm({
         kod_od: kat.kod_od, kod_do: kat.kod_do, naziv: kat.naziv,
-        opis: kat.opis || '', boja: kat.boja || '#3b82f6',
+        opis: kat.opis || '', boja: kat.boja || '#0891b2',
         ikona: kat.ikona || '', redoslijed: kat.redoslijed
       });
     } else {
       setEditingKategorija(null);
-      setKategorijaForm({ kod_od: '', kod_do: '', naziv: '', opis: '', boja: '#3b82f6', ikona: '', redoslijed: kategorije.length });
+      setKategorijaForm({ kod_od: '', kod_do: '', naziv: '', opis: '', boja: '#0891b2', ikona: '', redoslijed: kategorije.length });
     }
     setKategorijaDialog(true);
   };

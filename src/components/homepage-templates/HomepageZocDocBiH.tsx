@@ -81,7 +81,7 @@ export default function HomepageZocDocBiH() {
   ];
 
   const quickLinks = [
-    { icon: Stethoscope, label: 'Doktori', href: '/doktori', color: 'from-blue-500 to-blue-600' },
+    { icon: Stethoscope, label: 'Doktori', href: '/doktori', color: 'from-cyan-500 to-cyan-600' },
     { icon: Building2, label: 'Klinike', href: '/klinike', color: 'from-purple-500 to-purple-600' },
     { icon: FlaskConical, label: 'Laboratorije', href: '/laboratorije', color: 'from-emerald-500 to-emerald-600' },
     { icon: Droplet, label: 'Banje', href: '/banje', color: 'from-cyan-500 to-cyan-600' },
@@ -94,11 +94,11 @@ export default function HomepageZocDocBiH() {
       <Navbar />
       
       {/* Hero Section - ZocDoc Inspired */}
-      <section className="relative bg-gradient-to-br from-[#f0f7f4] via-[#e8f5f1] to-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#e0f2fe] via-[#cffafe] to-white overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-[#00856f] rounded-full blur-3xl max-md:w-48 max-md:h-48"></div>
-          <div className="absolute bottom-20 -right-20 w-96 h-96 bg-blue-500 rounded-full blur-3xl max-md:w-64 max-md:h-64 max-md:-right-32"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-[#0891b2] rounded-full blur-3xl max-md:w-48 max-md:h-48"></div>
+          <div className="absolute bottom-20 -right-20 w-96 h-96 bg-cyan-500 rounded-full blur-3xl max-md:w-64 max-md:h-64 max-md:-right-32"></div>
         </div>
 
         <div className="relative container mx-auto px-4 py-16 md:py-24">
@@ -107,7 +107,7 @@ export default function HomepageZocDocBiH() {
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 leading-tight">
                 Pronađite i zakažite pregled kod
-                <span className="text-[#00856f] block mt-2">najboljeg doktora u BiH</span>
+                <span className="text-[#0891b2] block mt-2">najboljeg doktora u BiH</span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
                 Stotine doktora. Sve specijalnosti. Jednostavno zakazivanje.
@@ -126,7 +126,7 @@ export default function HomepageZocDocBiH() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="w-full h-14 pl-12 pr-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[#00856f] focus:outline-none transition-colors"
+                    className="w-full h-14 pl-12 pr-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[#0891b2] focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -140,7 +140,7 @@ export default function HomepageZocDocBiH() {
                     onChange={(e) => setCitySearchQuery(e.target.value)}
                     onFocus={() => setCitySearchQuery('')}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="w-full h-14 pl-12 pr-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[#00856f] focus:outline-none transition-colors"
+                    className="w-full h-14 pl-12 pr-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[#0891b2] focus:outline-none transition-colors"
                   />
                   {citySearchQuery && filteredCities.length > 0 && (
                     <div className="absolute z-20 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
@@ -173,7 +173,7 @@ export default function HomepageZocDocBiH() {
               <Button 
                 onClick={handleSearch}
                 size="lg"
-                className="w-full h-14 text-lg font-semibold bg-[#00856f] hover:bg-[#006d5b] rounded-xl"
+                className="w-full h-14 text-lg font-semibold bg-[#0891b2] hover:bg-[#0891b2] rounded-xl"
               >
                 <Search className="mr-2 h-5 w-5" />
                 Pretražite doktore
@@ -235,8 +235,8 @@ export default function HomepageZocDocBiH() {
             {features.map((feature, idx) => (
               <Card key={idx} className="border-0 shadow-sm hover:shadow-xl transition-all duration-300 bg-white">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#00856f]/10 flex items-center justify-center">
-                    <feature.icon className="w-8 h-8 text-[#00856f]" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#0891b2]/10 flex items-center justify-center">
+                    <feature.icon className="w-8 h-8 text-[#0891b2]" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
                   <p className="text-gray-600 text-sm">{feature.desc}</p>
@@ -270,9 +270,9 @@ export default function HomepageZocDocBiH() {
               const IconComponent = specialtyIcons[spec.naziv] || specialtyIcons.default;
               return (
                 <Link key={spec.id} to={`/specijalnost/${spec.slug}`}>
-                  <Card className="group cursor-pointer transition-all duration-300 border-2 border-transparent hover:border-[#00856f] hover:shadow-lg">
+                  <Card className="group cursor-pointer transition-all duration-300 border-2 border-transparent hover:border-[#0891b2] hover:shadow-lg">
                     <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-[#00856f]/10 to-[#00856f]/5 flex items-center justify-center group-hover:from-[#00856f] group-hover:to-[#006d5b] transition-all duration-300">
+                      <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-[#0891b2]/10 to-[#0891b2]/5 flex items-center justify-center group-hover:from-[#0891b2] group-hover:to-[#0891b2] transition-all duration-300">
                         {spec.icon_url ? (
                           spec.icon_url.startsWith('icon:') ? (
                             <span className="text-3xl">{spec.icon_url.replace('icon:', '')}</span>
@@ -280,7 +280,7 @@ export default function HomepageZocDocBiH() {
                             <img src={spec.icon_url} alt={spec.naziv} className="w-8 h-8 object-contain" />
                           )
                         ) : (
-                          <IconComponent className="w-8 h-8 text-[#00856f] group-hover:text-white transition-colors duration-300" />
+                          <IconComponent className="w-8 h-8 text-[#0891b2] group-hover:text-white transition-colors duration-300" />
                         )}
                       </div>
                       <h3 className="font-medium text-gray-900 text-sm line-clamp-2">{spec.naziv}</h3>
@@ -330,7 +330,7 @@ export default function HomepageZocDocBiH() {
       )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-[#00856f] to-[#006d5b] text-white">
+      <section className="py-20 bg-gradient-to-br from-[#0891b2] to-[#0891b2] text-white">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
@@ -341,7 +341,7 @@ export default function HomepageZocDocBiH() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/doktori">
-                <Button size="lg" className="bg-white text-[#00856f] hover:bg-gray-100 px-8 h-14 text-lg font-semibold">
+                <Button size="lg" className="bg-white text-[#0891b2] hover:bg-gray-100 px-8 h-14 text-lg font-semibold">
                   Pronađi doktora
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>

@@ -210,7 +210,7 @@ export default function CareHomeDashboard() {
                       <p className="text-sm text-muted-foreground">Pregledi</p>
                       <p className="text-2xl font-bold">{stats.dom.broj_pregleda}</p>
                     </div>
-                    <Eye className="h-8 w-8 text-blue-500" />
+                    <Eye className="h-8 w-8 text-cyan-500" />
                   </div>
                 </CardContent>
               </Card>

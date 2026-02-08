@@ -148,12 +148,12 @@ const MedicalCalendar: React.FC = () => {
       />
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 pt-20 pb-12">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-cyan-50 pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-12">
             <div className="flex items-center justify-center mb-3 sm:mb-4">
-              <Calendar className="hidden sm:block w-12 h-12 text-blue-600 mr-3" />
+              <Calendar className="hidden sm:block w-12 h-12 text-cyan-600 mr-3" />
               <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">
                 Medicinski Kalendar {selectedYear}
               </h1>
@@ -175,7 +175,7 @@ const MedicalCalendar: React.FC = () => {
                   placeholder="Pretraži događaje..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm sm:text-base"
                 />
               </div>
 
@@ -183,7 +183,7 @@ const MedicalCalendar: React.FC = () => {
               <select
                 value={selectedMonth === null ? 'all' : selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value === 'all' ? null : parseInt(e.target.value))}
-                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Svi mjeseci</option>
                 {monthNames.map((month, index) => (
@@ -195,7 +195,7 @@ const MedicalCalendar: React.FC = () => {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Svi tipovi</option>
                 {Object.entries(typeLabels).map(([value, label]) => (
@@ -207,7 +207,7 @@ const MedicalCalendar: React.FC = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">Sve kategorije</option>
                 {categories.map(category => (
@@ -228,7 +228,7 @@ const MedicalCalendar: React.FC = () => {
                     setSelectedCategory('all');
                     setSearchQuery('');
                   }}
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  className="flex items-center gap-1 text-cyan-600 hover:text-cyan-700 font-medium transition-colors"
                 >
                   <X className="w-4 h-4" />
                   Resetuj filtere
@@ -240,7 +240,7 @@ const MedicalCalendar: React.FC = () => {
           {/* Events List */}
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
               <p className="mt-4 text-gray-600">Učitavanje kalendara...</p>
             </div>
           ) : filteredEvents.length === 0 ? (
@@ -252,7 +252,7 @@ const MedicalCalendar: React.FC = () => {
             <div className="space-y-6 sm:space-y-8">
               {Object.entries(groupedEvents).map(([month, monthEvents]) => (
                 <div key={month} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="bg-gradient-to-r from-cyan-600 to-cyan-600 px-4 sm:px-6 py-3 sm:py-4">
                     <h2 className="text-xl sm:text-2xl font-bold text-white">
                       {monthNames[parseInt(month)]} {selectedYear}
                     </h2>

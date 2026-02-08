@@ -147,11 +147,11 @@ export const ReviewCard = ({ recenzija, onUpdate, canRespond = false }: ReviewCa
         
         {/* Odgovor od doktora/klinike */}
         {recenzija.odgovor && (
-          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mt-4">
+          <div className="bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500 mt-4">
             <div className="flex items-start gap-3">
-              <MessageSquare className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <MessageSquare className="h-5 w-5 text-cyan-600 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-semibold text-sm text-blue-900 mb-2">
+                <p className="font-semibold text-sm text-cyan-900 mb-2">
                   Odgovor doktora:
                 </p>
                 <p className="text-gray-700 leading-relaxed">

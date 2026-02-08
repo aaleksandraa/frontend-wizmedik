@@ -97,7 +97,7 @@ export function HomepagePro() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-cyan-600 via-cyan-700 to-indigo-800 overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -129,10 +129,10 @@ export function HomepagePro() {
                       {suggestions.map((spec) => (
                         <div
                           key={spec.id}
-                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center gap-3 text-left"
+                          className="px-4 py-3 hover:bg-cyan-50 cursor-pointer flex items-center gap-3 text-left"
                           onMouseDown={() => handleSuggestionClick(spec)}
                         >
-                          <Stethoscope className="h-5 w-5 text-blue-600" />
+                          <Stethoscope className="h-5 w-5 text-cyan-600" />
                           <div>
                             <div className="font-medium text-gray-900">{spec.naziv}</div>
                             <div className="text-xs text-gray-500">Specijalnost</div>
@@ -142,16 +142,16 @@ export function HomepagePro() {
                     </div>
                   )}
                 </div>
-                <Button onClick={handleSearch} size="lg" className="h-12 md:h-14 px-6 md:px-8 bg-blue-600 hover:bg-blue-700 rounded-xl">
+                <Button onClick={handleSearch} size="lg" className="h-12 md:h-14 px-6 md:px-8 bg-cyan-600 hover:bg-cyan-700 rounded-xl">
                   <Search className="h-5 w-5 mr-2" />Pretraži
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-4 justify-center items-center">
                 <span className="text-sm text-gray-500">Popularno:</span>
-                <Link to="/doktori/specijalnost/kardiologija" className="text-sm text-blue-600 hover:underline">Kardiolog</Link>
-                <Link to="/doktori/specijalnost/dermatologija" className="text-sm text-blue-600 hover:underline">Dermatolog</Link>
-                <Link to="/doktori/specijalnost/stomatologija" className="text-sm text-blue-600 hover:underline">Stomatolog</Link>
-                <Link to="/doktori/specijalnost/ginekologija" className="text-sm text-blue-600 hover:underline">Ginekolog</Link>
+                <Link to="/doktori/specijalnost/kardiologija" className="text-sm text-cyan-600 hover:underline">Kardiolog</Link>
+                <Link to="/doktori/specijalnost/dermatologija" className="text-sm text-cyan-600 hover:underline">Dermatolog</Link>
+                <Link to="/doktori/specijalnost/stomatologija" className="text-sm text-cyan-600 hover:underline">Stomatolog</Link>
+                <Link to="/doktori/specijalnost/ginekologija" className="text-sm text-cyan-600 hover:underline">Ginekolog</Link>
               </div>
             </div>
           </div>
@@ -163,10 +163,10 @@ export function HomepagePro() {
       <section className="bg-white border-b py-6 md:py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
-            <div><div className="text-2xl md:text-3xl font-bold text-blue-600">{doctors.length * 50}+</div><div className="text-sm md:text-base text-gray-600">Doktora</div></div>
-            <div><div className="text-2xl md:text-3xl font-bold text-blue-600">{clinics.length * 25}+</div><div className="text-sm md:text-base text-gray-600">Klinika</div></div>
-            <div><div className="text-2xl md:text-3xl font-bold text-blue-600">{specijalnosti.length * 5}+</div><div className="text-sm md:text-base text-gray-600">Specijalnosti</div></div>
-            <div><div className="text-2xl md:text-3xl font-bold text-blue-600">50K+</div><div className="text-sm md:text-base text-gray-600">Pacijenata</div></div>
+            <div><div className="text-2xl md:text-3xl font-bold text-cyan-600">{doctors.length * 50}+</div><div className="text-sm md:text-base text-gray-600">Doktora</div></div>
+            <div><div className="text-2xl md:text-3xl font-bold text-cyan-600">{clinics.length * 25}+</div><div className="text-sm md:text-base text-gray-600">Klinika</div></div>
+            <div><div className="text-2xl md:text-3xl font-bold text-cyan-600">{specijalnosti.length * 5}+</div><div className="text-sm md:text-base text-gray-600">Specijalnosti</div></div>
+            <div><div className="text-2xl md:text-3xl font-bold text-cyan-600">50K+</div><div className="text-sm md:text-base text-gray-600">Pacijenata</div></div>
           </div>
         </div>
       </section>
@@ -187,10 +187,10 @@ export function HomepagePro() {
               const description = specialtyDescriptions[spec.naziv] || 'Stručna medicinska njega';
               return (
                 <Link key={spec.id} to={'/doktori/specijalnost/' + spec.slug} className="group">
-                  <Card className="h-full hover:shadow-lg transition-all hover:border-blue-500 cursor-pointer bg-white">
+                  <Card className="h-full hover:shadow-lg transition-all hover:border-cyan-500 cursor-pointer bg-white">
                     <CardContent className="p-4 md:p-6 text-center">
-                      <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                        <IconComponent className="h-6 w-6 md:h-8 md:w-8 text-blue-600 group-hover:text-white transition-colors" />
+                      <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 bg-cyan-50 rounded-xl md:rounded-2xl flex items-center justify-center group-hover:bg-cyan-600 transition-colors">
+                        <IconComponent className="h-6 w-6 md:h-8 md:w-8 text-cyan-600 group-hover:text-white transition-colors" />
                       </div>
                       <h3 className="font-semibold text-gray-900 text-sm md:text-base">{spec.naziv}</h3>
                       <p className="text-xs md:text-sm text-gray-500 mt-1">{description}</p>
@@ -213,8 +213,8 @@ export function HomepagePro() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
             {gradovi.map((grad) => (
               <Link key={grad.id} to={'/grad/' + grad.slug} className="group">
-                <Card className="hover:shadow-lg transition-all hover:border-blue-500 overflow-hidden">
-                  <div className="h-20 md:h-24 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <Card className="hover:shadow-lg transition-all hover:border-cyan-500 overflow-hidden">
+                  <div className="h-20 md:h-24 bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center">
                     <MapPin className="h-8 w-8 md:h-10 md:w-10 text-white" />
                   </div>
                   <CardContent className="p-3 md:p-4 text-center">
@@ -283,7 +283,7 @@ export function HomepagePro() {
                       {post.thumbnail ? (
                         <img src={fixImageUrl(post.thumbnail) || ''} alt={post.naslov} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center">
                           <Stethoscope className="h-10 w-10 md:h-12 md:w-12 text-white/50" />
                         </div>
                       )}
@@ -322,7 +322,7 @@ export function HomepagePro() {
               { title: 'Važnost redovnih pregleda', duration: '4:48', views: '15K' },
             ].map((video, i) => (
               <Card key={i} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-all cursor-pointer overflow-hidden group">
-                <div className="relative h-40 md:h-48 bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
+                <div className="relative h-40 md:h-48 bg-gradient-to-br from-cyan-600 to-indigo-700 flex items-center justify-center">
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
                   <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Play className="h-6 w-6 md:h-8 md:w-8 text-white ml-1" />
@@ -341,10 +341,10 @@ export function HomepagePro() {
 
 
       {/* CTA Section */}
-      <section className="py-16 md:py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
+      <section className="py-16 md:py-20 bg-gradient-to-r from-cyan-600 to-indigo-700">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6">Imate pitanje za doktora?</h2>
-          <p className="text-blue-100 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">Postavite pitanje i dobijte odgovor od stručnih doktora potpuno besplatno.</p>
+          <p className="text-cyan-100 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">Postavite pitanje i dobijte odgovor od stručnih doktora potpuno besplatno.</p>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
             <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto"><Link to="/postavi-pitanje">Postavi pitanje</Link></Button>
             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto text-white border-white hover:bg-white/10"><Link to="/pitanja">Pregledaj pitanja</Link></Button>

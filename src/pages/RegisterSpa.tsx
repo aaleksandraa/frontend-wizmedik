@@ -240,7 +240,7 @@ export default function RegisterSpa() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-cyan-50 flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
             <CardContent className="p-8 text-center">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -267,7 +267,7 @@ export default function RegisterSpa() {
 
       <Navbar />
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-cyan-50 py-12">
         <div className="max-w-3xl mx-auto px-4">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -518,9 +518,9 @@ export default function RegisterSpa() {
                     </div>
                   </div>
                   
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-3">Podaci za pristup profilu</h4>
-                    <p className="text-sm text-blue-700 mb-4">
+                  <div className="mt-4 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+                    <h4 className="font-medium text-cyan-900 mb-3">Podaci za pristup profilu</h4>
+                    <p className="text-sm text-cyan-700 mb-4">
                       Unesite email adresu i lozinku koje ćete koristiti za prijavu na vaš profil.
                     </p>
                     <div className="space-y-4">
@@ -537,7 +537,7 @@ export default function RegisterSpa() {
                           className={`${touched.account_email && errors.account_email ? 'border-red-500' : ''} ${backendErrors.account_email ? 'border-red-600 border-2' : ''}`}
                           required
                         />
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="text-xs text-cyan-600 mt-1">
                           Ovaj email koristite za prijavu. Može biti različit od javnog emaila.
                         </p>
                         <FormError error={touched.account_email ? errors.account_email : undefined} />
@@ -603,7 +603,7 @@ export default function RegisterSpa() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-xs text-blue-600 mt-2">
+                    <p className="text-xs text-cyan-600 mt-2">
                       Lozinka mora imati 12+ karaktera, velika i mala slova, brojeve i specijalne karaktere.
                     </p>
                   </div>

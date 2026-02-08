@@ -179,7 +179,7 @@ export default function SpaProfile() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Hero Image */}
-        <div className="relative h-96 bg-gradient-to-br from-blue-600 to-teal-600">
+        <div className="relative h-96 bg-gradient-to-br from-cyan-600 to-teal-600">
           {banja.featured_slika ? (
             <img
               src={normalizeImageUrl(banja.featured_slika)}
@@ -212,7 +212,7 @@ export default function SpaProfile() {
               </Badge>
             )}
             {banja.medicinski_nadzor && (
-              <Badge className="bg-blue-500 text-white shadow-lg">
+              <Badge className="text-white shadow-lg" style={{ backgroundColor: '#0891b2' }}>
                 <Heart className="w-3 h-3 mr-1" />
                 Medicinski nadzor
               </Badge>
@@ -344,7 +344,7 @@ export default function SpaProfile() {
                       {banja.terapije && banja.terapije.map((terapija) => (
                         <div key={`standard-${terapija.id}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <Droplet className="w-5 h-5 text-blue-500" />
+                            <Droplet className="w-5 h-5" style={{ color: '#0891b2' }} />
                             <span className="font-medium text-gray-900">{terapija.naziv}</span>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -414,7 +414,7 @@ export default function SpaProfile() {
                               </span>
                             )}
                             {paket.cijena && (
-                              <span className="text-lg font-bold text-blue-600">
+                              <span className="text-lg font-bold" style={{ color: '#0891b2' }}>
                                 {paket.cijena} KM
                               </span>
                             )}
@@ -492,7 +492,7 @@ export default function SpaProfile() {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-600">Telefon</p>
-                        <a href={`tel:${banja.telefon}`} className="font-medium text-blue-600 hover:underline">
+                        <a href={`tel:${banja.telefon}`} className="font-medium hover:underline" style={{ color: '#0891b2' }}>
                           {banja.telefon}
                         </a>
                       </div>
@@ -504,7 +504,7 @@ export default function SpaProfile() {
                       <Mail className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-600">Email</p>
-                        <a href={`mailto:${banja.email}`} className="font-medium text-blue-600 hover:underline">
+                        <a href={`mailto:${banja.email}`} className="font-medium hover:underline" style={{ color: '#0891b2' }}>
                           {banja.email}
                         </a>
                       </div>
@@ -520,7 +520,7 @@ export default function SpaProfile() {
                           href={banja.website} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="font-medium text-blue-600 hover:underline"
+                          className="font-medium hover:underline" style={{ color: '#0891b2' }}
                         >
                           Posjeti website
                         </a>
@@ -538,7 +538,7 @@ export default function SpaProfile() {
                 <CardContent className="space-y-3">
                   {banja.ima_smjestaj && (
                     <div className="flex items-center gap-3">
-                      <Bed className="w-5 h-5 text-blue-500" />
+                      <Bed className="w-5 h-5" style={{ color: '#0891b2' }} />
                       <div>
                         <p className="font-medium text-gray-900">Smještaj</p>
                         {banja.broj_kreveta && (

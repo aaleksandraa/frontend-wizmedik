@@ -96,7 +96,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline hover:text-blue-800',
+          class: 'text-cyan-600 underline hover:text-cyan-800',
         },
       }),
       TextAlign.configure({
@@ -212,7 +212,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           border-radius: 0.5rem;
         }
         .ProseMirror blockquote {
-          border-left: 4px solid #0ea5e9;
+          border-left: 4px solid #0891b2;
           padding-left: 1rem;
           margin: 1.5rem 0;
           font-style: italic;
@@ -234,11 +234,11 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           font-weight: 600;
         }
         .ProseMirror a {
-          color: #0ea5e9;
+          color: #0891b2;
           text-decoration: underline;
         }
         .ProseMirror a:hover {
-          color: #0284c7;
+          color: #0891b2;
         }
         .ProseMirror hr {
           margin: 2rem 0;

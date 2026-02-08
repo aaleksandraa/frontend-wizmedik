@@ -149,7 +149,7 @@ export default function GdprSettings() {
           ) : (
             <div className="space-y-4">
               <div className="grid gap-4">
-                <div className="border-l-4 border-blue-500 pl-4">
+                <div className="border-l-4 border-cyan-500 pl-4">
                   <h4 className="font-semibold">Korisnički Podaci</h4>
                   <p className="text-sm text-muted-foreground">
                     {retentionPolicy.policy.user_data.description}

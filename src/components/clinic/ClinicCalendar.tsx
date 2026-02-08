@@ -339,7 +339,7 @@ export function ClinicCalendar({ clinicDoctors, guestVisits, onRefresh }: Props)
                     className={`p-1 md:p-2 border rounded text-center min-h-[60px] cursor-pointer transition-all hover:border-primary/50
                       ${isToday ? 'bg-primary/10 border-primary' : ''} 
                       ${isSelected ? 'ring-2 ring-primary' : ''}
-                      ${appointmentCount > 0 ? 'bg-blue-50 border-blue-200' : ''}
+                      ${appointmentCount > 0 ? 'bg-cyan-50 border-cyan-200' : ''}
                       ${hasGuestVisit ? 'bg-green-50 border-green-200' : ''}
                     `}
                   >
@@ -488,7 +488,7 @@ export function ClinicCalendar({ clinicDoctors, guestVisits, onRefresh }: Props)
               </Select>
               {formErrors.doktor_id && <p className="text-xs text-red-500 mt-1">{formErrors.doktor_id}</p>}
               {selectedDoctor?.type === 'gostujuci' && (
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-xs text-cyan-600 mt-1">
                   Gostujući doktor - dostupan: {selectedDoctor.guestDates.map(d => format(new Date(d), 'dd.MM.yyyy.')).join(', ')}
                 </p>
               )}

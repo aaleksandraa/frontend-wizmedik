@@ -71,8 +71,8 @@ export function HomepageCards() {
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-100">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 bg-blue-50 rounded-xl mb-2">
-                  <Users className="h-5 w-5 text-blue-600" />
+                <div className="inline-flex items-center justify-center w-10 h-10 bg-cyan-50 rounded-xl mb-2">
+                  <Users className="h-5 w-5 text-cyan-600" />
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{featuredDoctors.length * 100}+</p>
                 <p className="text-sm text-slate-500">Doktora</p>
@@ -104,7 +104,7 @@ export function HomepageCards() {
           <div className="bg-white rounded-2xl shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Specijalnosti</h2>
-              <Link to="/specijalnosti" className="text-sm text-blue-600 hover:underline">Sve</Link>
+              <Link to="/specijalnosti" className="text-sm text-cyan-600 hover:underline">Sve</Link>
             </div>
             <div className="space-y-2">
               {specijalnosti.map((spec) => (
@@ -126,7 +126,7 @@ export function HomepageCards() {
           <div className="bg-white rounded-2xl shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Gradovi</h2>
-              <Link to="/gradovi" className="text-sm text-blue-600 hover:underline">Svi</Link>
+              <Link to="/gradovi" className="text-sm text-cyan-600 hover:underline">Svi</Link>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {gradovi.map((grad) => (
@@ -142,10 +142,10 @@ export function HomepageCards() {
             </div>
             
             {/* Pitanja CTA */}
-            <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+            <div className="mt-6 p-4 bg-gradient-to-br from-cyan-50 to-indigo-50 rounded-xl">
               <h3 className="font-medium text-slate-900 mb-1">Imate pitanje?</h3>
               <p className="text-sm text-slate-500 mb-3">Besplatno pitajte doktore</p>
-              <Button asChild size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button asChild size="sm" className="w-full bg-cyan-600 hover:bg-cyan-700">
                 <Link to="/postavi-pitanje">Postavi pitanje</Link>
               </Button>
             </div>
@@ -155,7 +155,7 @@ export function HomepageCards() {
           <div className="lg:row-span-2 bg-white rounded-2xl shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Istaknuti doktori</h2>
-              <Link to="/doktori" className="text-sm text-blue-600 hover:underline">Svi</Link>
+              <Link to="/doktori" className="text-sm text-cyan-600 hover:underline">Svi</Link>
             </div>
             <div className="space-y-4">
               {featuredDoctors.map((doc) => (
@@ -173,7 +173,7 @@ export function HomepageCards() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-slate-900 text-sm">Dr. {doc.ime} {doc.prezime}</h3>
-                      <p className="text-xs text-blue-600">{doc.specijalnost}</p>
+                      <p className="text-xs text-cyan-600">{doc.specijalnost}</p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" /> {doc.grad}

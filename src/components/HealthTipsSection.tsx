@@ -28,9 +28,9 @@ const healthCategories = [
     title: 'Dijabetes',
     description: 'Kontrola šećera i zdrav način života',
     icon: Activity,
-    color: 'from-blue-500 to-cyan-500',
-    bgColor: 'bg-blue-50',
-    iconColor: 'text-blue-600',
+    color: 'from-cyan-500 to-cyan-500',
+    bgColor: 'bg-cyan-50',
+    iconColor: 'text-cyan-600',
     articles: '18 članaka'
   },
   {

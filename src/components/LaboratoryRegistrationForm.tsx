@@ -474,8 +474,8 @@ export function LaboratoryRegistrationForm() {
                     <FormError error={touched.password_confirmation ? errors.password_confirmation : undefined} />
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-800">
+                  <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                    <p className="text-sm text-cyan-800">
                       <strong>Sigurnost:</strong> Lozinka mora imati 12+ karaktera, velika i mala slova, brojeve i specijalne karaktere.
                     </p>
                   </div>

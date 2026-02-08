@@ -64,7 +64,7 @@ export default function HomepageCustom3Cyan() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-cyan-50">
         <Navbar />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
@@ -128,7 +128,7 @@ export default function HomepageCustom3Cyan() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-cyan-50">
       <Navbar />
       
       {/* Hero Section - Clean Centered Design */}
@@ -147,7 +147,7 @@ export default function HomepageCustom3Cyan() {
         {/* Subtle Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-400 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400 rounded-full blur-3xl"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -258,7 +258,7 @@ export default function HomepageCustom3Cyan() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
               { icon: Stethoscope, label: 'Opšta medicina', href: '/specijalnost/opsta-medicina-i-porodicna-medicina', color: 'bg-cyan-100 text-cyan-600' },
-              { icon: Heart, label: 'Kardiologija', href: '/specijalnost/kardiologija', color: 'bg-blue-100 text-blue-600' },
+              { icon: Heart, label: 'Kardiologija', href: '/specijalnost/kardiologija', color: 'bg-cyan-100 text-cyan-600' },
               { icon: Activity, label: 'Interna medicina', href: '/specijalnost/interna-medicina', color: 'bg-teal-100 text-teal-600' },
               { icon: FlaskConical, label: 'Laboratorije', href: '/laboratorije', color: 'bg-emerald-100 text-emerald-600' },
               { icon: Droplet, label: 'Banje', href: '/banje', color: 'bg-sky-100 text-sky-600' },
@@ -289,7 +289,7 @@ export default function HomepageCustom3Cyan() {
 
       {/* Blog Section - Latest Health Tips */}
       {blogPosts && blogPosts.length > 0 && (
-        <section className="py-16 bg-gradient-to-br from-cyan-50 via-blue-50 to-white">
+        <section className="py-16 bg-gradient-to-br from-cyan-50 via-cyan-50 to-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
               <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
@@ -400,7 +400,7 @@ export default function HomepageCustom3Cyan() {
 
       {/* Questions Section */}
       {pitanja.length > 0 && (
-        <section className="py-16 bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
+        <section className="py-16 bg-gradient-to-br from-cyan-50 via-cyan-50 to-teal-50">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
               <div>
@@ -580,7 +580,7 @@ export default function HomepageCustom3Cyan() {
 
           {/* Animated Pulse Circles */}
           <div className="absolute top-20 right-1/4 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse overflow-hidden"></div>
-          <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000 overflow-hidden"></div>
+          <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000 overflow-hidden"></div>
 
           <div className={`container mx-auto px-4 relative z-10 transition-all duration-300 ${citySearchQuery && filteredCities.length > 0 ? 'pb-96' : 'pb-0'}`}>
             <div className="text-center mb-12">
@@ -651,9 +651,9 @@ export default function HomepageCustom3Cyan() {
       {/* CTA */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-600 via-blue-600 to-teal-600 p-8 md:p-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-600 via-cyan-600 to-teal-600 p-8 md:p-16">
             <div className="absolute -top-48 -right-48 w-96 h-96 bg-white/10 rounded-full blur-3xl max-md:hidden"></div>
-            <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl max-md:hidden"></div>
+            <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl max-md:hidden"></div>
             <div className="relative text-center max-w-3xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Spremni ste za bolju zdravstvenu njegu?</h2>
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">

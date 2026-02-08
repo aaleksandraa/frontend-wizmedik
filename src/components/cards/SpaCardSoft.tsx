@@ -13,7 +13,7 @@ export default function SpaCardSoft({ banja }: SpaCardSoftProps) {
       className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
     >
       {/* Image */}
-      <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-50 to-teal-50">
+      <div className="relative h-56 overflow-hidden bg-gradient-to-br from-cyan-50 to-teal-50">
         {banja.featured_slika ? (
           <img
             src={banja.featured_slika}
@@ -22,7 +22,7 @@ export default function SpaCardSoft({ banja }: SpaCardSoftProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Droplet className="w-16 h-16 text-blue-300" />
+            <Droplet className="w-16 h-16 text-cyan-300" />
           </div>
         )}
         
@@ -35,7 +35,7 @@ export default function SpaCardSoft({ banja }: SpaCardSoftProps) {
             </span>
           )}
           {banja.medicinski_nadzor && (
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-full shadow-lg">
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-cyan-500 text-white text-xs font-medium rounded-full shadow-lg">
               Medicinski nadzor
             </span>
           )}
@@ -58,7 +58,7 @@ export default function SpaCardSoft({ banja }: SpaCardSoftProps) {
       {/* Content */}
       <div className="p-5">
         {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors line-clamp-1">
           {banja.naziv}
         </h3>
 
@@ -79,7 +79,7 @@ export default function SpaCardSoft({ banja }: SpaCardSoftProps) {
             {banja.vrste.slice(0, 3).map((vrsta) => (
               <span
                 key={vrsta.id}
-                className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg"
+                className="inline-flex items-center px-2.5 py-1 bg-cyan-50 text-cyan-700 text-xs font-medium rounded-lg"
               >
                 {vrsta.naziv}
               </span>

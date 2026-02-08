@@ -714,9 +714,9 @@ export default function DoctorProfile() {
 
               {/* Telemedicine Section */}
               {doctor.telemedicine_enabled && doctor.telemedicine_phone && (
-                <Card className="mb-8 shadow-medium order-1 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+                <Card className="mb-8 shadow-medium order-1 bg-gradient-to-br from-cyan-50 to-cyan-50 border-cyan-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <CardTitle className="flex items-center gap-2 text-cyan-900">
                       <Video className="w-5 h-5" />
                       Telemedicina - Video konsultacije
                     </CardTitle>
@@ -730,7 +730,7 @@ export default function DoctorProfile() {
                       <Button 
                         variant="default"
                         size="lg"
-                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        className="flex-1" style={{ backgroundColor: '#0891b2' }}
                         asChild
                       >
                         <a href={`tel:${doctor.telemedicine_phone}`}>
@@ -877,10 +877,10 @@ export default function DoctorProfile() {
 
               {/* Guest Visits Section */}
               {guestVisits.length > 0 && (
-                <Card className="mb-8 shadow-medium border-l-4 border-l-blue-500 order-3">
+                <Card className="mb-8 shadow-medium border-l-4 order-3" style={{ borderLeftColor: '#0891b2' }}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5 text-blue-600" />
+                      <Building2 className="w-5 h-5" style={{ color: '#0891b2' }} />
                       Gostovanja u klinikama
                     </CardTitle>
                   </CardHeader>
@@ -890,12 +890,12 @@ export default function DoctorProfile() {
                     </p>
                     <div className="space-y-4">
                       {guestVisits.map((visit) => (
-                        <div key={visit.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100 gap-4">
+                        <div key={visit.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-cyan-50 rounded-lg border border-cyan-100 gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <Link 
                                 to={`/klinika/${visit.klinika.slug}`}
-                                className="font-semibold text-blue-700 hover:underline"
+                                className="font-semibold hover:underline" style={{ color: '#0891b2' }}
                               >
                                 {visit.klinika.naziv}
                               </Link>

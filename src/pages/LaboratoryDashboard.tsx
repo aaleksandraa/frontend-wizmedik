@@ -804,7 +804,7 @@ export default function LaboratoryDashboard() {
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Ukupno Analiza</CardTitle>
                 <FlaskConical className="h-4 w-4 text-muted-foreground" />
@@ -1208,8 +1208,8 @@ export default function LaboratoryDashboard() {
                 </Card>
               ) : (
                 <>
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="mb-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
+                    <p className="text-sm text-cyan-800">
                       <strong>Savjet:</strong> Povucite <GripVertical className="h-4 w-4 inline" /> za promjenu redoslijeda prikaza analiza na profilu.
                     </p>
                   </div>
@@ -1340,8 +1340,8 @@ export default function LaboratoryDashboard() {
                 </Card>
               ) : (
                 <>
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="mb-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
+                    <p className="text-sm text-cyan-800">
                       <strong>Savjet:</strong> Povucite <GripVertical className="h-4 w-4 inline" /> za promjenu redoslijeda prikaza paketa na profilu.
                     </p>
                   </div>
@@ -1407,8 +1407,8 @@ export default function LaboratoryDashboard() {
                 <CardContent>
                   {laboratory?.galerija && laboratory.galerija.length > 0 ? (
                     <>
-                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800">
+                      <div className="mb-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
+                        <p className="text-sm text-cyan-800">
                           <strong>Profilna slika:</strong> Kliknite na <Star className="h-3 w-3 inline" /> da postavite sliku kao profilnu.
                           Profilna slika se prikazuje na rezultatima pretrage.
                         </p>
