@@ -234,7 +234,8 @@ export default function HomepageCustom3Cyan() {
 
             {/* Quick Links */}
             <div className="text-sm text-gray-600">
-              <span className="font-medium">Verificirani doktori</span>
+              <span className="font-medium">Verificirani </span>
+              <Link to="/doktori" className="font-medium hover:text-cyan-600 transition-colors">doktori</Link>
               <span className="mx-2">/</span>
               <Link to="/klinike" className="hover:text-cyan-600 transition-colors">klinike</Link>
               <span className="mx-2">/</span>
