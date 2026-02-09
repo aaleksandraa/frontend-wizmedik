@@ -6,6 +6,11 @@ import { preloadCardSettings } from "./hooks/useCardSettings";
 import { preloadSearchData } from "./hooks/useSmartSearch";
 import "./utils/mobileScrollDebug";
 
+// Import HMR setup for development
+if (import.meta.env.DEV) {
+  import("./dev/hmr-setup");
+}
+
 // Ensure React is available globally (fixes module loading issues on refresh)
 if (typeof window !== 'undefined') {
   (window as any).React = React;

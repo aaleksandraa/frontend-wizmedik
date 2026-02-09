@@ -5,6 +5,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
+import { createHealthCheckMiddleware } from './src/dev/health-check-middleware';
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -12,17 +13,40 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     strictPort: true,
     hmr: {
+      port: 5173,
+      host: "localhost",
       overlay: false, // Disable error overlay that causes refresh
+      clientPort: 5173, // Ensure client connects to correct port
     },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
+        ws: true, // Enable WebSocket proxying
       },
     },
     fs: {
       strict: false,
+    },
+    // Ensure WebSocket server binds correctly
+    watch: {
+      usePolling: false,
+    },
+    // Add health check middleware
+    middlewareMode: false,
+    configureServer(server) {
+      server.middlewares.use(createHealthCheckMiddleware());
+      
+      // Handle server restart gracefully
+      server.httpServer?.on('close', () => {
+        console.log('[Vite] Server shutting down...');
+      });
+
+      // Log when server is ready
+      server.httpServer?.once('listening', () => {
+        console.log('[Vite] Server ready and listening');
+      });
     },
   },
   plugins: [
