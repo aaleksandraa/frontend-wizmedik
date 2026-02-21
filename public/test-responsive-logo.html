@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Logo Responsive Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0891b2;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #0891b2;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .test-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        .test-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #0891b2;
+        }
+        .test-card p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .instructions {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #1e3a8a;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            color: #0891b2;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .app-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0891b2;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: background 0.2s;
+        }
+        .app-link:hover {
+            background: #0e7490;
+        }
+        .viewport-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f2937;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-info" id="viewportInfo">
+        Viewport: <span id="viewportWidth">0</span>px × <span id="viewportHeight">0</span>px
+    </div>
+
+    <div class="container">
+        <h1>🔍 Mobile Logo Responsive Behavior Test</h1>
+        <p class="subtitle">Task 2: Verify responsive behavior - Manual Testing Guide</p>
+
+        <div class="instructions">
+            <h3>📋 How to Test</h3>
+            <ol>
+                <li>Open the main application in a new tab</li>
+                <li>Open browser DevTools (F12 or Ctrl+Shift+I)</li>
+                <li>Enable device toolbar (Ctrl+Shift+M or Cmd+Shift+M)</li>
+                <li>Test each viewport size listed below</li>
+                <li>Verify the checklist items for each test case</li>
+            </ol>
+            <a href="/" class="app-link" target="_blank">Open Application →</a>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 1: Logo Visibility on Various Mobile Screen Sizes (320px - 1023px)</h2>
+            <p><strong>Requirement:</strong> 1.1, 2.2, 2.3</p>
+            
+            <div class="test-grid">
+                <div class="test-card">
+                    <h3>iPhone SE</h3>
+                    <p><strong>Width:</strong> 320px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>iPhone 12 Pro</h3>
+                    <p><strong>Width:</strong> 375px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>iPhone 13</h3>
+                    <p><strong>Width:</strong> 390px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Pixel 5</h3>
+                    <p><strong>Width:</strong> 393px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Galaxy S20</h3>
+                    <p><strong>Width:</strong> 412px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>iPad Mini</h3>
+                    <p><strong>Width:</strong> 768px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>iPad Air</h3>
+                    <p><strong>Width:</strong> 820px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Below Desktop</h3>
+                    <p><strong>Width:</strong> 1023px</p>
+                    <p><strong>Expected:</strong> LogoCompact visible</p>
+                    <span class="status pending">Manual Test Required</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Verification Checklist:</h3>
+            <ul class="checklist">
+                <li>LogoCompact is visible at all tested widths</li>
+                <li>Desktop Logo is NOT visible (hidden by CSS)</li>
+                <li>Logo is clickable and navigates to homepage</li>
+                <li>No horizontal scrolling occurs</li>
+                <li>Logo maintains proper size (doesn't shrink)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: Logo Transition at 1024px Breakpoint</h2>
+            <p><strong>Requirement:</strong> 3.2</p>
+            
+            <h3>Test Procedure:</h3>
+            <ol>
+                <li>Set viewport to 1023px width</li>
+                <li>Verify LogoCompact is visible</li>
+                <li>Slowly increase width to 1024px</li>
+                <li>Verify Logo (desktop version) becomes visible</li>
+                <li>Verify LogoCompact becomes hidden</li>
+            </ol>
+
+            <h3>Verification Checklist:</h3>
+            <ul class="checklist">
+                <li>At 1023px: LogoCompact visible, Logo hidden</li>
+                <li>At 1024px: Logo visible, LogoCompact hidden</li>
+                <li>Transition is smooth (no flashing)</li>
+                <li>No layout shift or content jumping</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: No Horizontal Overflow on Small Screens</h2>
+            <p><strong>Requirement:</strong> 2.2</p>
+            
+            <h3>Test Procedure:</h3>
+            <ol>
+                <li>Set viewport to 320px (smallest mobile width)</li>
+                <li>Check for horizontal scrollbar</li>
+                <li>Inspect navbar layout in DevTools</li>
+                <li>Verify all elements fit within viewport</li>
+            </ol>
+
+            <h3>Verification Checklist:</h3>
+            <ul class="checklist">
+                <li>No horizontal scrollbar appears</li>
+                <li>Logo uses shrink-0 class (prevents shrinking)</li>
+                <li>Proper spacing maintained (gap-3 class)</li>
+                <li>All navbar elements visible and accessible</li>
+                <li>Hamburger menu button is visible and clickable</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 4: Logo Remains Visible When Scrolling (Sticky Navbar)</h2>
+            <p><strong>Requirement:</strong> 1.3</p>
+            
+            <h3>Test Procedure:</h3>
+            <ol>
+                <li>Open a page with scrollable content (e.g., homepage, blog)</li>
+                <li>Scroll down the page</li>
+                <li>Verify navbar remains at top of viewport</li>
+                <li>Verify logo remains visible while scrolling</li>
+                <li>Test on both mobile and desktop viewports</li>
+            </ol>
+
+            <h3>Verification Checklist:</h3>
+            <ul class="checklist">
+                <li>Navbar sticks to top of viewport (sticky positioning)</li>
+                <li>Logo remains visible during scroll</li>
+                <li>No z-index conflicts with other elements</li>
+                <li>Smooth scrolling behavior maintained</li>
+                <li>Navbar shadow/border visible when scrolled</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>✅ Implementation Verification</h2>
+            
+            <h3>Code Review Checklist:</h3>
+            <ul class="checklist">
+                <li>Logo uses conditional rendering (Logo for desktop, LogoCompact for mobile)</li>
+                <li>Desktop logo has "hidden lg:block" classes</li>
+                <li>Mobile logo has "block lg:hidden" classes</li>
+                <li>Logo link has "shrink-0" class</li>
+                <li>Navbar has "sticky top-0 z-50" classes</li>
+                <li>Proper spacing with "gap-3" class</li>
+            </ul>
+
+            <h3>CSS Classes Applied:</h3>
+            <pre style="background: #1f2937; color: #10b981; padding: 15px; border-radius: 6px; overflow-x: auto;">
+&lt;Link to="/" className="flex items-center gap-2.5 group shrink-0"&gt;
+  &lt;div className="hidden lg:block"&gt;
+    &lt;Logo /&gt;
+  &lt;/div&gt;
+  &lt;div className="block lg:hidden"&gt;
+    &lt;LogoCompact /&gt;
+  &lt;/div&gt;
+&lt;/Link&gt;
+            </pre>
+        </div>
+
+        <div class="test-section" style="background: #d1fae5; border-left-color: #059669;">
+            <h2>📊 Test Summary</h2>
+            <p>After completing all tests above, verify that:</p>
+            <ul class="checklist">
+                <li><strong>Requirement 1.3:</strong> Logo remains visible when scrolling (sticky navbar)</li>
+                <li><strong>Requirement 2.2:</strong> No horizontal overflow on any tested viewport</li>
+                <li><strong>Requirement 2.3:</strong> Logo visible on all mobile devices (320px - 1023px)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            document.getElementById('viewportWidth').textContent = width;
+            document.getElementById('viewportHeight').textContent = height;
+        }
+
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+    </script>
+</body>
+</html>
