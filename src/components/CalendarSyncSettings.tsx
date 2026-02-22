@@ -11,8 +11,8 @@ import { calendarSyncAPI } from "@/services/api";
 
 interface CalendarSyncSettingsData {
   enabled: boolean;
-  token: string;
-  ical_url: string;
+  token: string | null;
+  ical_url: string | null;
   google_calendar_url: string | null;
   outlook_calendar_url: string | null;
   last_synced: string | null;
@@ -53,7 +53,7 @@ export function CalendarSyncSettings() {
     setSaving(true);
     try {
       await calendarSyncAPI.updateSettings({ enabled });
-      setSettings((prev) => (prev ? { ...prev, enabled } : null));
+      await loadSettings();
       toast.success(enabled ? "Sinhronizacija je ukljucena" : "Sinhronizacija je iskljucena");
     } catch (error) {
       console.error("Error toggling sync:", error);
@@ -111,8 +111,8 @@ export function CalendarSyncSettings() {
     }
   };
 
-  const copyToClipboard = async (text: string) => {
-    if (!settings?.enabled) {
+  const copyToClipboard = async (text: string | null) => {
+    if (!settings?.enabled || !text) {
       toast.error("Prvo ukljucite sinhronizaciju kalendara");
       return;
     }
@@ -183,12 +183,12 @@ export function CalendarSyncSettings() {
               Kopirajte ovaj URL i dodajte ga kao subscribed calendar.
             </p>
             <div className="flex gap-2">
-              <Input value={settings.ical_url} readOnly className="font-mono text-sm" />
+              <Input value={settings.ical_url || ""} readOnly className="font-mono text-sm" />
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => void copyToClipboard(settings.ical_url)}
-                disabled={!settings.enabled}
+                disabled={!settings.enabled || !settings.ical_url}
                 title={settings.enabled ? "Kopiraj URL" : "Ukljucite sinhronizaciju"}
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -196,8 +196,8 @@ export function CalendarSyncSettings() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => window.open(settings.ical_url, "_blank")}
-                disabled={!settings.enabled}
+                onClick={() => settings.ical_url && window.open(settings.ical_url, "_blank")}
+                disabled={!settings.enabled || !settings.ical_url}
                 title={settings.enabled ? "Testiraj URL" : "Ukljucite sinhronizaciju"}
               >
                 <ExternalLink className="h-4 w-4" />
@@ -333,4 +333,3 @@ export function CalendarSyncSettings() {
     </div>
   );
 }
-
