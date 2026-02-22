@@ -167,7 +167,7 @@ export function GuestVisitBookingDialog({
         datum_vrijeme: dateTime,
         gostovanje_id: guestVisit.id,
         klinika_id: guestVisit.klinika.id,
-        napomena: user ? undefined : guestData.napomena
+        napomene: user ? undefined : guestData.napomena
       };
 
       if (selectedServiceId) {
@@ -180,11 +180,11 @@ export function GuestVisitBookingDialog({
       } else {
         response = await appointmentsAPI.createGuest({
           ...bookingData,
-          ime: guestData.ime,
-          prezime: guestData.prezime,
-          email: guestData.email,
-          telefon: guestData.telefon,
-          napomena: guestData.napomena
+          guest_ime: guestData.ime,
+          guest_prezime: guestData.prezime,
+          guest_email: guestData.email,
+          guest_telefon: guestData.telefon,
+          napomene: guestData.napomena
         });
       }
 

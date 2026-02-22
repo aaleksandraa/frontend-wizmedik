@@ -119,10 +119,10 @@ export function GuestBookingDialog({
         trajanje_minuti: trajanje,
         cijena: cijena,
         usluga_id: selectedService === 'ostalo' ? null : parseInt(selectedService),
-        ime: guestData.ime,
-        prezime: guestData.prezime,
-        telefon: guestData.telefon,
-        email: guestData.email || null
+        guest_ime: guestData.ime,
+        guest_prezime: guestData.prezime,
+        guest_telefon: guestData.telefon,
+        guest_email: guestData.email || null
       });
 
       // Set booked appointment details for confirmation screen
