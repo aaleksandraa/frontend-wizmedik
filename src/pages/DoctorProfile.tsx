@@ -28,11 +28,13 @@ import { formatRating } from '@/utils/formatters';
 
 interface Doctor {
   id: number;
+  user_id?: number;
   ime: string;
   prezime: string;
   specijalnost: string;
   telefon: string;
   email?: string;
+  public_email?: string;
   grad: string;
   lokacija: string;
   latitude?: number;
@@ -1279,7 +1281,7 @@ export default function DoctorProfile() {
                           key={recenzija.id}
                           recenzija={recenzija}
                           onUpdate={fetchRecenzije}
-                          canRespond={user?.role === 'doctor' && user.email === doctor.email}
+                          canRespond={user?.role === 'doctor' && user.id === doctor.user_id}
                         />
                       ))}
                     </div>

@@ -29,6 +29,7 @@ export function DoctorTemplateMinimal({
   onGuestVisitBook
 }: DoctorTemplateProps) {
   const specijalnostSlug = doctor.specijalnost?.toLowerCase().replace(/\s+/g, '-') || '';
+  const publicEmail = doctor.public_email || doctor.email;
   
   // Remove seconds from time string (08:00:00 -> 08:00)
   const formatTime = (time: string) => time.substring(0, 5);
@@ -171,10 +172,10 @@ export function DoctorTemplateMinimal({
                 <span>{doctor.telefon}</span>
               </a>
             )}
-            {doctor.email && (
-              <a href={`mailto:${doctor.email}`} className="flex items-center gap-3 text-gray-600 hover:text-primary">
+            {publicEmail && (
+              <a href={`mailto:${publicEmail}`} className="flex items-center gap-3 text-gray-600 hover:text-primary">
                 <Mail className="h-4 w-4 text-gray-400" />
-                <span>{doctor.email}</span>
+                <span>{publicEmail}</span>
               </a>
             )}
             <div className="flex items-center gap-3 text-gray-600">

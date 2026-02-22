@@ -142,7 +142,7 @@ export const createDoctorSchema = (doctor: any) => ({
   description: doctor.opis,
   url: `https://wizmedik.com/doktor/${doctor.slug}`,
   telephone: doctor.telefon,
-  email: doctor.email,
+  email: doctor.public_email || doctor.email,
   address: doctor.adresa ? {
     '@type': 'PostalAddress',
     streetAddress: doctor.adresa,

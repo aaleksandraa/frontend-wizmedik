@@ -36,11 +36,14 @@ import { CSS } from '@dnd-kit/utilities';
 
 interface DoctorProfile {
   id: number;
+  user_id?: number;
   ime: string;
   prezime: string;
   specijalnost: string;
   telefon: string;
   email?: string;
+  account_email?: string;
+  public_email?: string;
   grad: string;
   lokacija: string;
   latitude?: number;
@@ -184,7 +187,7 @@ function SortableUsluga({ usluga, onEdit, onDelete }: any) {
 }
 
 export default function DoctorDashboard() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'kalendar';
@@ -491,12 +494,17 @@ export default function DoctorDashboard() {
   };
 
   const fetchDoctorProfile = async () => {
-    if (!user?.email) return;
+    if (!user) return;
     try {
       const response = await doctorsAPI.getMyProfile();
       const data = response.data;
       if (data) {
-        setProfile(data);
+        const normalizedProfile = {
+          ...data,
+          account_email: data.account_email || user.email || '',
+          public_email: data.public_email ?? data.email ?? ''
+        };
+        setProfile(normalizedProfile);
         if (data.radno_vrijeme && typeof data.radno_vrijeme === 'object') {
           const transformed: any = {};
           Object.entries(data.radno_vrijeme).forEach(([day, schedule]: [string, any]) => {
@@ -516,7 +524,7 @@ export default function DoctorDashboard() {
   };
 
   const fetchServices = async () => {
-    if (!user?.email) return;
+    if (!user) return;
     try {
       const response = await servicesAPI.getMyServices();
       if (response.data) setServices(response.data);
@@ -685,7 +693,7 @@ export default function DoctorDashboard() {
   };
 
   const fetchAppointments = async () => {
-    if (!user?.email) return;
+    if (!user) return;
     try {
       const response = await appointmentsAPI.getDoctorAppointments();
       const data = response.data || [];
@@ -730,7 +738,7 @@ export default function DoctorDashboard() {
 
 
   const updateProfile = async () => {
-    if (!profile || !user?.email) return;
+    if (!profile || !user) return;
     const transformedWorkingHours: any = {};
     Object.entries(workingHours).forEach(([day, schedule]) => {
       transformedWorkingHours[day] = { closed: !schedule.radi, open: schedule.od, close: schedule.do };
@@ -738,6 +746,8 @@ export default function DoctorDashboard() {
 
     const updateData: any = {
       telefon: profile.telefon, lokacija: profile.lokacija, opis: profile.opis || null,
+      account_email: profile.account_email,
+      public_email: profile.public_email || null,
       specialty_ids: selectedSpecialtyIds,
       prihvata_online: profile.prihvata_online, auto_potvrda: profile.auto_potvrda,
       slot_trajanje_minuti: profile.slot_trajanje_minuti,
@@ -751,6 +761,7 @@ export default function DoctorDashboard() {
 
     try {
       await doctorsAPI.updateProfile(updateData);
+      await refreshUser().catch(() => undefined);
       toast({ title: "Uspjeh", description: "Profil ažuriran" });
       setEditingProfile(false);
       fetchDoctorProfile();
@@ -1767,6 +1778,26 @@ export default function DoctorDashboard() {
                           <Input value={profile.telefon} onChange={(e) => setProfile({...profile, telefon: e.target.value})} />
                         </div>
                         <div>
+                          <Label>Email za prijavu</Label>
+                          <Input
+                            type="email"
+                            value={profile.account_email || ''}
+                            onChange={(e) => setProfile({...profile, account_email: e.target.value})}
+                            placeholder="vas-login@email.com"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Koristi se za prijavu i sistemske obavijesti.</p>
+                        </div>
+                        <div>
+                          <Label>Javni email (opcionalno)</Label>
+                          <Input
+                            type="email"
+                            value={profile.public_email || ''}
+                            onChange={(e) => setProfile({...profile, public_email: e.target.value})}
+                            placeholder="kontakt@email.com"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Prikazuje se javno na profilu doktora.</p>
+                        </div>
+                        <div>
                           <Label>Lokacija (Adresa)</Label>
                           <Input value={profile.lokacija} onChange={(e) => setProfile({...profile, lokacija: e.target.value})} />
                         </div>
@@ -1968,6 +1999,16 @@ export default function DoctorDashboard() {
                           <Phone className="h-4 w-4 text-muted-foreground" />
                           <span className="text-muted-foreground">Telefon:</span>
                           <span className="font-medium">{profile.telefon}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Email za prijavu:</span>
+                          <span className="font-medium">{profile.account_email || user?.email || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Javni email:</span>
+                          <span className="font-medium">{profile.public_email || 'Nije postavljen'}</span>
                         </div>
                       </div>
                       {profile.klinika_naziv && (

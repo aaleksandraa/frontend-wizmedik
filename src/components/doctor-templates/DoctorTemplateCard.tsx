@@ -28,6 +28,7 @@ export function DoctorTemplateCard({
   onGuestVisitBook
 }: DoctorTemplateProps) {
   const specijalnostSlug = doctor.specijalnost?.toLowerCase().replace(/\s+/g, '-') || '';
+  const publicEmail = doctor.public_email || doctor.email;
   
   // Remove seconds from time string (08:00:00 -> 08:00)
   const formatTime = (time: string) => time.substring(0, 5);
@@ -118,7 +119,7 @@ export function DoctorTemplateCard({
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-semibold truncate">{doctor.email || 'N/A'}</p>
+                  <p className="font-semibold truncate">{publicEmail || 'N/A'}</p>
                 </div>
               </div>
             </div>

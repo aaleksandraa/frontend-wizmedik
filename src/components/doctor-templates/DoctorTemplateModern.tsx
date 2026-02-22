@@ -33,6 +33,7 @@ export function DoctorTemplateModern({
   onGuestVisitBook
 }: DoctorTemplateProps) {
   const specijalnostSlug = doctor.specijalnost?.toLowerCase().replace(/\s+/g, '-') || '';
+  const publicEmail = doctor.public_email || doctor.email;
   
   // Remove seconds from time string (08:00:00 -> 08:00)
   const formatTime = (time: string) => time.substring(0, 5);
@@ -413,10 +414,10 @@ export function DoctorTemplateModern({
                       {doctor.telefon}
                     </a>
                   )}
-                  {doctor.email && (
-                    <a href={`mailto:${doctor.email}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary">
+                  {publicEmail && (
+                    <a href={`mailto:${publicEmail}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary">
                       <Mail className="h-4 w-4" />
-                      {doctor.email}
+                      {publicEmail}
                     </a>
                   )}
                 </div>
