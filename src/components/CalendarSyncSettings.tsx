@@ -27,6 +27,7 @@ export function CalendarSyncSettings() {
   const [settings, setSettings] = useState<CalendarSyncSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [syncingNow, setSyncingNow] = useState(false);
   const [copied, setCopied] = useState(false);
   const [googleUrl, setGoogleUrl] = useState("");
   const [outlookUrl, setOutlookUrl] = useState("");
@@ -109,6 +110,42 @@ export function CalendarSyncSettings() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSyncNow = async () => {
+    if (!settings?.enabled) {
+      toast.error("Prvo ukljucite sinhronizaciju kalendara");
+      return;
+    }
+
+    setSyncingNow(true);
+    try {
+      const response = await calendarSyncAPI.syncNow();
+      await loadSettings();
+
+      const eventsCount = Number(response?.data?.events_count ?? 0);
+      toast.success(`Sinhronizacija pokrenuta. Feed trenutno ima ${eventsCount} termina.`);
+    } catch (error: unknown) {
+      const message = getRequestErrorMessage(error, "Rucna sinhronizacija nije uspjela");
+      toast.error(message);
+    } finally {
+      setSyncingNow(false);
+    }
+  };
+
+  const getRequestErrorMessage = (error: unknown, fallback: string): string => {
+    if (typeof error === "object" && error !== null) {
+      const response = (
+        error as { response?: { data?: { message?: unknown } } }
+      ).response;
+
+      const message = response?.data?.message;
+      if (typeof message === "string" && message.trim() !== "") {
+        return message;
+      }
+    }
+
+    return fallback;
   };
 
   const copyToClipboard = async (text: string | null) => {
@@ -211,6 +248,19 @@ export function CalendarSyncSettings() {
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
+            </div>
+            <div>
+              <Button
+                variant="secondary"
+                onClick={() => void handleSyncNow()}
+                disabled={!settings.enabled || !settings.ical_url || syncingNow}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${syncingNow ? "animate-spin" : ""}`} />
+                Sinhronizuj sada
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Ovo odmah regenerise feed za test. Google i Outlook povlace promjene periodicno.
+              </p>
             </div>
           </div>
 

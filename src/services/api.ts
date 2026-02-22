@@ -384,4 +384,5 @@ export const calendarSyncAPI = {
     outlook_calendar_url?: string;
   }) => api.put('/doctor/calendar-sync', data),
   regenerateToken: () => api.post('/doctor/calendar-sync/regenerate-token'),
+  syncNow: () => api.post('/doctor/calendar-sync/sync-now'),
 };
