@@ -114,7 +114,7 @@ export default function CookiePolicy() {
                 Ako imate pitanja o našoj politici kolačića, kontaktirajte nas:
               </p>
               <ul className="list-none mb-8 text-muted-foreground space-y-2">
-                <li><strong>Email:</strong> privacy@wizmedik.ba</li>
+                <li><strong>Email:</strong> privacy@wizmedik.com</li>
                 <li><strong>Telefon:</strong> +387 33 123 456</li>
                 <li><strong>Adresa:</strong> Zmaja od Bosne 7, 71000 Sarajevo, BiH</li>
               </ul>

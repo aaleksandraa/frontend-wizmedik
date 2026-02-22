@@ -235,7 +235,7 @@ export default function CareHomes() {
       const nivo = filterOptions?.nivoi_njege.find(n => n.slug === selectedNivoNjege);
       if (nivo) desc += `${nivo.naziv} njega. `;
     }
-    desc += 'Uporedite cijene, usluge, medicinski kadar i smjeötajne uslove. Besplatna pretraga i kontakt.';
+    desc += 'Uporedite cijene, usluge, medicinski kadar i smje≈°tajne uslove. Besplatna pretraga i kontakt.';
     return desc;
   }, [selectedGrad, selectedNivoNjege, filterOptions]);
 
@@ -310,15 +310,15 @@ export default function CareHomes() {
           "name": "Kako odabrati pravi dom za starije osobe?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Pri odabiru doma za starije osobe, vaûno je razmotriti: nivo potrebne njege, lokaciju, dostupnost medicinskog osoblja 24/7, kvalitet smjeötaja, programe aktivnosti, te cijenu i nacin placanja. Preporucujemo posjet domu prije donoöenja odluke."
+            "text": "Pri odabiru doma za starije osobe, va≈æno je razmotriti: nivo potrebne njege, lokaciju, dostupnost medicinskog osoblja 24/7, kvalitet smje≈°taja, programe aktivnosti, te cijenu i nacin placanja. Preporucujemo posjet domu prije dono≈°enja odluke."
           }
         },
         {
           "@type": "Question",
-          "name": "Koliko koöta smjeötaj u domu za starije?",
+          "name": "Koliko ko≈°ta smje≈°taj u domu za starije?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cijene smjeötaja u domovima za starije u BiH variraju od 800 do 2500 KM mjesecno, ovisno o nivou njege, lokaciji i uslugama. Osnovni smjeötaj je jeftiniji, dok specijalizirana njega (demencija, palijativna njega) koöta viöe."
+            "text": "Cijene smje≈°taja u domovima za starije u BiH variraju od 800 do 2500 KM mjesecno, ovisno o nivou njege, lokaciji i uslugama. Osnovni smje≈°taj je jeftiniji, dok specijalizirana njega (demencija, palijativna njega) ko≈°ta vi≈°e."
           }
         },
         {
@@ -326,7 +326,7 @@ export default function CareHomes() {
           "name": "Koje usluge nude domovi za starije osobe?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Domovi za starije nude: smjeötaj i ishranu, medicinsku njegu, fizioterapiju, radnu terapiju, socijalne aktivnosti, pomoc pri svakodnevnim aktivnostima, te specijalizirane programe za demenciju i Alzheimerovu bolest."
+            "text": "Domovi za starije nude: smje≈°taj i ishranu, medicinsku njegu, fizioterapiju, radnu terapiju, socijalne aktivnosti, pomoc pri svakodnevnim aktivnostima, te specijalizirane programe za demenciju i Alzheimerovu bolest."
           }
         },
         {
@@ -334,7 +334,7 @@ export default function CareHomes() {
           "name": "Da li domovi primaju osobe sa demencijom?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Mnogi domovi u BiH imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom boleöcu. Ovi odjeli imaju obuceno osoblje i prilagodene prostore za sigurnu njegu osoba sa kognitivnim poremecajima."
+            "text": "Mnogi domovi u BiH imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom bole≈°ƒáu. Ovi odjeli imaju obuceno osoblje i prilagodene prostore za sigurnu njegu osoba sa kognitivnim poremecajima."
           }
         }
       ]
@@ -358,12 +358,12 @@ export default function CareHomes() {
     <>
       <Helmet>
         <title>{pageTitle} | WizMedik</title>
-        <meta name="description" content="Pregledajte profile, zakaûite termin online ili kontaktirajte." />
-        <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, staracki dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontoloöki centar, smjeötaj starijih osoba`} />
+        <meta name="description" content="Pregledajte profile, zaka≈æite termin online ili kontaktirajte." />
+        <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, staracki dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontolo≈°ki centar, smje≈°taj starijih osoba`} />
         
         {/* Open Graph */}
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content="Pregledajte profile, zakaûite termin online ili kontaktirajte." />
+        <meta property="og:description" content="Pregledajte profile, zaka≈æite termin online ili kontaktirajte." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="WizMedik" />
@@ -373,7 +373,7 @@ export default function CareHomes() {
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content="Pregledajte profile, zakaûite termin online ili kontaktirajte." />
+        <meta name="twitter:description" content="Pregledajte profile, zaka≈æite termin online ili kontaktirajte." />
         
         {/* Canonical */}
         <link rel="canonical" href={canonicalUrl} />
@@ -416,7 +416,7 @@ export default function CareHomes() {
                 </h1>
               </div>
               <p className="text-xl opacity-90 max-w-3xl mx-auto mb-8">
-                Pregledajte profile, zakaûite termin online ili kontaktirajte.
+                Pregledajte profile, zaka≈æite termin online ili kontaktirajte.
               </p>
               
               {/* Link to Vodic page */}
@@ -484,7 +484,7 @@ export default function CareHomes() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">Pretraga</label>
                     <Input
-                      placeholder="Pretraûite domove..."
+                      placeholder="Pretra≈æite domove..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
@@ -559,7 +559,7 @@ export default function CareHomes() {
                               onClick={() => setSelectedTipDoma('')}
                               className="w-full mt-2"
                             >
-                              Poniöti izbor
+                              Poni≈°ti izbor
                             </Button>
                           )}
                         </div>
@@ -600,7 +600,7 @@ export default function CareHomes() {
                               onClick={() => setSelectedNivoNjege('')}
                               className="w-full mt-2"
                             >
-                              Poniöti izbor
+                              Poni≈°ti izbor
                             </Button>
                           )}
                         </div>
@@ -729,7 +729,7 @@ export default function CareHomes() {
                         <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                         <h3 className="text-xl font-semibold mb-2">Nema rezultata</h3>
                         <p className="text-muted-foreground mb-4">
-                          Nismo pronaöli domove koji odgovaraju vaöim kriterijima.
+                          Nismo prona≈°li domove koji odgovaraju va≈°im kriterijima.
                         </p>
                         <Button onClick={clearFilters}>Ocisti filtere</Button>
                       </CardContent>
@@ -773,31 +773,31 @@ export default function CareHomes() {
                   Kako odabrati pravi dom za starije osobe?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Pri odabiru doma za starije osobe, vaûno je razmotriti nekoliko kljucnih faktora:</p>
+                  <p>Pri odabiru doma za starije osobe, va≈æno je razmotriti nekoliko kljucnih faktora:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     <li>Nivo potrebne njege (osnovna, pojacana, specijalizirana)</li>
                     <li>Lokacija i blizina porodici</li>
                     <li>Dostupnost medicinskog osoblja 24/7</li>
-                    <li>Kvalitet smjeötaja i opremljenost</li>
+                    <li>Kvalitet smje≈°taja i opremljenost</li>
                     <li>Programi aktivnosti i socijalizacije</li>
                     <li>Cijena i nacin placanja</li>
                   </ul>
-                  <p className="mt-2">Preporucujemo posjet domu i razgovor sa osobljem prije donoöenja konacne odluke.</p>
+                  <p className="mt-2">Preporucujemo posjet domu i razgovor sa osobljem prije dono≈°enja konacne odluke.</p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="faq-2">
                 <AccordionTrigger className="text-left font-medium">
-                  Koliko koöta smjeötaj u domu za starije?
+                  Koliko ko≈°ta smje≈°taj u domu za starije?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Cijene smjeötaja u domovima za starije u Bosni i Hercegovini variraju ovisno o viöe faktora:</p>
+                  <p>Cijene smje≈°taja u domovima za starije u Bosni i Hercegovini variraju ovisno o vi≈°e faktora:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Osnovni smjeötaj: 800 - 1200 KM mjesecno</li>
+                    <li>Osnovni smje≈°taj: 800 - 1200 KM mjesecno</li>
                     <li>Pojacana njega: 1200 - 1800 KM mjesecno</li>
                     <li>Specijalizirana njega (demencija, palijativa): 1500 - 2500 KM mjesecno</li>
                   </ul>
-                  <p className="mt-2">Cijene zavise od lokacije, nivoa njege, tipa sobe (jednokrevetna/viöekrevetna) i dodatnih usluga.</p>
+                  <p className="mt-2">Cijene zavise od lokacije, nivoa njege, tipa sobe (jednokrevetna/vi≈°ekrevetna) i dodatnih usluga.</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -808,7 +808,7 @@ export default function CareHomes() {
                 <AccordionContent className="text-muted-foreground">
                   <p>Domovi za starije osobe u BiH tipicno nude sljedece usluge:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Smjeötaj i puna pansionska ishrana</li>
+                    <li>Smje≈°taj i puna pansionska ishrana</li>
                     <li>24-satna medicinska njega i nadzor</li>
                     <li>Fizioterapija i rehabilitacija</li>
                     <li>Radna i okupaciona terapija</li>
@@ -825,7 +825,7 @@ export default function CareHomes() {
                   Da li domovi primaju osobe sa demencijom?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  <p>Da, mnogi domovi u Bosni i Hercegovini imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom boleöcu. Ovi odjeli karakteriöe:</p>
+                  <p>Da, mnogi domovi u Bosni i Hercegovini imaju specijalizirane odjele za osobe sa demencijom i Alzheimerovom bole≈°ƒáu. Ovi odjeli karakteri≈°e:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     <li>Posebno obuceno osoblje za rad sa osobama sa kognitivnim poremecajima</li>
                     <li>Sigurni i prilagodeni prostori koji sprjecavaju lutanje</li>
@@ -838,15 +838,15 @@ export default function CareHomes() {
 
               <AccordionItem value="faq-5">
                 <AccordionTrigger className="text-left font-medium">
-                  Kako mogu posjetiti dom prije donoöenja odluke?
+                  Kako mogu posjetiti dom prije dono≈°enja odluke?
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   <p>Vecina domova nudi mogucnost posjete i razgledanja prostora. Preporucujemo:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Kontaktirajte dom telefonom ili putem naöe platforme</li>
-                    <li>Zakaûite termin za obilazak u vrijeme kada su aktivnosti u toku</li>
+                    <li>Kontaktirajte dom telefonom ili putem na≈°e platforme</li>
+                    <li>Zaka≈æite termin za obilazak u vrijeme kada su aktivnosti u toku</li>
                     <li>Pripremite pitanja o njezi, osoblju, aktivnostima i cijenama</li>
-                    <li>Obratite paûnju na cistocu, atmosferu i odnos osoblja prema öticenicima</li>
+                    <li>Obratite pa≈ænju na cistocu, atmosferu i odnos osoblja prema ≈°tiƒáenicima</li>
                     <li>Pitajte za probni boravak ako je moguc</li>
                   </ul>
                 </AccordionContent>
@@ -863,16 +863,16 @@ export default function CareHomes() {
             </h2>
             <div className="prose prose-gray max-w-none">
               <p>
-                WizMedik vam pomaûe pronaci idealan dom za njegu vaöih najdraûih. Naöa platforma okuplja verificirane domove za starije i bolesne osobe öirom Bosne i Hercegovine, omogucavajuci vam da uporedite usluge, cijene i recenzije na jednom mjestu.
+                WizMedik vam poma≈æe pronaci idealan dom za njegu va≈°ih najdra≈æih. Na≈°a platforma okuplja verificirane domove za starije i bolesne osobe ≈°irom Bosne i Hercegovine, omogucavajuci vam da uporedite usluge, cijene i recenzije na jednom mjestu.
               </p>
               <p>
-                Bilo da traûite dom sa osnovnom njegom za samostalne starije osobe, pojacanu njegu za one kojima je potrebna svakodnevna pomoc, ili specijaliziranu njegu za osobe sa demencijom i Alzheimerovom boleöcu - na pravom ste mjestu.
+                Bilo da tra≈æite dom sa osnovnom njegom za samostalne starije osobe, pojacanu njegu za one kojima je potrebna svakodnevna pomoc, ili specijaliziranu njegu za osobe sa demencijom i Alzheimerovom bole≈°ƒáu - na pravom ste mjestu.
               </p>
-              <h3 className="text-xl font-semibold mt-6 mb-3">Zaöto koristiti WizMedik za pronalazak doma?</h3>
+              <h3 className="text-xl font-semibold mt-6 mb-3">Za≈°to koristiti WizMedik za pronalazak doma?</h3>
               <ul className="list-disc list-inside space-y-2">
                 <li>Svi domovi su verificirani i provjereni</li>
                 <li>Detaljne informacije o uslugama, osoblju i cijenama</li>
-                <li>Autenticne recenzije od porodica öticenika</li>
+                <li>Autenticne recenzije od porodica ≈°tiƒáenika</li>
                 <li>Jednostavno filtriranje po lokaciji, tipu njege i uslugama</li>
                 <li>Besplatan kontakt sa domovima</li>
               </ul>

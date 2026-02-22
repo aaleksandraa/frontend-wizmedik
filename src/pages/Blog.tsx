@@ -195,10 +195,10 @@ export default function Blog() {
         <title>Blog - Zdravstveni savjeti od doktora | wizMedik</title>
         <meta name="description" content="Čitajte stručne zdravstvene savjete od doktora u BiH. Članci o prevenciji, liječenju i zdravom životu." />
         <meta name="keywords" content="zdravstveni savjeti, medicinski blog, doktor savjeti, zdravlje bih, prevencija bolesti" />
-        <link rel="canonical" href="https://wizmedik.ba/blog" />
+        <link rel="canonical" href="https://wizmedik.com/blog" />
         <meta property="og:title" content="wizMedik Blog - Zdravstveni savjeti" />
         <meta property="og:description" content="Stručni zdravstveni savjeti od doktora u Bosni i Hercegovini" />
-        <meta property="og:url" content="https://wizmedik.ba/blog" />
+        <meta property="og:url" content="https://wizmedik.com/blog" />
         <meta property="og:type" content="blog" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>

@@ -107,7 +107,7 @@ export default function FAQ() {
         },
         {
           q: 'Kako mogu kontaktirati podršku?',
-          a: 'Možete nas kontaktirati putem email-a info@wizmedik.ba ili kontakt forme na sajtu.'
+          a: 'Možete nas kontaktirati putem email-a info@wizmedik.com ili kontakt forme na sajtu.'
         }
       ]
     }
