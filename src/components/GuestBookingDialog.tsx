@@ -23,6 +23,8 @@ interface GuestBookingDialogProps {
   selectedServiceId?: number | null;
 }
 
+const ALL_CATEGORIES_VALUE = 'all-categories';
+
 export function GuestBookingDialog({
   open,
   onOpenChange,
@@ -156,7 +158,9 @@ export function GuestBookingDialog({
       setBookedAppointment(null);
       setSelectedDate(undefined);
       setSelectedTime('');
+      setSelectedCategory('');
       setSelectedService(selectedServiceId?.toString() || '');
+      setOtherService('');
       setGuestData({ ime: '', prezime: '', telefon: '', email: '', napomene: '' });
     }, 300);
   };
@@ -332,17 +336,21 @@ export function GuestBookingDialog({
                 <div>
                   <Label>Kategorija usluga</Label>
                   <Select 
-                    value={selectedCategory} 
+                    value={selectedCategory || ALL_CATEGORIES_VALUE}
                     onValueChange={(value) => {
-                      setSelectedCategory(value);
-                      setSelectedService(''); // Reset service when category changes
+                      const normalizedCategory = value === ALL_CATEGORIES_VALUE ? '' : value;
+                      setSelectedCategory(normalizedCategory);
+                      // Set first service from new category instead of empty string
+                      const category = categories.find((c: any) => c.id.toString() === normalizedCategory);
+                      const firstService = category?.usluge?.[0];
+                      setSelectedService(firstService ? firstService.id.toString() : '');
                     }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sve kategorije" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sve usluge</SelectItem>
+                      <SelectItem value={ALL_CATEGORIES_VALUE}>Sve usluge</SelectItem>
                       {categories.map((category: any) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           {category.naziv} ({category.usluge?.length || 0})

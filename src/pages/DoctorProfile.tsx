@@ -185,14 +185,14 @@ export default function DoctorProfile() {
   const fetchServices = async () => {
     if (!doctor?.id) return;
     try {
-      const response = await doctorsAPI.getServices(doctor.id);
+      const response = await doctorsAPI.getById(doctor.id);
       // Filter only services without category (uncategorized)
-      const allServices = Array.isArray(response.data) ? response.data : [];
+      const allServices = Array.isArray(response.data?.usluge) ? response.data.usluge : [];
       const uncategorizedServices = allServices.filter((s: any) => !s.kategorija_id);
       setServices(uncategorizedServices);
     } catch (error) {
       console.error('Error fetching services:', error);
-      setServices([]); // Set empty array on error
+      setServices([]);
     }
   };
 
@@ -1140,25 +1140,31 @@ export default function DoctorProfile() {
                           <form onSubmit={handleSubmitReview} className="space-y-4">
                             <div>
                               <Label>Odaberite termin</Label>
-                              <Select
-                                value={newReview.termin_id.toString()}
+                              <Select                                
+                                value={newReview.termin_id?.toString() || (eligibleTermini.length > 0 ? eligibleTermini[0].id.toString() : "")}
                                 onValueChange={(value) => setNewReview(prev => ({...prev, termin_id: parseInt(value)}))}
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Odaberite termin" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {eligibleTermini.map((termin) => (
-                                    <SelectItem key={termin.id} value={termin.id.toString()}>
-                                      {new Date(termin.datum_vrijeme).toLocaleDateString('sr-Latn-BA', {
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
+                                  {eligibleTermini.length > 0 ? (
+                                    eligibleTermini.map((termin) => (
+                                      <SelectItem key={termin.id} value={termin.id.toString()}>
+                                        {new Date(termin.datum_vrijeme).toLocaleDateString('sr-Latn-BA', {
+                                          day: 'numeric',
+                                          month: 'long',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <SelectItem value="no-termini" disabled>
+                                      Nema dostupnih termina
                                     </SelectItem>
-                                  ))}
+                                  )}
                                 </SelectContent>
                               </Select>
                             </div>

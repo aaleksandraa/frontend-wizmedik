@@ -17,6 +17,8 @@ interface BookAppointmentFormProps {
   onSuccess: () => void;
 }
 
+const ALL_CATEGORIES_VALUE = 'all-categories';
+
 export function BookAppointmentForm({ doctorId, doctorName, selectedServiceId, onSuccess }: BookAppointmentFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -45,7 +47,6 @@ export function BookAppointmentForm({ doctorId, doctorName, selectedServiceId, o
 
   useEffect(() => {
     fetchDoctorData();
-    fetchServices();
     fetchBookedSlots();
   }, [doctorId]);
 
@@ -53,25 +54,18 @@ export function BookAppointmentForm({ doctorId, doctorName, selectedServiceId, o
     try {
       const response = await doctorsAPI.getById(doctorId);
       setDoctorData(response.data);
-      
-      // Extract categories if available
-      if (response.data.kategorijeUsluga && response.data.kategorijeUsluga.length > 0) {
-        setCategories(response.data.kategorijeUsluga);
-      }
+
+      const doctorCategories = response.data.kategorijeUsluga || response.data.kategorije_usluga || [];
+      setCategories(Array.isArray(doctorCategories) ? doctorCategories : []);
+
+      // Fallback source for services in case /doctors/{id}/services is unavailable
+      const doctorServices = Array.isArray(response.data.usluge) ? response.data.usluge : [];
+      setServices(doctorServices);
     } catch (error) {
       console.error('Error fetching doctor data:', error);
     }
   };
 
-  const fetchServices = async () => {
-    try {
-      const response = await doctorsAPI.getServices(doctorId);
-      setServices(response.data || []);
-    } catch (error) {
-      console.error('Error fetching services:', error);
-    }
-  };
-  
   // Get filtered services based on selected category
   const getFilteredServices = () => {
     if (!selectedCategory) {
@@ -188,17 +182,21 @@ export function BookAppointmentForm({ doctorId, doctorName, selectedServiceId, o
         <div>
           <Label>Kategorija usluga</Label>
           <Select 
-            value={selectedCategory} 
+            value={selectedCategory || ALL_CATEGORIES_VALUE}
             onValueChange={(value) => {
-              setSelectedCategory(value);
-              setSelectedService(''); // Reset service when category changes
+              const normalizedCategory = value === ALL_CATEGORIES_VALUE ? '' : value;
+              setSelectedCategory(normalizedCategory);
+              // Set first service from new category instead of empty string
+              const category = categories.find(c => c.id.toString() === normalizedCategory);
+              const firstService = category?.usluge?.[0];
+              setSelectedService(firstService ? firstService.id.toString() : '');
             }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sve kategorije" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Sve usluge</SelectItem>
+              <SelectItem value={ALL_CATEGORIES_VALUE}>Sve usluge</SelectItem>
               {categories.map((category: any) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.naziv} ({category.usluge?.length || 0})
@@ -211,18 +209,29 @@ export function BookAppointmentForm({ doctorId, doctorName, selectedServiceId, o
       
       <div>
         <Label>Usluga</Label>
-        <Select value={selectedService} onValueChange={setSelectedService}>
+        <Select 
+          value={selectedService || (getFilteredServices().length > 0 ? getFilteredServices()[0].id.toString() : "")} 
+          onValueChange={setSelectedService}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Izaberite uslugu" />
           </SelectTrigger>
           <SelectContent className="max-h-[300px]">
-            {getFilteredServices().map((service: any) => (
-              <SelectItem key={service.id} value={service.id.toString()}>
-                {service.naziv} - {service.cijena ? `${service.cijena} KM` : 'Cijena po dogovoru'} ({service.trajanje_minuti} min)
+            {getFilteredServices().length > 0 ? (
+              <>
+                {getFilteredServices().map((service: any) => (
+                  <SelectItem key={service.id} value={service.id.toString()}>
+                    {service.naziv} - {service.cijena ? `${service.cijena} KM` : 'Cijena po dogovoru'} ({service.trajanje_minuti} min)
+                  </SelectItem>
+                ))}
+                {!selectedCategory && doctorData.prihvata_ostalo && (
+                  <SelectItem value="ostalo">Ostalo</SelectItem>
+                )}
+              </>
+            ) : (
+              <SelectItem value="no-services" disabled>
+                Nema dostupnih usluga
               </SelectItem>
-            ))}
-            {!selectedCategory && doctorData.prihvata_ostalo && (
-              <SelectItem value="ostalo">Ostalo</SelectItem>
             )}
           </SelectContent>
         </Select>

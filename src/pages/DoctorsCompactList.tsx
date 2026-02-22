@@ -20,6 +20,9 @@ interface Doctor {
   broj_ocjena?: number;
 }
 
+const ALL_CITIES_VALUE = 'all-cities';
+const ALL_SPECIALTIES_VALUE = 'all-specialties';
+
 export default function DoctorsCompactList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -116,7 +119,10 @@ export default function DoctorsCompactList() {
 
             {/* City Filter */}
             <div>
-              <Select value={selectedCity} onValueChange={setSelectedCity}>
+              <Select
+                value={selectedCity || ALL_CITIES_VALUE}
+                onValueChange={(value) => setSelectedCity(value === ALL_CITIES_VALUE ? '' : value)}
+              >
                 <SelectTrigger>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-gray-400" />
@@ -124,7 +130,7 @@ export default function DoctorsCompactList() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Svi gradovi</SelectItem>
+                  <SelectItem value={ALL_CITIES_VALUE}>Svi gradovi</SelectItem>
                   {cities.map((city) => (
                     <SelectItem key={city.id} value={city.naziv}>
                       {city.naziv}
@@ -136,7 +142,10 @@ export default function DoctorsCompactList() {
 
             {/* Specialty Filter */}
             <div>
-              <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+              <Select
+                value={selectedSpecialty || ALL_SPECIALTIES_VALUE}
+                onValueChange={(value) => setSelectedSpecialty(value === ALL_SPECIALTIES_VALUE ? '' : value)}
+              >
                 <SelectTrigger>
                   <div className="flex items-center gap-2">
                     <Stethoscope className="h-4 w-4 text-gray-400" />
@@ -144,7 +153,7 @@ export default function DoctorsCompactList() {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sve specijalnosti</SelectItem>
+                  <SelectItem value={ALL_SPECIALTIES_VALUE}>Sve specijalnosti</SelectItem>
                   {specialties.map((specialty) => (
                     <SelectItem key={specialty.id} value={specialty.naziv}>
                       {specialty.naziv}
