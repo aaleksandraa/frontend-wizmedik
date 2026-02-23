@@ -335,7 +335,7 @@ export default function Mkb10() {
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://wizmedik.com/mkb-10" />
+        <meta property="og:url" content="https://wizmedik.com/mkb10" />
         <meta property="og:title" content="MKB-10 Šifarnik bolesti | Međunarodna klasifikacija bolesti" />
         <meta property="og:description" content="Kompletna MKB-10 klasifikacija bolesti na srpskom jeziku. Pretražujte preko 14.000 dijagnoza po šifri ili nazivu." />
         <meta property="og:image" content="https://wizmedik.com/images/mkb10-og.jpg" />
@@ -346,7 +346,7 @@ export default function Mkb10() {
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content="https://wizmedik.com/mkb-10" />
+        <meta name="twitter:url" content="https://wizmedik.com/mkb10" />
         <meta name="twitter:title" content="MKB-10 Šifarnik bolesti | Međunarodna klasifikacija bolesti" />
         <meta name="twitter:description" content="Kompletna MKB-10 klasifikacija bolesti na srpskom jeziku. Pretražujte preko 14.000 dijagnoza." />
         <meta name="twitter:image" content="https://wizmedik.com/images/mkb10-twitter.jpg" />

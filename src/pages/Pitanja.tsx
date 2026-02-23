@@ -13,6 +13,9 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { MessageSquare, Search, Plus, CheckCircle2, Clock, ChevronRight, Calendar, ChevronDown } from 'lucide-react';
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
 export default function Pitanja() {
   const [pitanja, setPitanja] = useState<any[]>([]);
   const [specijalnosti, setSpecijalnosti] = useState<any[]>([]);
@@ -80,6 +83,26 @@ export default function Pitanja() {
   };
 
   const MJESECI = ['januar', 'februar', 'mart', 'april', 'maj', 'juni', 'juli', 'august', 'septembar', 'oktobar', 'novembar', 'decembar'];
+  const canonicalUrl = `${SITE_URL}/pitanja`;
+  const seoTitle = 'Medicinska pitanja i odgovori | WizMedik';
+  const seoDescription = 'Postavite medicinsko pitanje i procitajte javne odgovore verifikovanih doktora u Bosni i Hercegovini.';
+
+  const itemListSchema = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: seoTitle,
+    description: seoDescription,
+    url: canonicalUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: pitanja.slice(0, 20).map((pitanje, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: pitanje.naslov,
+        url: `${SITE_URL}/pitanja/${pitanje.slug}`,
+      })),
+    },
+  }), [canonicalUrl, pitanja, seoDescription, seoTitle]);
 
   const formatDatum = (datum: string) => {
     const date = new Date(datum);
@@ -95,8 +118,20 @@ export default function Pitanja() {
   return (
     <>
       <Helmet>
-        <title>Medicinska Pitanja i Odgovori - WizMedik</title>
-        <meta name="description" content="Pregledajte medicinska pitanja i odgovore od stručnih doktora" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        <script type="application/ld+json">{JSON.stringify(itemListSchema)}</script>
       </Helmet>
       <Navbar />
       

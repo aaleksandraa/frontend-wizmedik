@@ -157,6 +157,8 @@ export default function PostaviPitanje() {
         <title>Postavi Pitanje - WizMedik</title>
         <meta name="description" content="Postavite medicinsko pitanje i dobijte odgovor od stručnih doktora u Bosni i Hercegovini" />
         <meta name="keywords" content="medicinsko pitanje, zdravstveni savjet, doktor online, besplatno pitanje" />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href="https://wizmedik.com/postavi-pitanje" />
       </Helmet>
 
       <Navbar />

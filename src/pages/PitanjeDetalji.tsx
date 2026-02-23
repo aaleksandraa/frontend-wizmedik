@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'sonner';
@@ -16,6 +16,9 @@ import {
   User, Stethoscope, MapPin, Clock, Send 
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
+
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
 
 export default function PitanjeDetalji() {
   const { slug } = useParams<{ slug: string }>();
@@ -107,6 +110,64 @@ export default function PitanjeDetalji() {
   const hasMatchingSpecialty = isDoctor && doctorProfile?.specijalnosti?.some(
     (spec: any) => spec.id === pitanje?.specijalnost_id
   );
+  const canonicalUrl = `${SITE_URL}/pitanja/${slug || ''}`;
+  const seoTitle = pitanje ? `${pitanje.naslov} | Medicinska pitanja | WizMedik` : 'Medicinsko pitanje | WizMedik';
+
+  const plainQuestionText = useMemo(() => {
+    const content = pitanje?.sadrzaj || '';
+    return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }, [pitanje?.sadrzaj]);
+
+  const seoDescription = plainQuestionText
+    ? plainQuestionText.slice(0, 160)
+    : 'Javno medicinsko pitanje i odgovori verifikovanih doktora.';
+
+  const qaSchema = useMemo(() => {
+    if (!pitanje) return null;
+
+    const answers = Array.isArray(pitanje.odgovori) ? pitanje.odgovori : [];
+    const accepted = answers.find((odg: any) => odg.je_prihvacen);
+    const suggestedAnswers = answers.map((odg: any) => ({
+      '@type': 'Answer',
+      text: (odg.sadrzaj || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
+      dateCreated: odg.created_at,
+      upvoteCount: odg.broj_lajkova || 0,
+      author: {
+        '@type': 'Person',
+        name: `Dr. ${odg.doktor?.user?.ime || ''} ${odg.doktor?.user?.prezime || ''}`.trim(),
+      },
+    }));
+
+    const questionEntity: Record<string, any> = {
+      '@type': 'Question',
+      name: pitanje.naslov,
+      text: plainQuestionText,
+      dateCreated: pitanje.created_at,
+      answerCount: answers.length,
+      url: canonicalUrl,
+      about: pitanje.specijalnost?.naziv || undefined,
+      suggestedAnswer: suggestedAnswers,
+    };
+
+    if (accepted) {
+      questionEntity.acceptedAnswer = {
+        '@type': 'Answer',
+        text: (accepted.sadrzaj || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
+        dateCreated: accepted.created_at,
+        upvoteCount: accepted.broj_lajkova || 0,
+        author: {
+          '@type': 'Person',
+          name: `Dr. ${accepted.doktor?.user?.ime || ''} ${accepted.doktor?.user?.prezime || ''}`.trim(),
+        },
+      };
+    }
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'QAPage',
+      mainEntity: questionEntity,
+    };
+  }, [canonicalUrl, plainQuestionText, pitanje]);
 
   if (loading) {
     return (
@@ -127,9 +188,23 @@ export default function PitanjeDetalji() {
   return (
     <>
       <Helmet>
-        <title>{pitanje.naslov} - WizMedik</title>
-        <meta name="description" content={pitanje.sadrzaj.substring(0, 160)} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <meta name="keywords" content={pitanje.tagovi?.join(', ')} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        {qaSchema && (
+          <script type="application/ld+json">{JSON.stringify(qaSchema)}</script>
+        )}
       </Helmet>
 
       <Navbar />
@@ -222,7 +297,7 @@ export default function PitanjeDetalji() {
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <Link 
-                              to={`/doctors/${odg.doktor?.slug}`}
+                              to={`/doktor/${odg.doktor?.slug}`}
                               className="font-semibold hover:text-primary"
                             >
                               Dr. {odg.doktor?.user?.ime} {odg.doktor?.user?.prezime}
@@ -282,12 +357,12 @@ export default function PitanjeDetalji() {
 
                         <div className="flex gap-2">
                           <Button asChild variant="outline" size="sm">
-                            <Link to={`/doctors/${odg.doktor?.slug}`}>
+                            <Link to={`/doktor/${odg.doktor?.slug}`}>
                               Otvori Profil
                             </Link>
                           </Button>
                           <Button asChild size="sm">
-                            <Link to={`/doctors/${odg.doktor?.slug}#booking`}>
+                            <Link to={`/doktor/${odg.doktor?.slug}#booking`}>
                               Rezerviši Termin
                             </Link>
                           </Button>
