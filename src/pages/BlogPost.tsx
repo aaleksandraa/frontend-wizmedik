@@ -133,7 +133,7 @@ export default function BlogPost() {
     "@type": "BlogPosting",
     "headline": post.naslov,
     "description": post.meta_description || post.excerpt,
-    "image": post.thumbnail,
+    "image": fixImageUrl(post.thumbnail) || 'https://wizmedik.com/wizmedik-logo.png',
     "author": {
       "@type": post.doktor ? "Physician" : "Organization",
       "name": post.autor_name,
@@ -148,20 +148,27 @@ export default function BlogPost() {
     "mainEntityOfPage": { "@type": "WebPage", "@id": `https://wizmedik.com/blog/${post.slug}` }
   };
 
+  const canonicalUrl = `https://wizmedik.com/blog/${post.slug}`;
+  const ogImage = fixImageUrl(post.thumbnail) || 'https://wizmedik.com/wizmedik-logo.png';
+
   return (
     <>
       <Helmet>
         <title>{post.meta_title || post.naslov} | WizMedik Blog</title>
         <meta name="description" content={post.meta_description || post.excerpt} />
         {post.meta_keywords && <meta name="keywords" content={post.meta_keywords} />}
-        <link rel="canonical" href={`https://wizmedik.com/blog/${post.slug}`} />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={post.naslov} />
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://wizmedik.com/blog/${post.slug}`} />
-        {post.thumbnail && <meta property="og:image" content={fixImageUrl(post.thumbnail) || ''} />}
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
         <meta property="article:published_time" content={post.published_at} />
         <meta property="article:author" content={post.autor_name} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post.meta_title || post.naslov} />
+        <meta name="twitter:description" content={post.meta_description || post.excerpt} />
+        <meta name="twitter:image" content={ogImage} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 

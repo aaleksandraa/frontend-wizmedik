@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useParams, Link } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Filter, MapPin, Shield, Activity, Users, Home as HomeIcon, X, ChevronRight, Phone, Star, CheckCircle, BookOpen, List } from 'lucide-react';
 import { useAllCities } from '@/hooks/useAllCities';
@@ -14,6 +14,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const slugifySegment = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
 
 interface Dom {
   id: number;
@@ -82,6 +96,8 @@ interface FilterOptions {
 export default function CareHomes() {
   const { grad } = useParams<{ grad?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { cities: allCities } = useAllCities(); // Get all cities from database
   const [domovi, setDomovi] = useState<Dom[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
@@ -93,11 +109,11 @@ export default function CareHomes() {
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [gradInput, setGradInput] = useState(() => {
     const gradParam = grad || searchParams.get('grad') || '';
-    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')).replace(/-/g, ' ') : '';
   });
   const [selectedGrad, setSelectedGrad] = useState(() => {
     const gradParam = grad || searchParams.get('grad') || '';
-    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')).replace(/-/g, ' ') : '';
   });
   const [selectedTipDoma, setSelectedTipDoma] = useState(searchParams.get('tip_doma') || '');
   const [selectedNivoNjege, setSelectedNivoNjege] = useState(searchParams.get('nivo_njege') || '');
@@ -114,6 +130,19 @@ export default function CareHomes() {
     );
   }, [allCities, gradInput]);
 
+  const resolveCityNameFromSlug = (cityValue: string) => {
+    const decoded = decodeURIComponent(cityValue.replace(/\+/g, ' '));
+    const matched = allCities.find((city) =>
+      city.slug === decoded || city.naziv.toLowerCase() === decoded.toLowerCase()
+    );
+
+    if (matched?.naziv) {
+      return matched.naziv;
+    }
+
+    return decoded.replace(/-/g, ' ').trim();
+  };
+
   const [showGradSuggestions, setShowGradSuggestions] = useState(false);
 
   useEffect(() => {
@@ -127,11 +156,11 @@ export default function CareHomes() {
   // Update filters when URL path param changes
   useEffect(() => {
     if (grad) {
-      const decodedGrad = decodeURIComponent(grad.replace(/\+/g, ' '));
-      setGradInput(decodedGrad);
-      setSelectedGrad(decodedGrad);
+      const cityName = resolveCityNameFromSlug(grad);
+      setGradInput(cityName);
+      setSelectedGrad(cityName);
     }
-  }, [grad]);
+  }, [grad, allCities]);
 
   // Set gradInput when selectedGrad is loaded from URL
   useEffect(() => {
@@ -170,7 +199,12 @@ export default function CareHomes() {
       }
       
       // Update URL
-      setSearchParams(params);
+      const urlParams = new URLSearchParams(params);
+      const hasNonCityFilters = !!search || !!selectedTipDoma || !!selectedNivoNjege || selectedProgrami.length > 0;
+      if (!hasNonCityFilters) {
+        urlParams.delete('grad');
+      }
+      setSearchParams(urlParams, { replace: true });
     } catch (error) {
       console.error('Error fetching domovi:', error);
     } finally {
@@ -241,7 +275,7 @@ export default function CareHomes() {
 
   // SEO: Structured Data for listing page
   const structuredData = useMemo(() => {
-    const baseUrl = window.location.origin;
+    const baseUrl = SITE_URL;
     
     // Main WebPage schema
     const webPageSchema = {
@@ -249,7 +283,7 @@ export default function CareHomes() {
       "@type": "CollectionPage",
       "name": seoTitle,
       "description": seoDescription,
-      "url": window.location.href,
+      "url": `${SITE_URL}/domovi-njega`,
       "mainEntity": {
         "@type": "ItemList",
         "itemListElement": domovi.slice(0, 10).map((dom, index) => ({
@@ -343,41 +377,98 @@ export default function CareHomes() {
     return [webPageSchema, faqSchema];
   }, [domovi, seoTitle, seoDescription]);
 
+  const selectedGradSlug = useMemo(() => {
+    if (!selectedGrad) {
+      return '';
+    }
+
+    const matched = allCities.find((city) =>
+      city.naziv.toLowerCase() === selectedGrad.toLowerCase() ||
+      city.slug === selectedGrad.toLowerCase()
+    );
+
+    if (matched?.slug) {
+      return matched.slug;
+    }
+
+    return slugifySegment(selectedGrad);
+  }, [allCities, selectedGrad]);
+
+  const onlyCityFilter = useMemo(
+    () =>
+      !!selectedGradSlug &&
+      !selectedTipDoma &&
+      !selectedNivoNjege &&
+      selectedProgrami.length === 0 &&
+      !search,
+    [search, selectedGradSlug, selectedNivoNjege, selectedProgrami, selectedTipDoma]
+  );
+
+  useEffect(() => {
+    // Legacy query links: /domovi-njega?grad=... -> /domovi-njega/{slug}
+    if (location.pathname === '/domovi-njega' && onlyCityFilter && selectedGradSlug) {
+      navigate(`/domovi-njega/${selectedGradSlug}`, { replace: true });
+      return;
+    }
+
+    // If city is cleared while on /domovi-njega/{grad}, return to base listing.
+    if (location.pathname.startsWith('/domovi-njega/') && !selectedGrad) {
+      navigate('/domovi-njega', { replace: true });
+    }
+  }, [location.pathname, navigate, onlyCityFilter, selectedGrad, selectedGradSlug]);
+
   // SEO: Canonical URL
   const canonicalUrl = useMemo(() => {
-    const baseUrl = `${window.location.origin}/domovi-njega`;
-    const params = new URLSearchParams();
-    if (selectedGrad) params.set('grad', selectedGrad);
-    if (selectedTipDoma) params.set('tip_doma', selectedTipDoma);
-    if (selectedNivoNjege) params.set('nivo_njege', selectedNivoNjege);
-    const queryString = params.toString();
-    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
-  }, [selectedGrad, selectedTipDoma, selectedNivoNjege]);
+    if (onlyCityFilter) {
+      return `${SITE_URL}/domovi-njega/${selectedGradSlug}`;
+    }
+
+    return `${SITE_URL}/domovi-njega`;
+  }, [onlyCityFilter, selectedGradSlug]);
+
+  const robotsContent = useMemo(() => {
+    if (onlyCityFilter) {
+      return 'index, follow';
+    }
+
+    const hasFacetedFilters =
+      !!search ||
+      !!selectedTipDoma ||
+      !!selectedNivoNjege ||
+      selectedProgrami.length > 0;
+    if (hasFacetedFilters) {
+      return 'noindex, follow';
+    }
+
+    return selectedGrad ? 'noindex, follow' : 'index, follow';
+  }, [onlyCityFilter, search, selectedGrad, selectedNivoNjege, selectedProgrami, selectedTipDoma]);
 
   return (
     <>
       <Helmet>
-        <title>{pageTitle} | WizMedik</title>
-        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
-        <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, staracki dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontološki centar, smještaj starijih osoba`} />
-        
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`domovi za starije ${selectedGrad || 'BiH'}, dom za njegu, staracki dom, njega starijih osoba, dom za bolesne, palijativna njega, demencija njega, alzheimer dom, gerontoloski centar, smjestaj starijih osoba`} />
+
         {/* Open Graph */}
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:site_name" content="WizMedik" />
         <meta property="og:locale" content="bs_BA" />
-        <meta property="og:image" content={`${window.location.origin}/og-domovi-njega.jpg`} />
-        
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
-        
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+
         {/* Canonical */}
         <link rel="canonical" href={canonicalUrl} />
-        
+        <meta name="robots" content={robotsContent} />
+
         {/* Structured Data */}
         {structuredData.map((schema, index) => (
           <script key={index} type="application/ld+json">
@@ -885,3 +976,4 @@ export default function CareHomes() {
     </>
   );
 }
+

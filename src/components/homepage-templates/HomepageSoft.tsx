@@ -116,23 +116,34 @@ export function HomepageSoft() {
   };
 
   const handleSearch = () => {
-    let url = '';
-    
     if (activeTab === 'doktori') {
-      url = '/doktori';
-      const params = new URLSearchParams();
-      if (selectedCity) params.append('grad', selectedCity);
-      if (selectedSpecialty) params.append('specijalnost', selectedSpecialty);
-      if (params.toString()) url += '?' + params.toString();
-    } else if (activeTab === 'klinike') {
-      url = '/klinike';
-      if (selectedCity) url += '?grad=' + selectedCity;
-    } else if (activeTab === 'laboratoriji') {
-      url = '/laboratorije';
-      if (selectedCity) url += '?grad=' + selectedCity;
+      if (selectedCity && selectedSpecialty) {
+        navigate(`/doktori/${selectedCity}/${selectedSpecialty}`);
+        return;
+      }
+      if (selectedSpecialty) {
+        navigate(`/doktori/specijalnost/${selectedSpecialty}`);
+        return;
+      }
+      if (selectedCity) {
+        navigate(`/doktori/${selectedCity}`);
+        return;
+      }
+      navigate('/doktori');
+      return;
     }
-    
-    navigate(url);
+
+    if (activeTab === 'klinike') {
+      navigate(selectedCity ? `/klinike/${selectedCity}` : '/klinike');
+      return;
+    }
+
+    if (activeTab === 'laboratoriji') {
+      navigate(selectedCity ? `/laboratorije/${selectedCity}` : '/laboratorije');
+      return;
+    }
+
+    navigate('/doktori');
   };
 
   return (

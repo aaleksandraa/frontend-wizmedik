@@ -137,10 +137,13 @@ export default function Auth() {
         return <Navigate to="/clinic-dashboard" replace />;
       case 'laboratory':
         return <Navigate to="/laboratory-dashboard" replace />;
+      case 'spa':
       case 'spa_manager':
         return <Navigate to="/spa-dashboard" replace />;
+      case 'care_home':
+      case 'dom_manager':
       case 'care_home_manager':
-        return <Navigate to="/care-home-dashboard" replace />;
+        return <Navigate to="/dom-dashboard" replace />;
       default:
         return <Navigate to="/dashboard" replace />;
     }

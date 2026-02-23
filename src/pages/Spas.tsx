@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useParams, Link } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Search, Filter, MapPin, Droplet, Heart, Bed, Calendar, X, CheckCircle, HelpCircle, BookOpen, List } from 'lucide-react';
 import { spasAPI } from '@/services/api';
@@ -19,9 +19,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const slugifySegment = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
 export default function Spas() {
   const { grad } = useParams<{ grad?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { cities: allCities } = useAllCities(); // Get all cities from database
   const [banje, setBanje] = useState<Banja[]>([]);
   const [vrste, setVrste] = useState<VrstaBanje[]>([]);
@@ -30,7 +46,7 @@ export default function Spas() {
   const [showFilters, setShowFilters] = useState(false);
   const [gradInput, setGradInput] = useState(() => {
     const gradParam = grad || searchParams.get('grad') || '';
-    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')).replace(/-/g, ' ') : '';
   });
   const [showGradSuggestions, setShowGradSuggestions] = useState(false);
   
@@ -38,7 +54,7 @@ export default function Spas() {
     search: searchParams.get('search') || '',
     grad: (() => {
       const gradParam = grad || searchParams.get('grad') || '';
-      return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
+      return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')).replace(/-/g, ' ') : '';
     })(),
     vrsta_id: searchParams.get('vrsta_id') ? Number(searchParams.get('vrsta_id')) : undefined,
     indikacija_id: searchParams.get('indikacija_id') ? Number(searchParams.get('indikacija_id')) : undefined,
@@ -60,11 +76,11 @@ export default function Spas() {
   // Update filters when URL path param changes
   useEffect(() => {
     if (grad) {
-      const decodedGrad = decodeURIComponent(grad.replace(/\+/g, ' '));
-      setGradInput(decodedGrad);
-      updateFilters({ grad: decodedGrad });
+      const cityName = resolveCityNameFromSlug(grad);
+      setGradInput(cityName);
+      updateFilters({ grad: cityName });
     }
-  }, [grad]);
+  }, [grad, allCities]);
 
   // Set gradInput when filters.grad is loaded from URL
   useEffect(() => {
@@ -78,6 +94,19 @@ export default function Spas() {
     allCities.map(city => ({ grad: city.naziv, broj_banja: 0 })),
     [allCities]
   );
+
+  const resolveCityNameFromSlug = (cityValue: string) => {
+    const decoded = decodeURIComponent(cityValue.replace(/\+/g, ' '));
+    const matched = allCities.find((city) =>
+      city.slug === decoded || city.naziv.toLowerCase() === decoded.toLowerCase()
+    );
+
+    if (matched?.naziv) {
+      return matched.naziv;
+    }
+
+    return decoded.replace(/-/g, ' ').trim();
+  };
 
   const filteredGradovi = gradovi.filter(g => 
     g.grad.toLowerCase().includes(gradInput.toLowerCase())
@@ -146,11 +175,14 @@ export default function Spas() {
     // Update URL params
     const params = new URLSearchParams();
     Object.entries(updated).forEach(([key, value]) => {
+      if (key === 'grad') return;
+      if (key === 'sort_by' && value === 'naziv') return;
+      if (key === 'sort_order' && value === 'asc') return;
       if (value !== '' && value !== undefined && value !== false) {
         params.set(key, String(value));
       }
     });
-    setSearchParams(params);
+    setSearchParams(params, { replace: true });
   };
 
   const clearFilters = () => {
@@ -165,7 +197,7 @@ export default function Spas() {
       sort_by: 'naziv',
       sort_order: 'asc',
     });
-    setSearchParams({});
+    setSearchParams({}, { replace: true });
   };
 
   const activeFiltersCount = [
@@ -186,11 +218,120 @@ export default function Spas() {
     return title;
   }, [filters.grad]);
 
+  const seoDescription = useMemo(() => {
+    let desc = 'Pronadite banje i rehabilitacione centre u Bosni i Hercegovini';
+    if (filters.grad) desc += `, grad ${filters.grad}`;
+    desc += '. Uporedite terapije, smjestaj i kontakt informacije.';
+    return desc;
+  }, [filters.grad]);
+
+  const selectedGradSlug = useMemo(() => {
+    if (!filters.grad) {
+      return '';
+    }
+
+    const matched = allCities.find((city) =>
+      city.naziv.toLowerCase() === filters.grad!.toLowerCase() ||
+      city.slug === filters.grad!.toLowerCase()
+    );
+
+    if (matched?.slug) {
+      return matched.slug;
+    }
+
+    return slugifySegment(filters.grad);
+  }, [allCities, filters.grad]);
+
+  const onlyCityFilter = useMemo(
+    () =>
+      !!selectedGradSlug &&
+      !filters.search &&
+      !filters.vrsta_id &&
+      !filters.indikacija_id &&
+      !filters.medicinski_nadzor &&
+      !filters.ima_smjestaj &&
+      !filters.online_rezervacija,
+    [filters, selectedGradSlug]
+  );
+
+  useEffect(() => {
+    // Legacy query links: /banje?grad=... -> /banje/{slug}
+    if (location.pathname === '/banje' && onlyCityFilter && selectedGradSlug) {
+      navigate(`/banje/${selectedGradSlug}`, { replace: true });
+      return;
+    }
+
+    // If city filter is removed while on /banje/{grad}, return to base listing.
+    if (location.pathname.startsWith('/banje/') && !filters.grad) {
+      navigate('/banje', { replace: true });
+    }
+  }, [filters.grad, location.pathname, navigate, onlyCityFilter, selectedGradSlug]);
+
+  const canonicalUrl = useMemo(() => {
+    if (onlyCityFilter) {
+      return `${SITE_URL}/banje/${selectedGradSlug}`;
+    }
+
+    return `${SITE_URL}/banje`;
+  }, [onlyCityFilter, selectedGradSlug]);
+
+  const robotsContent = useMemo(() => {
+    if (onlyCityFilter) {
+      return 'index, follow';
+    }
+
+    const hasFacetedFilters =
+      !!filters.search ||
+      !!filters.vrsta_id ||
+      !!filters.indikacija_id ||
+      !!filters.medicinski_nadzor ||
+      !!filters.ima_smjestaj ||
+      !!filters.online_rezervacija;
+
+    return hasFacetedFilters ? 'noindex, follow' : 'index, follow';
+  }, [filters, onlyCityFilter]);
+
+  const structuredData = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: filters.grad ? `Banje - ${filters.grad}` : 'Banje u Bosni i Hercegovini',
+    description: seoDescription,
+    numberOfItems: banje.length,
+    itemListElement: banje.slice(0, 20).map((banja, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'MedicalClinic',
+        name: banja.naziv,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: banja.adresa,
+          addressLocality: banja.grad,
+          addressCountry: 'BA',
+        },
+        url: `${SITE_URL}/banja/${banja.slug}`,
+      },
+    })),
+  }), [banje, filters.grad, seoDescription]);
+
   return (
     <>
       <Helmet>
         <title>{pageTitle} | WizMedik</title>
-        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`banje bih, rehabilitacija, banjsko lijecenje, ${filters.grad || 'bosna i hercegovina'}`} />
+        <meta property="og:title" content={`${pageTitle} | WizMedik`} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${pageTitle} | WizMedik`} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="robots" content={robotsContent} />
+        <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
       <Navbar />
@@ -702,3 +843,4 @@ export default function Spas() {
     </>
   );
 }
+

@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Phone, Star, Clock, Calendar, MessageSquare, Award, Building2, Briefcase, FileText, ArrowDown, Video } from 'lucide-react';
+import { MapPin, Phone, Star, Clock, Calendar, MessageSquare, Award, Building2, Briefcase, FileText, ArrowDown, Video, Mail } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { BookAppointmentForm } from '@/components/BookAppointmentForm';
 import { GuestBookingDialog } from '@/components/GuestBookingDialog';
@@ -31,6 +31,7 @@ interface Doctor {
   user_id?: number;
   ime: string;
   prezime: string;
+  slug?: string;
   specijalnost: string;
   telefon: string;
   email?: string;
@@ -64,6 +65,9 @@ interface Doctor {
   }>;
 }
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
 // Helper function to extract YouTube video ID from URL
 const getYouTubeVideoId = (url: string): string | null => {
   const patterns = [
@@ -78,6 +82,12 @@ const getYouTubeVideoId = (url: string): string | null => {
     }
   }
   return null;
+};
+
+const toAbsoluteUrl = (url?: string | null): string => {
+  if (!url) return DEFAULT_OG_IMAGE;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 interface RatingStats {
@@ -445,12 +455,18 @@ export default function DoctorProfile() {
     );
   }
 
+  const profileSlug = doctor.slug || slug || '';
+  const canonicalUrl = `${SITE_URL}/doktor/${profileSlug}`;
+  const ogImage = toAbsoluteUrl(doctor.slika_profila);
+  const seoDescription = `${doctor.opis || `${doctor.specijalnost} u ${doctor.grad}u`}`.slice(0, 160);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Physician",
     "name": `Dr. ${doctor.ime} ${doctor.prezime}`,
     "medicalSpecialty": doctor.specijalnost,
     "telephone": doctor.telefon,
+    "email": doctor.public_email || doctor.email || undefined,
     "address": {
       "@type": "PostalAddress",
       "streetAddress": doctor.lokacija,
@@ -464,8 +480,9 @@ export default function DoctorProfile() {
       "bestRating": "5",
       "worstRating": "1"
     } : undefined,
-    "url": window.location.href,
-    "description": doctor.opis || `${doctor.specijalnost} u ${doctor.grad}u`
+    "url": canonicalUrl,
+    "image": ogImage,
+    "description": seoDescription
   };
 
   // Non-classic templates
@@ -475,7 +492,21 @@ export default function DoctorProfile() {
         <Navbar />
         <Helmet>
           <title>Dr. {doctor.ime} {doctor.prezime} - {doctor.specijalnost} {doctor.grad} | WizMedik</title>
-          <meta name="description" content={`Dr. ${doctor.ime} ${doctor.prezime}, ${doctor.specijalnost} u ${doctor.grad}u.`} />
+          <meta name="description" content={seoDescription} />
+          <meta name="keywords" content={`${doctor.specijalnost} ${doctor.grad}, doktor ${doctor.grad}, ${doctor.specijalnost.toLowerCase()}, online zakazivanje, wizmedik`} />
+          <link rel="canonical" href={canonicalUrl} />
+          <meta property="og:title" content={`Dr. ${doctor.ime} ${doctor.prezime} - ${doctor.specijalnost}`} />
+          <meta property="og:description" content={seoDescription} />
+          <meta property="og:type" content="profile" />
+          <meta property="og:url" content={canonicalUrl} />
+          <meta property="og:image" content={ogImage} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`Dr. ${doctor.ime} ${doctor.prezime} - ${doctor.specijalnost}`} />
+          <meta name="twitter:description" content={seoDescription} />
+          <meta name="twitter:image" content={ogImage} />
+          <script type="application/ld+json">
+            {JSON.stringify(structuredData)}
+          </script>
         </Helmet>
         <DoctorTemplate
           template={doctorTemplate as DoctorTemplateType}
@@ -550,12 +581,18 @@ export default function DoctorProfile() {
       <Navbar />
       <Helmet>
         <title>Dr. {doctor.ime} {doctor.prezime} - {doctor.specijalnost} {doctor.grad} | WizMedik</title>
-        <meta name="description" content={`Dr. ${doctor.ime} ${doctor.prezime}, ${doctor.specijalnost} u ${doctor.grad}u. ${doctor.opis || 'Iskusan stručnjak sa dugogodišnjim iskustvom.'} Zakažite termin online.`} />
+        <meta name="description" content={seoDescription} />
         <meta name="keywords" content={`${doctor.specijalnost} ${doctor.grad}, doktor ${doctor.grad}, ${doctor.specijalnost.toLowerCase()}, zdravstvo ${doctor.grad}, ${doctor.ime} ${doctor.prezime}`} />
         <meta property="og:title" content={`Dr. ${doctor.ime} ${doctor.prezime} - ${doctor.specijalnost}`} />
-        <meta property="og:description" content={doctor.opis || `${doctor.specijalnost} u ${doctor.grad}u`} />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="profile" />
-        <link rel="canonical" href={window.location.href} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Dr. ${doctor.ime} ${doctor.prezime} - ${doctor.specijalnost}`} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <link rel="canonical" href={canonicalUrl} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
@@ -631,6 +668,17 @@ export default function DoctorProfile() {
                           <Phone className="w-5 h-5 text-primary" />
                           <span>{doctor.telefon}</span>
                         </div>
+                        {(doctor.public_email || doctor.email) && (
+                          <div className="flex items-center gap-3">
+                            <Mail className="w-5 h-5 text-primary" />
+                            <a
+                              href={`mailto:${doctor.public_email || doctor.email}`}
+                              className="text-primary hover:underline"
+                            >
+                              {doctor.public_email || doctor.email}
+                            </a>
+                          </div>
+                        )}
                         <div className="flex items-center gap-3">
                           <MapPin className="w-5 h-5 text-primary" />
                           <span>{doctor.lokacija}, {doctor.grad}</span>

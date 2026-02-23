@@ -24,6 +24,9 @@ import { ImageLightbox } from '@/components/ImageLightbox';
 import { LocationMapCard } from '@/components/LocationMapCard';
 import { toast } from 'sonner';
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
 export default function SpaProfile() {
   const { slug } = useParams<{ slug: string }>();
   const [banja, setBanja] = useState<Banja | null>(null);
@@ -167,12 +170,54 @@ export default function SpaProfile() {
     );
   }
 
+  const canonicalUrl = `${SITE_URL}/banja/${banja.slug}`;
+  const seoTitle = banja.meta_title || `${banja.naziv} - Banja i rehabilitacija | WizMedik`;
+  const seoDescription = `${banja.meta_description || banja.opis || `${banja.naziv} u ${banja.grad}u`}`.slice(0, 160);
+  const normalizedOgImage = normalizeImageUrl(banja.featured_slika || '');
+  const ogImage = normalizedOgImage
+    ? (normalizedOgImage.startsWith('http') ? normalizedOgImage : `${SITE_URL}${normalizedOgImage.startsWith('/') ? '' : '/'}${normalizedOgImage}`)
+    : DEFAULT_OG_IMAGE;
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalClinic',
+    name: banja.naziv,
+    description: banja.opis || undefined,
+    url: canonicalUrl,
+    image: ogImage,
+    telephone: banja.telefon || undefined,
+    email: banja.email || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: banja.adresa,
+      addressLocality: banja.grad,
+      addressCountry: 'BA',
+    },
+    aggregateRating: banja.prosjecna_ocjena > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: parseFloat(Number(banja.prosjecna_ocjena).toFixed(1)),
+      reviewCount: banja.broj_recenzija || 0,
+      bestRating: 5,
+      worstRating: 1,
+    } : undefined,
+  };
+
   return (
     <>
       <Helmet>
-        <title>{banja.meta_title || `${banja.naziv} - Banje i Rehabilitacija`}</title>
-        <meta name="description" content={banja.meta_description || banja.opis} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
         {banja.meta_keywords && <meta name="keywords" content={banja.meta_keywords} />}
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
       <Navbar />

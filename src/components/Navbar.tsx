@@ -153,7 +153,8 @@ export function Navbar() {
     if (user.role === 'doctor') return '/doctor-dashboard';
     if (user.role === 'clinic') return '/clinic-dashboard';
     if (user.role === 'laboratory') return '/laboratory-dashboard';
-    if (user.role === 'spa_manager') return '/spa-dashboard';
+    if (user.role === 'spa_manager' || user.role === 'spa') return '/spa-dashboard';
+    if (user.role === 'dom_manager' || user.role === 'care_home_manager' || user.role === 'care_home') return '/dom-dashboard';
     return '/dashboard';
   }, [user]);
 
@@ -163,7 +164,8 @@ export function Navbar() {
     if (user.role === 'doctor') return 'Doktor Dashboard';
     if (user.role === 'clinic') return 'Klinika Dashboard';
     if (user.role === 'laboratory') return 'Laboratorija Dashboard';
-    if (user.role === 'spa_manager') return 'Banja Dashboard';
+    if (user.role === 'spa_manager' || user.role === 'spa') return 'Banja Dashboard';
+    if (user.role === 'dom_manager' || user.role === 'care_home_manager' || user.role === 'care_home') return 'Dom Dashboard';
     return 'Moj Dashboard';
   }, [user]);
 
@@ -173,7 +175,8 @@ export function Navbar() {
     if (user.role === 'doctor') return <Stethoscope className="w-4 h-4" />;
     if (user.role === 'clinic') return <Building2 className="w-4 h-4" />;
     if (user.role === 'laboratory') return <FlaskConical className="w-4 h-4" />;
-    if (user.role === 'spa_manager') return <Droplet className="w-4 h-4" />;
+    if (user.role === 'spa_manager' || user.role === 'spa') return <Droplet className="w-4 h-4" />;
+    if (user.role === 'dom_manager' || user.role === 'care_home_manager' || user.role === 'care_home') return <Home className="w-4 h-4" />;
     return <LayoutDashboard className="w-4 h-4" />;
   }, [user]);
 

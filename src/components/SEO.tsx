@@ -254,7 +254,7 @@ export const createSearchActionSchema = () => ({
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: 'https://wizmedik.com/doktori?search={search_term_string}',
+      urlTemplate: 'https://wizmedik.com/doktori?pretraga={search_term_string}',
     },
     'query-input': 'required name=search_term_string',
   },

@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'doctor' | 'clinic' | 'patient' | 'laboratory' | 'spa_manager' | 'dom_manager';
-  allowedRoles?: Array<'admin' | 'doctor' | 'clinic' | 'patient' | 'laboratory' | 'spa_manager' | 'dom_manager'>;
+  requiredRole?: 'admin' | 'doctor' | 'clinic' | 'patient' | 'laboratory' | 'spa' | 'spa_manager' | 'care_home' | 'care_home_manager' | 'dom_manager';
+  allowedRoles?: Array<'admin' | 'doctor' | 'clinic' | 'patient' | 'laboratory' | 'spa' | 'spa_manager' | 'care_home' | 'care_home_manager' | 'dom_manager'>;
 }
 
 export function ProtectedRoute({ children, requiredRole, allowedRoles }: ProtectedRouteProps) {

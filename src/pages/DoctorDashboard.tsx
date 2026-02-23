@@ -250,6 +250,11 @@ export default function DoctorDashboard() {
 
   const [breaks, setBreaks] = useState<Array<{ od: string; do: string }>>([]);
   const [holidays, setHolidays] = useState<Array<{ od: string; do: string; razlog: string }>>([]);
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: '',
+  });
 
   useEffect(() => {
     if (user) checkDoctorStatus();
@@ -758,10 +763,16 @@ export default function DoctorDashboard() {
     if (profile.latitude) updateData.latitude = Number(profile.latitude);
     if (profile.longitude) updateData.longitude = Number(profile.longitude);
     if (profile.google_maps_link) updateData.google_maps_link = profile.google_maps_link;
+    if (passwordForm.current_password || passwordForm.new_password || passwordForm.new_password_confirmation) {
+      updateData.current_password = passwordForm.current_password;
+      updateData.new_password = passwordForm.new_password;
+      updateData.new_password_confirmation = passwordForm.new_password_confirmation;
+    }
 
     try {
       await doctorsAPI.updateProfile(updateData);
       await refreshUser().catch(() => undefined);
+      setPasswordForm({ current_password: '', new_password: '', new_password_confirmation: '' });
       toast({ title: "Uspjeh", description: "Profil ažuriran" });
       setEditingProfile(false);
       fetchDoctorProfile();
@@ -1729,7 +1740,15 @@ export default function DoctorDashboard() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Profil</CardTitle>
-                    <Button variant={editingProfile ? "secondary" : "outline"} onClick={() => setEditingProfile(!editingProfile)}>
+                    <Button
+                      variant={editingProfile ? "secondary" : "outline"}
+                      onClick={() => {
+                        if (editingProfile) {
+                          setPasswordForm({ current_password: '', new_password: '', new_password_confirmation: '' });
+                        }
+                        setEditingProfile(!editingProfile);
+                      }}
+                    >
                       {editingProfile ? 'Otkaži' : 'Uredi'}
                     </Button>
                   </div>
@@ -1829,6 +1848,41 @@ export default function DoctorDashboard() {
                             <p className="text-sm text-muted-foreground p-2">Niste povezani sa klinikom. Koristite "Pridruži se klinici" iznad.</p>
                           )}
                         </div>
+                      </div>
+                      <div className="space-y-3 rounded-lg border p-4">
+                        <Label className="text-sm font-semibold">Promjena lozinke (opcionalno)</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Trenutna lozinka</Label>
+                            <Input
+                              type="password"
+                              value={passwordForm.current_password}
+                              onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
+                              placeholder="Unesite trenutnu"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Nova lozinka</Label>
+                            <Input
+                              type="password"
+                              value={passwordForm.new_password}
+                              onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                              placeholder="Min 8 karaktera"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Potvrda nove lozinke</Label>
+                            <Input
+                              type="password"
+                              value={passwordForm.new_password_confirmation}
+                              onChange={(e) => setPasswordForm({ ...passwordForm, new_password_confirmation: e.target.value })}
+                              placeholder="Ponovite novu lozinku"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Lozinka se mijenja samo ako popunite sva 3 polja.
+                        </p>
                       </div>
                       <div>
                         <Label>Specijalnosti</Label>

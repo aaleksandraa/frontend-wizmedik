@@ -32,7 +32,7 @@ export function HomepageCards() {
   }, []);
 
   const handleSearch = () => {
-    if (searchQuery) navigate(`/doktori?pretraga=${searchQuery}`);
+    if (searchQuery) navigate(`/doktori?pretraga=${encodeURIComponent(searchQuery)}`);
   };
 
   return (

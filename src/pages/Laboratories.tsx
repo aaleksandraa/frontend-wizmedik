@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Link, useSearchParams, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAllCities } from '@/hooks/useAllCities';
 import { Navbar } from '@/components/Navbar';
@@ -65,11 +65,27 @@ interface KategorijaAnalize {
   aktivne_analize_count?: number;
 }
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const slugifySegment = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
 export default function Laboratories() {
   const { grad } = useParams<{ grad?: string }>();
   const { template } = useListingTemplate('laboratories');
   const { cities: allCities } = useAllCities(); // Get all cities from database
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const [laboratories, setLaboratories] = useState<Laboratory[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -82,7 +98,7 @@ export default function Laboratories() {
     // Ako je gradParam slug (sadrži crtice), pokušaj da nađeš pravi naziv
     if (gradParam.includes('-') || gradParam.includes('+')) {
       const decodedGrad = decodeURIComponent(gradParam.replace(/\+/g, ' '));
-      return decodedGrad;
+      return decodedGrad.replace(/-/g, ' ');
     }
     return gradParam;
   });
@@ -104,6 +120,19 @@ export default function Laboratories() {
     }));
   }, [allCities]);
 
+  const resolveCityNameFromSlug = useCallback((cityValue: string) => {
+    const decoded = decodeURIComponent(cityValue.replace(/\+/g, ' '));
+    const matched = allCities.find((city) =>
+      city.slug === decoded || city.naziv.toLowerCase() === decoded.toLowerCase()
+    );
+
+    if (matched?.naziv) {
+      return matched.naziv;
+    }
+
+    return decoded.replace(/-/g, ' ').trim();
+  }, [allCities]);
+
   // Load initial data (kategorije) - only once
   useEffect(() => {
     const loadInitialData = async () => {
@@ -120,9 +149,9 @@ export default function Laboratories() {
   // Update filter when URL param changes
   useEffect(() => {
     if (grad) {
-      setSelectedGrad(grad);
+      setSelectedGrad(resolveCityNameFromSlug(grad));
     }
-  }, [grad]);
+  }, [grad, resolveCityNameFromSlug]);
 
   // Load laboratories when filters change
   useEffect(() => {
@@ -146,8 +175,12 @@ export default function Laboratories() {
   // Update URL params when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    if (selectedGrad) params.set('grad', selectedGrad);
-    if (selectedKategorija) params.set('kategorija', selectedKategorija);
+    if (selectedKategorija) {
+      params.set('kategorija', selectedKategorija);
+      if (selectedGrad) {
+        params.set('grad', selectedGrad);
+      }
+    }
     setSearchParams(params, { replace: true });
   }, [selectedGrad, selectedKategorija, setSearchParams]);
 
@@ -203,6 +236,60 @@ export default function Laboratories() {
     return `${title} - wizMedik`;
   }, [selectedGrad, selectedKategorijaName]);
 
+  const selectedGradSlug = useMemo(() => {
+    if (!selectedGrad) {
+      return '';
+    }
+
+    const matched = allCities.find((city) =>
+      city.naziv.toLowerCase() === selectedGrad.toLowerCase() ||
+      city.slug === selectedGrad.toLowerCase()
+    );
+
+    if (matched?.slug) {
+      return matched.slug;
+    }
+
+    return slugifySegment(selectedGrad);
+  }, [allCities, selectedGrad]);
+
+  const onlyCityFilter = useMemo(
+    () => !!selectedGradSlug && !selectedKategorija && !searchTerm.trim(),
+    [searchTerm, selectedGradSlug, selectedKategorija]
+  );
+
+  // Normalize legacy query links to clean city path.
+  useEffect(() => {
+    if (location.pathname === '/laboratorije' && onlyCityFilter && selectedGradSlug) {
+      navigate(`/laboratorije/${selectedGradSlug}`, { replace: true });
+      return;
+    }
+
+    if (location.pathname.startsWith('/laboratorije/') && !selectedGrad) {
+      navigate('/laboratorije', { replace: true });
+    }
+  }, [location.pathname, navigate, onlyCityFilter, selectedGrad, selectedGradSlug]);
+
+  const canonicalUrl = useMemo(() => {
+    if (onlyCityFilter) {
+      return `${SITE_URL}/laboratorije/${selectedGradSlug}`;
+    }
+    return `${SITE_URL}/laboratorije`;
+  }, [onlyCityFilter, selectedGradSlug]);
+
+  const robotsContent = useMemo(() => {
+    if (onlyCityFilter) {
+      return 'index, follow';
+    }
+
+    const hasFacetedFilters = !!selectedKategorija || !!searchTerm.trim();
+    if (hasFacetedFilters) {
+      return 'noindex, follow';
+    }
+
+    return selectedGrad ? 'noindex, follow' : 'index, follow';
+  }, [onlyCityFilter, searchTerm, selectedGrad, selectedKategorija]);
+
   // JSON-LD structured data for SEO
   const jsonLd = useMemo(() => ({
     "@context": "https://schema.org",
@@ -223,7 +310,7 @@ export default function Laboratories() {
           "addressCountry": "BA"
         },
         "telephone": lab.telefon,
-        "url": `${window.location.origin}/laboratorija/${lab.slug}`,
+        "url": `${SITE_URL}/laboratorija/${lab.slug}`,
         ...(lab.ocjena > 0 && {
           "aggregateRating": {
             "@type": "AggregateRating",
@@ -241,11 +328,20 @@ export default function Laboratories() {
         <title>{pageTitle}</title>
         <meta name="description" content={metaDescription} />
         <meta name="keywords" content={`laboratorije, medicinske analize, ${selectedGrad || 'Bosna i Hercegovina'}, ${selectedKategorijaName || 'biohemija, hematologija, mikrobiologija'}`} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">
           {JSON.stringify(jsonLd)}
         </script>
-        <link rel="canonical" href={`${window.location.origin}/laboratorije${selectedGrad ? `?grad=${selectedGrad}` : ''}`} />
-        {selectedGrad && <meta name="robots" content="index, follow" />}
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content={robotsContent} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">

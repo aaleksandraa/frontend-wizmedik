@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { clinicsAPI, specialtiesAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
 import { Navbar } from '@/components/Navbar';
@@ -37,10 +37,25 @@ interface Clinic {
 }
 
 type SortOption = 'name' | 'rating' | 'distance';
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const slugifySegment = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
 
 export default function Clinics() {
   const { grad, specijalnost } = useParams<{ grad?: string; specijalnost?: string }>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { template } = useListingTemplate('clinics');
   const { cities: allCities } = useAllCities(); // Get all cities from database
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -57,7 +72,7 @@ export default function Clinics() {
   const [selectedSubSpecialties, setSelectedSubSpecialties] = useState<string[]>([]);
   const [specialties, setSpecialties] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
-  const [useLocation, setUseLocation] = useState(false);
+  const [useUserLocation, setUseUserLocation] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
@@ -135,7 +150,7 @@ export default function Clinics() {
         case 'rating':
           return (b.ocjena || 0) - (a.ocjena || 0);
         case 'distance':
-          if (!useLocation) return 0;
+          if (!useUserLocation) return 0;
           return (a.distance || 999) - (b.distance || 999);
         default:
           return 0;
@@ -143,7 +158,7 @@ export default function Clinics() {
     });
 
     setFilteredClinics(filtered);
-  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, calculateDistance]);
+  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useUserLocation, sortBy, calculateDistance]);
 
   const fetchClinics = async () => {
     try {
@@ -173,16 +188,61 @@ export default function Clinics() {
     fetchSpecialties();
   }, []);
 
+  // Normalize legacy query URLs to clean SEO routes.
+  useEffect(() => {
+    if (location.pathname !== '/klinike') {
+      return;
+    }
+
+    const gradQuery = searchParams.get('grad');
+    const specialtyQuery = searchParams.get('specijalnost');
+
+    if (!gradQuery && !specialtyQuery) {
+      return;
+    }
+
+    if (specialtyQuery && !gradQuery) {
+      navigate(`/klinike/specijalnost/${slugifySegment(specialtyQuery)}`, { replace: true });
+      return;
+    }
+
+    if (gradQuery) {
+      const decodedGrad = decodeURIComponent(gradQuery.replace(/\+/g, ' ')).replace(/-/g, ' ').trim();
+      const matched = allCities.find((city) =>
+        city.slug === decodedGrad.toLowerCase() ||
+        city.naziv.toLowerCase() === decodedGrad.toLowerCase()
+      );
+      const citySlug = matched?.slug || slugifySegment(decodedGrad);
+      if (citySlug) {
+        navigate(`/klinike/${citySlug}`, { replace: true });
+      }
+    }
+  }, [allCities, location.pathname, navigate, searchParams]);
+
+  const resolveCityNameFromSlug = useCallback((cityValue: string) => {
+    const decoded = decodeURIComponent(cityValue.replace(/\+/g, ' '));
+    const matched = allCities.find((city) =>
+      city.slug === decoded || city.naziv.toLowerCase() === decoded.toLowerCase()
+    );
+
+    if (matched?.naziv) {
+      return matched.naziv;
+    }
+
+    return decoded.replace(/-/g, ' ').trim();
+  }, [allCities]);
+
   // Update filters when URL params change
   useEffect(() => {
     if (grad) {
-      setSelectedCity(grad);
-      setCitySearch(grad);
+      const cityName = resolveCityNameFromSlug(grad);
+      setSelectedCity(cityName);
+      setCitySearch(cityName);
     }
     if (specijalnost) {
       setSelectedParentSpecialty(specijalnost);
     }
-  }, [grad, specijalnost]);
+  }, [grad, specijalnost, resolveCityNameFromSlug]);
 
   // Set citySearch when selectedCity is loaded from URL
   useEffect(() => {
@@ -219,9 +279,56 @@ export default function Clinics() {
     return title;
   }, [selectedCity]);
 
+  const selectedCitySlug = useMemo(() => {
+    if (!selectedCity) {
+      return '';
+    }
+
+    const matched = allCities.find((city) =>
+      city.naziv.toLowerCase() === selectedCity.toLowerCase() ||
+      city.slug === selectedCity.toLowerCase()
+    );
+
+    if (matched?.slug) {
+      return matched.slug;
+    }
+
+    return selectedCity.toLowerCase().trim().replace(/\s+/g, '-');
+  }, [allCities, selectedCity]);
+
+  const canonicalUrl = useMemo(() => {
+    const hasCityFilter = !!selectedCitySlug;
+    const hasSpecialtyFilter = !!selectedParentData?.slug;
+    const hasSubSpecialtyFilters = selectedSubSpecialties.length > 0;
+
+    if (hasCityFilter && !hasSpecialtyFilter && !hasSubSpecialtyFilters) {
+      return `${SITE_URL}/klinike/${selectedCitySlug}`;
+    }
+    if (!hasCityFilter && hasSpecialtyFilter && !hasSubSpecialtyFilters) {
+      return `${SITE_URL}/klinike/specijalnost/${selectedParentData.slug}`;
+    }
+
+    return `${SITE_URL}/klinike`;
+  }, [selectedCitySlug, selectedParentData, selectedSubSpecialties]);
+
+  const seoTitle = useMemo(() => {
+    let title = 'Klinike';
+    if (selectedParentData?.naziv) title += ` - ${selectedParentData.naziv}`;
+    if (selectedCity) title += ` u ${selectedCity}`;
+    return `${title} | WizMedik`;
+  }, [selectedCity, selectedParentData]);
+
+  const seoDescription = useMemo(() => {
+    let desc = 'Pronadite klinike i zdravstvene ustanove u Bosni i Hercegovini';
+    if (selectedParentData?.naziv) desc = `Pronadite klinike za ${selectedParentData.naziv.toLowerCase()} u Bosni i Hercegovini`;
+    if (selectedCity) desc += `, grad ${selectedCity}`;
+    desc += '. Uporedite profile, usluge i kontakt informacije.';
+    return desc;
+  }, [selectedCity, selectedParentData]);
+
   const toggleLocation = () => {
-    if (useLocation) {
-      setUseLocation(false);
+    if (useUserLocation) {
+      setUseUserLocation(false);
       setUserLocation(null);
       setSortBy('name');
     } else {
@@ -232,7 +339,7 @@ export default function Clinics() {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             });
-            setUseLocation(true);
+            setUseUserLocation(true);
             setSortBy('distance');
           },
           (error) => {
@@ -296,7 +403,7 @@ export default function Clinics() {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Privatne klinike u Bosni i Hercegovini",
-    "description": "Lista privatnih klinika i zdravstvenih ustanova u BiH",
+    "description": seoDescription,
     "numberOfItems": filteredClinics.length,
     "itemListElement": filteredClinics.slice(0, 10).map((clinic, index) => ({
       "@type": "ListItem",
@@ -313,13 +420,19 @@ export default function Clinics() {
   return (
     <>
       <Helmet>
-        <title>{pageTitle} | WizMedik</title>
-        <meta name="description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
-        <meta name="keywords" content="privatne klinike bih, klinika sarajevo, klinika banja luka, zdravstvene ustanove, poliklinika, medicinski centar" />
-        <link rel="canonical" href="https://wizmedik.com/klinike" />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content="Pregledajte profile, zakažite termin online ili kontaktirajte." />
-        <meta property="og:url" content="https://wizmedik.com/klinike" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`privatne klinike bih, klinika ${selectedCity || 'sarajevo'}, ${selectedParentData?.naziv || 'zdravstvene usluge'}, medicinski centar`} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       
@@ -442,11 +555,11 @@ export default function Clinics() {
             {/* Location Toggle */}
             <Button 
               onClick={toggleLocation}
-              variant={useLocation ? "default" : "outline"}
+              variant={useUserLocation ? "default" : "outline"}
               className="w-full lg:w-auto"
             >
-              <Navigation className={`h-4 w-4 mr-2 ${useLocation ? 'animate-pulse' : ''}`} />
-              {useLocation ? 'Lokacija uključena' : 'Blizu mene'}
+              <Navigation className={`h-4 w-4 mr-2 ${useUserLocation ? 'animate-pulse' : ''}`} />
+              {useUserLocation ? 'Lokacija uključena' : 'Blizu mene'}
             </Button>
           </div>
 
@@ -485,7 +598,7 @@ export default function Clinics() {
           <div className="flex items-center justify-between pt-4 border-t">
             <p className="text-sm text-muted-foreground">
               Pronađeno {filteredClinics.length} klinika
-              {useLocation && ' • Lokacija aktivna'}
+              {useUserLocation && ' • Lokacija aktivna'}
             </p>
             <div className="flex items-center gap-2">
               <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
@@ -496,7 +609,7 @@ export default function Clinics() {
                 <SelectContent>
                   <SelectItem value="name">Po nazivu</SelectItem>
                   <SelectItem value="rating">Po ocjeni</SelectItem>
-                  <SelectItem value="distance" disabled={!useLocation}>Po udaljenosti</SelectItem>
+                  <SelectItem value="distance" disabled={!useUserLocation}>Po udaljenosti</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -546,3 +659,4 @@ export default function Clinics() {
     </>
   );
 }
+

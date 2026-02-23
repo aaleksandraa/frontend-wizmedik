@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { blogAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
@@ -42,6 +42,9 @@ interface Author {
   posts_count: number;
 }
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
 export default function Blog() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -54,6 +57,7 @@ export default function Blog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const postsPerPage = 10;
+  const hasFilterParams = selectedCategory !== 'all' || selectedAuthor !== 'all';
 
   // Sync state with URL parameters when they change
   useEffect(() => {
@@ -164,15 +168,15 @@ export default function Blog() {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "WizMedik Blog - Zdravstveni savjeti",
-    "description": "Stručni zdravstveni savjeti od doktora u Bosni i Hercegovini",
-    "url": "https://wizmedik.com/blog",
+    "description": "Strucni zdravstveni savjeti od doktora u Bosni i Hercegovini",
+    "url": `${SITE_URL}/blog`,
     "blogPost": posts.slice(0, 5).map(post => ({
       "@type": "BlogPosting",
       "headline": post.naslov,
       "description": post.excerpt,
       "author": { "@type": "Person", "name": post.autor_name },
       "datePublished": post.published_at,
-      "url": `https://wizmedik.com/blog/${post.slug}`
+      "url": `${SITE_URL}/blog/${post.slug}`
     }))
   };
 
@@ -193,13 +197,19 @@ export default function Blog() {
     <>
       <Helmet>
         <title>Blog - Zdravstveni savjeti od doktora | wizMedik</title>
-        <meta name="description" content="Čitajte stručne zdravstvene savjete od doktora u BiH. Članci o prevenciji, liječenju i zdravom životu." />
+        <meta name="description" content="Citajte strucne zdravstvene savjete od doktora u BiH. Clanci o prevenciji, lijecenju i zdravom zivotu." />
         <meta name="keywords" content="zdravstveni savjeti, medicinski blog, doktor savjeti, zdravlje bih, prevencija bolesti" />
-        <link rel="canonical" href="https://wizmedik.com/blog" />
+        <meta name="robots" content={hasFilterParams ? 'noindex, follow' : 'index, follow'} />
+        <link rel="canonical" href={`${SITE_URL}/blog`} />
         <meta property="og:title" content="wizMedik Blog - Zdravstveni savjeti" />
-        <meta property="og:description" content="Stručni zdravstveni savjeti od doktora u Bosni i Hercegovini" />
-        <meta property="og:url" content="https://wizmedik.com/blog" />
+        <meta property="og:description" content="Strucni zdravstveni savjeti od doktora u Bosni i Hercegovini" />
+        <meta property="og:url" content={`${SITE_URL}/blog`} />
         <meta property="og:type" content="blog" />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="wizMedik Blog - Zdravstveni savjeti" />
+        <meta name="twitter:description" content="Strucni zdravstveni savjeti od doktora u Bosni i Hercegovini" />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
@@ -226,7 +236,7 @@ export default function Blog() {
               Zdravstveni savjeti
             </h1>
             <p className="text-sm md:text-xl text-gray-600 max-w-2xl mx-auto">
-              Stručni članci i savjeti od naših doktora za vaše zdravlje i dobrobit
+              StruÄni Älanci i savjeti od naÅ¡ih doktora za vaÅ¡e zdravlje i dobrobit
             </p>
           </div>
         </motion.div>
@@ -282,7 +292,7 @@ export default function Blog() {
             className="mb-16"
           >
             <h2 className="text-2xl md:text-3xl font-bold mb-6">
-              {selectedCategory !== 'all' || selectedAuthor !== 'all' ? 'Filtrirani članci' : 'Najnoviji članci'}
+              {selectedCategory !== 'all' || selectedAuthor !== 'all' ? 'Filtrirani Älanci' : 'Najnoviji Älanci'}
             </h2>
 
             {/* Posts grid - Mobile: horizontal layout, Desktop: grid */}
@@ -295,8 +305,8 @@ export default function Blog() {
             ) : posts.length === 0 ? (
               <div className="text-center py-20">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-xl text-gray-600">Nema pronađenih članaka</p>
-                <p className="text-sm text-gray-500 mt-2">Pokušajte promijeniti filter</p>
+                <p className="text-xl text-gray-600">Nema pronaÄ‘enih Älanaka</p>
+                <p className="text-sm text-gray-500 mt-2">PokuÅ¡ajte promijeniti filter</p>
               </div>
             ) : (
               <>
@@ -430,11 +440,11 @@ export default function Blog() {
                       {loadingMore ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Učitavanje...
+                          UÄitavanje...
                         </>
                       ) : (
                         <>
-                          Učitaj još članaka
+                          UÄitaj joÅ¡ Älanaka
                           <ChevronRight className="w-4 h-4 ml-2" />
                         </>
                       )}
@@ -473,7 +483,7 @@ export default function Blog() {
                           </p>
                         )}
                         <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                          Pogledaj članke
+                          Pogledaj Älanke
                           <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </CardContent>
@@ -490,3 +500,5 @@ export default function Blog() {
     </>
   );
 }
+
+

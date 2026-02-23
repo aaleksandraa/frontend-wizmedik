@@ -64,6 +64,15 @@ interface Paket {
   analize?: Analiza[];
 }
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const toAbsoluteUrl = (url?: string | null): string => {
+  if (!url) return DEFAULT_OG_IMAGE;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function LaboratoryProfile() {
   const { slug } = useParams<{ slug: string }>();
   const [laboratory, setLaboratory] = useState<Laboratory | null>(null);
@@ -156,12 +165,50 @@ export default function LaboratoryProfile() {
   }
 
   const dani = ['ponedeljak', 'utorak', 'srijeda', 'cetvrtak', 'petak', 'subota', 'nedjelja'];
+  const canonicalUrl = `${SITE_URL}/laboratorija/${laboratory.slug}`;
+  const seoDescription = `${laboratory.opis || `${laboratory.naziv} - Medicinska laboratorija u ${laboratory.grad}u`}`.slice(0, 160);
+  const ogImage = toAbsoluteUrl(laboratory.featured_slika || laboratory.profilna_slika);
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalBusiness',
+    name: laboratory.naziv,
+    description: laboratory.opis || undefined,
+    url: canonicalUrl,
+    image: ogImage,
+    telephone: laboratory.telefon || undefined,
+    email: laboratory.email || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: laboratory.adresa,
+      addressLocality: laboratory.grad,
+      addressCountry: 'BA',
+    },
+    aggregateRating: laboratory.prosjecna_ocjena > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: parseFloat(Number(laboratory.prosjecna_ocjena).toFixed(1)),
+      reviewCount: laboratory.broj_recenzija || 0,
+      bestRating: 5,
+      worstRating: 1,
+    } : undefined,
+  };
 
   return (
     <>
       <Helmet>
         <title>{laboratory.naziv} - Laboratorija | wizMedik</title>
-        <meta name="description" content={laboratory.opis || `${laboratory.naziv} - Medicinska laboratorija u ${laboratory.grad}u`} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`laboratorija ${laboratory.grad}, ${laboratory.naziv}, medicinske analize, laboratorijski nalazi, dijagnostika`} />
+        <meta property="og:title" content={`${laboratory.naziv} - Laboratorija u ${laboratory.grad}u`} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${laboratory.naziv} - Laboratorija`} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">

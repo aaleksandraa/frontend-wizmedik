@@ -21,6 +21,15 @@ import { domoviAPI } from '@/services/api';
 import { DomUpitFormData } from '@/types/careHome';
 import { toast } from 'sonner';
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const toAbsoluteUrl = (url?: string | null): string => {
+  if (!url) return DEFAULT_OG_IMAGE;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 interface Dom {
   id: number;
   naziv: string;
@@ -160,11 +169,51 @@ export default function CareHomeProfile() {
     );
   }
 
+  const canonicalUrl = `${SITE_URL}/dom-njega/${dom.slug}`;
+  const seoTitle = `${dom.naziv} - Dom za njegu u ${dom.grad}u | WizMedik`;
+  const seoDescription = `${dom.opis || `${dom.naziv} dom za njegu u ${dom.grad}u`}`.slice(0, 160);
+  const ogImage = toAbsoluteUrl(dom.featured_slika || dom.slike?.[0]);
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'NursingHome',
+    name: dom.naziv,
+    description: dom.opis || undefined,
+    url: canonicalUrl,
+    image: ogImage,
+    telephone: dom.telefon || undefined,
+    email: dom.email || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: dom.adresa,
+      addressLocality: dom.grad,
+      addressCountry: 'BA',
+    },
+    aggregateRating: Number(dom.prosjecna_ocjena) > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: parseFloat(Number(dom.prosjecna_ocjena).toFixed(1)),
+      reviewCount: dom.broj_recenzija || 0,
+      bestRating: 5,
+      worstRating: 1,
+    } : undefined,
+  };
+
   return (
     <>
       <Helmet>
-        <title>{dom.naziv} - Dom za njegu | wizMedik</title>
-        <meta name="description" content={dom.opis?.substring(0, 160)} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`dom za njegu ${dom.grad}, ${dom.naziv}, staracki dom, njega starijih, medicinska njega`} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
       <Navbar />

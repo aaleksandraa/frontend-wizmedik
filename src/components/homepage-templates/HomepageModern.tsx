@@ -34,7 +34,7 @@ export function HomepageModern() {
     } catch (error) { console.error('Error:', error); }
   };
 
-  const handleSearch = () => { navigate('/doktori/svi?pretraga=' + searchQuery); };
+  const handleSearch = () => { navigate('/doktori?pretraga=' + encodeURIComponent(searchQuery)); };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -47,7 +47,7 @@ export function HomepageModern() {
               <Badge className="bg-white/20 text-white mb-6 px-4 py-2"><Sparkles className="w-4 h-4 mr-2 inline" />Online konsultacije</Badge>
               <h1 className="text-5xl md:text-7xl font-bold mb-6">Zdravlje na <span className="text-emerald-200">prvom mjestu</span></h1>
               <p className="text-xl text-white/80 mb-8 max-w-lg">Povezite se sa najboljim doktorima u BiH.</p>
-              <Link to="/doktori/svi"><Button size="lg" className="bg-white text-emerald-700 h-14 px-8">Pronadji doktora <ArrowRight className="ml-2 h-5 w-5" /></Button></Link>
+              <Link to="/doktori"><Button size="lg" className="bg-white text-emerald-700 h-14 px-8">Pronadji doktora <ArrowRight className="ml-2 h-5 w-5" /></Button></Link>
             </div>
             <div className="bg-white rounded-3xl shadow-2xl p-8">
               <h2 className="text-2xl font-bold mb-6">Pretrazi doktore</h2>
@@ -102,7 +102,7 @@ export function HomepageModern() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-10">
             <h2 className="text-3xl font-bold">Istaknuti doktori</h2>
-            <Link to="/doktori/svi"><Button variant="ghost">Svi doktori <ChevronRight className="ml-1 h-4 w-4" /></Button></Link>
+            <Link to="/doktori"><Button variant="ghost">Svi doktori <ChevronRight className="ml-1 h-4 w-4" /></Button></Link>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {doctors.map((doctor) => (
@@ -175,7 +175,7 @@ export function HomepageModern() {
       <section className="py-20 bg-gradient-to-r from-emerald-600 to-teal-600">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">Spremni za bolju brigu o zdravlju?</h2>
-          <Link to="/doktori/svi"><Button size="lg" className="bg-white text-emerald-700 h-14 px-10">Zapocni pretragu <ArrowRight className="ml-2 h-5 w-5" /></Button></Link>
+          <Link to="/doktori"><Button size="lg" className="bg-white text-emerald-700 h-14 px-10">Zapocni pretragu <ArrowRight className="ml-2 h-5 w-5" /></Button></Link>
         </div>
       </section>
 
@@ -183,7 +183,7 @@ export function HomepageModern() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div><h3 className="text-2xl font-bold mb-4">WizMedik</h3><p className="text-gray-400">Vas partner za zdravlje.</p></div>
-            <div><h4 className="font-semibold mb-4">Navigacija</h4><ul className="space-y-2 text-gray-400"><li><Link to="/doktori/svi" className="hover:text-white">Doktori</Link></li><li><Link to="/klinike" className="hover:text-white">Klinike</Link></li></ul></div>
+            <div><h4 className="font-semibold mb-4">Navigacija</h4><ul className="space-y-2 text-gray-400"><li><Link to="/doktori" className="hover:text-white">Doktori</Link></li><li><Link to="/klinike" className="hover:text-white">Klinike</Link></li></ul></div>
             <div><h4 className="font-semibold mb-4">Podrska</h4><ul className="space-y-2 text-gray-400"><li><Link to="/pitanja" className="hover:text-white">Pitanja</Link></li></ul></div>
             <div><h4 className="font-semibold mb-4">Kontakt</h4><p className="text-gray-400">podrska@wizmedik.com</p></div>
           </div>

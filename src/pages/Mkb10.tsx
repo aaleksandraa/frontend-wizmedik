@@ -331,7 +331,7 @@ export default function Mkb10() {
         <meta name="keywords" content="MKB-10, MKB 10, ICD-10, šifarnik bolesti, klasifikacija bolesti, dijagnoze, medicinske šifre, bolesti, zdravlje, medicina, A00-B99, zarazne bolesti, tumori, kardiovaskularne bolesti" />
         <meta name="author" content="WizMedik" />
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <link rel="canonical" href="https://wizmedik.com/mkb-10" />
+        <link rel="canonical" href="https://wizmedik.com/mkb10" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />

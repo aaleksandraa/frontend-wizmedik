@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { doctorsAPI, specialtiesAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
 import { Navbar } from '@/components/Navbar';
@@ -38,11 +38,26 @@ interface Doctor {
 }
 
 type SortOption = 'name' | 'rating' | 'distance';
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const slugifySegment = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
 
 export default function Doctors() {
   const { template } = useListingTemplate('doctors');
   const { cities: allCities } = useAllCities(); // Get all cities from database
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
@@ -58,7 +73,7 @@ export default function Doctors() {
   const [selectedSubSpecialties, setSelectedSubSpecialties] = useState<string[]>([]);
   const [specialties, setSpecialties] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
-  const [useLocation, setUseLocation] = useState(false);
+  const [useUserLocation, setUseUserLocation] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [viewMode, setViewMode] = useState<'list' | 'map' | 'split'>('list');
   const [splitViewEnabled, setSplitViewEnabled] = useState(true);
@@ -75,6 +90,51 @@ export default function Doctors() {
       children: parent.children || []
     }));
   }, [specialties]);
+
+  // Normalize legacy query URLs to clean SEO routes.
+  useEffect(() => {
+    if (location.pathname !== '/doktori') {
+      return;
+    }
+
+    const textSearch = searchParams.get('pretraga');
+    if (textSearch) {
+      setSearchTerm(decodeURIComponent(textSearch.replace(/\+/g, ' ')));
+      return;
+    }
+
+    const gradParam = searchParams.get('grad');
+    const specParam = searchParams.get('specijalnost');
+    if (!gradParam && !specParam) {
+      return;
+    }
+
+    const decodedGrad = gradParam
+      ? decodeURIComponent(gradParam.replace(/\+/g, ' ')).replace(/-/g, ' ').trim()
+      : '';
+    const cityMatch = decodedGrad
+      ? allCities.find(
+          (city) =>
+            city.slug === decodedGrad.toLowerCase() ||
+            city.naziv.toLowerCase() === decodedGrad.toLowerCase()
+        )
+      : null;
+    const citySlug = decodedGrad ? (cityMatch?.slug || slugifySegment(decodedGrad)) : '';
+
+    const specialtySlug = specParam ? slugifySegment(specParam) : '';
+
+    if (citySlug && specialtySlug) {
+      navigate(`/doktori/${citySlug}/${specialtySlug}`, { replace: true });
+      return;
+    }
+    if (citySlug) {
+      navigate(`/doktori/${citySlug}`, { replace: true });
+      return;
+    }
+    if (specialtySlug) {
+      navigate(`/doktori/specijalnost/${specialtySlug}`, { replace: true });
+    }
+  }, [allCities, location.pathname, navigate, searchParams]);
 
   // Update filters when URL params change
   useEffect(() => {
@@ -142,6 +202,51 @@ export default function Doctors() {
     return hierarchicalSpecialties.find(s => s.id.toString() === selectedParentSpecialty);
   }, [selectedParentSpecialty, hierarchicalSpecialties]);
 
+  const selectedCitySlug = useMemo(() => {
+    if (!selectedCity) {
+      return '';
+    }
+
+    const matched = allCities.find((city) =>
+      city.naziv.toLowerCase() === selectedCity.toLowerCase() ||
+      city.slug === selectedCity.toLowerCase()
+    );
+
+    if (matched?.slug) {
+      return matched.slug;
+    }
+
+    return slugifySegment(selectedCity);
+  }, [allCities, selectedCity]);
+
+  const canonicalUrl = useMemo(() => {
+    if (selectedCitySlug && selectedParentData?.slug) {
+      return `${SITE_URL}/doktori/${selectedCitySlug}/${selectedParentData.slug}`;
+    }
+    if (selectedParentData?.slug) {
+      return `${SITE_URL}/doktori/specijalnost/${selectedParentData.slug}`;
+    }
+    if (selectedCitySlug) {
+      return `${SITE_URL}/doktori/${selectedCitySlug}`;
+    }
+    return `${SITE_URL}/doktori`;
+  }, [selectedCitySlug, selectedParentData]);
+
+  const seoTitle = useMemo(() => {
+    let title = 'Doktori';
+    if (selectedParentData?.naziv) title += ` - ${selectedParentData.naziv}`;
+    if (selectedCity) title += ` u ${selectedCity}`;
+    return `${title} | WizMedik`;
+  }, [selectedCity, selectedParentData]);
+
+  const seoDescription = useMemo(() => {
+    let desc = 'Pronadite doktore i specijaliste u Bosni i Hercegovini';
+    if (selectedParentData?.naziv) desc = `Pronadite ${selectedParentData.naziv.toLowerCase()} doktore u Bosni i Hercegovini`;
+    if (selectedCity) desc += `, grad ${selectedCity}`;
+    desc += '. Uporedite profile, ocjene i dostupnost termina.';
+    return desc;
+  }, [selectedCity, selectedParentData]);
+
   // Use all cities from database instead of extracting from doctors
   const uniqueCities = useMemo(() => {
     return allCities.map(city => city.naziv).sort();
@@ -155,11 +260,11 @@ export default function Doctors() {
 
   useEffect(() => {
     filterDoctors();
-  }, [doctors, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useLocation, sortBy, hierarchicalSpecialties]);
+  }, [doctors, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useUserLocation, sortBy, hierarchicalSpecialties]);
 
   const toggleLocation = () => {
-    if (useLocation) {
-      setUseLocation(false);
+    if (useUserLocation) {
+      setUseUserLocation(false);
       setUserLocation(null);
       setSortBy('name');
     } else {
@@ -167,7 +272,7 @@ export default function Doctors() {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
-            setUseLocation(true);
+            setUseUserLocation(true);
             setSortBy('distance');
           },
           () => alert('Nije moguće pristupiti vašoj lokaciji.')
@@ -206,7 +311,7 @@ export default function Doctors() {
     }
 
     if (selectedCity) {
-      filtered = filtered.filter(d => d.grad === selectedCity);
+      filtered = filtered.filter(d => d.grad?.toLowerCase() === selectedCity.toLowerCase());
     }
 
     if (selectedParentSpecialty) {
@@ -233,7 +338,7 @@ export default function Doctors() {
       switch (sortBy) {
         case 'name': return `${a.ime} ${a.prezime}`.localeCompare(`${b.ime} ${b.prezime}`);
         case 'rating': return (b.ocjena || 0) - (a.ocjena || 0);
-        case 'distance': return useLocation ? (a.distance || 999) - (b.distance || 999) : 0;
+        case 'distance': return useUserLocation ? (a.distance || 999) - (b.distance || 999) : 0;
         default: return 0;
       }
     });
@@ -277,8 +382,12 @@ export default function Doctors() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": "Doktori u Bosni i Hercegovini",
-    "description": "Lista doktora i specijalista u BiH",
+    "name": selectedParentData?.naziv
+      ? `${selectedParentData.naziv} doktori${selectedCity ? ` - ${selectedCity}` : ''}`
+      : selectedCity
+        ? `Doktori - ${selectedCity}`
+        : "Doktori u Bosni i Hercegovini",
+    "description": seoDescription,
     "numberOfItems": filteredDoctors.length,
     "itemListElement": filteredDoctors.slice(0, 10).map((doctor, index) => ({
       "@type": "ListItem",
@@ -295,13 +404,19 @@ export default function Doctors() {
   return (
     <>
       <Helmet>
-        <title>Doktori u BiH - Pronađite specijaliste | WizMedik</title>
-        <meta name="description" content="Pretražite 500+ doktora u Bosni i Hercegovini. Kardiolozi, pedijatri, ginekolozi, stomatolozi i drugi specijalisti. Online zakazivanje termina." />
-        <meta name="keywords" content="doktor bih, doktor sarajevo, doktor banja luka, kardiolog, pedijatar, ginekolog, stomatolog, specijalist, online zakazivanje" />
-        <link rel="canonical" href="https://wizmedik.com/doktori" />
-        <meta property="og:title" content="Doktori u BiH - Pronađite specijaliste" />
-        <meta property="og:description" content="Pretražite 500+ doktora u Bosni i Hercegovini. Online zakazivanje termina." />
-        <meta property="og:url" content="https://wizmedik.com/doktori" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`doktor bih, doktor ${selectedCity || 'sarajevo'}, ${selectedParentData?.naziv || 'specijalist'}, online zakazivanje`} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       
@@ -397,9 +512,9 @@ export default function Doctors() {
               </div>
             )}
 
-            <Button onClick={toggleLocation} variant={useLocation ? "default" : "outline"} className="w-full lg:w-auto">
-              <Navigation className={`h-4 w-4 mr-2 ${useLocation ? 'animate-pulse' : ''}`} />
-              {useLocation ? 'Lokacija uključena' : 'Blizu mene'}
+            <Button onClick={toggleLocation} variant={useUserLocation ? "default" : "outline"} className="w-full lg:w-auto">
+              <Navigation className={`h-4 w-4 mr-2 ${useUserLocation ? 'animate-pulse' : ''}`} />
+              {useUserLocation ? 'Lokacija uključena' : 'Blizu mene'}
             </Button>
           </div>
 
@@ -426,7 +541,7 @@ export default function Doctors() {
           <div className="flex items-center justify-between pt-4 border-t">
             <p className="text-sm text-muted-foreground">
               Pronađeno {filteredDoctors.length} doktora
-              {useLocation && ' • Lokacija aktivna'}
+              {useUserLocation && ' • Lokacija aktivna'}
             </p>
             <div className="flex items-center gap-2">
               <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
@@ -437,7 +552,7 @@ export default function Doctors() {
                 <SelectContent>
                   <SelectItem value="name">Po imenu</SelectItem>
                   <SelectItem value="rating">Po ocjeni</SelectItem>
-                  <SelectItem value="distance" disabled={!useLocation}>Po udaljenosti</SelectItem>
+                  <SelectItem value="distance" disabled={!useUserLocation}>Po udaljenosti</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -524,3 +639,4 @@ export default function Doctors() {
     </>
   );
 }
+

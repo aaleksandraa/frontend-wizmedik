@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { clinicsAPI, doctorsAPI, specialtiesAPI } from '@/services/api';
+import { specialtiesAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { ClinicCard } from '@/components/ClinicCard';
@@ -33,6 +33,9 @@ const slugToName = (slug: string): string => {
     .replace(/Zenska/g, 'Ženska');
 };
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
 export default function ClinicsBySpecialty() {
   const { specijalnost } = useParams<{ specijalnost: string }>();
   const navigate = useNavigate();
@@ -43,6 +46,7 @@ export default function ClinicsBySpecialty() {
   const [selectedCity, setSelectedCity] = useState<string>('all');
 
   const specialtyName = specijalnost ? slugToName(specijalnost) : '';
+  const canonicalUrl = `${SITE_URL}/klinike/specijalnost/${specijalnost || ''}`;
 
   useEffect(() => {
     fetchClinics();
@@ -145,7 +149,15 @@ export default function ClinicsBySpecialty() {
         <meta name="keywords" content={`${specialtyName}, klinike, zdravstvo BiH, ${specialtyName.toLowerCase()} klinika`} />
         <meta property="og:title" content={`${specialtyName} - Klinike`} />
         <meta property="og:description" content={`Klinike koje nude usluge ${specialtyName.toLowerCase()} specijalnosti`} />
-        <link rel="canonical" href={window.location.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${specialtyName} - Klinike`} />
+        <meta name="twitter:description" content={`Klinike koje nude usluge ${specialtyName.toLowerCase()} specijalnosti`} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>

@@ -242,14 +242,14 @@ const App = () => {
               
               {/* Spa-only routes */}
               <Route path="/spa-dashboard" element={
-                <ProtectedRoute allowedRoles={['spa_manager']}>
+                <ProtectedRoute allowedRoles={['spa_manager', 'spa']}>
                   <SpaDashboard />
                 </ProtectedRoute>
               } />
               
               {/* Care Home-only routes */}
               <Route path="/dom-dashboard" element={
-                <ProtectedRoute allowedRoles={['dom_manager']}>
+                <ProtectedRoute allowedRoles={['dom_manager', 'care_home_manager', 'care_home']}>
                   <CareHomeDashboard />
                 </ProtectedRoute>
               } />

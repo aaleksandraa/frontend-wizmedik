@@ -140,6 +140,9 @@ interface Dom {
   url: string;
 }
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
 export default function CityLanding() {
   const { grad } = useParams<{ grad: string }>();
   const navigate = useNavigate();
@@ -299,7 +302,14 @@ export default function CityLanding() {
         <meta name="keywords" content={`doktor ${city.naziv}, klinika ${city.naziv}, laboratorija ${city.naziv}, banja ${city.naziv}, dom za starije ${city.naziv}, pregled ${city.naziv}, zdravstvo ${city.naziv}, ljekari ${city.naziv}, analize ${city.naziv}`} />
         <meta property="og:title" content={`Doktori i klinike u ${city.naziv}u`} />
         <meta property="og:description" content={city.opis} />
-        <link rel="canonical" href={window.location.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/grad/${city.slug}`} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Doktori i klinike u ${city.naziv}u`} />
+        <meta name="twitter:description" content={city.opis} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        <link rel="canonical" href={`${SITE_URL}/grad/${city.slug}`} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>

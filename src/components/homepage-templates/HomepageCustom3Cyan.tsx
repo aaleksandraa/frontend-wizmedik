@@ -98,32 +98,30 @@ export default function HomepageCustom3Cyan() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    let url = '/doktori';
-    const params = new URLSearchParams();
-    
-    if (selectedType === 'klinike') url = '/klinike';
-    else if (selectedType === 'laboratorije') url = '/laboratorije';
-    else if (selectedType === 'banje') url = '/banje';
-    else if (selectedType === 'domovi') url = '/domovi-njega';
-    
-    // Add city as query parameter
-    if (selectedCity) {
-      const selectedCityData = allCities.find((city: any) => city.slug === selectedCity);
-      if (selectedCityData) {
-        params.set('grad', selectedCityData.naziv);
+
+    const type = selectedType || 'doktori';
+    let finalUrl = '/doktori';
+
+    if (type === 'doktori') {
+      if (selectedCity && selectedSpecialty) {
+        finalUrl = `/doktori/${selectedCity}/${selectedSpecialty}`;
+      } else if (selectedSpecialty) {
+        finalUrl = `/doktori/specijalnost/${selectedSpecialty}`;
+      } else if (selectedCity) {
+        finalUrl = `/doktori/${selectedCity}`;
+      } else {
+        finalUrl = '/doktori';
       }
+    } else if (type === 'klinike') {
+      finalUrl = selectedCity ? `/klinike/${selectedCity}` : '/klinike';
+    } else if (type === 'laboratorije') {
+      finalUrl = selectedCity ? `/laboratorije/${selectedCity}` : '/laboratorije';
+    } else if (type === 'banje') {
+      finalUrl = selectedCity ? `/banje/${selectedCity}` : '/banje';
+    } else if (type === 'domovi') {
+      finalUrl = selectedCity ? `/domovi-njega/${selectedCity}` : '/domovi-njega';
     }
-    
-    // Add specialty as query parameter for doctors only
-    if (selectedSpecialty && selectedType === 'doktori') {
-      params.set('specijalnost', selectedSpecialty);
-    }
-    
-    // Generate final URL with query parameters
-    const queryString = params.toString();
-    const finalUrl = queryString ? `${url}?${queryString}` : url;
-    
+
     navigate(finalUrl);
   };
 

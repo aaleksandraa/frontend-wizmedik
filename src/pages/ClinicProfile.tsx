@@ -46,6 +46,15 @@ interface Doctor {
   slug: string;
 }
 
+const SITE_URL = 'https://wizmedik.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
+
+const toAbsoluteUrl = (url?: string | null): string => {
+  if (!url) return DEFAULT_OG_IMAGE;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function ClinicProfile() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -208,19 +217,52 @@ export default function ClinicProfile() {
   }
 
   const currentStatus = getCurrentStatus(clinic.radno_vrijeme);
+  const canonicalUrl = `${SITE_URL}/klinika/${slug || ''}`;
+  const ogImage = clinic.slike && clinic.slike.length > 0
+    ? toAbsoluteUrl(clinic.slike[0])
+    : DEFAULT_OG_IMAGE;
+  const seoDescription = `${clinic.naziv} u ${clinic.grad}u. ${clinic.opis || 'Profesionalna zdravstvena ustanova sa strucnim osobljem.'}`.slice(0, 160);
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalClinic',
+    name: clinic.naziv,
+    description: clinic.opis || undefined,
+    url: canonicalUrl,
+    image: ogImage,
+    telephone: clinic.telefon || undefined,
+    email: clinic.contact_email || clinic.email || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: clinic.adresa,
+      addressLocality: clinic.grad,
+      addressCountry: 'BA',
+    },
+    aggregateRating: clinic.ocjena ? {
+      '@type': 'AggregateRating',
+      ratingValue: clinic.ocjena,
+      reviewCount: recenzije.length || 0,
+      bestRating: 5,
+      worstRating: 1,
+    } : undefined,
+  };
 
   return (
     <>
       <Helmet>
         <title>{clinic.naziv} - Klinika u {clinic.grad} | WizMedik</title>
-        <meta name="description" content={`${clinic.naziv} u ${clinic.grad}u. ${clinic.opis || 'Profesionalna zdravstvena ustanova sa stručnim osobljem.'} Zakažite termin online.`} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={`klinika ${clinic.grad}, ${clinic.naziv}, privatna klinika, zdravstvene usluge, online zakazivanje`} />
         <meta property="og:title" content={`${clinic.naziv} - ${clinic.grad}`} />
-        <meta property="og:description" content={clinic.opis || `Profesionalna zdravstvena ustanova u ${clinic.grad}u`} />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="business.business" />
-        {clinic.slike && clinic.slike.length > 0 && (
-          <meta property="og:image" content={clinic.slike[0]} />
-        )}
-        <link rel="canonical" href={window.location.href} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${clinic.naziv} - ${clinic.grad}`} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       <Navbar />
       <div className="min-h-screen bg-gradient-primary">
@@ -580,3 +622,4 @@ export default function ClinicProfile() {
      </>
    );
 }
+
