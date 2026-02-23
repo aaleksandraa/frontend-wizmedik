@@ -41,10 +41,13 @@ export function SEO({
   const defaultImage = `${baseUrl}/og-image.jpg`;
   const defaultKeywords = 'doktor, klinika, laboratorija, banja, dom njege, zdravstvo, BiH, Bosna i Hercegovina, zakazivanje, pregled, zdravstveni savjeti';
 
+  const resolvedPath = typeof window !== 'undefined'
+    ? `${window.location.pathname}${window.location.search}`
+    : '/';
   const fullTitle = title ? `${title} | WizMedik` : defaultTitle;
   const fullDescription = description || defaultDescription;
   const fullImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : defaultImage;
-  const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
+  const fullUrl = url ? `${baseUrl}${url}` : `${baseUrl}${resolvedPath}`;
   const fullKeywords = keywords ? `${keywords}, ${defaultKeywords}` : defaultKeywords;
   const canonicalUrl = canonical ? `${baseUrl}${canonical}` : fullUrl;
 

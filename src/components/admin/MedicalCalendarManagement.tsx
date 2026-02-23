@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, Plus, Edit2, Trash2, Search, X, Save } from 'lucide-react';
+import { Calendar, Plus, Edit2, Trash2, Search, X, Save, Upload, Download } from 'lucide-react';
 import { adminAPI } from '@/services/adminApi';
 
 interface CalendarEvent {
@@ -29,6 +29,11 @@ const MedicalCalendarManagement: React.FC = () => {
   const [newCategoryValue, setNewCategoryValue] = useState('');
   const [newCategoryLabel, setNewCategoryLabel] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [importing, setImporting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [categories, setCategories] = useState([
     { value: 'cancer', label: 'Rak' },
     { value: 'mental-health', label: 'Mentalno zdravlje' },
@@ -81,6 +86,16 @@ const MedicalCalendarManagement: React.FC = () => {
     filterEventsList();
   }, [events, searchQuery, filterType, filterActive]);
 
+  useEffect(() => {
+    const availableIds = new Set(
+      events
+        .map((event) => event.id)
+        .filter((id): id is number => typeof id === 'number')
+    );
+
+    setSelectedIds((prev) => prev.filter((id) => availableIds.has(id)));
+  }, [events]);
+
   const fetchEvents = async () => {
     try {
       setLoading(true);
@@ -92,6 +107,7 @@ const MedicalCalendarManagement: React.FC = () => {
       // Laravel paginate vraća {data: [], current_page, ...}
       const eventsData = response.data.data || response.data;
       setEvents(Array.isArray(eventsData) ? eventsData : []);
+      setError(null);
     } catch (error: any) {
       if (error.response?.status === 401) {
         setError('Niste autorizovani. Molimo prijavite se ponovo.');
@@ -153,10 +169,147 @@ const MedicalCalendarManagement: React.FC = () => {
 
     try {
       await adminAPI.delete(`/admin/medical-calendar/${id}`);
+      setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
       fetchEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
       alert('Greška pri brisanju događaja');
+    }
+  };
+
+  const handleImportXml = async (file: File | null) => {
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.xml')) {
+      alert('Molimo odaberite XML fajl.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    try {
+      setImporting(true);
+      const importFormData = new FormData();
+      importFormData.append('xml_file', file);
+
+      const response = await adminAPI.post('/admin/medical-calendar/import-xml', importFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      const created = Number(response.data?.created || 0);
+      const updated = Number(response.data?.updated || 0);
+      const failed = Number(response.data?.failed || 0);
+
+      let alertMessage = `XML import zavrsen. Kreirano: ${created}, azurirano: ${updated}, neuspjesno: ${failed}.`;
+
+      const rowErrors = Array.isArray(response.data?.row_errors) ? response.data.row_errors : [];
+      if (rowErrors.length > 0) {
+        const previewRows = rowErrors
+          .slice(0, 5)
+          .map((row: any) => `red ${row.row}`)
+          .join(', ');
+        alertMessage += ` Problematicni redovi: ${previewRows}${rowErrors.length > 5 ? ', ...' : ''}.`;
+      }
+
+      alert(alertMessage);
+      await fetchEvents();
+    } catch (error: any) {
+      console.error('Error importing XML:', error);
+      alert(error.response?.data?.message || 'Greska pri XML importu.');
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDownloadXml = async () => {
+    try {
+      setDownloading(true);
+      const response = await adminAPI.get('/admin/medical-calendar/export-xml', {
+        responseType: 'blob'
+      });
+
+      const blob = new Blob([response.data], { type: 'application/xml' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      const disposition = response.headers?.['content-disposition'] as string | undefined;
+      const filenameMatch = disposition?.match(/filename=\"?([^\";]+)\"?/i);
+      const fallbackName = `medical-calendar-${new Date().toISOString().slice(0, 10)}.xml`;
+
+      link.href = downloadUrl;
+      link.download = filenameMatch?.[1] || fallbackName;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error: any) {
+      console.error('Error downloading XML:', error);
+      alert(error.response?.data?.message || 'Greska pri preuzimanju XML fajla.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const toggleSelection = (id: number) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((existingId) => existingId !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  const toggleSelectAllFiltered = () => {
+    const visibleIds = filteredEvents
+      .map((event) => event.id)
+      .filter((id): id is number => typeof id === 'number');
+
+    if (visibleIds.length === 0) {
+      return;
+    }
+
+    const allVisibleSelected = visibleIds.every((id) => selectedIds.includes(id));
+
+    setSelectedIds((prev) => {
+      if (allVisibleSelected) {
+        return prev.filter((id) => !visibleIds.includes(id));
+      }
+      return Array.from(new Set([...prev, ...visibleIds]));
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) {
+      alert('Oznacite barem jedan dogadjaj za brisanje.');
+      return;
+    }
+
+    if (!confirm(`Da li ste sigurni da zelite obrisati ${selectedIds.length} oznacenih dogadjaja?`)) {
+      return;
+    }
+
+    try {
+      setBulkDeleting(true);
+      const response = await adminAPI.post('/admin/medical-calendar/bulk-delete', {
+        ids: selectedIds
+      });
+
+      const deleted = Number(response.data?.deleted || 0);
+      setSelectedIds([]);
+      await fetchEvents();
+      alert(`Obrisano dogadjaja: ${deleted}.`);
+    } catch (error: any) {
+      console.error('Error bulk deleting events:', error);
+      alert(error.response?.data?.message || 'Greska pri bulk brisanju.');
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -244,6 +397,13 @@ const MedicalCalendarManagement: React.FC = () => {
     }
   };
 
+  const filteredSelectableIds = filteredEvents
+    .map((event) => event.id)
+    .filter((id): id is number => typeof id === 'number');
+  const allFilteredSelected =
+    filteredSelectableIds.length > 0 &&
+    filteredSelectableIds.every((id) => selectedIds.includes(id));
+
   return (
     <div className="space-y-6">
       {/* Error Message */}
@@ -271,13 +431,46 @@ const MedicalCalendarManagement: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <Calendar className="w-8 h-8 text-cyan-600" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Medicinski Kalendar</h2>
             <p className="text-sm text-gray-600">Ukupno: {events.length} događaja</p>
           </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xml,text/xml,application/xml"
+            className="hidden"
+            onChange={(e) => handleImportXml(e.target.files?.[0] || null)}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60"
+          >
+            <Upload className="w-4 h-4" />
+            {importing ? 'Uvoz...' : 'Upload XML'}
+          </button>
+          <button
+            onClick={handleDownloadXml}
+            disabled={downloading}
+            className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60"
+          >
+            <Download className="w-4 h-4" />
+            {downloading ? 'Preuzimanje...' : 'Download XML'}
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            disabled={selectedIds.length === 0 || bulkDeleting}
+            className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60"
+          >
+            <Trash2 className="w-4 h-4" />
+            {bulkDeleting ? 'Brisanje...' : `Bulk delete (${selectedIds.length})`}
+          </button>
         </div>
         <button
           onClick={() => openModal()}
@@ -347,6 +540,15 @@ const MedicalCalendarManagement: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      className="w-4 h-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
+                      aria-label="Oznaci sve prikazane dogadjaje"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Datum</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Naziv</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tip</th>
@@ -358,6 +560,17 @@ const MedicalCalendarManagement: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredEvents.map(event => (
                   <tr key={event.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      {event.id && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(event.id)}
+                          onChange={() => toggleSelection(event.id as number)}
+                          className="w-4 h-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
+                          aria-label={`Oznaci dogadjaj ${event.title}`}
+                        />
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(event.date)}
                       {event.end_date && ` - ${formatDate(event.end_date)}`}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar, Filter, Search, Tag, Clock, X } from 'lucide-react';
 import axios from 'axios';
 import { SEO } from '../components/SEO';
@@ -138,13 +138,35 @@ const MedicalCalendar: React.FC = () => {
   };
 
   const groupedEvents = groupEventsByMonth();
+  const calendarSchema = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `Medicinski kalendar ${selectedYear}`,
+    description: `Kalendar zdravlja ${selectedYear} sa svjetskim danima zdravlja i kampanjama.`,
+    url: 'https://wizmedik.com/medicinski-kalendar',
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: filteredEvents.length,
+      itemListElement: filteredEvents.slice(0, 30).map((event, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: event.title,
+        description: event.description || '',
+        startDate: event.date,
+        endDate: event.end_date || event.date,
+      })),
+    },
+  }), [filteredEvents, selectedYear]);
 
   return (
     <>
       <SEO
-        title="Medicinski Kalendar 2026 - Svjetski Dani Zdravlja"
-        description="Kompletni medicinski kalendar za 2026. godinu sa svjetskim danima zdravlja, kampanjama i edukativnim događajima. Korisno za zdravstvene ustanove, ordinacije i edukaciju."
-        keywords="medicinski kalendar, svjetski dani zdravlja, zdravstvene kampanje, medicinski događaji 2026"
+        title={`Medicinski kalendar ${selectedYear} - Kalendar zdravlja ${selectedYear}`}
+        description={`Kompletan medicinski kalendar za ${selectedYear}. Svjetski dan zdravlja ${selectedYear}, zdravstvene kampanje i edukativni datumi za ustanove, ordinacije i javnost.`}
+        keywords={`medicinski kalendar ${selectedYear}, kalendar zdravlja ${selectedYear}, svjetski dan zdravlja ${selectedYear}, zdravstvene kampanje ${selectedYear}, medicinski događaji ${selectedYear}`}
+        url="/medicinski-kalendar"
+        canonical="/medicinski-kalendar"
+        structuredData={calendarSchema}
       />
       <Navbar />
 
