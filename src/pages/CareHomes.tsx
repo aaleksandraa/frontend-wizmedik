@@ -855,7 +855,7 @@ export default function CareHomes() {
         <section className="bg-white py-16 border-t" aria-labelledby="faq-heading">
           <div className="max-w-4xl mx-auto px-4">
             <h2 id="faq-heading" className="text-3xl font-bold text-center mb-8">
-              Cesto postavljana pitanja o domovima za njegu
+              Često postavljana pitanja o domovima za njegu
             </h2>
             
             <Accordion type="single" collapsible className="w-full">
