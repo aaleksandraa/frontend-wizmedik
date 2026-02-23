@@ -236,7 +236,7 @@ export default function Blog() {
               Zdravstveni savjeti
             </h1>
             <p className="text-sm md:text-xl text-gray-600 max-w-2xl mx-auto">
-              StruÄni Älanci i savjeti od naÅ¡ih doktora za vaÅ¡e zdravlje i dobrobit
+              Stručni članci i savjeti od naših doktora za vaše zdravlje i dobrobit
             </p>
           </div>
         </motion.div>
@@ -292,7 +292,7 @@ export default function Blog() {
             className="mb-16"
           >
             <h2 className="text-2xl md:text-3xl font-bold mb-6">
-              {selectedCategory !== 'all' || selectedAuthor !== 'all' ? 'Filtrirani Älanci' : 'Najnoviji Älanci'}
+              {selectedCategory !== 'all' || selectedAuthor !== 'all' ? 'Filtrirani članci' : 'Najnoviji članci'}
             </h2>
 
             {/* Posts grid - Mobile: horizontal layout, Desktop: grid */}
