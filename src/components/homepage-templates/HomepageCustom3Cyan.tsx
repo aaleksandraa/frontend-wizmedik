@@ -247,7 +247,7 @@ export default function HomepageCustom3Cyan() {
       <Navbar />
       
       {/* Hero Section - Clean Centered Design */}
-      <section className="relative z-30 overflow-visible py-20 lg:py-32 pb-32 lg:pb-40">
+      <section className="relative z-30 overflow-visible py-20 lg:py-32 pb-16 lg:pb-20">
         {/* Background Image (if enabled) */}
         {heroBgSettings.enabled && heroBgSettings.image && (
           <div 
@@ -385,7 +385,7 @@ export default function HomepageCustom3Cyan() {
 
       {/* Featured Blog Cards (no heading) */}
       {featuredBlogPosts && featuredBlogPosts.length > 0 && (
-        <section className="relative z-10 pb-10 md:-mt-16">
+        <section className="relative z-10 -mt-4 md:-mt-8 pb-10">
           <div className="container mx-auto px-4">
             {/* Desktop: 3 columns */}
             <div className="hidden md:grid md:grid-cols-3 gap-4">
