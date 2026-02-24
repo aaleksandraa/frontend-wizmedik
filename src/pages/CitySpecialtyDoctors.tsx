@@ -154,7 +154,7 @@ export default function CitySpecialtyDoctors() {
       return `${resolvedSpecialtyName} - doktori specijalisti | WizMedik`;
     }
     if (resolvedCityName) {
-      return `Doktori u ${resolvedCityName} | WizMedik`;
+      return `Doktori - ${resolvedCityName} | WizMedik`;
     }
     return 'Pretraga doktora | WizMedik';
   }, [resolvedCityName, resolvedSpecialtyName]);
@@ -267,7 +267,7 @@ export default function CitySpecialtyDoctors() {
               {!resolvedSpecialtyName && resolvedCityName && (
                 <>
                   <MapPin className="inline w-8 h-8 mr-2 text-primary" />
-                  Doktori u {resolvedCityName}
+                  Doktori - {resolvedCityName}
                 </>
               )}
               {resolvedSpecialtyName && !resolvedCityName && (

@@ -157,13 +157,6 @@ export default function Cities() {
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm">Stanovništvo</span>
-                      </div>
-                      <span className="font-semibold text-foreground">{city.populacija || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Users className="w-4 w-4" />
                         <span className="text-sm">Doktora</span>
                       </div>

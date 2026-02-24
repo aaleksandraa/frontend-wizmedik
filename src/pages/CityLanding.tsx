@@ -162,9 +162,20 @@ export default function CityLanding() {
       return {
         ...cityData,
         kljucne_tacke: Array.isArray(cityData.kljucne_tacke)
-          ? cityData.kljucne_tacke.map((item: any) => 
-              typeof item === 'string' ? { naziv: item, url: undefined } : item
-            )
+          ? cityData.kljucne_tacke
+              .map((item: any) => {
+                if (typeof item === 'string') {
+                  const naziv = item.trim();
+                  return naziv ? { naziv, url: undefined } : null;
+                }
+                if (!item || typeof item !== 'object') {
+                  return null;
+                }
+                const naziv = (item.naziv || item.name || '').toString().trim();
+                const url = (item.url || item.link || '').toString().trim() || undefined;
+                return naziv ? { naziv, url } : null;
+              })
+              .filter(Boolean)
           : []
       } as City;
     },

@@ -128,6 +128,41 @@ const getErrorMessage = (error: any): string => {
   return error.response?.data?.message || error.message || "Došlo je do greške";
 };
 
+const normalizeCityLink = (value?: string): string | undefined => {
+  const trimmed = (value || '').trim();
+  return trimmed ? trimmed : undefined;
+};
+
+const normalizeCityKeyPoints = (
+  value: unknown
+): Array<{ naziv: string; url?: string }> => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item: any) => {
+      if (typeof item === 'string') {
+        const naziv = item.trim();
+        return naziv ? { naziv } : null;
+      }
+
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const naziv = (item.naziv || item.name || '').toString().trim();
+      const url = normalizeCityLink(item.url || item.link || '');
+
+      if (!naziv) {
+        return null;
+      }
+
+      return { naziv, ...(url ? { url } : {}) };
+    })
+    .filter(Boolean) as Array<{ naziv: string; url?: string }>;
+};
+
 // Sortable Specialty Item Component
 function SortableSpecialtyItem({ 
   category, 
@@ -337,9 +372,7 @@ export default function AdminPanel() {
       console.log('✅ Cities loaded:', citiesList.length);
       setCities(citiesList.map((city: any) => ({
         ...city,
-        kljucne_tacke: Array.isArray(city.kljucne_tacke) 
-          ? city.kljucne_tacke.map((item: any) => typeof item === 'string' ? { naziv: item } : item)
-          : []
+        kljucne_tacke: normalizeCityKeyPoints(city.kljucne_tacke),
       })));
     } catch (error: any) {
       console.error('❌ Error fetching admin data:', error);
@@ -537,7 +570,7 @@ export default function AdminPanel() {
         naziv: city.naziv, u_gradu: city.u_gradu || '', slug: city.slug, opis: city.opis || '',
         detaljni_opis: city.detaljni_opis || '', populacija: city.populacija || '',
         broj_bolnica: city.broj_bolnica || 0, hitna_pomoc: city.hitna_pomoc || '124',
-        kljucne_tacke: Array.isArray(city.kljucne_tacke) ? [...city.kljucne_tacke] : [], 
+        kljucne_tacke: normalizeCityKeyPoints(city.kljucne_tacke),
         aktivan: city.aktivan ?? true
       };
       console.log('Setting city form:', formData);
@@ -552,7 +585,21 @@ export default function AdminPanel() {
     e.preventDefault();
     try {
       const slug = createSlug(cityForm.naziv);
-      const data = { ...cityForm, slug };
+      const kljucneTacke = normalizeCityKeyPoints(cityForm.kljucne_tacke);
+      const pendingNaziv = newKeyPoint.naziv.trim();
+      const pendingUrl = normalizeCityLink(newKeyPoint.url);
+
+      // If user typed a key point but didn't click "+" we still persist it on save.
+      if (pendingNaziv) {
+        const alreadyExists = kljucneTacke.some(
+          (point) => point.naziv === pendingNaziv && (point.url || '') === (pendingUrl || '')
+        );
+        if (!alreadyExists) {
+          kljucneTacke.push({ naziv: pendingNaziv, ...(pendingUrl ? { url: pendingUrl } : {}) });
+        }
+      }
+
+      const data = { ...cityForm, slug, kljucne_tacke: kljucneTacke };
       
       console.log('Saving city:', { editingCity, data });
       
@@ -607,10 +654,13 @@ export default function AdminPanel() {
   };
 
   const addKeyPoint = () => {
-    if (newKeyPoint.naziv.trim()) {
+    const naziv = newKeyPoint.naziv.trim();
+    const url = normalizeCityLink(newKeyPoint.url);
+
+    if (naziv) {
       setCityForm(prev => ({
         ...prev,
-        kljucne_tacke: [...prev.kljucne_tacke, { naziv: newKeyPoint.naziv.trim(), url: newKeyPoint.url.trim() || undefined }]
+        kljucne_tacke: [...normalizeCityKeyPoints(prev.kljucne_tacke), { naziv, ...(url ? { url } : {}) }]
       }));
       setNewKeyPoint({ naziv: '', url: '' });
     }
@@ -1739,8 +1789,13 @@ export default function AdminPanel() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {cityForm.kljucne_tacke.map((p, i) => (
-                      <Badge key={i} variant="secondary" className="gap-1">
-                        {p.naziv}
+                      <Badge key={i} variant="secondary" className="gap-2 py-1.5">
+                        <span className="flex flex-col max-w-[220px]">
+                          <span className="font-medium truncate">{p.naziv}</span>
+                          {p.url && (
+                            <span className="text-[11px] text-muted-foreground truncate">{p.url}</span>
+                          )}
+                        </span>
                         <button type="button" onClick={() => setCityForm(prev => ({...prev, kljucne_tacke: prev.kljucne_tacke.filter((_, idx) => idx !== i)}))}>
                           <X className="h-3 w-3" />
                         </button>
