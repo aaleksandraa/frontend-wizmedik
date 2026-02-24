@@ -23,6 +23,8 @@ interface HomepageData {
   all_cities?: Array<any>; // ALL cities for dropdown filters
   pitanja?: Array<any>;
   blog_posts?: Array<any>;
+  blog_posts_latest?: Array<any>;
+  blog_posts_featured?: Array<any>;
   filters: {
     specialties: string[];
     cities: string[];
@@ -69,6 +71,8 @@ export function useHomepageData() {
           all_cities: [],
           pitanja: [],
           blog_posts: [],
+          blog_posts_latest: [],
+          blog_posts_featured: [],
           filters: {
             specialties: [],
             cities: [],

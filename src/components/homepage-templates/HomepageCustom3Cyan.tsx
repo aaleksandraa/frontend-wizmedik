@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -111,6 +111,8 @@ export default function HomepageCustom3Cyan() {
   const allCities = data?.all_cities || []; // For dropdown filters
   const pitanja = data?.pitanja || [];
   const blogPosts = data?.blog_posts || [];
+  const latestBlogPosts = data?.blog_posts_latest || blogPosts;
+  const featuredBlogPosts = data?.blog_posts_featured || blogPosts;
   const isDoctorSearch = !selectedType || selectedType === 'doktori';
 
   const groupedSpecialties = useMemo<SpecialtyCategory[]>(() => {
@@ -267,7 +269,7 @@ export default function HomepageCustom3Cyan() {
           <div className="max-w-4xl mx-auto text-center">
             {/* Main Heading with Animated Word */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-              Pronađite{' '}
+              PronaÄ‘ite{' '}
               <span 
                 key={currentWord}
                 className="text-cyan-600 inline-block animate-in fade-in-0 slide-in-from-bottom-2 duration-500"
@@ -277,7 +279,7 @@ export default function HomepageCustom3Cyan() {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 mb-12">
-              Zakažite pregled kod najboljih u Bosni i Hercegovini
+              ZakaÅ¾ite pregled kod najboljih u Bosni i Hercegovini
             </p>
 
             {/* Search Box - Clean White Card */}
@@ -287,7 +289,7 @@ export default function HomepageCustom3Cyan() {
                   {/* Type Select */}
                   <div className="relative z-40">
                     <CustomSelect
-                      label="Šta tražite?"
+                      label="Å ta traÅ¾ite?"
                       value={selectedType}
                       onChange={setSelectedType}
                       placeholder="Odaberite tip"
@@ -359,7 +361,7 @@ export default function HomepageCustom3Cyan() {
                   className="w-full h-14 text-lg font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
                 >
                   <Search className="mr-2 h-5 w-5" />
-                  Pretražite
+                  PretraÅ¾ite
                 </Button>
               </form>
             </div>
@@ -381,16 +383,52 @@ export default function HomepageCustom3Cyan() {
         </div>
       </section>
 
+      {/* Featured Blog Cards (no heading) */}
+      {featuredBlogPosts && featuredBlogPosts.length > 0 && (
+        <section className="-mt-16 relative z-20 pb-10">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {featuredBlogPosts.slice(0, 3).map((post: any) => (
+                <Link key={post.id} to={`/blog/${post.slug}`}>
+                  <Card className="group h-full bg-white/95 backdrop-blur border-2 border-gray-100 hover:border-cyan-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-cyan-100">
+                          {post.slika_url ? (
+                            <img
+                              src={fixImageUrl(post.slika_url) || ''}
+                              alt={post.naslov}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Lightbulb className="w-8 h-8 text-cyan-600" />
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-3 group-hover:text-cyan-700 transition-colors">
+                          {post.naslov}
+                        </h3>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Top Specialties - Quick Services Style */}
       <section className="py-12 bg-white border-b border-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Najpopularnije specijalnosti</h2>
-            <p className="text-gray-600">Brzo pronađite doktora za vašu potrebu</p>
+            <p className="text-gray-600">Brzo pronaÄ‘ite doktora za vaÅ¡u potrebu</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { icon: Stethoscope, label: 'Opšta medicina', href: '/specijalnost/opsta-medicina-i-porodicna-medicina', color: 'bg-cyan-100 text-cyan-600' },
+              { icon: Stethoscope, label: 'OpÅ¡ta medicina', href: '/specijalnost/opsta-medicina-i-porodicna-medicina', color: 'bg-cyan-100 text-cyan-600' },
               { icon: Heart, label: 'Kardiologija', href: '/specijalnost/kardiologija', color: 'bg-cyan-100 text-cyan-600' },
               { icon: Activity, label: 'Interna medicina', href: '/specijalnost/interna-medicina', color: 'bg-teal-100 text-teal-600' },
               { icon: FlaskConical, label: 'Laboratorije', href: '/laboratorije', color: 'bg-emerald-100 text-emerald-600' },
@@ -421,7 +459,7 @@ export default function HomepageCustom3Cyan() {
       </section>
 
       {/* Blog Section - Latest Health Tips */}
-      {blogPosts && blogPosts.length > 0 && (
+      {latestBlogPosts && latestBlogPosts.length > 0 && (
         <section className="py-16 bg-gradient-to-br from-cyan-50 via-cyan-50 to-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
@@ -429,12 +467,12 @@ export default function HomepageCustom3Cyan() {
                 <Lightbulb className="w-3 h-3 mr-2" />Zdravstveni savjeti
               </Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Najnoviji savjeti</h2>
-              <p className="text-gray-600">Stručni savjeti i informacije od naših doktora</p>
+              <p className="text-gray-600">StruÄni savjeti i informacije od naÅ¡ih doktora</p>
             </div>
 
             {/* Desktop: 3 columns with large images */}
             <div className="hidden md:grid md:grid-cols-3 gap-6">
-              {blogPosts.slice(0, 3).map((post: any) => (
+              {latestBlogPosts.slice(0, 3).map((post: any) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
                   <Card className="group h-full hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200 overflow-hidden">
                     {post.slika_url && (
@@ -446,6 +484,7 @@ export default function HomepageCustom3Cyan() {
                         />
                       </div>
                     )}
+
                     <CardContent className="p-6">
                       <div className="flex items-center gap-2 mb-3 flex-wrap">
                         {post.kategorija && (
@@ -476,7 +515,7 @@ export default function HomepageCustom3Cyan() {
 
             {/* Mobile: Horizontal layout (small image left, text right) */}
             <div className="md:hidden space-y-4">
-              {blogPosts.slice(0, 3).map((post: any) => (
+              {latestBlogPosts.slice(0, 3).map((post: any) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
                   <Card className="hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200">
                     <CardContent className="p-4">
@@ -540,7 +579,7 @@ export default function HomepageCustom3Cyan() {
                 <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
                   <HelpCircle className="w-3 h-3 mr-2" />Pitanja i odgovori
                 </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Pitajte naše stručnjake</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Pitajte naÅ¡e struÄnjake</h2>
                 <p className="text-gray-600 mt-2">Postavite pitanje i dobijte odgovor od verificiranih doktora</p>
               </div>
               <div className="flex gap-3">
@@ -592,10 +631,10 @@ export default function HomepageCustom3Cyan() {
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
               <div>
                 <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
-                  <Users className="w-3 h-3 mr-2" />Naši doktori
+                  <Users className="w-3 h-3 mr-2" />NaÅ¡i doktori
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Najbolji doktori u BiH</h2>
-                <p className="text-gray-600 mt-2">Provjereni i licencirani zdravstveni stručnjaci</p>
+                <p className="text-gray-600 mt-2">Provjereni i licencirani zdravstveni struÄnjaci</p>
               </div>
               <Link to="/doktori">
                 <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
@@ -679,7 +718,7 @@ export default function HomepageCustom3Cyan() {
                   <Users className="w-3 h-3 mr-2" />Njega i briga
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Domovi za starija i bolesna lica</h2>
-                <p className="text-gray-600 mt-2">Profesionalna njega i briga u sigurnom okruženju</p>
+                <p className="text-gray-600 mt-2">Profesionalna njega i briga u sigurnom okruÅ¾enju</p>
               </div>
               <Link to="/domovi-njega">
                 <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
@@ -702,13 +741,13 @@ export default function HomepageCustom3Cyan() {
         <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative">
           {/* Medical Background Symbols */}
           <div className="absolute inset-0 opacity-5 overflow-hidden">
-            <div className="absolute top-10 left-10 text-6xl">⚕️</div>
-            <div className="absolute top-32 right-20 text-5xl">🏥</div>
-            <div className="absolute bottom-20 left-32 text-7xl">💊</div>
-            <div className="absolute bottom-32 right-10 text-6xl">🩺</div>
-            <div className="absolute top-1/2 left-1/4 text-4xl">💉</div>
-            <div className="absolute top-1/3 right-1/3 text-5xl">🔬</div>
-            <div className="absolute bottom-1/3 left-2/3 text-4xl">❤️</div>
+            <div className="absolute top-10 left-10 text-6xl">âš•ï¸</div>
+            <div className="absolute top-32 right-20 text-5xl">ðŸ¥</div>
+            <div className="absolute bottom-20 left-32 text-7xl">ðŸ’Š</div>
+            <div className="absolute bottom-32 right-10 text-6xl">ðŸ©º</div>
+            <div className="absolute top-1/2 left-1/4 text-4xl">ðŸ’‰</div>
+            <div className="absolute top-1/3 right-1/3 text-5xl">ðŸ”¬</div>
+            <div className="absolute bottom-1/3 left-2/3 text-4xl">â¤ï¸</div>
           </div>
 
           {/* Animated Pulse Circles */}
@@ -720,9 +759,9 @@ export default function HomepageCustom3Cyan() {
               <Badge variant="secondary" className="mb-4 px-4 py-1 bg-white/10 text-white border-white/20">
                 <MapPin className="w-3 h-3 mr-2" />Lokacije
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Zdravstvo u vašem gradu</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Zdravstvo u vaÅ¡em gradu</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                Pronađite doktore i klinike u svim većim gradovima Bosne i Hercegovine
+                PronaÄ‘ite doktore i klinike u svim veÄ‡im gradovima Bosne i Hercegovine
               </p>
             </div>
 
@@ -733,7 +772,7 @@ export default function HomepageCustom3Cyan() {
                   type="text"
                   value={citySearchQuery}
                   onChange={(e) => setCitySearchQuery(e.target.value)}
-                  placeholder="Pretražite grad..."
+                  placeholder="PretraÅ¾ite grad..."
                   className="w-full h-16 px-6 pr-12 rounded-2xl border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 text-lg"
                 />
                 <Search className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -790,12 +829,12 @@ export default function HomepageCustom3Cyan() {
             <div className="relative text-center max-w-3xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Spremni ste za bolju zdravstvenu njegu?</h2>
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                Zakažite pregled kod najboljih doktora u Bosni i Hercegovini
+                ZakaÅ¾ite pregled kod najboljih doktora u Bosni i Hercegovini
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/doktori">
                   <Button size="lg" className="bg-white text-cyan-700 hover:bg-white/90 shadow-xl px-8 h-14 text-lg font-semibold">
-                    Pronađi doktora
+                    PronaÄ‘i doktora
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
@@ -814,4 +853,6 @@ export default function HomepageCustom3Cyan() {
     </div>
   );
 }
+
+
 
