@@ -228,7 +228,7 @@ export const blogAPI = {
   getCategories: () => api.get('/blog/categories'),
   getAuthors: () => api.get('/blog/authors'),
   getDoctorPosts: (doctorSlug: string) => api.get(`/blog/doctor/${doctorSlug}`),
-  canDoctorsWrite: () => api.get('/blog/can-doctors-write'),
+  canDoctorsWrite: () => api.get('/blog/can-write'),
   // Doctor
   getMyPosts: () => api.get('/blog/my-posts'),
   createPost: (data: any) => api.post('/blog/posts', data),
