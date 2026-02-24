@@ -127,16 +127,26 @@ export default function PitanjeDetalji() {
 
     const answers = Array.isArray(pitanje.odgovori) ? pitanje.odgovori : [];
     const accepted = answers.find((odg: any) => odg.je_prihvacen);
-    const suggestedAnswers = answers.map((odg: any) => ({
-      '@type': 'Answer',
-      text: (odg.sadrzaj || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
-      dateCreated: odg.created_at,
-      upvoteCount: odg.broj_lajkova || 0,
-      author: {
-        '@type': 'Person',
-        name: `Dr. ${odg.doktor?.user?.ime || ''} ${odg.doktor?.user?.prezime || ''}`.trim(),
-      },
-    }));
+    const questionAuthorName = (pitanje.ime_korisnika || '').trim() || 'Anonimni korisnik';
+    const suggestedAnswers = answers.map((odg: any, index: number) => {
+      const doctorIme = odg.doktor?.user?.ime || odg.doktor?.ime || '';
+      const doctorPrezime = odg.doktor?.user?.prezime || odg.doktor?.prezime || '';
+      const doctorName = `${doctorIme} ${doctorPrezime}`.trim();
+      const answerAnchor = odg.id ? `odgovor-${odg.id}` : `odgovor-${index + 1}`;
+
+      return {
+        '@type': 'Answer',
+        text: (odg.sadrzaj || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
+        dateCreated: odg.created_at,
+        upvoteCount: odg.broj_lajkova || 0,
+        url: `${canonicalUrl}#${answerAnchor}`,
+        author: {
+          '@type': 'Person',
+          name: doctorName ? `Dr. ${doctorName}` : 'Doktor wizMedik',
+          url: odg.doktor?.slug ? `${SITE_URL}/doktor/${odg.doktor.slug}` : `${SITE_URL}/doktori`,
+        },
+      };
+    });
 
     const questionEntity: Record<string, any> = {
       '@type': 'Question',
@@ -146,18 +156,32 @@ export default function PitanjeDetalji() {
       answerCount: answers.length,
       url: canonicalUrl,
       about: pitanje.specijalnost?.naziv || undefined,
+      author: {
+        '@type': 'Person',
+        name: questionAuthorName,
+      },
       suggestedAnswer: suggestedAnswers,
     };
 
     if (accepted) {
+      const acceptedDoctorIme = accepted.doktor?.user?.ime || accepted.doktor?.ime || '';
+      const acceptedDoctorPrezime = accepted.doktor?.user?.prezime || accepted.doktor?.prezime || '';
+      const acceptedDoctorName = `${acceptedDoctorIme} ${acceptedDoctorPrezime}`.trim();
+      const acceptedIndex = answers.findIndex((odg: any) => odg === accepted);
+      const acceptedAnchor = accepted.id
+        ? `odgovor-${accepted.id}`
+        : `odgovor-${acceptedIndex >= 0 ? acceptedIndex + 1 : 1}`;
+
       questionEntity.acceptedAnswer = {
         '@type': 'Answer',
         text: (accepted.sadrzaj || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
         dateCreated: accepted.created_at,
         upvoteCount: accepted.broj_lajkova || 0,
+        url: `${canonicalUrl}#${acceptedAnchor}`,
         author: {
           '@type': 'Person',
-          name: `Dr. ${accepted.doktor?.user?.ime || ''} ${accepted.doktor?.user?.prezime || ''}`.trim(),
+          name: acceptedDoctorName ? `Dr. ${acceptedDoctorName}` : 'Doktor wizMedik',
+          url: accepted.doktor?.slug ? `${SITE_URL}/doktor/${accepted.doktor.slug}` : `${SITE_URL}/doktori`,
         },
       };
     }
