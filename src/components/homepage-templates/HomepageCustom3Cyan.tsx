@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
-import { settingsAPI } from '@/services/api';
+import { settingsAPI, specialtiesAPI } from '@/services/api';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, Heart, Users, Building2, MapPin, ArrowRight,
@@ -19,15 +19,26 @@ import {
   Stethoscope, Activity, FlaskConical, Droplet, Home
 } from 'lucide-react';
 
+interface SpecialtyCategory {
+  id: number;
+  naziv: string;
+  slug: string;
+  parent_id?: number | null;
+  children?: SpecialtyCategory[];
+}
+
 export default function HomepageCustom3Cyan() {
   const navigate = useNavigate();
   const { data, loading } = useHomepageData();
   
   const [selectedType, setSelectedType] = useState('');
+  const [selectedMainSpecialty, setSelectedMainSpecialty] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [citySearchQuery, setCitySearchQuery] = useState('');
   const [currentWord, setCurrentWord] = useState(0);
+  const [hierarchicalSpecialties, setHierarchicalSpecialties] = useState<SpecialtyCategory[]>([]);
+  const [loadingHierarchicalSpecialties, setLoadingHierarchicalSpecialties] = useState(true);
   const [heroBgSettings, setHeroBgSettings] = useState({
     enabled: false,
     image: null as string | null,
@@ -43,6 +54,37 @@ export default function HomepageCustom3Cyan() {
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Load hierarchical specialties (main categories + subcategories)
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadHierarchicalSpecialties = async () => {
+      try {
+        const response = await specialtiesAPI.getAll();
+        if (!isMounted) {
+          return;
+        }
+
+        const categories = Array.isArray(response.data)
+          ? (response.data as SpecialtyCategory[])
+          : [];
+        setHierarchicalSpecialties(categories);
+      } catch (error) {
+        console.error('Error loading hierarchical specialties:', error);
+      } finally {
+        if (isMounted) {
+          setLoadingHierarchicalSpecialties(false);
+        }
+      }
+    };
+
+    loadHierarchicalSpecialties();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Load hero background settings
@@ -82,11 +124,68 @@ export default function HomepageCustom3Cyan() {
 
   const doctors = data.doctors || [];
   const clinics = data.clinics || [];
-  const specialties = data.specialties || [];
+  const homepageSpecialties = data.specialties || [];
   const cities = data.cities || []; // For display with doctor counts
   const allCities = data.all_cities || []; // For dropdown filters
   const pitanja = data.pitanja || [];
   const blogPosts = data.blog_posts || [];
+  const isDoctorSearch = !selectedType || selectedType === 'doktori';
+
+  const groupedSpecialties = useMemo<SpecialtyCategory[]>(() => {
+    if (hierarchicalSpecialties.length > 0) {
+      return hierarchicalSpecialties;
+    }
+
+    return homepageSpecialties.map((specialty: any) => ({
+      id: specialty.id,
+      naziv: specialty.naziv,
+      slug: specialty.slug,
+      parent_id: specialty.parent_id || null,
+      children: [],
+    }));
+  }, [hierarchicalSpecialties, homepageSpecialties]);
+
+  const mainSpecialtyOptions = useMemo(
+    () =>
+      groupedSpecialties.map((specialty) => ({
+        value: specialty.slug,
+        label: specialty.naziv,
+      })),
+    [groupedSpecialties]
+  );
+
+  const selectedMainSpecialtyData = useMemo(
+    () =>
+      groupedSpecialties.find(
+        (specialty) => specialty.slug === selectedMainSpecialty
+      ) || null,
+    [groupedSpecialties, selectedMainSpecialty]
+  );
+
+  const hasSubcategories = (selectedMainSpecialtyData?.children?.length || 0) > 0;
+
+  const subSpecialtyOptions = useMemo(() => {
+    if (!selectedMainSpecialtyData) {
+      return [];
+    }
+
+    const parentOption = {
+      value: selectedMainSpecialtyData.slug,
+      label: `Opsta - ${selectedMainSpecialtyData.naziv}`,
+    };
+
+    if (!selectedMainSpecialtyData.children || selectedMainSpecialtyData.children.length === 0) {
+      return [parentOption];
+    }
+
+    return [
+      parentOption,
+      ...selectedMainSpecialtyData.children.map((child) => ({
+        value: child.slug,
+        label: child.naziv,
+      })),
+    ];
+  }, [selectedMainSpecialtyData]);
 
   // Debug: Log blog posts data
   console.log('Blog posts data:', data.blog_posts);
@@ -95,6 +194,22 @@ export default function HomepageCustom3Cyan() {
   const filteredCities = allCities.filter((city: any) => 
     city.naziv.toLowerCase().includes(citySearchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    if (!isDoctorSearch) {
+      setSelectedMainSpecialty('');
+      setSelectedSpecialty('');
+    }
+  }, [isDoctorSearch]);
+
+  const handleMainSpecialtyChange = (parentSlug: string) => {
+    setSelectedMainSpecialty(parentSlug);
+    setSelectedSpecialty(parentSlug);
+  };
+
+  const handleSubSpecialtyChange = (specialtySlug: string) => {
+    setSelectedSpecialty(specialtySlug);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,9 +283,9 @@ export default function HomepageCustom3Cyan() {
             {/* Search Box - Clean White Card */}
             <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
               <form onSubmit={handleSearch} className="space-y-6">
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className={`grid grid-cols-1 md:grid-cols-2 ${hasSubcategories ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
                   {/* Type Select */}
-                  <div className="relative z-30">
+                  <div className="relative z-40">
                     <CustomSelect
                       label="Šta tražite?"
                       value={selectedType}
@@ -187,20 +302,33 @@ export default function HomepageCustom3Cyan() {
                     />
                   </div>
 
-                  {/* Specialty Select */}
-                  <div className="relative z-20">
+                  {/* Main specialty category */}
+                  <div className="relative z-30">
                     <CustomSelect
-                      label="Oblast medicine"
-                      value={selectedSpecialty}
-                      onChange={setSelectedSpecialty}
-                      placeholder="Odaberite specijalnost..."
+                      label="Glavna oblast medicine"
+                      value={selectedMainSpecialty}
+                      onChange={handleMainSpecialtyChange}
+                      placeholder={isDoctorSearch ? 'Odaberite glavnu oblast...' : 'Dostupno za doktore'}
+                      disabled={!isDoctorSearch || loadingHierarchicalSpecialties || mainSpecialtyOptions.length === 0}
                       hideLabelOnMobile={true}
-                      options={specialties.map((specialty) => ({
-                        value: specialty.slug,
-                        label: specialty.naziv,
-                      }))}
+                      options={mainSpecialtyOptions}
                     />
                   </div>
+
+                  {/* Subcategory / general option */}
+                  {hasSubcategories && (
+                    <div className="relative z-20">
+                      <CustomSelect
+                        label="Podkategorija (opcionalno)"
+                        value={selectedSpecialty}
+                        onChange={handleSubSpecialtyChange}
+                        placeholder="Odaberite podkategoriju ili opstu opciju"
+                        disabled={!isDoctorSearch || !selectedMainSpecialty}
+                        hideLabelOnMobile={true}
+                        options={subSpecialtyOptions}
+                      />
+                    </div>
+                  )}
 
                   {/* City Select */}
                   <div className="relative z-10">
@@ -217,6 +345,12 @@ export default function HomepageCustom3Cyan() {
                     />
                   </div>
                 </div>
+
+                {isDoctorSearch && selectedMainSpecialty && hasSubcategories && (
+                  <p className="text-xs text-gray-500 text-left">
+                    Mozete izabrati opstu kategoriju ili jednu podkategoriju.
+                  </p>
+                )}
 
                 {/* Search Button */}
                 <Button 
