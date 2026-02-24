@@ -104,31 +104,13 @@ export default function HomepageCustom3Cyan() {
     loadSettings();
   }, []);
 
-  if (loading || !data) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-cyan-50">
-        <Navbar />
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="text-center">
-            <div className="relative w-20 h-20 mx-auto mb-4">
-              <div className="absolute inset-0 rounded-full border-4 border-cyan-500/20"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
-              <Heart className="absolute inset-0 m-auto w-8 h-8 text-cyan-500 animate-pulse" />
-            </div>
-            <p className="text-muted-foreground">Učitavanje...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const doctors = data.doctors || [];
-  const clinics = data.clinics || [];
-  const homepageSpecialties = data.specialties || [];
-  const cities = data.cities || []; // For display with doctor counts
-  const allCities = data.all_cities || []; // For dropdown filters
-  const pitanja = data.pitanja || [];
-  const blogPosts = data.blog_posts || [];
+  const doctors = data?.doctors || [];
+  const clinics = data?.clinics || [];
+  const homepageSpecialties = data?.specialties || [];
+  const cities = data?.cities || []; // For display with doctor counts
+  const allCities = data?.all_cities || []; // For dropdown filters
+  const pitanja = data?.pitanja || [];
+  const blogPosts = data?.blog_posts || [];
   const isDoctorSearch = !selectedType || selectedType === 'doktori';
 
   const groupedSpecialties = useMemo<SpecialtyCategory[]>(() => {
@@ -188,7 +170,7 @@ export default function HomepageCustom3Cyan() {
   }, [selectedMainSpecialtyData]);
 
   // Debug: Log blog posts data
-  console.log('Blog posts data:', data.blog_posts);
+  console.log('Blog posts data:', data?.blog_posts);
   console.log('Blog posts length:', blogPosts.length);
 
   const filteredCities = allCities.filter((city: any) => 
@@ -201,6 +183,24 @@ export default function HomepageCustom3Cyan() {
       setSelectedSpecialty('');
     }
   }, [isDoctorSearch]);
+
+  if (loading || !data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-cyan-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center">
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <div className="absolute inset-0 rounded-full border-4 border-cyan-500/20"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+              <Heart className="absolute inset-0 m-auto w-8 h-8 text-cyan-500 animate-pulse" />
+            </div>
+            <p className="text-muted-foreground">Ucitavanje...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleMainSpecialtyChange = (parentSlug: string) => {
     setSelectedMainSpecialty(parentSlug);
@@ -814,3 +814,4 @@ export default function HomepageCustom3Cyan() {
     </div>
   );
 }
+
