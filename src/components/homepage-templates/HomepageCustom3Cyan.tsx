@@ -387,7 +387,8 @@ export default function HomepageCustom3Cyan() {
       {featuredBlogPosts && featuredBlogPosts.length > 0 && (
         <section className="relative z-10 pb-10 md:-mt-16">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Desktop: 3 columns */}
+            <div className="hidden md:grid md:grid-cols-3 gap-4">
               {featuredBlogPosts.slice(0, 3).map((post: any) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
                   <Card className="group h-full bg-white/95 backdrop-blur border-2 border-gray-100 hover:border-cyan-200 shadow-sm hover:shadow-md transition-all duration-300">
@@ -406,9 +407,53 @@ export default function HomepageCustom3Cyan() {
                             </div>
                           )}
                         </div>
-                        <h3 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-3 group-hover:text-cyan-700 transition-colors">
-                          {post.naslov}
-                        </h3>
+                        <div className="flex-1 min-w-0">
+                          {post.kategorija && (
+                            <Badge variant="secondary" className="mb-2 bg-cyan-100 text-cyan-700">
+                              {post.kategorija.naziv}
+                            </Badge>
+                          )}
+                          <h3 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-3 group-hover:text-cyan-700 transition-colors">
+                            {post.naslov}
+                          </h3>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            {/* Mobile: stacked list like latest articles */}
+            <div className="md:hidden space-y-4">
+              {featuredBlogPosts.slice(0, 3).map((post: any) => (
+                <Link key={post.id} to={`/blog/${post.slug}`}>
+                  <Card className="hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200">
+                    <CardContent className="p-4">
+                      <div className="flex gap-4 min-w-0">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-cyan-100">
+                          {post.slika_url ? (
+                            <img
+                              src={fixImageUrl(post.slika_url) || ''}
+                              alt={post.naslov}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Lightbulb className="w-8 h-8 text-cyan-600" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {post.kategorija && (
+                            <Badge variant="secondary" className="bg-cyan-100 text-cyan-700 mb-2">
+                              {post.kategorija.naziv}
+                            </Badge>
+                          )}
+                          <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm">
+                            {post.naslov}
+                          </h3>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
