@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -122,7 +122,7 @@ export function CustomSelect({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Pretražite..."
+                placeholder="Pretrazite..."
                 className="w-full px-3 py-2 text-base sm:text-sm border border-gray-200 rounded-md focus:outline-none focus:border-cyan-500"
                 onClick={(e) => e.stopPropagation()}
               />
@@ -160,3 +160,4 @@ export function CustomSelect({
     </div>
   );
 }
+

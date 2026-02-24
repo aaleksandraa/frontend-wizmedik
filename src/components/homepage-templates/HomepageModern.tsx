@@ -64,7 +64,7 @@ export function HomepageModern() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Pronadjite strucnjaka</h2>
+            <h2 className="text-4xl font-bold mb-4">Pronađite strucnjaka</h2>
             <p className="text-xl text-gray-600">Odaberite specijalnost</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">

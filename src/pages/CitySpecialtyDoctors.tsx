@@ -161,13 +161,13 @@ export default function CitySpecialtyDoctors() {
 
   const pageDescription = useMemo(() => {
     if (resolvedSpecialtyName && resolvedCityName) {
-      return `Pronadjite ${resolvedSpecialtyName.toLowerCase()} doktore u gradu ${resolvedCityName}. Pregledajte profile, ocjene i zakazite termin online.`;
+      return `Pronađite ${resolvedSpecialtyName.toLowerCase()} doktore u gradu ${resolvedCityName}. Pregledajte profile, ocjene i zakazite termin online.`;
     }
     if (resolvedSpecialtyName) {
       return `Lista doktora specijalista iz oblasti ${resolvedSpecialtyName.toLowerCase()} sa mogucnoscu online zakazivanja termina.`;
     }
     if (resolvedCityName) {
-      return `Pronadjite doktore u gradu ${resolvedCityName}. Pregledajte profile, kontakt informacije i dostupnost termina.`;
+      return `Pronađite doktore u gradu ${resolvedCityName}. Pregledajte profile, kontakt informacije i dostupnost termina.`;
     }
     return 'Pretrazite doktore po gradu i specijalnosti na platformi WizMedik.';
   }, [resolvedCityName, resolvedSpecialtyName]);

@@ -247,7 +247,7 @@ export default function HomepageCustom3Cyan() {
       <Navbar />
       
       {/* Hero Section - Clean Centered Design */}
-      <section className="relative py-20 lg:py-32 pb-32 lg:pb-40">
+      <section className="relative z-30 overflow-visible py-20 lg:py-32 pb-32 lg:pb-40">
         {/* Background Image (if enabled) */}
         {heroBgSettings.enabled && heroBgSettings.image && (
           <div 
@@ -265,11 +265,11 @@ export default function HomepageCustom3Cyan() {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 relative z-30">
           <div className="max-w-4xl mx-auto text-center">
             {/* Main Heading with Animated Word */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-              PronaÄ‘ite{' '}
+              Pronađite{' '}
               <span 
                 key={currentWord}
                 className="text-cyan-600 inline-block animate-in fade-in-0 slide-in-from-bottom-2 duration-500"
@@ -279,17 +279,17 @@ export default function HomepageCustom3Cyan() {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 mb-12">
-              ZakaÅ¾ite pregled kod najboljih u Bosni i Hercegovini
+              Zakažite pregled kod najboljih u Bosni i Hercegovini
             </p>
 
             {/* Search Box - Clean White Card */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+            <div className="relative z-40 bg-white rounded-2xl shadow-2xl p-8 mb-8">
               <form onSubmit={handleSearch} className="space-y-6">
                 <div className={`grid grid-cols-1 md:grid-cols-2 ${hasSubcategories ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
                   {/* Type Select */}
                   <div className="relative z-40">
                     <CustomSelect
-                      label="Å ta traÅ¾ite?"
+                      label="Sta trazite?"
                       value={selectedType}
                       onChange={setSelectedType}
                       placeholder="Odaberite tip"
@@ -361,7 +361,7 @@ export default function HomepageCustom3Cyan() {
                   className="w-full h-14 text-lg font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
                 >
                   <Search className="mr-2 h-5 w-5" />
-                  PretraÅ¾ite
+                  Pretrazite
                 </Button>
               </form>
             </div>
@@ -385,12 +385,12 @@ export default function HomepageCustom3Cyan() {
 
       {/* Featured Blog Cards (no heading) */}
       {featuredBlogPosts && featuredBlogPosts.length > 0 && (
-        <section className="-mt-16 relative z-20 pb-10">
+        <section className="relative z-10 pb-10 md:-mt-16">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {featuredBlogPosts.slice(0, 3).map((post: any) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
-                  <Card className="group h-full bg-white/95 backdrop-blur border-2 border-gray-100 hover:border-cyan-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Card className="group h-full bg-white/95 backdrop-blur border-2 border-gray-100 hover:border-cyan-200 shadow-sm hover:shadow-md transition-all duration-300">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-4 min-w-0">
                         <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-cyan-100">
@@ -424,11 +424,11 @@ export default function HomepageCustom3Cyan() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Najpopularnije specijalnosti</h2>
-            <p className="text-gray-600">Brzo pronaÄ‘ite doktora za vaÅ¡u potrebu</p>
+            <p className="text-gray-600">Brzo pronađite doktora za vasu potrebu</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { icon: Stethoscope, label: 'OpÅ¡ta medicina', href: '/specijalnost/opsta-medicina-i-porodicna-medicina', color: 'bg-cyan-100 text-cyan-600' },
+              { icon: Stethoscope, label: 'Opšta medicina', href: '/specijalnost/opsta-medicina-i-porodicna-medicina', color: 'bg-cyan-100 text-cyan-600' },
               { icon: Heart, label: 'Kardiologija', href: '/specijalnost/kardiologija', color: 'bg-cyan-100 text-cyan-600' },
               { icon: Activity, label: 'Interna medicina', href: '/specijalnost/interna-medicina', color: 'bg-teal-100 text-teal-600' },
               { icon: FlaskConical, label: 'Laboratorije', href: '/laboratorije', color: 'bg-emerald-100 text-emerald-600' },
@@ -467,7 +467,7 @@ export default function HomepageCustom3Cyan() {
                 <Lightbulb className="w-3 h-3 mr-2" />Zdravstveni savjeti
               </Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Najnoviji savjeti</h2>
-              <p className="text-gray-600">StruÄni savjeti i informacije od naÅ¡ih doktora</p>
+              <p className="text-gray-600">Stručni savjeti i informacije od nasih doktora</p>
             </div>
 
             {/* Desktop: 3 columns with large images */}
@@ -579,7 +579,7 @@ export default function HomepageCustom3Cyan() {
                 <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
                   <HelpCircle className="w-3 h-3 mr-2" />Pitanja i odgovori
                 </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Pitajte naÅ¡e struÄnjake</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Pitajte naše stručnjake</h2>
                 <p className="text-gray-600 mt-2">Postavite pitanje i dobijte odgovor od verificiranih doktora</p>
               </div>
               <div className="flex gap-3">
@@ -718,7 +718,7 @@ export default function HomepageCustom3Cyan() {
                   <Users className="w-3 h-3 mr-2" />Njega i briga
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Domovi za starija i bolesna lica</h2>
-                <p className="text-gray-600 mt-2">Profesionalna njega i briga u sigurnom okruÅ¾enju</p>
+                <p className="text-gray-600 mt-2">Profesionalna njega i briga u sigurnom okruženju</p>
               </div>
               <Link to="/domovi-njega">
                 <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
