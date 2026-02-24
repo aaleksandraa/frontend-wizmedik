@@ -774,7 +774,12 @@ export default function AdminPanel() {
 
   const handleSaveBlogSettings = async () => {
     try {
-      await blogAPI.updateSettings(blogSettings);
+      const payload = {
+        ...blogSettings,
+        homepage_display: blogSettings.homepage_display === 'featured' ? 'featured' : 'latest',
+      };
+      const response = await blogAPI.updateSettings(payload);
+      setBlogSettings(response.data || payload);
       toast({ title: "Uspjeh", description: "Postavke sačuvane" });
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
@@ -1430,7 +1435,6 @@ export default function AdminPanel() {
                           <SelectContent>
                             <SelectItem value="latest">Najnoviji članci</SelectItem>
                             <SelectItem value="featured">Istaknuti članci</SelectItem>
-                            <SelectItem value="none">Ne prikazuj</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

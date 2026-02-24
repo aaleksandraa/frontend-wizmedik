@@ -416,18 +416,43 @@ export default function DoctorDashboard() {
 
   const fetchBlogData = async () => {
     try {
-      const [canWriteRes, postsRes, catsRes] = await Promise.all([
-        blogAPI.canDoctorsWrite(),
+      const canWriteRes = await blogAPI.canDoctorsWrite();
+      const canWrite = Boolean(canWriteRes.data?.can_write);
+      setCanWriteBlog(canWrite);
+
+      if (!canWrite) {
+        setMyBlogPosts([]);
+        setBlogCategories([]);
+        return;
+      }
+    } catch (error) {
+      console.error('Error fetching blog permission:', error);
+      setCanWriteBlog(false);
+      setMyBlogPosts([]);
+      setBlogCategories([]);
+      return;
+    }
+
+    try {
+      const [postsRes, catsRes] = await Promise.all([
         blogAPI.getMyPosts(),
         blogAPI.getCategories()
       ]);
-      setCanWriteBlog(canWriteRes.data?.can_write || false);
+
       setMyBlogPosts(postsRes.data || []);
       setBlogCategories(catsRes.data || []);
     } catch (error) {
-      console.error('Error fetching blog data:', error);
+      console.error('Error fetching doctor blog content:', error);
+      setMyBlogPosts([]);
+      setBlogCategories([]);
     }
   };
+
+  useEffect(() => {
+    if (isDoctor && activeTab === 'blog') {
+      fetchBlogData();
+    }
+  }, [activeTab, isDoctor]);
 
   const resetBlogPostForm = () => {
     setBlogPostForm({ naslov: '', sadrzaj: '', excerpt: '', thumbnail: '', meta_title: '', meta_description: '', meta_keywords: '', category_ids: [] });
@@ -1167,7 +1192,7 @@ export default function DoctorDashboard() {
                 <CalendarDays className="h-4 w-4 mr-2 hidden sm:inline" />
                 Kalendar Sync
               </TabsTrigger>
-              <TabsTrigger value="blog" className="flex-1 min-w-[80px]" onClick={() => fetchBlogData()}>
+              <TabsTrigger value="blog" className="flex-1 min-w-[80px]">
                 <FileText className="h-4 w-4 mr-2 hidden sm:inline" />
                 Blog
               </TabsTrigger>
