@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { doctorsAPI, clinicsAPI, citiesAPI, specialtiesAPI, uploadAPI, blogAPI } from '@/services/api';
@@ -125,7 +125,7 @@ const getErrorMessage = (error: any): string => {
     const errors = error.response.data.errors;
     return Object.values(errors).flat().join('\n');
   }
-  return error.response?.data?.message || error.message || "Došlo je do greške";
+  return error.response?.data?.message || error.message || "DoÅ¡lo je do greÅ¡ke";
 };
 
 const normalizeCityLink = (value?: string): string | undefined => {
@@ -250,7 +250,7 @@ const defaultWorkingHours = {
   ponedeljak: { open: '08:00', close: '20:00', closed: false },
   utorak: { open: '08:00', close: '20:00', closed: false },
   sreda: { open: '08:00', close: '20:00', closed: false },
-  četvrtak: { open: '08:00', close: '20:00', closed: false },
+  cetvrtak: { open: '08:00', close: '20:00', closed: false },
   petak: { open: '08:00', close: '20:00', closed: false },
   subota: { open: '09:00', close: '15:00', closed: false },
   nedelja: { open: '09:00', close: '15:00', closed: true }
@@ -355,7 +355,7 @@ export default function AdminPanel() {
         // Direct array response
         doctorsList = doctorsRes.data;
       }
-      console.log('✅ Doctors loaded:', doctorsList.length);
+      console.log('âœ… Doctors loaded:', doctorsList.length);
       setDoctors(doctorsList);
       
       // Parse clinics response
@@ -365,7 +365,7 @@ export default function AdminPanel() {
       } else if (Array.isArray(clinicsRes.data)) {
         clinicsList = clinicsRes.data;
       }
-      console.log('✅ Clinics loaded:', clinicsList.length);
+      console.log('âœ… Clinics loaded:', clinicsList.length);
       setClinics(clinicsList);
       
       // Parse specialties response
@@ -375,7 +375,7 @@ export default function AdminPanel() {
       } else if (Array.isArray(specialtiesRes.data)) {
         specialtiesList = specialtiesRes.data;
       }
-      console.log('✅ Specialties loaded:', specialtiesList.length);
+      console.log('âœ… Specialties loaded:', specialtiesList.length);
       setSpecialties(specialtiesList);
       
       // Parse cities response
@@ -385,21 +385,21 @@ export default function AdminPanel() {
       } else if (Array.isArray(citiesRes.data)) {
         citiesList = citiesRes.data;
       }
-      console.log('✅ Cities loaded:', citiesList.length);
+      console.log('âœ… Cities loaded:', citiesList.length);
       setCities(citiesList.map((city: any) => ({
         ...city,
         kljucne_tacke: normalizeCityKeyPoints(city.kljucne_tacke),
       })));
     } catch (error: any) {
-      console.error('❌ Error fetching admin data:', error);
+      console.error('âŒ Error fetching admin data:', error);
       console.error('Error details:', {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status
       });
       toast({ 
-        title: "Greška pri učitavanju", 
-        description: error.response?.data?.message || "Nije moguće učitati podatke. Pokušajte osvježiti stranicu.", 
+        title: "GreÅ¡ka pri uÄitavanju", 
+        description: error.response?.data?.message || "Nije moguÄ‡e uÄitati podatke. PokuÅ¡ajte osvjeÅ¾iti stranicu.", 
         variant: "destructive" 
       });
     } finally {
@@ -424,7 +424,7 @@ export default function AdminPanel() {
 
   const createSlug = (name: string): string => {
     return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd').replace(/č/g, 'c').replace(/ć/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z')
+      .replace(/Ä‘/g, 'd').replace(/Ä/g, 'c').replace(/Ä‡/g, 'c').replace(/Å¡/g, 's').replace(/Å¾/g, 'z')
       .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   };
 
@@ -474,7 +474,7 @@ export default function AdminPanel() {
       };
       if (editingDoctor) {
         await adminAPI.updateDoctor(editingDoctor.id, data);
-        toast({ title: "Uspjeh", description: "Doktor ažuriran" });
+        toast({ title: "Uspjeh", description: "Doktor aÅ¾uriran" });
       } else {
         await adminAPI.createDoctor({ ...data, password: doctorForm.password });
         toast({ title: "Uspjeh", description: "Doktor kreiran" });
@@ -483,7 +483,7 @@ export default function AdminPanel() {
       resetDoctorForm();
       fetchData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -494,7 +494,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Doktor obrisan" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -543,7 +543,7 @@ export default function AdminPanel() {
       
       if (editingClinic) {
         await adminAPI.updateClinic(editingClinic.id, data);
-        toast({ title: "Uspjeh", description: "Klinika ažurirana" });
+        toast({ title: "Uspjeh", description: "Klinika aÅ¾urirana" });
       } else {
         await adminAPI.createClinic({ ...data, password: clinicForm.password });
         toast({ title: "Uspjeh", description: "Klinika kreirana" });
@@ -552,7 +552,7 @@ export default function AdminPanel() {
       resetClinicForm();
       fetchData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -563,7 +563,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Klinika obrisana" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -622,7 +622,7 @@ export default function AdminPanel() {
       if (editingCity) {
         const response = await adminAPI.updateCity(editingCity.id, data);
         console.log('Update response:', response);
-        toast({ title: "Uspjeh", description: "Grad ažuriran" });
+        toast({ title: "Uspjeh", description: "Grad aÅ¾uriran" });
       } else {
         await adminAPI.createCity(data);
         toast({ title: "Uspjeh", description: "Grad kreiran" });
@@ -632,7 +632,7 @@ export default function AdminPanel() {
       fetchData();
     } catch (error: any) {
       console.error('Save city error:', error);
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -643,7 +643,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Grad obrisan" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -654,7 +654,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Specijalnost obrisana" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -664,7 +664,7 @@ export default function AdminPanel() {
       const response = await adminAPI.getSpecialty(specialty.id);
       setEditingSpecialty(response.data);
     } catch (error: any) {
-      toast({ title: "Greška", description: "Nije moguće učitati podatke specijalnosti", variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: "Nije moguÄ‡e uÄitati podatke specijalnosti", variant: "destructive" });
       console.error('Error loading specialty:', error);
     }
   };
@@ -693,17 +693,12 @@ export default function AdminPanel() {
       const posts = postsRes.data?.data || postsRes.data || [];
       setBlogPosts(posts);
       setBlogCategories(catsRes.data || []);
-      const validPostIds = new Set(
-        (posts || [])
-          .map((post: any) => Number(post?.id))
-          .filter((id: number) => Number.isInteger(id) && id > 0)
-      );
       const settings = settingsRes.data || {};
       setBlogSettings({
         doctors_can_write: Boolean(settings.doctors_can_write),
         homepage_display: settings.homepage_display === 'featured' ? 'featured' : 'latest',
         homepage_count: Number(settings.homepage_count) || 3,
-        featured_post_ids: normalizeFeaturedPostIds(settings.featured_post_ids).filter((id) => validPostIds.has(id)),
+        featured_post_ids: normalizeFeaturedPostIds(settings.featured_post_ids),
       });
     } catch (error) {
       console.error('Error fetching blog data:', error);
@@ -736,28 +731,28 @@ export default function AdminPanel() {
     try {
       if (editingBlogPost) {
         await blogAPI.adminUpdatePost(editingBlogPost.id, blogPostForm);
-        toast({ title: "Uspjeh", description: "Članak ažuriran" });
+        toast({ title: "Uspjeh", description: "ÄŒlanak aÅ¾uriran" });
       } else {
         await blogAPI.adminCreatePost(blogPostForm);
-        toast({ title: "Uspjeh", description: "Članak kreiran" });
+        toast({ title: "Uspjeh", description: "ÄŒlanak kreiran" });
       }
       setShowBlogPostDialog(false);
       resetBlogPostForm();
       fetchBlogData();
     } catch (error: any) {
       console.error('Blog post error:', error.response?.data);
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
   const handleDeleteBlogPost = async (id: number) => {
-    if (!confirm('Obrisati članak?')) return;
+    if (!confirm('Obrisati Älanak?')) return;
     try {
       await blogAPI.adminDeletePost(id);
-      toast({ title: "Uspjeh", description: "Članak obrisan" });
+      toast({ title: "Uspjeh", description: "ÄŒlanak obrisan" });
       fetchBlogData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -777,7 +772,7 @@ export default function AdminPanel() {
     try {
       if (editingBlogCategory) {
         await blogAPI.adminUpdateCategory(editingBlogCategory.id, blogCategoryForm);
-        toast({ title: "Uspjeh", description: "Kategorija ažurirana" });
+        toast({ title: "Uspjeh", description: "Kategorija aÅ¾urirana" });
       } else {
         await blogAPI.adminCreateCategory(blogCategoryForm);
         toast({ title: "Uspjeh", description: "Kategorija kreirana" });
@@ -785,7 +780,7 @@ export default function AdminPanel() {
       setShowBlogCategoryDialog(false);
       fetchBlogData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -796,55 +791,64 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Kategorija obrisana" });
       fetchBlogData();
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
+  };
+
+  const buildBlogSettingsPayload = (sourceSettings: any) => ({
+    doctors_can_write: Boolean(sourceSettings?.doctors_can_write),
+    homepage_display: sourceSettings?.homepage_display === 'featured' ? 'featured' : 'latest',
+    homepage_count: Number(sourceSettings?.homepage_count) || 3,
+    featured_post_ids: normalizeFeaturedPostIds(sourceSettings?.featured_post_ids),
+  });
+
+  const persistBlogSettings = async (sourceSettings: any) => {
+    const payload = buildBlogSettingsPayload(sourceSettings);
+    const response = await blogAPI.updateSettings(payload);
+    const saved = response.data || payload;
+    const normalizedSaved = {
+      doctors_can_write: Boolean(saved.doctors_can_write),
+      homepage_display: saved.homepage_display === 'featured' ? 'featured' : 'latest',
+      homepage_count: Number(saved.homepage_count) || 3,
+      featured_post_ids: normalizeFeaturedPostIds(saved.featured_post_ids),
+    };
+    setBlogSettings(normalizedSaved);
+    return normalizedSaved;
   };
 
   const handleSaveBlogSettings = async () => {
     try {
-      const validPostIds = new Set(
-        (blogPosts || [])
-          .map((post: any) => Number(post?.id))
-          .filter((id: number) => Number.isInteger(id) && id > 0)
-      );
-      const payload = {
-        doctors_can_write: Boolean(blogSettings.doctors_can_write),
-        homepage_display: blogSettings.homepage_display === 'featured' ? 'featured' : 'latest',
-        homepage_count: Number(blogSettings.homepage_count) || 3,
-        featured_post_ids: normalizeFeaturedPostIds(blogSettings.featured_post_ids).filter((id) => validPostIds.has(id)),
-      };
-      const response = await blogAPI.updateSettings(payload);
-      const saved = response.data || payload;
-      setBlogSettings({
-        doctors_can_write: Boolean(saved.doctors_can_write),
-        homepage_display: saved.homepage_display === 'featured' ? 'featured' : 'latest',
-        homepage_count: Number(saved.homepage_count) || 3,
-        featured_post_ids: normalizeFeaturedPostIds(saved.featured_post_ids),
-      });
-      toast({ title: "Uspjeh", description: "Postavke sačuvane" });
+      await persistBlogSettings(blogSettings);
+      toast({ title: "Uspjeh", description: "Postavke sacuvane" });
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greska", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
-  const toggleFeaturedPost = (postId: number) => {
+  const toggleFeaturedPost = async (postId: number) => {
     const normalizedPostId = Number(postId);
     if (!Number.isInteger(normalizedPostId) || normalizedPostId <= 0) return;
 
-    setBlogSettings((prev: any) => {
-      const featured = normalizeFeaturedPostIds(prev?.featured_post_ids);
-      const exists = featured.includes(normalizedPostId);
-      const maxFeatured = Math.max(1, Number(prev?.homepage_count) || 3);
+    const previousSettings = { ...blogSettings };
+    const featured = normalizeFeaturedPostIds(previousSettings.featured_post_ids);
+    const exists = featured.includes(normalizedPostId);
+    const maxFeatured = Math.max(1, Number(previousSettings.homepage_count) || 3);
+    const nextSettings = {
+      ...previousSettings,
+      featured_post_ids: exists
+        ? featured.filter((id: number) => id !== normalizedPostId)
+        : [normalizedPostId, ...featured].slice(0, maxFeatured),
+    };
 
-      return {
-        ...prev,
-        featured_post_ids: exists
-          ? featured.filter((id: number) => id !== normalizedPostId)
-          : [normalizedPostId, ...featured].slice(0, maxFeatured),
-      };
-    });
+    setBlogSettings(nextSettings);
+
+    try {
+      await persistBlogSettings(nextSettings);
+    } catch (error: any) {
+      setBlogSettings(previousSettings);
+      toast({ title: "Greska", description: getErrorMessage(error), variant: "destructive" });
+    }
   };
-
   // Specialty sorting handlers
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -866,10 +870,10 @@ export default function AdminPanel() {
       }));
 
       await adminAPI.reorderSpecialties(reorderedSpecialties);
-      toast({ title: "Uspjeh", description: "Redoslijed specijalnosti sačuvan" });
+      toast({ title: "Uspjeh", description: "Redoslijed specijalnosti saÄuvan" });
       setIsSortingSpecialties(false);
     } catch (error: any) {
-      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -905,13 +909,13 @@ export default function AdminPanel() {
                 </div>
                 Admin Panel
               </h1>
-              <p className="text-muted-foreground mt-1">Upravljajte sadržajem platforme</p>
+              <p className="text-muted-foreground mt-1">Upravljajte sadrÅ¾ajem platforme</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative flex-1 md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Pretraži..."
+                  placeholder="PretraÅ¾i..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -1022,7 +1026,7 @@ export default function AdminPanel() {
               </TabsTrigger>
               <TabsTrigger value="homepage" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Settings className="h-4 w-4 mr-2 hidden sm:inline" />
-                Početna
+                PoÄetna
               </TabsTrigger>
               <TabsTrigger value="legal" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Shield className="h-4 w-4 mr-2 hidden sm:inline" />
@@ -1128,7 +1132,7 @@ export default function AdminPanel() {
                       <Stethoscope className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <p className="text-lg font-medium mb-2">Nema doktora</p>
                       <p className="text-sm text-muted-foreground mb-4">
-                        {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Dodajte prvog doktora klikom na dugme iznad.'}
+                        {searchTerm ? 'Nema rezultata za vaÅ¡u pretragu.' : 'Dodajte prvog doktora klikom na dugme iznad.'}
                       </p>
                       {!searchTerm && (
                         <Button onClick={() => openDoctorDialog()} className="gap-2">
@@ -1256,10 +1260,10 @@ export default function AdminPanel() {
                         setIsSortingSpecialties(false);
                         fetchData(); // Reset to original order
                       }}>
-                        Otkaži
+                        OtkaÅ¾i
                       </Button>
                       <Button onClick={handleSaveSpecialtyOrder} className="gap-2">
-                        <Check className="h-4 w-4" /> Sačuvaj redoslijed
+                        <Check className="h-4 w-4" /> SaÄuvaj redoslijed
                       </Button>
                     </>
                   ) : (
@@ -1326,7 +1330,7 @@ export default function AdminPanel() {
             <TabsContent value="blog" className="space-y-6">
               <Tabs defaultValue="posts">
                 <TabsList>
-                  <TabsTrigger value="posts">Članci</TabsTrigger>
+                  <TabsTrigger value="posts">ÄŒlanci</TabsTrigger>
                   <TabsTrigger value="categories">Kategorije</TabsTrigger>
                   <TabsTrigger value="settings">Postavke</TabsTrigger>
                   <TabsTrigger value="typography">Tipografija</TabsTrigger>
@@ -1335,9 +1339,9 @@ export default function AdminPanel() {
                 {/* Blog Posts */}
                 <TabsContent value="posts" className="mt-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Članci ({blogPosts.length})</h2>
+                    <h2 className="text-lg font-semibold">ÄŒlanci ({blogPosts.length})</h2>
                     <Button onClick={() => navigate('/blog/editor')} className="gap-2">
-                      <Plus className="h-4 w-4" /> Novi članak
+                      <Plus className="h-4 w-4" /> Novi Älanak
                     </Button>
                   </div>
                   <div className="space-y-3">
@@ -1358,7 +1362,7 @@ export default function AdminPanel() {
                                 <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>{post.status === 'published' ? 'Objavljeno' : 'Nacrt'}</Badge>
                                 {(blogSettings.featured_post_ids || []).includes(post.id) && <Badge variant="outline" className="text-yellow-600"><Star className="h-3 w-3 mr-1" />Istaknuto</Badge>}
                               </div>
-                              <p className="text-sm text-muted-foreground">{post.autor_name} • {post.views || 0} pregleda</p>
+                              <p className="text-sm text-muted-foreground">{post.autor_name} â€¢ {post.views || 0} pregleda</p>
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -1375,7 +1379,7 @@ export default function AdminPanel() {
                         </CardContent>
                       </Card>
                     ))}
-                    {blogPosts.length === 0 && <p className="text-center text-muted-foreground py-8">Nema članaka</p>}
+                    {blogPosts.length === 0 && <p className="text-center text-muted-foreground py-8">Nema Älanaka</p>}
                   </div>
                 </TabsContent>
 
@@ -1429,9 +1433,9 @@ export default function AdminPanel() {
                           try {
                             await blogAPI.adminUpdateCategoriesOrder(updatedCategories);
                             setBlogCategories(newCategories.map((cat, idx) => ({ ...cat, sort_order: idx })));
-                            toast({ title: "Uspjeh", description: "Redoslijed kategorija ažuriran" });
+                            toast({ title: "Uspjeh", description: "Redoslijed kategorija aÅ¾uriran" });
                           } catch (error) {
-                            toast({ title: "Greška", description: "Nije moguće ažurirati redoslijed", variant: "destructive" });
+                            toast({ title: "GreÅ¡ka", description: "Nije moguÄ‡e aÅ¾urirati redoslijed", variant: "destructive" });
                           }
                         }}
                         className="cursor-move hover:shadow-md transition-shadow"
@@ -1446,7 +1450,7 @@ export default function AdminPanel() {
                               </div>
                               <div>
                                 <p className="font-medium">{cat.naziv}</p>
-                                <p className="text-sm text-muted-foreground">{cat.posts_count || 0} članaka</p>
+                                <p className="text-sm text-muted-foreground">{cat.posts_count || 0} Älanaka</p>
                                 {cat.opis && (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{cat.opis}</p>
                                 )}
@@ -1474,7 +1478,7 @@ export default function AdminPanel() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Doktori mogu pisati</p>
-                          <p className="text-sm text-muted-foreground">Omogući doktorima da pišu članke</p>
+                          <p className="text-sm text-muted-foreground">OmoguÄ‡i doktorima da piÅ¡u Älanke</p>
                         </div>
                         <Switch
                           checked={blogSettings.doctors_can_write}
@@ -1482,20 +1486,20 @@ export default function AdminPanel() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Prikaz na početnoj</Label>
+                        <Label>Prikaz na poÄetnoj</Label>
                         <Select
                           value={blogSettings.homepage_display}
                           onValueChange={(v) => setBlogSettings((prev: any) => ({ ...prev, homepage_display: v }))}
                         >
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="latest">Najnoviji članci</SelectItem>
-                            <SelectItem value="featured">Istaknuti članci</SelectItem>
+                            <SelectItem value="latest">Najnoviji Älanci</SelectItem>
+                            <SelectItem value="featured">Istaknuti Älanci</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Broj članaka na početnoj</Label>
+                        <Label>Broj Älanaka na poÄetnoj</Label>
                         <Select
                           value={blogSettings.homepage_count?.toString()}
                           onValueChange={(v) =>
@@ -1519,13 +1523,13 @@ export default function AdminPanel() {
                       </div>
                       {blogSettings.homepage_display === 'featured' && (
                         <div className="space-y-2">
-                          <Label>Istaknuti članci ({(blogSettings.featured_post_ids || []).length})</Label>
+                          <Label>Istaknuti Älanci ({(blogSettings.featured_post_ids || []).length})</Label>
                           <p className="text-sm text-muted-foreground">
                             Kliknite na zvjezdicu pored clanka. Novi izbor ide na vrh (max {blogSettings.homepage_count}).
                           </p>
                         </div>
                       )}
-                      <Button onClick={handleSaveBlogSettings}>Sačuvaj postavke</Button>
+                      <Button onClick={handleSaveBlogSettings}>SaÄuvaj postavke</Button>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -1695,15 +1699,15 @@ export default function AdminPanel() {
                         setDoctorForm({...doctorForm, slika_profila: url});
                         toast({ title: "Slika uploadovana" });
                       } catch (err) {
-                        toast({ title: "Greška", variant: "destructive" });
+                        toast({ title: "GreÅ¡ka", variant: "destructive" });
                       }
                     }
                   }} />
                   {doctorForm.slika_profila && <img src={doctorForm.slika_profila} alt="" className="w-20 h-20 rounded-lg object-cover mt-2" />}
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingDoctor ? 'Sačuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowDoctorDialog(false)}>Otkaži</Button>
+                  <Button type="submit" className="flex-1">{editingDoctor ? 'SaÄuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowDoctorDialog(false)}>OtkaÅ¾i</Button>
                 </div>
               </form>
             </DialogContent>
@@ -1774,7 +1778,7 @@ export default function AdminPanel() {
                         setClinicForm({...clinicForm, slike: [...clinicForm.slike, url]});
                         toast({ title: "Slika uploadovana" });
                       } catch (err) {
-                        toast({ title: "Greška", variant: "destructive" });
+                        toast({ title: "GreÅ¡ka", variant: "destructive" });
                       }
                     }
                   }} />
@@ -1793,8 +1797,8 @@ export default function AdminPanel() {
                   )}
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingClinic ? 'Sačuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowClinicDialog(false)}>Otkaži</Button>
+                  <Button type="submit" className="flex-1">{editingClinic ? 'SaÄuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowClinicDialog(false)}>OtkaÅ¾i</Button>
                 </div>
               </form>
             </DialogContent>
@@ -1822,7 +1826,7 @@ export default function AdminPanel() {
                     <Input value={cityForm.populacija} onChange={(e) => setCityForm({...cityForm, populacija: e.target.value})} />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Hitna pomoć</label>
+                    <label className="text-sm font-medium">Hitna pomoÄ‡</label>
                     <Input value={cityForm.hitna_pomoc} onChange={(e) => setCityForm({...cityForm, hitna_pomoc: e.target.value})} />
                   </div>
                 </div>
@@ -1849,13 +1853,13 @@ export default function AdminPanel() {
                   </div>
                   {editingCity && (
                     <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground mb-1">Automatski izračunato:</p>
+                      <p className="text-xs text-muted-foreground mb-1">Automatski izraÄunato:</p>
                       <p className="text-sm">Doktora: {editingCity.broj_doktora || 0} | Klinika: {editingCity.broj_klinika || 0}</p>
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Ključne tačke</label>
+                  <label className="text-sm font-medium">KljuÄne taÄke</label>
                   <div className="flex gap-2 mb-2">
                     <Input placeholder="Naziv" value={newKeyPoint.naziv} onChange={(e) => setNewKeyPoint({...newKeyPoint, naziv: e.target.value})} className="flex-1" />
                     <Input placeholder="URL (opciono)" value={newKeyPoint.url} onChange={(e) => setNewKeyPoint({...newKeyPoint, url: e.target.value})} className="flex-1" />
@@ -1886,8 +1890,8 @@ export default function AdminPanel() {
                   <Label htmlFor="city-aktivan" className="text-sm cursor-pointer">Aktivan</Label>
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingCity ? 'Sačuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowCityDialog(false)}>Otkaži</Button>
+                  <Button type="submit" className="flex-1">{editingCity ? 'SaÄuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowCityDialog(false)}>OtkaÅ¾i</Button>
                 </div>
               </form>
             </DialogContent>
@@ -1906,8 +1910,8 @@ export default function AdminPanel() {
           <Dialog open={showBlogPostDialog} onOpenChange={setShowBlogPostDialog}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingBlogPost ? 'Uredi članak' : 'Novi članak'}</DialogTitle>
-                <DialogDescription>Unesite podatke o članku</DialogDescription>
+                <DialogTitle>{editingBlogPost ? 'Uredi Älanak' : 'Novi Älanak'}</DialogTitle>
+                <DialogDescription>Unesite podatke o Älanku</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSaveBlogPost} className="space-y-4">
                 <div>
@@ -1919,8 +1923,8 @@ export default function AdminPanel() {
                   <Textarea value={blogPostForm.excerpt} onChange={(e) => setBlogPostForm({ ...blogPostForm, excerpt: e.target.value })} rows={2} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Sadržaj *</label>
-                  <Textarea value={blogPostForm.sadrzaj} onChange={(e) => setBlogPostForm({ ...blogPostForm, sadrzaj: e.target.value })} rows={10} required placeholder="Podržava HTML formatiranje..." />
+                  <label className="text-sm font-medium">SadrÅ¾aj *</label>
+                  <Textarea value={blogPostForm.sadrzaj} onChange={(e) => setBlogPostForm({ ...blogPostForm, sadrzaj: e.target.value })} rows={10} required placeholder="PodrÅ¾ava HTML formatiranje..." />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Thumbnail slika</label>
@@ -1932,7 +1936,7 @@ export default function AdminPanel() {
                         setBlogPostForm({ ...blogPostForm, thumbnail: url });
                         toast({ title: "Slika uploadovana" });
                       } catch (err) {
-                        toast({ title: "Greška", variant: "destructive" });
+                        toast({ title: "GreÅ¡ka", variant: "destructive" });
                       }
                     }
                   }} />
@@ -1971,11 +1975,11 @@ export default function AdminPanel() {
                   <p className="text-sm font-medium">SEO</p>
                   <Input placeholder="Meta naslov (max 70 karaktera)" value={blogPostForm.meta_title} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_title: e.target.value })} maxLength={70} />
                   <Textarea placeholder="Meta opis (max 160 karaktera)" value={blogPostForm.meta_description} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_description: e.target.value })} rows={2} maxLength={160} />
-                  <Input placeholder="Ključne riječi (odvojene zarezom)" value={blogPostForm.meta_keywords} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_keywords: e.target.value })} />
+                  <Input placeholder="KljuÄne rijeÄi (odvojene zarezom)" value={blogPostForm.meta_keywords} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_keywords: e.target.value })} />
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingBlogPost ? 'Sačuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowBlogPostDialog(false)}>Otkaži</Button>
+                  <Button type="submit" className="flex-1">{editingBlogPost ? 'SaÄuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowBlogPostDialog(false)}>OtkaÅ¾i</Button>
                 </div>
               </form>
             </DialogContent>
@@ -2002,8 +2006,8 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingBlogCategory ? 'Sačuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowBlogCategoryDialog(false)}>Otkaži</Button>
+                  <Button type="submit" className="flex-1">{editingBlogCategory ? 'SaÄuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowBlogCategoryDialog(false)}>OtkaÅ¾i</Button>
                 </div>
               </form>
             </DialogContent>
