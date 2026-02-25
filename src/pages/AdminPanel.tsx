@@ -834,12 +834,13 @@ export default function AdminPanel() {
     setBlogSettings((prev: any) => {
       const featured = normalizeFeaturedPostIds(prev?.featured_post_ids);
       const exists = featured.includes(normalizedPostId);
+      const maxFeatured = Math.max(1, Number(prev?.homepage_count) || 3);
 
       return {
         ...prev,
         featured_post_ids: exists
           ? featured.filter((id: number) => id !== normalizedPostId)
-          : [...featured, normalizedPostId],
+          : [normalizedPostId, ...featured].slice(0, maxFeatured),
       };
     });
   };
@@ -1475,11 +1476,17 @@ export default function AdminPanel() {
                           <p className="font-medium">Doktori mogu pisati</p>
                           <p className="text-sm text-muted-foreground">Omogući doktorima da pišu članke</p>
                         </div>
-                        <Switch checked={blogSettings.doctors_can_write} onCheckedChange={(checked) => setBlogSettings({ ...blogSettings, doctors_can_write: checked })} />
+                        <Switch
+                          checked={blogSettings.doctors_can_write}
+                          onCheckedChange={(checked) => setBlogSettings((prev: any) => ({ ...prev, doctors_can_write: checked }))}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Prikaz na početnoj</Label>
-                        <Select value={blogSettings.homepage_display} onValueChange={(v) => setBlogSettings({ ...blogSettings, homepage_display: v })}>
+                        <Select
+                          value={blogSettings.homepage_display}
+                          onValueChange={(v) => setBlogSettings((prev: any) => ({ ...prev, homepage_display: v }))}
+                        >
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="latest">Najnoviji članci</SelectItem>
@@ -1489,7 +1496,19 @@ export default function AdminPanel() {
                       </div>
                       <div className="space-y-2">
                         <Label>Broj članaka na početnoj</Label>
-                        <Select value={blogSettings.homepage_count?.toString()} onValueChange={(v) => setBlogSettings({ ...blogSettings, homepage_count: parseInt(v) })}>
+                        <Select
+                          value={blogSettings.homepage_count?.toString()}
+                          onValueChange={(v) =>
+                            setBlogSettings((prev: any) => {
+                              const nextCount = Math.max(1, parseInt(v) || 3);
+                              return {
+                                ...prev,
+                                homepage_count: nextCount,
+                                featured_post_ids: normalizeFeaturedPostIds(prev?.featured_post_ids).slice(0, nextCount),
+                              };
+                            })
+                          }
+                        >
                           <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="3">3</SelectItem>
@@ -1501,7 +1520,9 @@ export default function AdminPanel() {
                       {blogSettings.homepage_display === 'featured' && (
                         <div className="space-y-2">
                           <Label>Istaknuti članci ({(blogSettings.featured_post_ids || []).length})</Label>
-                          <p className="text-sm text-muted-foreground">Kliknite na zvjezdicu pored članka da ga dodate/uklonite</p>
+                          <p className="text-sm text-muted-foreground">
+                            Kliknite na zvjezdicu pored clanka. Novi izbor ide na vrh (max {blogSettings.homepage_count}).
+                          </p>
                         </div>
                       )}
                       <Button onClick={handleSaveBlogSettings}>Sačuvaj postavke</Button>
