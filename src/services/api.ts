@@ -232,7 +232,7 @@ export const blogAPI = {
   // Doctor
   getMyPosts: () => api.get('/blog/my-posts'),
   createPost: (data: any) => api.post('/blog/posts', data),
-  updatePost: (slug: string, data: any) => api.put(`/blog/posts/${slug}`, data),
+  updatePost: (id: string | number, data: any) => api.put(`/blog/posts/${id}`, data),
   deletePost: (id: number) => api.delete(`/blog/posts/${id}`),
   // Admin
   adminGetPosts: (params?: any) => api.get('/admin/blog/posts', { params }),

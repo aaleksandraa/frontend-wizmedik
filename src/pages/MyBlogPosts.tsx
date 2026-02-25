@@ -46,7 +46,7 @@ export default function MyBlogPosts() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isAdmin]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,7 +56,13 @@ export default function MyBlogPosts() {
         blogAPI.getCategories()
       ]);
       
-      setPosts(postsRes.data?.data || postsRes.data || []);
+      const rawPosts = postsRes.data?.data || postsRes.data || [];
+      const normalizedPosts = (rawPosts || []).map((post: any) => ({
+        ...post,
+        categories: Array.isArray(post.categories) ? post.categories : [],
+      }));
+
+      setPosts(normalizedPosts);
       setCategories(catsRes.data || []);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -72,7 +78,11 @@ export default function MyBlogPosts() {
     }
 
     try {
-      await blogAPI.adminDeletePost(id);
+      if (isAdmin) {
+        await blogAPI.adminDeletePost(id);
+      } else {
+        await blogAPI.deletePost(id);
+      }
       toast.success('Članak uspješno obrisan');
       fetchData();
     } catch (error) {
@@ -96,11 +106,12 @@ export default function MyBlogPosts() {
 
   // Filter posts
   const filteredPosts = posts.filter(post => {
+    const postCategories = Array.isArray(post.categories) ? post.categories : [];
     const matchesSearch = post.naslov.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = selectedCategory === 'all' || 
-                           post.categories.some(cat => cat.id.toString() === selectedCategory);
+                           postCategories.some(cat => cat.id.toString() === selectedCategory);
     
     const matchesStatus = selectedStatus === 'all' || post.status === selectedStatus;
 

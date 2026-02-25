@@ -20,10 +20,13 @@ import {
 import { ArrowLeft, Save, Eye, X, Plus, Loader2 } from 'lucide-react';
 import { blogAPI, uploadAPI } from '@/services/api';
 import { fixImageUrl } from '@/utils/imageUrl';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function BlogEditor() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -48,11 +51,13 @@ export default function BlogEditor() {
   const [creatingCategory, setCreatingCategory] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
+
     loadCategories();
     if (slug) {
       loadPost();
     }
-  }, [slug]);
+  }, [slug, user, isAdmin]);
 
   const loadCategories = async () => {
     try {
@@ -64,6 +69,11 @@ export default function BlogEditor() {
   };
 
   const handleCreateCategory = async () => {
+    if (!isAdmin) {
+      toast.error('Samo administrator moze kreirati nove kategorije');
+      return;
+    }
+
     if (!newCategoryName.trim()) {
       toast.error('Unesite naziv kategorije');
       return;
@@ -99,8 +109,21 @@ export default function BlogEditor() {
     if (!slug) return;
     setLoading(true);
     try {
-      const response = await blogAPI.getPostBySlug(slug);
-      const post = response.data.post || response.data; // Handle both formats
+      let post: any;
+
+      if (isAdmin) {
+        const response = await blogAPI.getPostBySlug(slug);
+        post = response.data.post || response.data; // Handle both formats
+      } else {
+        const response = await blogAPI.getMyPosts();
+        const myPosts = response.data || [];
+        post = myPosts.find((p: any) => p.slug === slug);
+      }
+
+      if (!post) {
+        throw new Error('Post nije pronadjen');
+      }
+
       setPostId(post.id); // Save post ID for updates
       setFormData({
         naslov: post.naslov || '',
@@ -203,10 +226,18 @@ export default function BlogEditor() {
 
       if (postId) {
         // Use saved post ID
-        await blogAPI.adminUpdatePost(postId, data);
+        if (isAdmin) {
+          await blogAPI.adminUpdatePost(postId, data);
+        } else {
+          await blogAPI.updatePost(postId, data);
+        }
         toast.success('Post uspješno ažuriran');
       } else {
-        await blogAPI.adminCreatePost(data);
+        if (isAdmin) {
+          await blogAPI.adminCreatePost(data);
+        } else {
+          await blogAPI.createPost(data);
+        }
         toast.success('Post uspješno kreiran');
       }
       
@@ -380,15 +411,17 @@ export default function BlogEditor() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle>Kategorije</CardTitle>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowNewCategoryDialog(true)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Nova
-                </Button>
+                {isAdmin && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowNewCategoryDialog(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Nova
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="space-y-2">
                 {categories.length === 0 ? (

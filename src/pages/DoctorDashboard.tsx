@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { doctorsAPI, appointmentsAPI, servicesAPI, uploadAPI, clinicsAPI, specialtiesAPI, guestVisitsAPI, blogAPI, notifikacijeAPI } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -189,6 +189,7 @@ function SortableUsluga({ usluga, onEdit, onDelete }: any) {
 export default function DoctorDashboard() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'kalendar';
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -2122,7 +2123,7 @@ export default function DoctorDashboard() {
                 <>
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Moji članci ({myBlogPosts.length})</h2>
-                    <Button onClick={() => openBlogPostDialog()}>
+                    <Button onClick={() => navigate('/blog/editor')}>
                       <Plus className="h-4 w-4 mr-2" /> Novi članak
                     </Button>
                   </div>
@@ -2156,7 +2157,7 @@ export default function DoctorDashboard() {
                                 <Button variant="ghost" size="sm" onClick={() => window.open(`/blog/${post.slug}`, '_blank')}>
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={() => openBlogPostDialog(post)}>
+                                <Button variant="ghost" size="sm" onClick={() => navigate(`/blog/editor/${post.slug}`)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm" onClick={() => handleDeleteBlogPost(post.id)}>
@@ -2170,52 +2171,6 @@ export default function DoctorDashboard() {
                     </div>
                   )}
 
-                  {/* Blog Post Dialog */}
-                  <Dialog open={showBlogPostDialog} onOpenChange={setShowBlogPostDialog}>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>{editingBlogPost ? 'Uredi članak' : 'Novi članak'}</DialogTitle>
-                        <DialogDescription>Napišite i objavite svoj blog članak</DialogDescription>
-                      </DialogHeader>
-                      <form onSubmit={handleSaveBlogPost} className="space-y-4">
-                        <div>
-                          <Label>Naslov *</Label>
-                          <Input 
-                            value={blogPostForm.naslov} 
-                            onChange={(e) => setBlogPostForm({...blogPostForm, naslov: e.target.value})}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label>Kratki opis</Label>
-                          <Textarea 
-                            value={blogPostForm.excerpt} 
-                            onChange={(e) => setBlogPostForm({...blogPostForm, excerpt: e.target.value})}
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label>Sadržaj *</Label>
-                          <Textarea 
-                            value={blogPostForm.sadrzaj} 
-                            onChange={(e) => setBlogPostForm({...blogPostForm, sadrzaj: e.target.value})}
-                            rows={10}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label>Thumbnail URL</Label>
-                          <Input 
-                            value={blogPostForm.thumbnail} 
-                            onChange={(e) => setBlogPostForm({...blogPostForm, thumbnail: e.target.value})}
-                          />
-                        </div>
-                        <Button type="submit" className="w-full">
-                          {editingBlogPost ? 'Sačuvaj izmjene' : 'Objavi članak'}
-                        </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
                 </>
               )}
             </TabsContent>
