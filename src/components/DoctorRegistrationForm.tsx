@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import DOMPurify from 'dompurify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, AlertCircle, User, Mail, Lock, Briefcase, MapPin, ArrowRight, ArrowLeft } from 'lucide-react';
-import { specialtiesAPI } from '@/services/api';
+import { specialtiesAPI, legalAPI } from '@/services/api';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CitySelect } from '@/components/CitySelect';
@@ -55,6 +56,9 @@ export function DoctorRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stepValidationAttempted, setStepValidationAttempted] = useState<Record<number, boolean>>({});
+  const [showTermsContent, setShowTermsContent] = useState(false);
+  const [showPrivacyContent, setShowPrivacyContent] = useState(false);
 
   const { data: specialties, isLoading: specialtiesLoading, isError: specialtiesError } = useQuery({
     queryKey: ['specialties'],
@@ -64,13 +68,42 @@ export function DoctorRegistrationForm() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch, trigger } = useForm<RegistrationFormData>({
+  const { data: termsData, isLoading: termsLoading } = useQuery({
+    queryKey: ['legal-inline', 'terms-of-service'],
+    queryFn: () => legalAPI.getTermsOfService(),
+    enabled: showTermsContent,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: privacyData, isLoading: privacyLoading } = useQuery({
+    queryKey: ['legal-inline', 'privacy-policy'],
+    queryFn: () => legalAPI.getPrivacyPolicy(),
+    enabled: showPrivacyContent,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { register, handleSubmit, formState: { errors, touchedFields, isSubmitted }, setValue, watch, trigger, clearErrors } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     mode: 'onChange',
+    defaultValues: {
+      ime: '',
+      prezime: '',
+      email: '',
+      telefon: '',
+      password: '',
+      password_confirmation: '',
+      specialty_ids: [],
+      adresa: '',
+      grad: '',
+      message: '',
+      terms_accepted: false,
+      privacy_accepted: false,
+    },
   });
 
   const nextStep = async () => {
     const fieldsToValidate = getFieldsForStep(currentStep);
+    setStepValidationAttempted(prev => ({ ...prev, [currentStep]: true }));
     const isValid = await trigger(fieldsToValidate as any);
     
     if (!isValid) {
@@ -83,7 +116,9 @@ export function DoctorRegistrationForm() {
     }
     
     if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+      const nextStepNumber = currentStep + 1;
+      clearErrors(getFieldsForStep(nextStepNumber) as any);
+      setCurrentStep(nextStepNumber);
     }
   };
 
@@ -102,6 +137,12 @@ export function DoctorRegistrationForm() {
       case 5: return ['adresa', 'grad', 'terms_accepted', 'privacy_accepted'];
       default: return [];
     }
+  };
+
+  const shouldShowStep5Error = (field: keyof RegistrationFormData) => {
+    if (!errors[field]) return false;
+    const touched = Boolean(touchedFields[field]);
+    return touched || Boolean(stepValidationAttempted[5]) || isSubmitted;
   };
 
   const onSubmit = async (data: RegistrationFormData) => {
@@ -139,6 +180,14 @@ export function DoctorRegistrationForm() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const onSubmitInvalid = () => {
+    setStepValidationAttempted(prev => ({ ...prev, [currentStep]: true }));
+    const firstError = document.querySelector('[data-error="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
@@ -236,7 +285,7 @@ export function DoctorRegistrationForm() {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit, onSubmitInvalid)} className="space-y-6">
         <AnimatePresence mode="wait">
           {/* Step 1: Personal Info */}
           {currentStep === 1 && (
@@ -464,10 +513,10 @@ export function DoctorRegistrationForm() {
                   id="adresa" 
                   {...register('adresa')} 
                   className="mt-1"
-                  data-error={!!errors.adresa}
+                  data-error={shouldShowStep5Error('adresa')}
                   placeholder="Ulica i broj"
                 />
-                {errors.adresa && (
+                {shouldShowStep5Error('adresa') && (
                   <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-sm text-red-600 font-medium">{errors.adresa.message}</p>
                   </div>
@@ -475,15 +524,15 @@ export function DoctorRegistrationForm() {
               </div>
               <div>
                 <Label htmlFor="grad">Grad *</Label>
-                <div data-error={!!errors.grad}>
+                <div data-error={shouldShowStep5Error('grad')}>
                   <CitySelect
                     value={watch('grad') || ''}
-                    onChange={(value) => setValue('grad', value, { shouldValidate: true })}
-                    error={!!errors.grad}
+                    onChange={(value) => setValue('grad', value, { shouldValidate: true, shouldTouch: true })}
+                    error={shouldShowStep5Error('grad')}
                     showIcon={false}
                   />
                 </div>
-                {errors.grad && (
+                {shouldShowStep5Error('grad') && (
                   <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-sm text-red-600 font-medium">{errors.grad.message}</p>
                   </div>
@@ -492,16 +541,45 @@ export function DoctorRegistrationForm() {
               
               <div className="space-y-3 pt-4">
                 <div className="space-y-2">
-                  <div className="flex items-start space-x-2" data-error={!!errors.terms_accepted}>
+                  <div className="flex items-start space-x-2" data-error={shouldShowStep5Error('terms_accepted')}>
                     <Checkbox 
                       id="terms_accepted" 
-                      onCheckedChange={(checked) => setValue('terms_accepted', checked as boolean, { shouldValidate: true })}
+                      checked={Boolean(watch('terms_accepted'))}
+                      onCheckedChange={(checked) => setValue('terms_accepted', checked === true, { shouldValidate: true, shouldTouch: true })}
                     />
-                    <label htmlFor="terms_accepted" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Prihvatam <a href="/terms-of-service" className="text-primary hover:underline" target="_blank">uslove korištenja</a> *
-                    </label>
+                    <div className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      <label htmlFor="terms_accepted">Prihvatam </label>
+                      <button
+                        type="button"
+                        className="text-primary hover:underline"
+                        onClick={() => setShowTermsContent((prev) => !prev)}
+                      >
+                        uslove korištenja
+                      </button>
+                      <span> *</span>
+                    </div>
                   </div>
-                  {errors.terms_accepted && (
+                  {showTermsContent && (
+                    <div className="ml-6 p-4 bg-muted/30 border rounded-md">
+                      <p className="text-sm font-semibold mb-3">
+                        {termsData?.data?.title || 'Uslovi korištenja'}
+                      </p>
+                      {termsLoading ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Učitavanje uslova...
+                        </div>
+                      ) : termsData?.data?.content ? (
+                        <div
+                          className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(termsData.data.content) }}
+                        />
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Sadržaj nije dostupan.</p>
+                      )}
+                    </div>
+                  )}
+                  {shouldShowStep5Error('terms_accepted') && (
                     <div className="ml-6 p-3 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-sm text-red-600 font-medium">{errors.terms_accepted.message}</p>
                     </div>
@@ -509,16 +587,45 @@ export function DoctorRegistrationForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-start space-x-2" data-error={!!errors.privacy_accepted}>
+                  <div className="flex items-start space-x-2" data-error={shouldShowStep5Error('privacy_accepted')}>
                     <Checkbox 
                       id="privacy_accepted" 
-                      onCheckedChange={(checked) => setValue('privacy_accepted', checked as boolean, { shouldValidate: true })}
+                      checked={Boolean(watch('privacy_accepted'))}
+                      onCheckedChange={(checked) => setValue('privacy_accepted', checked === true, { shouldValidate: true, shouldTouch: true })}
                     />
-                    <label htmlFor="privacy_accepted" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Prihvatam <a href="/privacy-policy" className="text-primary hover:underline" target="_blank">politiku privatnosti</a> *
-                    </label>
+                    <div className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      <label htmlFor="privacy_accepted">Prihvatam </label>
+                      <button
+                        type="button"
+                        className="text-primary hover:underline"
+                        onClick={() => setShowPrivacyContent((prev) => !prev)}
+                      >
+                        politiku privatnosti
+                      </button>
+                      <span> *</span>
+                    </div>
                   </div>
-                  {errors.privacy_accepted && (
+                  {showPrivacyContent && (
+                    <div className="ml-6 p-4 bg-muted/30 border rounded-md">
+                      <p className="text-sm font-semibold mb-3">
+                        {privacyData?.data?.title || 'Politika privatnosti'}
+                      </p>
+                      {privacyLoading ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Učitavanje politike privatnosti...
+                        </div>
+                      ) : privacyData?.data?.content ? (
+                        <div
+                          className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(privacyData.data.content) }}
+                        />
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Sadržaj nije dostupan.</p>
+                      )}
+                    </div>
+                  )}
+                  {shouldShowStep5Error('privacy_accepted') && (
                     <div className="ml-6 p-3 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-sm text-red-600 font-medium">{errors.privacy_accepted.message}</p>
                     </div>

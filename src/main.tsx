@@ -14,23 +14,24 @@ if (import.meta.env.DEV) {
 // Ensure React is available globally (fixes module loading issues on refresh)
 if (typeof window !== 'undefined') {
   (window as any).React = React;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+  });
 }
 
-// Register Service Worker for PWA
+// PWA is temporarily disabled.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/sw.js')
-      .then((registration) => {
-        console.log('✅ Service Worker registered:', registration.scope);
-        
-        // Check for updates periodically
-        setInterval(() => {
-          registration.update();
-        }, 60000); // Check every minute
+      .getRegistrations()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .then((results) => {
+        if (results.some(Boolean)) {
+          console.log('Service workers unregistered (PWA disabled).');
+        }
       })
       .catch((error) => {
-        console.log('❌ Service Worker registration failed:', error);
+        console.log('Service worker cleanup failed:', error);
       });
   });
 }
@@ -61,3 +62,4 @@ try {
     </div>
   `;
 }
+
