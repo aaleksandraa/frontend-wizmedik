@@ -320,6 +320,22 @@ export default function AdminPanel() {
 
   useEffect(() => { fetchData(); }, []);
 
+  const normalizeFeaturedPostIds = (value: any): number[] => {
+    if (!Array.isArray(value)) return [];
+
+    const seen = new Set<number>();
+    const normalized: number[] = [];
+
+    value.forEach((id) => {
+      const numericId = Number(id);
+      if (!Number.isInteger(numericId) || numericId <= 0 || seen.has(numericId)) return;
+      seen.add(numericId);
+      normalized.push(numericId);
+    });
+
+    return normalized;
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -674,9 +690,21 @@ export default function AdminPanel() {
         blogAPI.getCategories(),
         blogAPI.getSettings()
       ]);
-      setBlogPosts(postsRes.data?.data || postsRes.data || []);
+      const posts = postsRes.data?.data || postsRes.data || [];
+      setBlogPosts(posts);
       setBlogCategories(catsRes.data || []);
-      setBlogSettings(settingsRes.data || { doctors_can_write: false, homepage_display: 'latest', homepage_count: 3, featured_post_ids: [] });
+      const validPostIds = new Set(
+        (posts || [])
+          .map((post: any) => Number(post?.id))
+          .filter((id: number) => Number.isInteger(id) && id > 0)
+      );
+      const settings = settingsRes.data || {};
+      setBlogSettings({
+        doctors_can_write: Boolean(settings.doctors_can_write),
+        homepage_display: settings.homepage_display === 'featured' ? 'featured' : 'latest',
+        homepage_count: Number(settings.homepage_count) || 3,
+        featured_post_ids: normalizeFeaturedPostIds(settings.featured_post_ids).filter((id) => validPostIds.has(id)),
+      });
     } catch (error) {
       console.error('Error fetching blog data:', error);
     }
@@ -774,12 +802,25 @@ export default function AdminPanel() {
 
   const handleSaveBlogSettings = async () => {
     try {
+      const validPostIds = new Set(
+        (blogPosts || [])
+          .map((post: any) => Number(post?.id))
+          .filter((id: number) => Number.isInteger(id) && id > 0)
+      );
       const payload = {
-        ...blogSettings,
+        doctors_can_write: Boolean(blogSettings.doctors_can_write),
         homepage_display: blogSettings.homepage_display === 'featured' ? 'featured' : 'latest',
+        homepage_count: Number(blogSettings.homepage_count) || 3,
+        featured_post_ids: normalizeFeaturedPostIds(blogSettings.featured_post_ids).filter((id) => validPostIds.has(id)),
       };
       const response = await blogAPI.updateSettings(payload);
-      setBlogSettings(response.data || payload);
+      const saved = response.data || payload;
+      setBlogSettings({
+        doctors_can_write: Boolean(saved.doctors_can_write),
+        homepage_display: saved.homepage_display === 'featured' ? 'featured' : 'latest',
+        homepage_count: Number(saved.homepage_count) || 3,
+        featured_post_ids: normalizeFeaturedPostIds(saved.featured_post_ids),
+      });
       toast({ title: "Uspjeh", description: "Postavke sačuvane" });
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
@@ -787,12 +828,20 @@ export default function AdminPanel() {
   };
 
   const toggleFeaturedPost = (postId: number) => {
-    const featured = blogSettings.featured_post_ids || [];
-    if (featured.includes(postId)) {
-      setBlogSettings({ ...blogSettings, featured_post_ids: featured.filter((id: number) => id !== postId) });
-    } else {
-      setBlogSettings({ ...blogSettings, featured_post_ids: [...featured, postId] });
-    }
+    const normalizedPostId = Number(postId);
+    if (!Number.isInteger(normalizedPostId) || normalizedPostId <= 0) return;
+
+    setBlogSettings((prev: any) => {
+      const featured = normalizeFeaturedPostIds(prev?.featured_post_ids);
+      const exists = featured.includes(normalizedPostId);
+
+      return {
+        ...prev,
+        featured_post_ids: exists
+          ? featured.filter((id: number) => id !== normalizedPostId)
+          : [...featured, normalizedPostId],
+      };
+    });
   };
 
   // Specialty sorting handlers
