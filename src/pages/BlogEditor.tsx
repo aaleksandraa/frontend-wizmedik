@@ -49,6 +49,8 @@ export default function BlogEditor() {
   const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -105,6 +107,95 @@ export default function BlogEditor() {
     }
   };
 
+  const toPlainText = (value: string) =>
+    (value || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const withMetaDescriptionFallback = () => {
+    const explicitMeta = (formData.meta_description || '').trim();
+    if (explicitMeta) {
+      return explicitMeta.slice(0, 160);
+    }
+
+    const excerptText = toPlainText(formData.excerpt || '');
+    if (excerptText) {
+      return excerptText.slice(0, 160);
+    }
+
+    return '';
+  };
+
+  const validateForm = (publish: boolean) => {
+    const nextErrors: Record<string, string> = {};
+    const title = (formData.naslov || '').trim();
+    const content = toPlainText(formData.sadrzaj || '');
+    const excerpt = (formData.excerpt || '').trim();
+    const metaDescription = (formData.meta_description || '').trim();
+
+    if (!title) {
+      nextErrors.naslov = 'Naslov je obavezan.';
+    } else if (title.length < 10) {
+      nextErrors.naslov = 'Naslov mora imati najmanje 10 karaktera.';
+    } else if (title.length > 200) {
+      nextErrors.naslov = 'Naslov ne može biti duži od 200 karaktera.';
+    }
+
+    if (!content) {
+      nextErrors.sadrzaj = 'Sadržaj je obavezan.';
+    }
+
+    if (excerpt.length > 300) {
+      nextErrors.excerpt = 'Kratak opis ne može biti duži od 300 karaktera.';
+    }
+
+    if (metaDescription.length > 160) {
+      nextErrors.meta_description = 'SEO meta opis ne može biti duži od 160 karaktera.';
+    }
+
+    if (publish && !formData.thumbnail) {
+      nextErrors.thumbnail = 'Thumbnail slika je obavezna za objavu.';
+    }
+
+    if (publish && formData.kategorije.length === 0) {
+      nextErrors.kategorije = 'Odaberite najmanje jednu kategoriju.';
+    }
+
+    return nextErrors;
+  };
+
+  const getApiErrorMessage = (error: any) => {
+    const payload = error?.response?.data;
+    if (payload?.message) return payload.message;
+    if (payload?.error) return payload.error;
+    if (payload?.errors && typeof payload.errors === 'object') {
+      const firstKey = Object.keys(payload.errors)[0];
+      const firstValue = payload.errors[firstKey];
+      if (Array.isArray(firstValue) && firstValue.length > 0) {
+        return firstValue[0];
+      }
+    }
+    return 'Greška pri čuvanju posta';
+  };
+
+  const mapServerValidationErrors = (error: any) => {
+    const payload = error?.response?.data;
+    if (!payload?.errors || typeof payload.errors !== 'object') {
+      return {};
+    }
+
+    const mapped: Record<string, string> = {};
+    Object.entries(payload.errors).forEach(([key, value]) => {
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'string') {
+        const normalizedKey = key.startsWith('category_ids') ? 'kategorije' : key;
+        mapped[normalizedKey] = value[0];
+      }
+    });
+
+    return mapped;
+  };
+
   const loadPost = async () => {
     if (!slug) return;
     setLoading(true);
@@ -149,6 +240,8 @@ export default function BlogEditor() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setFieldErrors(prev => ({ ...prev, thumbnail: '' }));
+    setSubmitError('');
     setUploading(true);
     try {
       const response = await uploadAPI.uploadImage(file, 'blog');
@@ -171,6 +264,8 @@ export default function BlogEditor() {
   };
 
   const handleTitleChange = (value: string) => {
+    setFieldErrors(prev => ({ ...prev, naslov: '' }));
+    setSubmitError('');
     setFormData(prev => ({
       ...prev,
       naslov: value,
@@ -179,39 +274,12 @@ export default function BlogEditor() {
   };
 
   const handleSave = async (publish: boolean = false) => {
-    // Validations
-    if (!formData.naslov || !formData.sadrzaj) {
-      toast.error('Naslov i sadržaj su obavezni');
-      return;
-    }
+    const nextErrors = validateForm(publish);
+    setFieldErrors(nextErrors);
+    setSubmitError('');
 
-    if (formData.naslov.length < 10) {
-      toast.error('Naslov mora imati najmanje 10 karaktera');
-      return;
-    }
-
-    if (formData.naslov.length > 200) {
-      toast.error('Naslov ne može biti duži od 200 karaktera');
-      return;
-    }
-
-    if (formData.excerpt && formData.excerpt.length > 300) {
-      toast.error('Kratak opis ne može biti duži od 300 karaktera');
-      return;
-    }
-
-    if (formData.meta_description && formData.meta_description.length > 160) {
-      toast.error('Meta opis ne može biti duži od 160 karaktera');
-      return;
-    }
-
-    if (publish && !formData.thumbnail) {
-      toast.error('Thumbnail slika je obavezna za objavu');
-      return;
-    }
-
-    if (publish && formData.kategorije.length === 0) {
-      toast.error('Odaberite najmanje jednu kategoriju');
+    if (Object.keys(nextErrors).length > 0) {
+      setSubmitError('Provjerite obavezna polja i ispravite greske prije objave.');
       return;
     }
 
@@ -221,29 +289,36 @@ export default function BlogEditor() {
         ...formData,
         status: publish ? 'published' : 'draft',
         category_ids: formData.kategorije,
-        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean)
+        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        meta_description: withMetaDescriptionFallback(),
       };
 
       if (postId) {
-        // Use saved post ID
         if (isAdmin) {
           await blogAPI.adminUpdatePost(postId, data);
         } else {
           await blogAPI.updatePost(postId, data);
         }
-        toast.success('Post uspješno ažuriran');
+        toast.success('Post uspjesno azuriran');
       } else {
         if (isAdmin) {
           await blogAPI.adminCreatePost(data);
         } else {
           await blogAPI.createPost(data);
         }
-        toast.success('Post uspješno kreiran');
+        toast.success('Post uspjesno kreiran');
       }
-      
+
       navigate('/my-blog-posts');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Greška pri čuvanju posta');
+      const serverFieldErrors = mapServerValidationErrors(error);
+      if (Object.keys(serverFieldErrors).length > 0) {
+        setFieldErrors(prev => ({ ...prev, ...serverFieldErrors }));
+      }
+
+      const message = getApiErrorMessage(error);
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -296,6 +371,12 @@ export default function BlogEditor() {
           </div>
         </div>
 
+        {submitError && (
+          <div className="mb-6 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            {submitError}
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -313,6 +394,9 @@ export default function BlogEditor() {
                     placeholder="Unesite naslov blog posta"
                     maxLength={200}
                   />
+                  {fieldErrors.naslov && (
+                    <p className="text-xs text-destructive mt-1">{fieldErrors.naslov}</p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     {formData.naslov.length}/200 karaktera
                   </p>
@@ -338,6 +422,8 @@ export default function BlogEditor() {
                     value={formData.excerpt}
                     onChange={(e) => {
                       const value = e.target.value;
+                      setFieldErrors(prev => ({ ...prev, excerpt: '' }));
+                      setSubmitError('');
                       if (value.length <= 300) {
                         setFormData(prev => ({ ...prev, excerpt: value }));
                       }
@@ -346,6 +432,9 @@ export default function BlogEditor() {
                     rows={3}
                     maxLength={300}
                   />
+                  {fieldErrors.excerpt && (
+                    <p className="text-xs text-destructive mt-1">{fieldErrors.excerpt}</p>
+                  )}
                   <p className={`text-xs mt-1 ${formData.excerpt.length > 250 ? 'text-orange-600' : 'text-muted-foreground'}`}>
                     {300 - formData.excerpt.length} karaktera preostalo
                   </p>
@@ -360,9 +449,16 @@ export default function BlogEditor() {
               <CardContent>
                 <RichTextEditor
                   content={formData.sadrzaj}
-                  onChange={(content) => setFormData(prev => ({ ...prev, sadrzaj: content }))}
+                  onChange={(content) => {
+                    setFieldErrors(prev => ({ ...prev, sadrzaj: '' }));
+                    setSubmitError('');
+                    setFormData(prev => ({ ...prev, sadrzaj: content }));
+                  }}
                   placeholder="Počnite pisati..."
                 />
+                {fieldErrors.sadrzaj && (
+                  <p className="text-xs text-destructive mt-2">{fieldErrors.sadrzaj}</p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -387,7 +483,11 @@ export default function BlogEditor() {
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
+                      onClick={() => {
+                        setFieldErrors(prev => ({ ...prev, thumbnail: '' }));
+                        setSubmitError('');
+                        setFormData(prev => ({ ...prev, thumbnail: '' }));
+                      }}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -402,6 +502,9 @@ export default function BlogEditor() {
                     onChange={handleThumbnailUpload}
                     disabled={uploading}
                   />
+                  {fieldErrors.thumbnail && (
+                    <p className="text-xs text-destructive mt-1">{fieldErrors.thumbnail}</p>
+                  )}
                   {uploading && <p className="text-sm text-muted-foreground mt-1">Uploadovanje...</p>}
                 </div>
               </CardContent>
@@ -436,6 +539,8 @@ export default function BlogEditor() {
                         id={`cat-${cat.id}`}
                         checked={formData.kategorije.includes(cat.id)}
                         onChange={(e) => {
+                          setFieldErrors(prev => ({ ...prev, kategorije: '' }));
+                          setSubmitError('');
                           if (e.target.checked) {
                             setFormData(prev => ({
                               ...prev,
@@ -455,6 +560,9 @@ export default function BlogEditor() {
                       </Label>
                     </div>
                   ))
+                )}
+                {fieldErrors.kategorije && (
+                  <p className="text-xs text-destructive mt-1">{fieldErrors.kategorije}</p>
                 )}
               </CardContent>
             </Card>
@@ -513,6 +621,8 @@ export default function BlogEditor() {
                   value={formData.meta_description}
                   onChange={(e) => {
                     const value = e.target.value;
+                    setFieldErrors(prev => ({ ...prev, meta_description: '' }));
+                    setSubmitError('');
                     if (value.length <= 160) {
                       setFormData(prev => ({ ...prev, meta_description: value }));
                     }
@@ -521,6 +631,9 @@ export default function BlogEditor() {
                   rows={3}
                   maxLength={160}
                 />
+                {fieldErrors.meta_description && (
+                  <p className="text-xs text-destructive mt-1">{fieldErrors.meta_description}</p>
+                )}
                 <div className="flex justify-between items-center">
                   <p className={`text-xs ${
                     formData.meta_description.length < 120 
@@ -622,3 +735,5 @@ export default function BlogEditor() {
     </div>
   );
 }
+
+
