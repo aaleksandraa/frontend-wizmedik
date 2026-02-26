@@ -159,6 +159,7 @@ export default function PitanjeDetalji() {
       author: {
         '@type': 'Person',
         name: questionAuthorName,
+        url: `${canonicalUrl}#question-author`,
       },
       suggestedAnswer: suggestedAnswers,
     };

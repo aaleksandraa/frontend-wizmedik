@@ -222,6 +222,9 @@ export const createQuestionSchema = (question: any) => ({
     author: {
       '@type': 'Person',
       name: question.korisnik?.ime || 'Anonimni korisnik',
+      url: question.slug
+        ? `https://wizmedik.com/pitanja/${question.slug}#question-author`
+        : 'https://wizmedik.com/pitanja',
     },
     acceptedAnswer: question.odgovori?.[0] ? {
       '@type': 'Answer',
