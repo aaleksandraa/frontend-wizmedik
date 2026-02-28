@@ -804,9 +804,9 @@ export default function HomepageCustom3Cyan() {
               <Badge variant="secondary" className="mb-4 px-4 py-1 bg-white/10 text-white border-white/20">
                 <MapPin className="w-3 h-3 mr-2" />Lokacije
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Zdravstvo u vaÅ¡em gradu</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Zdravstvo u vašem gradu</h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                PronaÄ‘ite doktore i klinike u svim veÄ‡im gradovima Bosne i Hercegovine
+                Pronađite doktore i klinike u svim većim gradovima Bosne i Hercegovine
               </p>
             </div>
 

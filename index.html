@@ -2,33 +2,41 @@
 <html lang="bs">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WizMedik - PronaÄ‘ite doktore, klinike, banje, domove u Bosni i Hercegovini | Online zakazivanje</title>
-    <meta name="description" content="PronaÄ‘ite i zakaÅ¾ite termin kod doktora online u BiH. 500+ doktora, 50+ specijalnosti u Sarajevu, Banja Luci, Tuzli. Brzo, jednostavno, besplatno. WizMedik - VaÅ¡ zdravstveni portal.">
-    <meta name="keywords" content="doktor sarajevo, doktor banja luka, doktor tuzla, kardiolog, pedijatar, ginekolog, stomatolog, online zakazivanje, zdravstvo bih, privatne klinike">
+
+    <title>WizMedik | Doktori i online zakazivanje u Bosni i Hercegovini</title>
+    <meta
+      name="description"
+      content="Pronađite doktore, klinike, laboratorije, banje i domove za njegu starijih i bolesnih u Bosni i Hercegovini. Zakažite termin online brzo i jednostavno."
+    />
     <meta name="author" content="WizMedik" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
-    <!-- Route-specific canonical is set via react-helmet -->
-    
-    
-    <!-- Google Search Console Verification -->
-    <!-- Dodaj ovdje verification meta tag nakon Å¡to kreiraÅ¡ property u Search Console -->
-    <!-- <meta name="google-site-verification" content="tvoj-verification-code" /> -->
-    
-    <!-- Google Fonts - Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Geo tags -->
+
+    <!-- Default canonical (route-specific canonical set via react-helmet) -->
+    <link rel="canonical" href="https://wizmedik.com/" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Geo -->
     <meta name="geo.region" content="BA" />
     <meta name="geo.placename" content="Bosna i Hercegovina" />
-    
+
     <!-- Open Graph -->
-    <meta property="og:title" content="WizMedik - PronaÄ‘ite doktore u Bosni i Hercegovini" />
-    <meta property="og:description" content="VodeÄ‡a platforma za pronalaÅ¾enje doktora i online zakazivanje termina u BiH. 500+ doktora, 50+ specijalnosti." />
+    <meta property="og:title" content="WizMedik | Doktori i online zakazivanje u BiH" />
+    <meta
+      property="og:description"
+      content="Pronađite doktore, klinike, laboratorije, banje i domove za njegu starijih i bolesnih u Bosni i Hercegovini. Zakažite termin online."
+    />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://wizmedik.com/" />
     <meta property="og:image" content="https://wizmedik.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -37,80 +45,63 @@
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="WizMedik - PronaÄ‘ite doktore u BiH" />
-    <meta name="twitter:description" content="Online zakazivanje termina kod doktora u Bosni i Hercegovini" />
+    <meta name="twitter:title" content="WizMedik | Doktori i online zakazivanje u BiH" />
+    <meta
+      name="twitter:description"
+      content="Pronađite i uporedite zdravstvene usluge u Bosni i Hercegovini te zakažite termin online."
+    />
     <meta name="twitter:image" content="https://wizmedik.com/og-image.jpg" />
-    
-    <!-- Favicon - Regular favicon.ico (v4 - official updated icon) -->
+
+    <!-- Favicons -->
     <link rel="icon" href="/favicon.ico?v=4" type="image/x-icon" />
     <link rel="shortcut icon" href="/favicon.ico?v=4" type="image/x-icon" />
-    
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/favicon.ico?v=4" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=4" />
-    
-    <!-- PWA Manifest temporarily disabled -->
-    
-    <!-- iOS PWA Meta Tags -->
+
+    <!-- PWA / iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="wizMedik" />
-    
-    <!-- Theme Color -->
+    <meta name="apple-mobile-web-app-title" content="WizMedik" />
+
+    <!-- Theme -->
     <meta name="theme-color" content="#0891b2" />
     <meta name="msapplication-TileColor" content="#0891b2" />
     <meta name="msapplication-navbutton-color" content="#0891b2" />
-    
-    <!-- Preconnect to Critical Origins (PageSpeed Insight Recommendation) -->
-    <link rel="preconnect" href="https://api.wizmedik.com" />
-    <link rel="preconnect" href="https://ui-avatars.com" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- DNS Prefetch for Additional Resources -->
-    <link rel="dns-prefetch" href="https://api.wizmedik.com" />
-    <link rel="dns-prefetch" href="https://ui-avatars.com" />
-    
-    <!-- Async Font Loading (Poppins) -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" as="style" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
-    
-    <!-- Schema.org Organization -->
+
+    <!-- Schema: MedicalBusiness -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "MedicalBusiness",
-      "name": "WizMedik",
-      "description": "Platforma za pronalaÅ¾enje doktora i online zakazivanje termina u Bosni i Hercegovini",
-      "url": "https://wizmedik.com",
-      "logo": "https://wizmedik.com/logo.png",
-      "areaServed": {
-        "@type": "Country",
-        "name": "Bosnia and Herzegovina"
-      },
-      "sameAs": [
-        "https://www.facebook.com/wizmedik",
-        "https://www.instagram.com/wizmedik"
-      ]
-    }
-    </script>
-    
-    <!-- Schema.org WebSite for Sitelinks Search -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "WizMedik",
-      "url": "https://wizmedik.com",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://wizmedik.com/doktori?search={search_term_string}",
-        "query-input": "required name=search_term_string"
+      {
+        "@context": "https://schema.org",
+        "@type": "MedicalBusiness",
+        "name": "WizMedik",
+        "description": "Platforma za pronalaženje doktora i online zakazivanje termina u Bosni i Hercegovini.",
+        "url": "https://wizmedik.com/",
+        "logo": "https://wizmedik.com/logo.png",
+        "image": "https://wizmedik.com/og-image.jpg",
+        "areaServed": {
+          "@type": "Country",
+          "name": "Bosnia and Herzegovina"
+        },
+        "sameAs": [
+          "https://www.facebook.com/wizmedik",
+          "https://www.instagram.com/wizmedik.ba"
+        ]
       }
-    }
     </script>
-    
+
+    <!-- Schema: WebSite (Sitelinks Search) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "WizMedik",
+        "url": "https://wizmedik.com/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://wizmedik.com/doktori?search={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
   </head>
 
   <body>
