@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Clock, MapPin, User, Phone, FileText, CalendarClock, Star, XCircle, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, isPast, isFuture } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { RateAppointmentDialog } from '@/components/RateAppointmentDialog';
 import { Navbar } from '@/components/Navbar';
 
@@ -133,6 +133,30 @@ export default function Dashboard() {
   const upcomingCount = getFilteredAppointments('upcoming').length;
   const pastCount = getFilteredAppointments('past').length;
   const cancelledCount = getFilteredAppointments('cancelled').length;
+
+  if (user && user.role && user.role !== 'patient' && user.role !== 'user') {
+    switch (user.role) {
+      case 'admin':
+        return <Navigate to="/admin" replace />;
+      case 'doctor':
+        return <Navigate to="/doctor-dashboard" replace />;
+      case 'clinic':
+        return <Navigate to="/clinic-dashboard" replace />;
+      case 'laboratory':
+        return <Navigate to="/laboratory-dashboard" replace />;
+      case 'pharmacy_owner':
+        return <Navigate to="/pharmacy-dashboard" replace />;
+      case 'spa':
+      case 'spa_manager':
+        return <Navigate to="/spa-dashboard" replace />;
+      case 'care_home':
+      case 'care_home_manager':
+      case 'dom_manager':
+        return <Navigate to="/dom-dashboard" replace />;
+      default:
+        break;
+    }
+  }
 
   if (loading) {
     return (

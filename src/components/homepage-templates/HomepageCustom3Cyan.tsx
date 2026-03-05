@@ -115,6 +115,7 @@ export default function HomepageCustom3Cyan() {
   const featuredBlogPosts = data?.blog_posts_featured || blogPosts;
   const supportsSpecialtySearch =
     !selectedType || selectedType === 'doktori' || selectedType === 'klinike';
+  const showSpecialtyFields = supportsSpecialtySearch;
 
   const groupedSpecialties = useMemo<SpecialtyCategory[]>(() => {
     if (hierarchicalSpecialties.length > 0) {
@@ -242,6 +243,8 @@ export default function HomepageCustom3Cyan() {
       }
     } else if (type === 'laboratorije') {
       finalUrl = selectedCity ? `/laboratorije/${selectedCity}` : '/laboratorije';
+    } else if (type === 'apoteke') {
+      finalUrl = selectedCity ? `/apoteke/${selectedCity}` : '/apoteke';
     } else if (type === 'banje') {
       finalUrl = selectedCity ? `/banje/${selectedCity}` : '/banje';
     } else if (type === 'domovi') {
@@ -294,7 +297,7 @@ export default function HomepageCustom3Cyan() {
             {/* Search Box - Clean White Card */}
             <div className="relative z-40 bg-white rounded-2xl shadow-2xl p-8 mb-8">
               <form onSubmit={handleSearch} className="space-y-6">
-                <div className={`grid grid-cols-1 md:grid-cols-2 ${hasSubcategories ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
+                <div className={`grid grid-cols-1 md:grid-cols-2 ${showSpecialtyFields ? (hasSubcategories ? 'lg:grid-cols-4' : 'lg:grid-cols-3') : 'lg:grid-cols-2'} gap-4`}>
                   {/* Type Select */}
                   <div className="relative z-40">
                     <CustomSelect
@@ -307,6 +310,7 @@ export default function HomepageCustom3Cyan() {
                         { value: 'doktori', label: 'Doktori' },
                         { value: 'klinike', label: 'Klinike' },
                         { value: 'laboratorije', label: 'Laboratorije' },
+                        { value: 'apoteke', label: 'Apoteke' },
                         { value: 'banje', label: 'Banje i rehabilitacija' },
                         { value: 'domovi', label: 'Domovi za starija i bolesna lica' },
                       ]}
@@ -314,27 +318,29 @@ export default function HomepageCustom3Cyan() {
                   </div>
 
                   {/* Main specialty category */}
-                  <div className="relative z-30">
-                    <CustomSelect
-                      label="Glavna oblast medicine"
-                      value={selectedMainSpecialty}
-                      onChange={handleMainSpecialtyChange}
-                      placeholder={supportsSpecialtySearch ? 'Odaberite glavnu oblast...' : 'Dostupno za doktore i klinike'}
-                      disabled={!supportsSpecialtySearch || loadingHierarchicalSpecialties || mainSpecialtyOptions.length === 0}
-                      hideLabelOnMobile={true}
-                      options={mainSpecialtyOptions}
-                    />
-                  </div>
+                  {showSpecialtyFields ? (
+                    <div className="relative z-30">
+                      <CustomSelect
+                        label="Glavna oblast medicine"
+                        value={selectedMainSpecialty}
+                        onChange={handleMainSpecialtyChange}
+                        placeholder="Odaberite glavnu oblast..."
+                        disabled={loadingHierarchicalSpecialties || mainSpecialtyOptions.length === 0}
+                        hideLabelOnMobile={true}
+                        options={mainSpecialtyOptions}
+                      />
+                    </div>
+                  ) : null}
 
                   {/* Subcategory / general option */}
-                  {hasSubcategories && (
+                  {showSpecialtyFields && hasSubcategories && (
                     <div className="relative z-20">
                       <CustomSelect
                         label="Podkategorija (opcionalno)"
                         value={selectedSpecialty}
                         onChange={handleSubSpecialtyChange}
                         placeholder="Odaberite podkategoriju ili opstu opciju"
-                        disabled={!supportsSpecialtySearch || !selectedMainSpecialty}
+                        disabled={!selectedMainSpecialty}
                         hideLabelOnMobile={true}
                         options={subSpecialtyOptions}
                       />
@@ -383,6 +389,8 @@ export default function HomepageCustom3Cyan() {
               <Link to="/klinike" className="hover:text-cyan-600 transition-colors">klinike</Link>
               <span className="mx-2">/</span>
               <Link to="/laboratorije" className="hover:text-cyan-600 transition-colors">laboratorije</Link>
+              <span className="mx-2">/</span>
+              <Link to="/apoteke" className="hover:text-cyan-600 transition-colors">apoteke</Link>
               <span className="mx-2">/</span>
               <Link to="/banje" className="hover:text-cyan-600 transition-colors">banje</Link>
               <span className="mx-2">/</span>

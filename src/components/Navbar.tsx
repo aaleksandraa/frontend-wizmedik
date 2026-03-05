@@ -42,6 +42,7 @@ import {
   FlaskConical,
   FileText,
   Droplet,
+  Pill,
   Heart,
   X,
 } from 'lucide-react';
@@ -54,6 +55,7 @@ const navLinks = [
   { href: '/specijalnosti', label: 'Specijalnosti', icon: Stethoscope },
   // Gradovi izbačeni iz glavnog menija
   { href: '/laboratorije', label: 'Laboratorije', icon: FlaskConical },
+  { href: '/apoteke', label: 'Apoteke', icon: Pill },
   { href: '/banje', label: 'Banje', icon: Droplet },
   { href: '/domovi-njega', label: 'Domovi', icon: Heart },
   { href: '/pitanja', label: 'Pitanja', icon: HelpCircle },
@@ -67,6 +69,7 @@ const infoLinks = [
   { href: '/register/doctor', label: 'Za Doktore' },
   { href: '/register/clinic', label: 'Za Klinike' },
   { href: '/register/laboratory', label: 'Za Laboratorije' },
+  { href: '/register/pharmacy', label: 'Za Apoteke' },
   { href: '/register/spa', label: 'Za Banje' },
   { href: '/register/care-home', label: 'Za Domove' },
   { href: '/contact', label: 'Kontakt' },
@@ -153,6 +156,7 @@ export function Navbar() {
     if (user.role === 'doctor') return '/doctor-dashboard';
     if (user.role === 'clinic') return '/clinic-dashboard';
     if (user.role === 'laboratory') return '/laboratory-dashboard';
+    if (user.role === 'pharmacy_owner') return '/pharmacy-dashboard';
     if (user.role === 'spa_manager' || user.role === 'spa') return '/spa-dashboard';
     if (user.role === 'dom_manager' || user.role === 'care_home_manager' || user.role === 'care_home') return '/dom-dashboard';
     return '/dashboard';
@@ -164,6 +168,7 @@ export function Navbar() {
     if (user.role === 'doctor') return 'Doktor Dashboard';
     if (user.role === 'clinic') return 'Klinika Dashboard';
     if (user.role === 'laboratory') return 'Laboratorija Dashboard';
+    if (user.role === 'pharmacy_owner') return 'Apoteka Dashboard';
     if (user.role === 'spa_manager' || user.role === 'spa') return 'Banja Dashboard';
     if (user.role === 'dom_manager' || user.role === 'care_home_manager' || user.role === 'care_home') return 'Dom Dashboard';
     return 'Moj Dashboard';
@@ -175,6 +180,7 @@ export function Navbar() {
     if (user.role === 'doctor') return <Stethoscope className="w-4 h-4" />;
     if (user.role === 'clinic') return <Building2 className="w-4 h-4" />;
     if (user.role === 'laboratory') return <FlaskConical className="w-4 h-4" />;
+    if (user.role === 'pharmacy_owner') return <Pill className="w-4 h-4" />;
     if (user.role === 'spa_manager' || user.role === 'spa') return <Droplet className="w-4 h-4" />;
     if (user.role === 'dom_manager' || user.role === 'care_home_manager' || user.role === 'care_home') return <Home className="w-4 h-4" />;
     return <LayoutDashboard className="w-4 h-4" />;

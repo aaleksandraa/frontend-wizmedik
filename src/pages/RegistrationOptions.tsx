@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Stethoscope, Building2, FlaskConical, Droplet, Home, 
+  Stethoscope, Building2, FlaskConical, Droplet, Home, Pill, 
   ArrowRight, CheckCircle2, Users, Calendar, TrendingUp 
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -49,6 +49,19 @@ export default function RegistrationOptions() {
         'Paketi usluga',
         'Cjenovnik',
         'Online upiti'
+      ]
+    },
+    {
+      icon: Pill,
+      title: 'Apoteka',
+      description: 'Registrujte apoteku i upravljajte vise poslovnica, radnim vremenom, dezurstvima i posebnim ponudama.',
+      link: '/register/pharmacy',
+      color: 'from-red-500 to-red-600',
+      benefits: [
+        'Vise poslovnica po gradovima',
+        'Open now i dezurna oznake',
+        'Posebne ponude i popusti',
+        'Mapa i nearest pretraga'
       ]
     },
     {

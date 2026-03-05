@@ -16,6 +16,7 @@ import {
   Stethoscope,
   Building2,
   FlaskConical,
+  Pill,
   Sparkles,
   Home,
   UserPlus,
@@ -63,6 +64,14 @@ const providerOptions: ProviderOption[] = [
     icon: <FlaskConical className="w-6 h-6" />,
     href: '/register/laboratory',
     color: 'bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100'
+  },
+  {
+    id: 'pharmacy',
+    title: 'Apoteka',
+    description: 'Registrujte apoteku i poslovnice',
+    icon: <Pill className="w-6 h-6" />,
+    href: '/register/pharmacy',
+    color: 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
   },
   {
     id: 'spa',
@@ -137,6 +146,8 @@ export default function Auth() {
         return <Navigate to="/clinic-dashboard" replace />;
       case 'laboratory':
         return <Navigate to="/laboratory-dashboard" replace />;
+      case 'pharmacy_owner':
+        return <Navigate to="/pharmacy-dashboard" replace />;
       case 'spa':
       case 'spa_manager':
         return <Navigate to="/spa-dashboard" replace />;

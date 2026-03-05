@@ -33,6 +33,7 @@ import Doctors from "./pages/Doctors";
 import DoctorsCompactList from "./pages/DoctorsCompactList";
 import Laboratories from "./pages/Laboratories";
 import LaboratoryProfile from "./pages/LaboratoryProfile";
+import Pharmacies from "./pages/Pharmacies";
 import Spas from "./pages/Spas";
 import SpaProfile from "./pages/SpaProfile";
 import SpaIndikacije from "./pages/SpaIndikacije";
@@ -50,6 +51,8 @@ const DoctorDashboard = lazy(() => import("./pages/DoctorDashboard"));
 const DoctorProfile = lazy(() => import("./pages/DoctorProfile"));
 const ClinicDashboard = lazy(() => import("./pages/ClinicDashboard"));
 const LaboratoryDashboard = lazy(() => import("./pages/LaboratoryDashboard"));
+const PharmacyProfile = lazy(() => import("./pages/PharmacyProfile"));
+const PharmacyDashboard = lazy(() => import("./pages/PharmacyDashboard"));
 const SpaDashboard = lazy(() => import("./pages/SpaDashboard"));
 const BlogEditor = lazy(() => import("./pages/BlogEditor"));
 const MyBlogPosts = lazy(() => import("./pages/MyBlogPosts"));
@@ -65,6 +68,7 @@ import RegistrationOptions from "./pages/RegistrationOptions";
 import RegisterDoctor from "./pages/RegisterDoctor";
 import RegisterClinic from "./pages/RegisterClinic";
 import RegisterLaboratory from "./pages/RegisterLaboratory";
+import RegisterPharmacy from "./pages/RegisterPharmacy";
 import RegisterSpa from "./pages/RegisterSpa";
 import VerifyEmail from "./pages/VerifyEmail";
 import CareHomes from "./pages/CareHomes";
@@ -131,6 +135,13 @@ const App = () => {
               <Route path="/laboratorije" element={<Laboratories />} />
               <Route path="/laboratorije/:grad" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />
+              <Route path="/apoteke" element={<Pharmacies />} />
+              <Route path="/apoteke/:grad" element={<Pharmacies />} />
+              <Route path="/apoteka/:slug" element={
+                <Suspense fallback={<PageLoader />}>
+                  <PharmacyProfile />
+                </Suspense>
+              } />
               
               <Route path="/banje" element={<Spas />} />
               <Route path="/banje/:grad" element={<Spas />} />
@@ -195,6 +206,7 @@ const App = () => {
               <Route path="/register/doctor" element={<RegisterDoctor />} />
               <Route path="/register/clinic" element={<RegisterClinic />} />
               <Route path="/register/laboratory" element={<RegisterLaboratory />} />
+              <Route path="/register/pharmacy" element={<RegisterPharmacy />} />
               <Route path="/register/spa" element={<RegisterSpa />} />
               <Route path="/register/care-home" element={<RegisterCareHome />} />
               <Route path="/register/verify/:token" element={<VerifyEmail />} />
@@ -237,6 +249,15 @@ const App = () => {
               <Route path="/laboratory-dashboard" element={
                 <ProtectedRoute allowedRoles={['laboratory']}>
                   <LaboratoryDashboard />
+                </ProtectedRoute>
+              } />
+
+              {/* Pharmacy-only routes */}
+              <Route path="/pharmacy-dashboard" element={
+                <ProtectedRoute allowedRoles={['pharmacy_owner']}>
+                  <Suspense fallback={<PageLoader />}>
+                    <PharmacyDashboard />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               

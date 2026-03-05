@@ -313,12 +313,61 @@ export const laboratoriesAPI = {
   updateRadnoVrijeme: (data: any) => api.put('/laboratorija/radno-vrijeme', data),
 };
 
+export const pharmaciesAPI = {
+  // Public
+  getAll: (params?: any) => api.get('/apoteke', { params }),
+  getBySlug: (slug: string) => api.get(`/apoteke/${slug}`),
+  getNearby: (params: { lat: number; lng: number; radius_km?: number; open_now?: boolean }) =>
+    api.get('/apoteke/nearby', { params }),
+  getDuty: (params: { grad: string; at?: string; nonstop_only?: boolean }) =>
+    api.get('/apoteke/dezurne', { params }),
+
+  // Dashboard
+  getProfile: () => api.get('/pharmacy/profile'),
+  updateProfile: (data: any) => api.put('/pharmacy/profile', data),
+  getBranches: () => api.get('/pharmacy/branches'),
+  createBranch: (data: any) => api.post('/pharmacy/branches', data),
+  updateBranch: (id: number, data: any) => api.put(`/pharmacy/branches/${id}`, data),
+  deleteBranch: (id: number) => api.delete(`/pharmacy/branches/${id}`),
+  uploadProfileImage: (id: number, data: FormData) =>
+    api.post(`/pharmacy/branches/${id}/profile-image`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  uploadGalleryImages: (id: number, data: FormData) =>
+    api.post(`/pharmacy/branches/${id}/gallery-images`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  deleteGalleryImage: (id: number, imageId: string | number) =>
+    api.delete(`/pharmacy/branches/${id}/gallery-images/${imageId}`),
+  updateHours: (id: number, hours: any[]) => api.put(`/pharmacy/branches/${id}/hours`, { hours }),
+  createHourException: (id: number, data: any) => api.post(`/pharmacy/branches/${id}/hour-exceptions`, data),
+  getDutyShifts: (id: number) => api.get(`/pharmacy/branches/${id}/duty-shifts`),
+  createDutyShift: (id: number, data: any) => api.post(`/pharmacy/branches/${id}/duty-shifts`, data),
+  updateDutyShift: (branchId: number, dutyId: number, data: any) =>
+    api.put(`/pharmacy/branches/${branchId}/duty-shifts/${dutyId}`, data),
+  deleteDutyShift: (branchId: number, dutyId: number) =>
+    api.delete(`/pharmacy/branches/${branchId}/duty-shifts/${dutyId}`),
+  getDiscounts: () => api.get('/pharmacy/discounts'),
+  createDiscount: (data: any) => api.post('/pharmacy/discounts', data),
+  updateDiscount: (id: number, data: any) => api.put(`/pharmacy/discounts/${id}`, data),
+  deleteDiscount: (id: number) => api.delete(`/pharmacy/discounts/${id}`),
+  getPromotions: () => api.get('/pharmacy/promotions'),
+  createPromotion: (data: any) => api.post('/pharmacy/promotions', data),
+  updatePromotion: (id: number, data: any) => api.put(`/pharmacy/promotions/${id}`, data),
+  deletePromotion: (id: number) => api.delete(`/pharmacy/promotions/${id}`),
+  getSpecialOffers: () => api.get('/pharmacy/special-offers'),
+  createSpecialOffer: (data: any) => api.post('/pharmacy/special-offers', data),
+  updateSpecialOffer: (id: number, data: any) => api.put(`/pharmacy/special-offers/${id}`, data),
+  deleteSpecialOffer: (id: number) => api.delete(`/pharmacy/special-offers/${id}`),
+};
+
 export const registrationAPI = {
   registerDoctor: (data: any) => api.post('/register/doctor', data),
   registerClinic: (data: any) => api.post('/register/clinic', data),
   registerLaboratory: (data: any) => api.post('/register/laboratory', data),
   registerSpa: (data: any) => api.post('/register/spa', data),
   registerCareHome: (data: any) => api.post('/register/care-home', data),
+  registerPharmacy: (data: any) => api.post('/register/pharmacy', data),
   verifyEmail: (token: string) => api.get(`/register/verify/${token}`),
   verifyEmailWithCode: (data: { email: string; code: string }) => api.post('/verify-email-code', data),
   resendVerification: (email: string) => api.post('/resend-verification', { email }),

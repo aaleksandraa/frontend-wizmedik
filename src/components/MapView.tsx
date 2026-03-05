@@ -22,7 +22,7 @@ export interface MapItem {
 interface MapViewProps {
   items: MapItem[];
   userLocation?: { lat: number; lng: number } | null;
-  itemType: 'laboratorija' | 'banja' | 'dom-njega' | 'doktor' | 'klinika';
+  itemType: 'laboratorija' | 'banja' | 'dom-njega' | 'doktor' | 'klinika' | 'apoteka';
   itemIcon?: React.ReactNode;
   emptyMessage?: string;
   height?: string;
@@ -43,6 +43,7 @@ const markerColors: Record<string, string> = {
   'dom-njega': 'green',
   'doktor': 'gold',
   'klinika': 'orange',
+  'apoteka': 'red',
 };
 
 export function MapView({ 
@@ -81,6 +82,8 @@ export function MapView({
         return `/doktor/${item.slug || item.id}`;
       case 'klinika':
         return `/klinika/${item.slug || item.id}`;
+      case 'apoteka':
+        return `/apoteka/${item.slug || item.id}`;
       default:
         return '#';
     }
@@ -99,6 +102,8 @@ export function MapView({
         return 'doktora';
       case 'klinika':
         return 'klinika';
+      case 'apoteka':
+        return 'apoteka';
       default:
         return 'lokacija';
     }
