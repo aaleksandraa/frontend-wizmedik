@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Plus, Edit, Trash2, Users, Building2, Stethoscope, MapPin, Upload, Clock, 
   Palette, Settings, Search, LayoutGrid, List, ChevronRight, Phone, Mail,
-  Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical,
+  Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical, Download,
   FlaskConical, Sparkles, Home, MessageSquare, User
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -313,6 +313,7 @@ export default function AdminPanel() {
   const [blogSettings, setBlogSettings] = useState<any>({ doctors_can_write: false, homepage_display: 'latest', homepage_count: 3, featured_post_ids: [] });
   const [showBlogPostDialog, setShowBlogPostDialog] = useState(false);
   const [showBlogCategoryDialog, setShowBlogCategoryDialog] = useState(false);
+  const [exportingBlog, setExportingBlog] = useState(false);
   const [editingBlogPost, setEditingBlogPost] = useState<any>(null);
   const [editingBlogCategory, setEditingBlogCategory] = useState<any>(null);
   const [blogPostForm, setBlogPostForm] = useState({ naslov: '', sadrzaj: '', excerpt: '', thumbnail: '', meta_title: '', meta_description: '', meta_keywords: '', status: 'draft', category_ids: [] as number[] });
@@ -753,6 +754,44 @@ export default function AdminPanel() {
       fetchBlogData();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+    }
+  };
+
+  const handleExportBlogPosts = async () => {
+    setExportingBlog(true);
+    try {
+      const response = await blogAPI.adminExportPosts();
+      const dispositionHeader = response.headers?.['content-disposition'] || '';
+
+      const utfFilenameMatch = dispositionHeader.match(/filename\*=UTF-8''([^;]+)/i);
+      const plainFilenameMatch = dispositionHeader.match(/filename="?([^"]+)"?/i);
+
+      const fallbackFileName = `blog-posts-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      const rawFileName = utfFilenameMatch?.[1] || plainFilenameMatch?.[1] || fallbackFileName;
+      const decodedFileName = (() => {
+        try {
+          return decodeURIComponent(rawFileName);
+        } catch {
+          return rawFileName;
+        }
+      })();
+      const fileName = decodedFileName.replace(/[/\\?%*:|"<>]/g, '-');
+
+      const blob = new Blob([response.data], { type: 'application/json' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      toast({ title: "Uspjeh", description: "Backup blog članaka je preuzet" });
+    } catch (error: any) {
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+    } finally {
+      setExportingBlog(false);
     }
   };
 
@@ -1340,9 +1379,15 @@ export default function AdminPanel() {
                 <TabsContent value="posts" className="mt-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Članci ({blogPosts.length})</h2>
-                    <Button onClick={() => navigate('/blog/editor')} className="gap-2">
-                      <Plus className="h-4 w-4" /> Novi članak
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" onClick={handleExportBlogPosts} className="gap-2" disabled={exportingBlog}>
+                        <Download className="h-4 w-4" />
+                        {exportingBlog ? 'Export...' : 'Export JSON'}
+                      </Button>
+                      <Button onClick={() => navigate('/blog/editor')} className="gap-2">
+                        <Plus className="h-4 w-4" /> Novi članak
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-3">
                     {blogPosts.map(post => (

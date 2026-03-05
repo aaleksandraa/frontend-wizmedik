@@ -236,6 +236,7 @@ export const blogAPI = {
   deletePost: (id: number) => api.delete(`/blog/posts/${id}`),
   // Admin
   adminGetPosts: (params?: any) => api.get('/admin/blog/posts', { params }),
+  adminExportPosts: () => api.get('/admin/blog/export', { responseType: 'blob' }),
   adminCreatePost: (data: any) => api.post('/admin/blog/posts', data),
   adminUpdatePost: (id: number, data: any) => api.put(`/admin/blog/posts/${id}`, data),
   adminDeletePost: (id: number) => api.delete(`/admin/blog/posts/${id}`),
