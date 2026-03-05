@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { clinicsAPI, doctorsAPI, guestVisitsAPI } from '@/services/api';
@@ -32,6 +32,12 @@ interface Clinic {
   aktivan: boolean;
   latitude?: number;
   longitude?: number;
+  ocjena?: number;
+  specijalnosti?: Array<{
+    id: number;
+    naziv: string;
+    slug: string;
+  }>;
 }
 
 interface Doctor {
@@ -55,6 +61,17 @@ const toAbsoluteUrl = (url?: string | null): string => {
   return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
+const slugifySpecialtyName = (value: string): string => {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
 export default function ClinicProfile() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -68,6 +85,33 @@ export default function ClinicProfile() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const clinicSpecialties = useMemo(() => {
+    if (Array.isArray(clinic?.specijalnosti) && clinic.specijalnosti.length > 0) {
+      return clinic.specijalnosti;
+    }
+
+    const byDoctor = new Map<string, { id: number; naziv: string; slug: string }>();
+
+    doctors.forEach((doctor) => {
+      const specialtyName = (doctor.specijalnost || '').trim();
+      if (!specialtyName) {
+        return;
+      }
+
+      const specialtySlug = slugifySpecialtyName(specialtyName);
+      if (!specialtySlug || byDoctor.has(specialtySlug)) {
+        return;
+      }
+
+      byDoctor.set(specialtySlug, {
+        id: -1,
+        naziv: specialtyName,
+        slug: specialtySlug,
+      });
+    });
+
+    return Array.from(byDoctor.values());
+  }, [clinic?.specijalnosti, doctors]);
 
   useEffect(() => {
     if (slug) {
@@ -237,6 +281,9 @@ export default function ClinicProfile() {
       addressLocality: clinic.grad,
       addressCountry: 'BA',
     },
+    medicalSpecialty: clinicSpecialties.length > 0
+      ? clinicSpecialties.map((specialty) => specialty.naziv)
+      : undefined,
     aggregateRating: clinic.ocjena ? {
       '@type': 'AggregateRating',
       ratingValue: clinic.ocjena,
@@ -334,6 +381,21 @@ export default function ClinicProfile() {
 
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Naši doktori</h2>
+              {clinicSpecialties.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Specijalnosti klinike</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {clinicSpecialties.map((specialty) => (
+                      <Link key={`${specialty.slug}-${specialty.naziv}`} to={`/specijalnost/${specialty.slug}`}>
+                        <Badge variant="secondary" className="cursor-pointer transition-colors hover:bg-primary hover:text-primary-foreground">
+                          {specialty.naziv}
+                        </Badge>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {doctors.length > 0 ? (
                 <div className="grid md:grid-cols-2 gap-4">
                   {doctors.map(doctor => (

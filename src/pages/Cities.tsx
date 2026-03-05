@@ -73,13 +73,13 @@ export default function Cities() {
         <meta name="keywords" content="doktori BiH, klinike BiH, zdravstvo po gradovima, ljekari Sarajevo, ljekari Banja Luka" />
         <link rel="canonical" href={`${SITE_URL}/gradovi`} />
         <meta property="og:title" content="Gradovi - Doktori i klinike po gradovima BiH | WizMedik" />
-        <meta property="og:description" content="PronaÄ‘ite doktore i klinike u svim veÄ‡im gradovima Bosne i Hercegovine." />
+        <meta property="og:description" content="Pronađite doktore i klinike u svim većim gradovima Bosne i Hercegovine." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${SITE_URL}/gradovi`} />
         <meta property="og:image" content={DEFAULT_OG_IMAGE} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Gradovi - Doktori i klinike po gradovima BiH | WizMedik" />
-        <meta name="twitter:description" content="PronaÄ‘ite doktore i klinike u svim veÄ‡im gradovima Bosne i Hercegovine." />
+        <meta name="twitter:description" content="Pronađite doktore i klinike u svim većim gradovima Bosne i Hercegovine." />
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
       </Helmet>
 

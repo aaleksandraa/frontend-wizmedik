@@ -152,7 +152,7 @@ export function GuestVisitBookingDialog({
     if (!selectedSlot) {
       toast({
         variant: "destructive",
-        title: "GreÅ¡ka",
+          title: "Greška",
         description: "Molimo odaberite termin"
       });
       return;
@@ -196,14 +196,14 @@ export function GuestVisitBookingDialog({
       });
 
       toast({
-        title: "UspjeÅ¡no zakazano!",
-        description: "Termin je uspjeÅ¡no zakazan u gostujuÄ‡oj klinici."
+        title: "Uspješno zakazano!",
+        description: "Termin je uspješno zakazan u gostujućoj klinici."
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "GreÅ¡ka",
-        description: error.response?.data?.error || "GreÅ¡ka pri zakazivanju termina"
+        title: "Greška",
+        description: error.response?.data?.error || "Greška pri zakazivanju termina"
       });
     } finally {
       setLoading(false);
@@ -249,7 +249,7 @@ export function GuestVisitBookingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>ZakaÅ¾i termin kod {doctorName}</DialogTitle>
+          <DialogTitle>Zakaži termin kod {doctorName}</DialogTitle>
           <DialogDescription>
             Gostovanje u klinici {guestVisit.klinika.naziv}
           </DialogDescription>
@@ -261,7 +261,7 @@ export function GuestVisitBookingDialog({
             <div className="flex items-start gap-2">
               <Building2 className="w-5 h-5 text-cyan-600 mt-0.5" />
               <div>
-                <p className="font-medium text-cyan-800">Termin u gostujuÄ‡oj klinici</p>
+                <p className="font-medium text-cyan-800">Termin u gostujućoj klinici</p>
                 <p className="text-sm text-cyan-700">
                   {guestVisit.klinika.naziv} - {guestVisit.klinika.lokacija}, {guestVisit.klinika.grad}
                 </p>
@@ -300,7 +300,7 @@ export function GuestVisitBookingDialog({
                   <SelectValue placeholder="Odaberite uslugu" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NO_SPECIFIC_SERVICE_VALUE}>-- Bez specifiÄne usluge --</SelectItem>
+                  <SelectItem value={NO_SPECIFIC_SERVICE_VALUE}>-- Bez specifične usluge --</SelectItem>
                   {services.map((service) => (
                     <SelectItem key={service.id} value={service.id.toString()}>
                       {service.naziv} {service.cijena && `- ${service.cijena} KM`}
@@ -316,7 +316,7 @@ export function GuestVisitBookingDialog({
             <Label className="mb-2 block">Odaberite vrijeme</Label>
             {loadingSlots ? (
               <div className="text-center py-4 text-muted-foreground">
-                UÄitavanje slobodnih termina...
+                Učitavanje slobodnih termina...
               </div>
             ) : availableSlots.length === 0 ? (
               <div className="text-center py-4 text-muted-foreground">
@@ -343,7 +343,7 @@ export function GuestVisitBookingDialog({
           {/* Guest booking form (if not logged in) */}
           {!user && (
             <div className="space-y-3 pt-4 border-t">
-              <p className="text-sm font-medium">VaÅ¡i podaci</p>
+              <p className="text-sm font-medium">Vaši podaci</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="ime">Ime *</Label>
@@ -401,7 +401,7 @@ export function GuestVisitBookingDialog({
             onClick={handleBooking}
             disabled={loading || !selectedSlot || (!user && (!guestData.ime || !guestData.prezime || !guestData.email || !guestData.telefon))}
           >
-            {loading ? 'Zakazivanje...' : 'ZakaÅ¾i termin'}
+            {loading ? 'Zakazivanje...' : 'Zakaži termin'}   
           </Button>
         </div>
       </DialogContent>

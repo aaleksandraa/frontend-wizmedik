@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { specialtiesAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
 import { Breadcrumb } from '@/components/Breadcrumb';
@@ -33,12 +33,24 @@ const slugToName = (slug: string): string => {
     .replace(/Zenska/g, 'Ženska');
 };
 
+const slugifySegment = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
 
 export default function ClinicsBySpecialty() {
   const { specijalnost } = useParams<{ specijalnost: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [filteredClinics, setFilteredClinics] = useState<Clinic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +58,8 @@ export default function ClinicsBySpecialty() {
   const [selectedCity, setSelectedCity] = useState<string>('all');
 
   const specialtyName = specijalnost ? slugToName(specijalnost) : '';
-  const canonicalUrl = `${SITE_URL}/klinike/specijalnost/${specijalnost || ''}`;
+  const canonicalCity = selectedCity !== 'all' ? `?grad=${encodeURIComponent(slugifySegment(selectedCity))}` : '';
+  const canonicalUrl = `${SITE_URL}/klinike/specijalnost/${specijalnost || ''}${canonicalCity}`;
 
   useEffect(() => {
     fetchClinics();
@@ -107,7 +120,41 @@ export default function ClinicsBySpecialty() {
     setFilteredClinics(filtered);
   };
 
-  const uniqueCities = [...new Set(clinics.map(clinic => clinic.grad))];
+  const uniqueCities = useMemo(
+    () => [...new Set(clinics.map(clinic => clinic.grad).filter((city) => city && city.trim() !== ''))].sort(),
+    [clinics]
+  );
+
+  useEffect(() => {
+    const gradQuery = searchParams.get('grad');
+
+    if (!gradQuery) {
+      setSelectedCity('all');
+      return;
+    }
+
+    const normalizedGradSlug = slugifySegment(gradQuery);
+    const matchedCity = uniqueCities.find((city) => slugifySegment(city) === normalizedGradSlug);
+
+    if (matchedCity) {
+      setSelectedCity(matchedCity);
+      return;
+    }
+
+    setSelectedCity('all');
+  }, [searchParams, uniqueCities]);
+
+  const handleCityChange = (value: string) => {
+    setSelectedCity(value);
+
+    const nextParams = new URLSearchParams(searchParams);
+    if (value === 'all') {
+      nextParams.delete('grad');
+    } else {
+      nextParams.set('grad', slugifySegment(value));
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -195,13 +242,13 @@ export default function ClinicsBySpecialty() {
               />
             </div>
             
-            <Select value={selectedCity} onValueChange={setSelectedCity}>
+            <Select value={selectedCity} onValueChange={handleCityChange}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="Svi gradovi" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Svi gradovi</SelectItem>
-                {uniqueCities.filter(city => city && city.trim() !== '').map(city => (
+                {uniqueCities.map(city => (
                   <SelectItem key={city} value={city}>
                     {city}
                   </SelectItem>

@@ -305,8 +305,8 @@ export default function Blog() {
             ) : posts.length === 0 ? (
               <div className="text-center py-20">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-xl text-gray-600">Nema pronaÄ‘enih Älanaka</p>
-                <p className="text-sm text-gray-500 mt-2">PokuÅ¡ajte promijeniti filter</p>
+                <p className="text-xl text-gray-600">Nema pronađenih članaka</p>
+                <p className="text-sm text-gray-500 mt-2">Pokušajte promijeniti filter</p>
               </div>
             ) : (
               <>
@@ -440,11 +440,11 @@ export default function Blog() {
                       {loadingMore ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          UÄitavanje...
+                          Učitavanje...
                         </>
                       ) : (
                         <>
-                          UÄitaj joÅ¡ Älanaka
+                          Učitaj još članaka
                           <ChevronRight className="w-4 h-4 ml-2" />
                         </>
                       )}
@@ -483,7 +483,7 @@ export default function Blog() {
                           </p>
                         )}
                         <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                          Pogledaj Älanke
+                          Pogledaj članke
                           <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </CardContent>

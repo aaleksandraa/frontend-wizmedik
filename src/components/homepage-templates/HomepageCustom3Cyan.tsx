@@ -113,7 +113,8 @@ export default function HomepageCustom3Cyan() {
   const blogPosts = data?.blog_posts || [];
   const latestBlogPosts = data?.blog_posts_latest || blogPosts;
   const featuredBlogPosts = data?.blog_posts_featured || blogPosts;
-  const isDoctorSearch = !selectedType || selectedType === 'doktori';
+  const supportsSpecialtySearch =
+    !selectedType || selectedType === 'doktori' || selectedType === 'klinike';
 
   const groupedSpecialties = useMemo<SpecialtyCategory[]>(() => {
     if (hierarchicalSpecialties.length > 0) {
@@ -180,11 +181,11 @@ export default function HomepageCustom3Cyan() {
   );
 
   useEffect(() => {
-    if (!isDoctorSearch) {
+    if (!supportsSpecialtySearch) {
       setSelectedMainSpecialty('');
       setSelectedSpecialty('');
     }
-  }, [isDoctorSearch]);
+  }, [supportsSpecialtySearch]);
 
   if (loading || !data) {
     return (
@@ -230,7 +231,15 @@ export default function HomepageCustom3Cyan() {
         finalUrl = '/doktori';
       }
     } else if (type === 'klinike') {
-      finalUrl = selectedCity ? `/klinike/${selectedCity}` : '/klinike';
+      if (selectedSpecialty && selectedCity) {
+        finalUrl = `/klinike/specijalnost/${selectedSpecialty}?grad=${encodeURIComponent(selectedCity)}`;
+      } else if (selectedSpecialty) {
+        finalUrl = `/klinike/specijalnost/${selectedSpecialty}`;
+      } else if (selectedCity) {
+        finalUrl = `/klinike/${selectedCity}`;
+      } else {
+        finalUrl = '/klinike';
+      }
     } else if (type === 'laboratorije') {
       finalUrl = selectedCity ? `/laboratorije/${selectedCity}` : '/laboratorije';
     } else if (type === 'banje') {
@@ -310,8 +319,8 @@ export default function HomepageCustom3Cyan() {
                       label="Glavna oblast medicine"
                       value={selectedMainSpecialty}
                       onChange={handleMainSpecialtyChange}
-                      placeholder={isDoctorSearch ? 'Odaberite glavnu oblast...' : 'Dostupno za doktore'}
-                      disabled={!isDoctorSearch || loadingHierarchicalSpecialties || mainSpecialtyOptions.length === 0}
+                      placeholder={supportsSpecialtySearch ? 'Odaberite glavnu oblast...' : 'Dostupno za doktore i klinike'}
+                      disabled={!supportsSpecialtySearch || loadingHierarchicalSpecialties || mainSpecialtyOptions.length === 0}
                       hideLabelOnMobile={true}
                       options={mainSpecialtyOptions}
                     />
@@ -325,7 +334,7 @@ export default function HomepageCustom3Cyan() {
                         value={selectedSpecialty}
                         onChange={handleSubSpecialtyChange}
                         placeholder="Odaberite podkategoriju ili opstu opciju"
-                        disabled={!isDoctorSearch || !selectedMainSpecialty}
+                        disabled={!supportsSpecialtySearch || !selectedMainSpecialty}
                         hideLabelOnMobile={true}
                         options={subSpecialtyOptions}
                       />
@@ -348,7 +357,7 @@ export default function HomepageCustom3Cyan() {
                   </div>
                 </div>
 
-                {isDoctorSearch && selectedMainSpecialty && hasSubcategories && (
+                {supportsSpecialtySearch && selectedMainSpecialty && hasSubcategories && (
                   <p className="text-xs text-gray-500 text-left">
                     Mozete izabrati opstu kategoriju ili jednu podkategoriju.
                   </p>
@@ -676,10 +685,10 @@ export default function HomepageCustom3Cyan() {
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
               <div>
                 <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
-                  <Users className="w-3 h-3 mr-2" />NaÅ¡i doktori
+                  <Users className="w-3 h-3 mr-2" />Naši doktori
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Najbolji doktori u BiH</h2>
-                <p className="text-gray-600 mt-2">Provjereni i licencirani zdravstveni struÄnjaci</p>
+                <p className="text-gray-600 mt-2">Provjereni i licencirani zdravstveni stručnjaci</p>
               </div>
               <Link to="/doktori">
                 <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
@@ -786,13 +795,13 @@ export default function HomepageCustom3Cyan() {
         <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative">
           {/* Medical Background Symbols */}
           <div className="absolute inset-0 opacity-5 overflow-hidden">
-            <div className="absolute top-10 left-10 text-6xl">âš•ï¸</div>
-            <div className="absolute top-32 right-20 text-5xl">ðŸ¥</div>
-            <div className="absolute bottom-20 left-32 text-7xl">ðŸ’Š</div>
-            <div className="absolute bottom-32 right-10 text-6xl">ðŸ©º</div>
-            <div className="absolute top-1/2 left-1/4 text-4xl">ðŸ’‰</div>
-            <div className="absolute top-1/3 right-1/3 text-5xl">ðŸ”¬</div>
-            <div className="absolute bottom-1/3 left-2/3 text-4xl">â¤ï¸</div>
+          <div className="absolute top-10 left-10 text-6xl">⚕️</div>      {/* Medical symbol */}
+          <div className="absolute top-32 right-20 text-5xl">🏥</div>     {/* Hospital */}
+          <div className="absolute bottom-20 left-32 text-7xl">💊</div>    {/* Pill */}
+          <div className="absolute bottom-32 right-10 text-6xl">🩺</div>   {/* Stethoscope */}
+          <div className="absolute top-1/2 left-1/4 text-4xl">💉</div>     {/* Syringe */}
+          <div className="absolute top-1/3 right-1/3 text-5xl">🔬</div>    {/* Microscope */}
+          <div className="absolute bottom-1/3 left-2/3 text-4xl">❤️</div>  {/* Heart */}
           </div>
 
           {/* Animated Pulse Circles */}
@@ -817,7 +826,7 @@ export default function HomepageCustom3Cyan() {
                   type="text"
                   value={citySearchQuery}
                   onChange={(e) => setCitySearchQuery(e.target.value)}
-                  placeholder="PretraÅ¾ite grad..."
+                  placeholder="Pretražite grad..."
                   className="w-full h-16 px-6 pr-12 rounded-2xl border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 text-lg"
                 />
                 <Search className="absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -874,12 +883,12 @@ export default function HomepageCustom3Cyan() {
             <div className="relative text-center max-w-3xl mx-auto">
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Spremni ste za bolju zdravstvenu njegu?</h2>
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                ZakaÅ¾ite pregled kod najboljih doktora u Bosni i Hercegovini
+                Zakažite pregled kod najboljih doktora u Bosni i Hercegovini
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/doktori">
                   <Button size="lg" className="bg-white text-cyan-700 hover:bg-white/90 shadow-xl px-8 h-14 text-lg font-semibold">
-                    PronaÄ‘i doktora
+                    Pronađi doktora
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>

@@ -125,7 +125,7 @@ const getErrorMessage = (error: any): string => {
     const errors = error.response.data.errors;
     return Object.values(errors).flat().join('\n');
   }
-  return error.response?.data?.message || error.message || "DoÅ¡lo je do greÅ¡ke";
+  return error.response?.data?.message || error.message || "Došlo je do greške";
 };
 
 const normalizeCityLink = (value?: string): string | undefined => {
@@ -398,8 +398,8 @@ export default function AdminPanel() {
         status: error.response?.status
       });
       toast({ 
-        title: "GreÅ¡ka pri uÄitavanju", 
-        description: error.response?.data?.message || "Nije moguÄ‡e uÄitati podatke. PokuÅ¡ajte osvjeÅ¾iti stranicu.", 
+        title: "Greška pri učitavanju", 
+        description: error.response?.data?.message || "Nije moguće učitati podatke. Pokušajte osvježiti stranicu.", 
         variant: "destructive" 
       });
     } finally {
@@ -474,7 +474,7 @@ export default function AdminPanel() {
       };
       if (editingDoctor) {
         await adminAPI.updateDoctor(editingDoctor.id, data);
-        toast({ title: "Uspjeh", description: "Doktor aÅ¾uriran" });
+        toast({ title: "Uspjeh", description: "Doktor ažuriran" });
       } else {
         await adminAPI.createDoctor({ ...data, password: doctorForm.password });
         toast({ title: "Uspjeh", description: "Doktor kreiran" });
@@ -483,7 +483,7 @@ export default function AdminPanel() {
       resetDoctorForm();
       fetchData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -494,7 +494,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Doktor obrisan" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -543,7 +543,7 @@ export default function AdminPanel() {
       
       if (editingClinic) {
         await adminAPI.updateClinic(editingClinic.id, data);
-        toast({ title: "Uspjeh", description: "Klinika aÅ¾urirana" });
+        toast({ title: "Uspjeh", description: "Klinika ažurirana" });
       } else {
         await adminAPI.createClinic({ ...data, password: clinicForm.password });
         toast({ title: "Uspjeh", description: "Klinika kreirana" });
@@ -552,7 +552,7 @@ export default function AdminPanel() {
       resetClinicForm();
       fetchData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -563,7 +563,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Klinika obrisana" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -622,7 +622,7 @@ export default function AdminPanel() {
       if (editingCity) {
         const response = await adminAPI.updateCity(editingCity.id, data);
         console.log('Update response:', response);
-        toast({ title: "Uspjeh", description: "Grad aÅ¾uriran" });
+        toast({ title: "Uspjeh", description: "Grad ažuriran" });
       } else {
         await adminAPI.createCity(data);
         toast({ title: "Uspjeh", description: "Grad kreiran" });
@@ -632,7 +632,7 @@ export default function AdminPanel() {
       fetchData();
     } catch (error: any) {
       console.error('Save city error:', error);
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -643,7 +643,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Grad obrisan" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -654,7 +654,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Specijalnost obrisana" });
       fetchData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -664,7 +664,7 @@ export default function AdminPanel() {
       const response = await adminAPI.getSpecialty(specialty.id);
       setEditingSpecialty(response.data);
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: "Nije moguÄ‡e uÄitati podatke specijalnosti", variant: "destructive" });
+      toast({ title: "Greška", description: "Nije moguće učitati podatke specijalnosti", variant: "destructive" });
       console.error('Error loading specialty:', error);
     }
   };
@@ -731,28 +731,28 @@ export default function AdminPanel() {
     try {
       if (editingBlogPost) {
         await blogAPI.adminUpdatePost(editingBlogPost.id, blogPostForm);
-        toast({ title: "Uspjeh", description: "ÄŒlanak aÅ¾uriran" });
+        toast({ title: "Uspjeh", description: "Članak ažuriran" });
       } else {
         await blogAPI.adminCreatePost(blogPostForm);
-        toast({ title: "Uspjeh", description: "ÄŒlanak kreiran" });
+        toast({ title: "Uspjeh", description: "Članak kreiran" });
       }
       setShowBlogPostDialog(false);
       resetBlogPostForm();
       fetchBlogData();
     } catch (error: any) {
       console.error('Blog post error:', error.response?.data);
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
   const handleDeleteBlogPost = async (id: number) => {
-    if (!confirm('Obrisati Älanak?')) return;
+    if (!confirm('Obrisati članak?')) return;
     try {
       await blogAPI.adminDeletePost(id);
-      toast({ title: "Uspjeh", description: "ÄŒlanak obrisan" });
+      toast({ title: "Uspjeh", description: "Članak obrisan" });
       fetchBlogData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -772,7 +772,7 @@ export default function AdminPanel() {
     try {
       if (editingBlogCategory) {
         await blogAPI.adminUpdateCategory(editingBlogCategory.id, blogCategoryForm);
-        toast({ title: "Uspjeh", description: "Kategorija aÅ¾urirana" });
+        toast({ title: "Uspjeh", description: "Kategorija ažurirana" });
       } else {
         await blogAPI.adminCreateCategory(blogCategoryForm);
         toast({ title: "Uspjeh", description: "Kategorija kreirana" });
@@ -780,7 +780,7 @@ export default function AdminPanel() {
       setShowBlogCategoryDialog(false);
       fetchBlogData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -791,7 +791,7 @@ export default function AdminPanel() {
       toast({ title: "Uspjeh", description: "Kategorija obrisana" });
       fetchBlogData();
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -870,10 +870,10 @@ export default function AdminPanel() {
       }));
 
       await adminAPI.reorderSpecialties(reorderedSpecialties);
-      toast({ title: "Uspjeh", description: "Redoslijed specijalnosti saÄuvan" });
+      toast({ title: "Uspjeh", description: "Redoslijed specijalnosti sačuvan" });
       setIsSortingSpecialties(false);
     } catch (error: any) {
-      toast({ title: "GreÅ¡ka", description: getErrorMessage(error), variant: "destructive" });
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
   };
 
@@ -909,13 +909,13 @@ export default function AdminPanel() {
                 </div>
                 Admin Panel
               </h1>
-              <p className="text-muted-foreground mt-1">Upravljajte sadrÅ¾ajem platforme</p>
+              <p className="text-muted-foreground mt-1">Upravljajte sadržajem platforme</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative flex-1 md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="PretraÅ¾i..."
+                  placeholder="Pretraži..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -1026,7 +1026,7 @@ export default function AdminPanel() {
               </TabsTrigger>
               <TabsTrigger value="homepage" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Settings className="h-4 w-4 mr-2 hidden sm:inline" />
-                PoÄetna
+                Početna
               </TabsTrigger>
               <TabsTrigger value="legal" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Shield className="h-4 w-4 mr-2 hidden sm:inline" />
@@ -1132,7 +1132,7 @@ export default function AdminPanel() {
                       <Stethoscope className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <p className="text-lg font-medium mb-2">Nema doktora</p>
                       <p className="text-sm text-muted-foreground mb-4">
-                        {searchTerm ? 'Nema rezultata za vaÅ¡u pretragu.' : 'Dodajte prvog doktora klikom na dugme iznad.'}
+                        {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Dodajte prvog doktora klikom na dugme iznad.'}
                       </p>
                       {!searchTerm && (
                         <Button onClick={() => openDoctorDialog()} className="gap-2">
@@ -1260,10 +1260,10 @@ export default function AdminPanel() {
                         setIsSortingSpecialties(false);
                         fetchData(); // Reset to original order
                       }}>
-                        OtkaÅ¾i
+                        Otkaži
                       </Button>
                       <Button onClick={handleSaveSpecialtyOrder} className="gap-2">
-                        <Check className="h-4 w-4" /> SaÄuvaj redoslijed
+                        <Check className="h-4 w-4" /> Sačuvaj redoslijed
                       </Button>
                     </>
                   ) : (
@@ -1330,7 +1330,7 @@ export default function AdminPanel() {
             <TabsContent value="blog" className="space-y-6">
               <Tabs defaultValue="posts">
                 <TabsList>
-                  <TabsTrigger value="posts">ÄŒlanci</TabsTrigger>
+                  <TabsTrigger value="posts">Članci</TabsTrigger>
                   <TabsTrigger value="categories">Kategorije</TabsTrigger>
                   <TabsTrigger value="settings">Postavke</TabsTrigger>
                   <TabsTrigger value="typography">Tipografija</TabsTrigger>
@@ -1339,9 +1339,9 @@ export default function AdminPanel() {
                 {/* Blog Posts */}
                 <TabsContent value="posts" className="mt-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">ÄŒlanci ({blogPosts.length})</h2>
+                    <h2 className="text-lg font-semibold">Članci ({blogPosts.length})</h2>
                     <Button onClick={() => navigate('/blog/editor')} className="gap-2">
-                      <Plus className="h-4 w-4" /> Novi Älanak
+                      <Plus className="h-4 w-4" /> Novi članak
                     </Button>
                   </div>
                   <div className="space-y-3">
@@ -1379,7 +1379,7 @@ export default function AdminPanel() {
                         </CardContent>
                       </Card>
                     ))}
-                    {blogPosts.length === 0 && <p className="text-center text-muted-foreground py-8">Nema Älanaka</p>}
+                    {blogPosts.length === 0 && <p className="text-center text-muted-foreground py-8">Nema članaka</p>}
                   </div>
                 </TabsContent>
 
@@ -1433,9 +1433,9 @@ export default function AdminPanel() {
                           try {
                             await blogAPI.adminUpdateCategoriesOrder(updatedCategories);
                             setBlogCategories(newCategories.map((cat, idx) => ({ ...cat, sort_order: idx })));
-                            toast({ title: "Uspjeh", description: "Redoslijed kategorija aÅ¾uriran" });
+                            toast({ title: "Uspjeh", description: "Redoslijed kategorija ažuriran" });
                           } catch (error) {
-                            toast({ title: "GreÅ¡ka", description: "Nije moguÄ‡e aÅ¾urirati redoslijed", variant: "destructive" });
+                            toast({ title: "Greška", description: "Nije moguće ažurirati redoslijed", variant: "destructive" });
                           }
                         }}
                         className="cursor-move hover:shadow-md transition-shadow"
@@ -1450,7 +1450,7 @@ export default function AdminPanel() {
                               </div>
                               <div>
                                 <p className="font-medium">{cat.naziv}</p>
-                                <p className="text-sm text-muted-foreground">{cat.posts_count || 0} Älanaka</p>
+                                <p className="text-sm text-muted-foreground">{cat.posts_count || 0} članaka</p>
                                 {cat.opis && (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{cat.opis}</p>
                                 )}
@@ -1478,7 +1478,7 @@ export default function AdminPanel() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Doktori mogu pisati</p>
-                          <p className="text-sm text-muted-foreground">OmoguÄ‡i doktorima da piÅ¡u Älanke</p>
+                          <p className="text-sm text-muted-foreground">Omogući doktorima da pišu članke</p>
                         </div>
                         <Switch
                           checked={blogSettings.doctors_can_write}
@@ -1486,20 +1486,20 @@ export default function AdminPanel() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Prikaz na poÄetnoj</Label>
+                        <Label>Prikaz na početnoj</Label>
                         <Select
                           value={blogSettings.homepage_display}
                           onValueChange={(v) => setBlogSettings((prev: any) => ({ ...prev, homepage_display: v }))}
                         >
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="latest">Najnoviji Älanci</SelectItem>
-                            <SelectItem value="featured">Istaknuti Älanci</SelectItem>
+                            <SelectItem value="latest">Najnoviji članci</SelectItem>
+                            <SelectItem value="featured">Istaknuti članci</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Broj Älanaka na poÄetnoj</Label>
+                        <Label>Broj članaka na početnoj</Label>
                         <Select
                           value={blogSettings.homepage_count?.toString()}
                           onValueChange={(v) =>
@@ -1523,13 +1523,13 @@ export default function AdminPanel() {
                       </div>
                       {blogSettings.homepage_display === 'featured' && (
                         <div className="space-y-2">
-                          <Label>Istaknuti Älanci ({(blogSettings.featured_post_ids || []).length})</Label>
+                          <Label>Istaknuti članci ({(blogSettings.featured_post_ids || []).length})</Label>
                           <p className="text-sm text-muted-foreground">
-                            Kliknite na zvjezdicu pored clanka. Novi izbor ide na vrh (max {blogSettings.homepage_count}).
+                            Kliknite na zvjezdicu pored članka. Novi izbor ide na vrh (max {blogSettings.homepage_count}).
                           </p>
                         </div>
                       )}
-                      <Button onClick={handleSaveBlogSettings}>SaÄuvaj postavke</Button>
+                      <Button onClick={handleSaveBlogSettings}>Sačuvaj postavke</Button>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -1699,15 +1699,15 @@ export default function AdminPanel() {
                         setDoctorForm({...doctorForm, slika_profila: url});
                         toast({ title: "Slika uploadovana" });
                       } catch (err) {
-                        toast({ title: "GreÅ¡ka", variant: "destructive" });
+                        toast({ title: "Greška", variant: "destructive" });
                       }
                     }
                   }} />
                   {doctorForm.slika_profila && <img src={doctorForm.slika_profila} alt="" className="w-20 h-20 rounded-lg object-cover mt-2" />}
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingDoctor ? 'SaÄuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowDoctorDialog(false)}>OtkaÅ¾i</Button>
+                  <Button type="submit" className="flex-1">{editingDoctor ? 'Sačuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowDoctorDialog(false)}>Otkaži</Button>
                 </div>
               </form>
             </DialogContent>
@@ -1778,7 +1778,7 @@ export default function AdminPanel() {
                         setClinicForm({...clinicForm, slike: [...clinicForm.slike, url]});
                         toast({ title: "Slika uploadovana" });
                       } catch (err) {
-                        toast({ title: "GreÅ¡ka", variant: "destructive" });
+                        toast({ title: "Greška", variant: "destructive" });
                       }
                     }
                   }} />
@@ -1797,8 +1797,8 @@ export default function AdminPanel() {
                   )}
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingClinic ? 'SaÄuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowClinicDialog(false)}>OtkaÅ¾i</Button>
+                  <Button type="submit" className="flex-1">{editingClinic ? 'Sačuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowClinicDialog(false)}>Otkaži</Button>
                 </div>
               </form>
             </DialogContent>
@@ -1826,7 +1826,7 @@ export default function AdminPanel() {
                     <Input value={cityForm.populacija} onChange={(e) => setCityForm({...cityForm, populacija: e.target.value})} />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Hitna pomoÄ‡</label>
+                    <label className="text-sm font-medium">Hitna pomoć</label>
                     <Input value={cityForm.hitna_pomoc} onChange={(e) => setCityForm({...cityForm, hitna_pomoc: e.target.value})} />
                   </div>
                 </div>
@@ -1853,13 +1853,13 @@ export default function AdminPanel() {
                   </div>
                   {editingCity && (
                     <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground mb-1">Automatski izraÄunato:</p>
+                      <p className="text-xs text-muted-foreground mb-1">Automatski izračunato:</p>
                       <p className="text-sm">Doktora: {editingCity.broj_doktora || 0} | Klinika: {editingCity.broj_klinika || 0}</p>
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium">KljuÄne taÄke</label>
+                  <label className="text-sm font-medium">Ključne tačke</label>
                   <div className="flex gap-2 mb-2">
                     <Input placeholder="Naziv" value={newKeyPoint.naziv} onChange={(e) => setNewKeyPoint({...newKeyPoint, naziv: e.target.value})} className="flex-1" />
                     <Input placeholder="URL (opciono)" value={newKeyPoint.url} onChange={(e) => setNewKeyPoint({...newKeyPoint, url: e.target.value})} className="flex-1" />
@@ -1890,8 +1890,8 @@ export default function AdminPanel() {
                   <Label htmlFor="city-aktivan" className="text-sm cursor-pointer">Aktivan</Label>
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingCity ? 'SaÄuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowCityDialog(false)}>OtkaÅ¾i</Button>
+                  <Button type="submit" className="flex-1">{editingCity ? 'Sačuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowCityDialog(false)}>Otkaži</Button>
                 </div>
               </form>
             </DialogContent>
@@ -1910,8 +1910,8 @@ export default function AdminPanel() {
           <Dialog open={showBlogPostDialog} onOpenChange={setShowBlogPostDialog}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingBlogPost ? 'Uredi Älanak' : 'Novi Älanak'}</DialogTitle>
-                <DialogDescription>Unesite podatke o Älanku</DialogDescription>
+                <DialogTitle>{editingBlogPost ? 'Uredi članak' : 'Novi članak'}</DialogTitle>
+                <DialogDescription>Unesite podatke o članku</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSaveBlogPost} className="space-y-4">
                 <div>
@@ -1923,8 +1923,8 @@ export default function AdminPanel() {
                   <Textarea value={blogPostForm.excerpt} onChange={(e) => setBlogPostForm({ ...blogPostForm, excerpt: e.target.value })} rows={2} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">SadrÅ¾aj *</label>
-                  <Textarea value={blogPostForm.sadrzaj} onChange={(e) => setBlogPostForm({ ...blogPostForm, sadrzaj: e.target.value })} rows={10} required placeholder="PodrÅ¾ava HTML formatiranje..." />
+                  <label className="text-sm font-medium">Sadržaj *</label>
+                  <Textarea value={blogPostForm.sadrzaj} onChange={(e) => setBlogPostForm({ ...blogPostForm, sadrzaj: e.target.value })} rows={10} required placeholder="Podržava HTML formatiranje..." />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Thumbnail slika</label>
@@ -1936,7 +1936,7 @@ export default function AdminPanel() {
                         setBlogPostForm({ ...blogPostForm, thumbnail: url });
                         toast({ title: "Slika uploadovana" });
                       } catch (err) {
-                        toast({ title: "GreÅ¡ka", variant: "destructive" });
+                        toast({ title: "Greška", variant: "destructive" });
                       }
                     }
                   }} />
@@ -1975,11 +1975,11 @@ export default function AdminPanel() {
                   <p className="text-sm font-medium">SEO</p>
                   <Input placeholder="Meta naslov (max 70 karaktera)" value={blogPostForm.meta_title} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_title: e.target.value })} maxLength={70} />
                   <Textarea placeholder="Meta opis (max 160 karaktera)" value={blogPostForm.meta_description} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_description: e.target.value })} rows={2} maxLength={160} />
-                  <Input placeholder="KljuÄne rijeÄi (odvojene zarezom)" value={blogPostForm.meta_keywords} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_keywords: e.target.value })} />
+                  <Input placeholder="Ključne riječi (odvojene zarezom)" value={blogPostForm.meta_keywords} onChange={(e) => setBlogPostForm({ ...blogPostForm, meta_keywords: e.target.value })} />
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingBlogPost ? 'SaÄuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowBlogPostDialog(false)}>OtkaÅ¾i</Button>
+                  <Button type="submit" className="flex-1">{editingBlogPost ? 'Sačuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowBlogPostDialog(false)}>Otkaži</Button>
                 </div>
               </form>
             </DialogContent>
@@ -2006,8 +2006,8 @@ export default function AdminPanel() {
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">{editingBlogCategory ? 'SaÄuvaj' : 'Kreiraj'}</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowBlogCategoryDialog(false)}>OtkaÅ¾i</Button>
+                  <Button type="submit" className="flex-1">{editingBlogCategory ? 'Sačuvaj' : 'Kreiraj'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowBlogCategoryDialog(false)}>Otkaži</Button>
                 </div>
               </form>
             </DialogContent>
