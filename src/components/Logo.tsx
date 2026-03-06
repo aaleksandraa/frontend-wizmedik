@@ -2,11 +2,32 @@ import { AnimatedLogo } from './AnimatedLogo';
 import { useLogoSettings } from '@/hooks/useLogoSettings';
 import { cn } from '@/lib/utils';
 import { Heart } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 interface LogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
+
+const sanitizeLogoHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true, svg: true, svgFilters: true },
+    ADD_TAGS: ['style'],
+    ADD_ATTR: [
+      'class',
+      'style',
+      'viewBox',
+      'stroke-width',
+      'stroke-linecap',
+      'stroke-dasharray',
+      'stroke-dashoffset',
+      'transform-origin',
+      'xmlns',
+      'aria-label',
+    ],
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+  });
+};
 
 export function Logo({ className, size = 'md' }: LogoProps) {
   const { settings, loading } = useLogoSettings();
@@ -17,6 +38,16 @@ export function Logo({ className, size = 'md' }: LogoProps) {
 
   if (!settings.logo_enabled) {
     return <AnimatedLogo size={size} className={className} />;
+  }
+
+  const logoHtml = (settings.logo_html || '').trim();
+  if (logoHtml) {
+    return (
+      <div
+        className={cn('logo-html-wrapper', className)}
+        dangerouslySetInnerHTML={{ __html: sanitizeLogoHtml(logoHtml) }}
+      />
+    );
   }
 
   const logoContent = settings.logo_type === 'text' || !settings.logo_url ? (
@@ -55,6 +86,16 @@ export function LogoCompact({ className }: { className?: string }) {
 
   if (loading || !settings.logo_enabled) {
     return <AnimatedLogo size="sm" className={className} />;
+  }
+
+  const logoHtml = (settings.logo_html || '').trim();
+  if (logoHtml) {
+    return (
+      <div
+        className={cn('logo-html-wrapper max-w-[220px] overflow-hidden', className)}
+        dangerouslySetInnerHTML={{ __html: sanitizeLogoHtml(logoHtml) }}
+      />
+    );
   }
 
   const logoContent = settings.logo_type === 'text' || !settings.logo_url ? (

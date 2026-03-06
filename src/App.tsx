@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -214,6 +214,8 @@ const App = () => {
               {/* Info pages */}
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/o-nama" element={<Navigate to="/about" replace />} />
+              <Route path="/kontakt" element={<Navigate to="/contact" replace />} />
               <Route path="/kalkulatori" element={<HealthCalculators />} />
               <Route path="/faq" element={<FAQ />} />
               

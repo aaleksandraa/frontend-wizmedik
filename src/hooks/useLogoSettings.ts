@@ -7,6 +7,7 @@ interface LogoSettings {
   logo_url: string | null;
   logo_enabled: boolean;
   logo_type: 'image' | 'text';
+  logo_html: string | null;
   footer_logo_url: string | null;
   footer_logo_enabled: boolean;
   footer_logo_type: 'image' | 'text';
@@ -23,6 +24,7 @@ export function useLogoSettings() {
     logo_url: null,
     logo_enabled: true,
     logo_type: 'text',
+    logo_html: null,
     footer_logo_url: null,
     footer_logo_enabled: true,
     footer_logo_type: 'text',
