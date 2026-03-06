@@ -17,7 +17,7 @@ import {
   Plus, Edit, Trash2, Users, Building2, Stethoscope, MapPin, Upload, Clock, 
   Palette, Settings, Search, LayoutGrid, List, ChevronRight, Phone, Mail,
   Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical, Download,
-  FlaskConical, Sparkles, Home, MessageSquare, User
+  FlaskConical, Sparkles, Home, MessageSquare, User, Pill
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,7 @@ import { BlogTypographySettings } from '@/components/admin/BlogTypographySetting
 import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSettings';
 import Mkb10Manager from '@/components/admin/Mkb10Manager';
 import { EntitiesManagement } from '@/components/admin/EntitiesManagement';
+import { AdminPharmaciesManagement } from '@/components/admin/AdminPharmaciesManagement';
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import {
@@ -1091,6 +1092,10 @@ export default function AdminPanel() {
                 <FlaskConical className="h-4 w-4 mr-2 hidden sm:inline" />
                 Laboratorije
               </TabsTrigger>
+              <TabsTrigger value="pharmacies" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Pill className="h-4 w-4 mr-2 hidden sm:inline" />
+                Apoteke
+              </TabsTrigger>
               <TabsTrigger value="spas" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Sparkles className="h-4 w-4 mr-2 hidden sm:inline" />
                 Banje
@@ -1624,6 +1629,11 @@ export default function AdminPanel() {
             {/* LABORATORIES TAB */}
             <TabsContent value="laboratories">
               <EntitiesManagement type="laboratories" />
+            </TabsContent>
+
+            {/* PHARMACIES TAB */}
+            <TabsContent value="pharmacies">
+              <AdminPharmaciesManagement />
             </TabsContent>
 
             {/* SPAS TAB */}

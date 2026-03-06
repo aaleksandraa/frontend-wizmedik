@@ -84,6 +84,12 @@ export const adminAPI = {
   updateDoctorCardSettings: (data: any) => adminApiInstance.put('/admin/settings/doctor-card', data),
   getClinicCardSettings: () => adminApiInstance.get('/admin/settings/clinic-card'),
   updateClinicCardSettings: (data: any) => adminApiInstance.put('/admin/settings/clinic-card', data),
+
+  // Pharmacy management
+  getPharmacies: (params?: any) => adminApiInstance.get('/admin/pharmacies', { params }),
+  createPharmacy: (data: any) => adminApiInstance.post('/admin/pharmacies', data),
+  updatePharmacy: (id: number, data: any) => adminApiInstance.put(`/admin/pharmacies/${id}`, data),
+  deletePharmacy: (id: number) => adminApiInstance.delete(`/admin/pharmacies/${id}`),
 };
 
 export default adminAPI;

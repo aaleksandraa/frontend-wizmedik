@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Loader2, CheckCircle, XCircle, Clock, UserPlus, Building2, 
-  Mail, Phone, MapPin, Calendar, Eye, FlaskConical, Droplet, Home 
+  Mail, Phone, MapPin, Calendar, Eye, FlaskConical, Droplet, Home, Pill
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import axios from 'axios';
@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 
 interface RegistrationRequest {
   id: number;
-  type: 'doctor' | 'clinic' | 'laboratory' | 'spa' | 'care_home';
+  type: 'doctor' | 'clinic' | 'laboratory' | 'spa' | 'care_home' | 'pharmacy';
   email: string;
   status: 'pending' | 'approved' | 'rejected';
   email_verified_at: string | null;
@@ -150,6 +150,7 @@ export function RegistrationRequests() {
   const laboratoryRequests = requests.filter(r => r.type === 'laboratory');
   const spaRequests = requests.filter(r => r.type === 'spa');
   const careHomeRequests = requests.filter(r => r.type === 'care_home');
+  const pharmacyRequests = requests.filter(r => r.type === 'pharmacy');
 
   // Helper functions to get data from request (supports both direct fields and legacy data object)
   const getName = (request: RegistrationRequest) => {
@@ -212,6 +213,10 @@ export function RegistrationRequests() {
             <Home className="w-4 h-4" />
             Domovi ({careHomeRequests.length})
           </TabsTrigger>
+          <TabsTrigger value="pharmacies" className="gap-2">
+            <Pill className="w-4 h-4" />
+            Apoteke ({pharmacyRequests.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
@@ -239,6 +244,8 @@ export function RegistrationRequests() {
                             <Droplet className="w-6 h-6 text-primary" />
                           ) : request.type === 'care_home' ? (
                             <Home className="w-6 h-6 text-primary" />
+                          ) : request.type === 'pharmacy' ? (
+                            <Pill className="w-6 h-6 text-primary" />
                           ) : (
                             <Building2 className="w-6 h-6 text-primary" />
                           )}
@@ -601,6 +608,63 @@ export function RegistrationRequests() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="pharmacies" className="space-y-4">
+          {pharmacyRequests.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Pill className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-lg font-medium text-gray-900">Nema zahtjeva od apoteka</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {pharmacyRequests.map((request) => (
+                <Card key={request.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-lg">{getName(request)}</h3>
+                          {getStatusBadge(request.status, request.email_verified_at)}
+                        </div>
+                        <div className="space-y-1 text-sm text-gray-600">
+                          <div>{request.email}</div>
+                          {getGrad(request) && <div>Grad: {getGrad(request)}</div>}
+                          <div>{format(new Date(request.created_at), 'dd.MM.yyyy. HH:mm')}</div>
+                        </div>
+                      </div>
+                      {request.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleApprove(request.id)}
+                            disabled={processing}
+                            className="bg-green-600 hover:bg-green-700"
+                            title={!isEmailVerified(request) ? 'Email nije verifikovan, ali mozete odobriti' : 'Odobri zahtjev'}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Odobri
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleReject(request.id)}
+                            disabled={processing}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Obrisi
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
 
       {/* Details Dialog */}
@@ -619,7 +683,8 @@ export function RegistrationRequests() {
                     {selectedRequest.type === 'doctor' ? 'Doktor' : 
                      selectedRequest.type === 'laboratory' ? 'Laboratorija' :
                      selectedRequest.type === 'spa' ? 'Banja' :
-                     selectedRequest.type === 'care_home' ? 'Dom za njegu' : 'Klinika'}
+                     selectedRequest.type === 'care_home' ? 'Dom za njegu' :
+                     selectedRequest.type === 'pharmacy' ? 'Apoteka' : 'Klinika'}
                   </p>
                 </div>
                 <div>
