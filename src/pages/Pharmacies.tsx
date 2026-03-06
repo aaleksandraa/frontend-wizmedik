@@ -90,7 +90,8 @@ export default function Pharmacies() {
       try {
         const params: any = {
           sort: 'open_first',
-          per_page: 100,
+          // Backend API trenutno validira per_page max 50.
+          per_page: 50,
         };
         if (city) params.grad = city;
         if (search) params.search = search;

@@ -171,13 +171,21 @@ export function AdminPharmaciesManagement() {
   const fetchFirms = async () => {
     setLoading(true);
     try {
-      const response = await adminAPI.getPharmacies({ per_page: 1000 });
-      const list = response?.data?.data || [];
+      const response = await adminAPI.getPharmacies({ per_page: 100 });
+      const payload = response?.data;
+      let list: any[] = [];
+      if (Array.isArray(payload)) {
+        list = payload;
+      } else if (Array.isArray(payload?.data)) {
+        list = payload.data;
+      } else if (Array.isArray(payload?.data?.data)) {
+        list = payload.data.data;
+      }
       setFirms(Array.isArray(list) ? list : []);
     } catch (error) {
       toast({
         title: 'Greška',
-        description: 'Nije moguće učitati apoteke.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     } finally {
@@ -640,4 +648,3 @@ export function AdminPharmaciesManagement() {
     </div>
   );
 }
-
