@@ -280,13 +280,7 @@ export default function Pharmacies() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((item) => (
                       <Link key={item.id} to={`/apoteka/${item.slug}`}>
-                        <Card className="relative h-full overflow-hidden hover:shadow-md transition-shadow">
-                          {item.has_pensioner_discount ? (
-                            <Badge className="absolute top-2 right-2 z-10 bg-emerald-600 hover:bg-emerald-700 text-white">
-                              <Pill className="w-3.5 h-3.5 mr-1" />
-                              Popust penzioneri
-                            </Badge>
-                          ) : null}
+                        <Card className="h-full overflow-hidden hover:shadow-md transition-shadow">
                           <CardContent className="p-4 space-y-3">
                             <div className="flex items-start justify-between gap-3">
                               <h3 className="font-semibold text-gray-900 line-clamp-2">{item.naziv}</h3>
@@ -311,6 +305,12 @@ export default function Pharmacies() {
                               </Badge>
                               {item.is_dezurna ? <Badge className="bg-orange-500 hover:bg-orange-600">Dezurna</Badge> : null}
                               {item.is_24h ? <Badge className="bg-blue-600 hover:bg-blue-700">24/7</Badge> : null}
+                              {item.has_pensioner_discount ? (
+                                <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                  <Pill className="w-3.5 h-3.5 mr-1" />
+                                  Popust za penzionere
+                                </Badge>
+                              ) : null}
                               {item.active_offers_count > 0 ? <Badge variant="outline">Ponude {item.active_offers_count}</Badge> : null}
                               {item.active_actions_count > 0 ? <Badge variant="outline">Akcije {item.active_actions_count}</Badge> : null}
                             </div>
