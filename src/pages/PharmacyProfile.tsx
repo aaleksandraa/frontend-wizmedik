@@ -13,7 +13,6 @@ import { pharmaciesAPI } from '@/services/api';
 import {
   Clock3,
   ExternalLink,
-  Image as ImageIcon,
   Mail,
   MapPin,
   Navigation,
@@ -136,16 +135,6 @@ const toAbsoluteUrl = (value?: string | null): string => {
   const fixed = fixImageUrl(value) || value;
   if (fixed.startsWith('http://') || fixed.startsWith('https://')) return fixed;
   return `${SITE_URL}${fixed.startsWith('/') ? '' : '/'}${fixed}`;
-};
-
-const formatDateTime = (value?: string | null): string => {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return new Intl.DateTimeFormat('bs-BA', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date);
 };
 
 const formatDateOnly = (value?: string | null): string => {
@@ -315,15 +304,10 @@ export default function PharmacyProfile() {
                         {pharmacy.is_24h ? (
                           <Badge className="bg-blue-600 hover:bg-blue-700">24/7</Badge>
                         ) : null}
-                        {hasPensionerDiscount ? (
+                      {hasPensionerDiscount ? (
                           <Badge className="bg-emerald-600 hover:bg-emerald-700">
                             <Pill className="w-3.5 h-3.5 mr-1" />
                             Popust za penzionere
-                          </Badge>
-                        ) : null}
-                        {pharmacy.status.next_change_at ? (
-                          <Badge variant="outline">
-                            Promjena: {formatDateTime(pharmacy.status.next_change_at)}
                           </Badge>
                         ) : null}
                       </div>
@@ -345,20 +329,24 @@ export default function PharmacyProfile() {
                           {pharmacy.postanski_broj ? `, ${pharmacy.postanski_broj}` : ''}
                         </span>
                       </div>
-                      {pharmacy.telefon ? (
-                        <div className="flex items-start gap-2">
-                          <Phone className="w-4 h-4 mt-0.5 text-red-600" />
-                          <a href={`tel:${pharmacy.telefon}`} className="hover:underline">
-                            {pharmacy.telefon}
-                          </a>
-                        </div>
-                      ) : null}
-                      {pharmacy.email ? (
-                        <div className="flex items-start gap-2">
-                          <Mail className="w-4 h-4 mt-0.5 text-red-600" />
-                          <a href={`mailto:${pharmacy.email}`} className="hover:underline">
-                            {pharmacy.email}
-                          </a>
+                      {pharmacy.telefon || pharmacy.email ? (
+                        <div className="space-y-0 sm:space-y-1.5">
+                          {pharmacy.telefon ? (
+                            <div className="flex items-start gap-2">
+                              <Phone className="w-4 h-4 mt-0.5 text-red-600" />
+                              <a href={`tel:${pharmacy.telefon}`} className="hover:underline">
+                                {pharmacy.telefon}
+                              </a>
+                            </div>
+                          ) : null}
+                          {pharmacy.email ? (
+                            <div className="flex items-start gap-2">
+                              <Mail className="w-4 h-4 mt-0.5 text-red-600" />
+                              <a href={`mailto:${pharmacy.email}`} className="hover:underline">
+                                {pharmacy.email}
+                              </a>
+                            </div>
+                          ) : null}
                         </div>
                       ) : null}
                       {pharmacy.firma?.website ? (
@@ -398,24 +386,48 @@ export default function PharmacyProfile() {
           </div>
         </section>
 
+        {images.length > 0 ? (
+          <section className="pt-4">
+            <div className="container mx-auto px-4">
+              <div className="overflow-x-auto pb-2">
+                <div className="flex gap-3 snap-x snap-mandatory">
+                  {images.map((image, index) => (
+                    <button
+                      key={`${image}-${index}`}
+                      type="button"
+                      className="snap-start flex-none w-[220px] h-[150px] md:w-[280px] md:h-[180px] rounded-lg overflow-hidden border group"
+                      onClick={() => setSelectedImage(image)}
+                    >
+                      <img
+                        src={image}
+                        alt={`${pharmacy.naziv} ${index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <section className="py-6">
           <div className="container mx-auto px-4">
             <div className="space-y-4">
               <div className="grid lg:grid-cols-5 gap-4">
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="text-base">O apoteci</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-gray-700">
-                    {pharmacy.kratki_opis ? <p>{pharmacy.kratki_opis}</p> : null}
-                    {pharmacy.firma?.opis ? <p>{pharmacy.firma.opis}</p> : null}
-                    {!pharmacy.kratki_opis && !pharmacy.firma?.opis ? (
-                      <p className="text-gray-500">Nije dodat detaljan opis apoteke.</p>
-                    ) : null}
-                  </CardContent>
-                </Card>
+                {pharmacy.kratki_opis || pharmacy.firma?.opis ? (
+                  <Card className="lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="text-base">O apoteci</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm text-gray-700">
+                      {pharmacy.kratki_opis ? <p>{pharmacy.kratki_opis}</p> : null}
+                      {pharmacy.firma?.opis ? <p>{pharmacy.firma.opis}</p> : null}
+                    </CardContent>
+                  </Card>
+                ) : null}
 
-                <div className="lg:col-span-3">
+                <div className={pharmacy.kratki_opis || pharmacy.firma?.opis ? 'lg:col-span-3' : 'lg:col-span-5'}>
                   <LocationMapCard
                     naziv={pharmacy.naziv}
                     adresa={pharmacy.adresa}
@@ -555,37 +567,6 @@ export default function PharmacyProfile() {
                   </CardContent>
                 </Card>
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Galerija ({images.length})</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {images.length === 0 ? (
-                    <div className="py-10 text-center">
-                      <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">Nema slika u galeriji.</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {images.map((image, index) => (
-                        <button
-                          key={`${image}-${index}`}
-                          type="button"
-                          className="aspect-square rounded-lg overflow-hidden border group"
-                          onClick={() => setSelectedImage(image)}
-                        >
-                          <img
-                            src={image}
-                            alt={`${pharmacy.naziv} ${index + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
             </div>
           </div>
         </section>
