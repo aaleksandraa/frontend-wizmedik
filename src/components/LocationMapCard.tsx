@@ -13,6 +13,7 @@ interface LocationMapCardProps {
   longitude?: number;
   googleMapsLink?: string;
   markerColor?: 'blue' | 'green' | 'violet' | 'gold' | 'orange';
+  mapHeightClass?: string;
 }
 
 // Fix for default marker icon
@@ -30,7 +31,8 @@ export function LocationMapCard({
   latitude, 
   longitude, 
   googleMapsLink,
-  markerColor = 'blue'
+  markerColor = 'blue',
+  mapHeightClass = 'h-[250px]',
 }: LocationMapCardProps) {
   // Generate Google Maps link if not provided but coordinates exist
   const mapsLink = googleMapsLink || 
@@ -62,7 +64,7 @@ export function LocationMapCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {hasCoordinates ? (
-          <div className="rounded-lg overflow-hidden border h-[250px]">
+          <div className={`rounded-lg overflow-hidden border ${mapHeightClass}`}>
             <MapContainer
               center={[latitude, longitude]}
               zoom={15}
