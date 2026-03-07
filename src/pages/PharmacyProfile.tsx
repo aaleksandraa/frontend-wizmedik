@@ -222,6 +222,14 @@ export default function PharmacyProfile() {
     return pensionerDiscount || pensionerOffer;
   }, [pharmacy]);
 
+  const hasActiveOffers = (pharmacy?.active_offers || []).length > 0;
+  const hasActiveDiscounts = (pharmacy?.active_discounts || []).length > 0;
+  const hasActiveActions = (pharmacy?.active_actions || []).length > 0;
+  const hasAnyBenefits = hasActiveOffers || hasActiveDiscounts || hasActiveActions;
+  const benefitsCount = Number(hasActiveOffers) + Number(hasActiveDiscounts) + Number(hasActiveActions);
+  const benefitsGridClass =
+    benefitsCount <= 1 ? 'lg:grid-cols-1' : benefitsCount === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3';
+
   if (loading) {
     return (
       <>
@@ -414,6 +422,77 @@ export default function PharmacyProfile() {
         <section className="py-6">
           <div className="container mx-auto px-4">
             <div className="space-y-4">
+              {hasAnyBenefits ? (
+                <div className={`grid gap-4 ${benefitsGridClass}`}>
+                  {hasActiveOffers ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Posebne ponude</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {pharmacy.active_offers?.map((offer) => (
+                          <div key={offer.id} className="border rounded-lg p-3 space-y-1">
+                            <p className="font-semibold text-sm">{offer.title}</p>
+                            {offer.description ? (
+                              <p className="text-sm text-gray-600">{offer.description}</p>
+                            ) : null}
+                            <div className="flex flex-wrap gap-1.5 text-xs">
+                              {offer.target_group ? <Badge variant="outline">{offer.target_group}</Badge> : null}
+                              {offer.discount_percent ? <Badge variant="outline">-{offer.discount_percent}%</Badge> : null}
+                              {offer.discount_amount ? <Badge variant="outline">-{offer.discount_amount} KM</Badge> : null}
+                              {offer.service_name ? <Badge variant="outline">{offer.service_name}</Badge> : null}
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ) : null}
+
+                  {hasActiveDiscounts ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Popusti</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {pharmacy.active_discounts?.map((discount) => (
+                          <div key={discount.id} className="border rounded-lg p-3 space-y-1">
+                            <p className="font-semibold text-sm capitalize">{discount.tip}</p>
+                            <p className="text-sm text-gray-700">
+                              {discount.discount_percent
+                                ? `${discount.discount_percent}% popusta`
+                                : `${discount.discount_amount || 0} KM popusta`}
+                            </p>
+                            {discount.min_purchase ? (
+                              <p className="text-xs text-gray-500">Minimalna kupovina: {discount.min_purchase} KM</p>
+                            ) : null}
+                            {discount.uslovi ? <p className="text-xs text-gray-500">{discount.uslovi}</p> : null}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ) : null}
+
+                  {hasActiveActions ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Akcije</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {pharmacy.active_actions?.map((action) => (
+                          <div key={action.id} className="border rounded-lg p-3 space-y-1">
+                            <p className="font-semibold text-sm">{action.naslov}</p>
+                            {action.opis ? <p className="text-sm text-gray-600">{action.opis}</p> : null}
+                            {action.promo_code ? (
+                              <Badge variant="secondary">Promo kod: {action.promo_code}</Badge>
+                            ) : null}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ) : null}
+                </div>
+              ) : null}
+
               <div className="grid lg:grid-cols-5 gap-4">
                 {pharmacy.kratki_opis || pharmacy.firma?.opis ? (
                   <Card className="lg:col-span-2">
@@ -439,81 +518,6 @@ export default function PharmacyProfile() {
                     mapHeightClass="h-[320px] md:h-[420px]"
                   />
                 </div>
-              </div>
-
-              <div className="grid lg:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Posebne ponude</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {(pharmacy.active_offers || []).length === 0 ? (
-                      <p className="text-sm text-gray-500">Trenutno nema aktivnih posebnih ponuda.</p>
-                    ) : (
-                      pharmacy.active_offers?.map((offer) => (
-                        <div key={offer.id} className="border rounded-lg p-3 space-y-1">
-                          <p className="font-semibold text-sm">{offer.title}</p>
-                          {offer.description ? (
-                            <p className="text-sm text-gray-600">{offer.description}</p>
-                          ) : null}
-                          <div className="flex flex-wrap gap-1.5 text-xs">
-                            {offer.target_group ? <Badge variant="outline">{offer.target_group}</Badge> : null}
-                            {offer.discount_percent ? <Badge variant="outline">-{offer.discount_percent}%</Badge> : null}
-                            {offer.discount_amount ? <Badge variant="outline">-{offer.discount_amount} KM</Badge> : null}
-                            {offer.service_name ? <Badge variant="outline">{offer.service_name}</Badge> : null}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Popusti</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {(pharmacy.active_discounts || []).length === 0 ? (
-                      <p className="text-sm text-gray-500">Trenutno nema aktivnih popusta.</p>
-                    ) : (
-                      pharmacy.active_discounts?.map((discount) => (
-                        <div key={discount.id} className="border rounded-lg p-3 space-y-1">
-                          <p className="font-semibold text-sm capitalize">{discount.tip}</p>
-                          <p className="text-sm text-gray-700">
-                            {discount.discount_percent
-                              ? `${discount.discount_percent}% popusta`
-                              : `${discount.discount_amount || 0} KM popusta`}
-                          </p>
-                          {discount.min_purchase ? (
-                            <p className="text-xs text-gray-500">Minimalna kupovina: {discount.min_purchase} KM</p>
-                          ) : null}
-                          {discount.uslovi ? <p className="text-xs text-gray-500">{discount.uslovi}</p> : null}
-                        </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Akcije</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {(pharmacy.active_actions || []).length === 0 ? (
-                      <p className="text-sm text-gray-500">Trenutno nema aktivnih akcija.</p>
-                    ) : (
-                      pharmacy.active_actions?.map((action) => (
-                        <div key={action.id} className="border rounded-lg p-3 space-y-1">
-                          <p className="font-semibold text-sm">{action.naslov}</p>
-                          {action.opis ? <p className="text-sm text-gray-600">{action.opis}</p> : null}
-                          {action.promo_code ? (
-                            <Badge variant="secondary">Promo kod: {action.promo_code}</Badge>
-                          ) : null}
-                        </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
               </div>
 
               <div className="grid lg:grid-cols-2 gap-4">

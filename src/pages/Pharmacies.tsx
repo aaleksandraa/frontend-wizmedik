@@ -217,7 +217,12 @@ export default function Pharmacies() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                <CitySelect value={city} onChange={setCity} />
+                <CitySelect
+                  value={city}
+                  onChange={setCity}
+                  showAllOption
+                  allOptionLabel="Svi gradovi"
+                />
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant={openNow ? 'default' : 'outline'} size="sm" onClick={() => setOpenNow((v) => !v)}>

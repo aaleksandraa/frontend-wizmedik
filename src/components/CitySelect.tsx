@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ChevronsUpDown, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,8 @@ interface CitySelectProps {
   error?: boolean;
   className?: string;
   showIcon?: boolean;
+  showAllOption?: boolean;
+  allOptionLabel?: string;
 }
 
 export function CitySelect({
@@ -41,6 +43,8 @@ export function CitySelect({
   error = false,
   className,
   showIcon = true,
+  showAllOption = false,
+  allOptionLabel = 'Svi gradovi',
 }: CitySelectProps) {
   const [open, setOpen] = useState(false);
   const [cities, setCities] = useState<City[]>([]);
@@ -62,6 +66,11 @@ export function CitySelect({
   }, []);
 
   const selectedCity = cities.find((city) => city.naziv === value);
+  const displayValue = value
+    ? selectedCity?.naziv || value
+    : showAllOption
+      ? allOptionLabel
+      : placeholder;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,24 +82,36 @@ export function CitySelect({
           disabled={disabled || loading}
           className={cn(
             'w-full justify-between font-normal',
-            !value && 'text-muted-foreground',
+            !value && !showAllOption && 'text-muted-foreground',
             error && 'border-red-500',
             className
           )}
         >
           <span className="flex items-center gap-2 truncate">
-            {showIcon && <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />}
-            {loading ? 'Učitavanje...' : selectedCity?.naziv || placeholder}
+            {showIcon ? <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" /> : null}
+            {loading ? 'Ucitavanje...' : displayValue}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Pretraži gradove..." />
+          <CommandInput placeholder="Pretrazi gradove..." />
           <CommandList>
-            <CommandEmpty>Grad nije pronađen.</CommandEmpty>
+            <CommandEmpty>Grad nije pronadjen.</CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-auto">
+              {showAllOption ? (
+                <CommandItem
+                  value="__all_cities__"
+                  onSelect={() => {
+                    onChange('');
+                    setOpen(false);
+                  }}
+                >
+                  <Check className={cn('mr-2 h-4 w-4', value === '' ? 'opacity-100' : 'opacity-0')} />
+                  {allOptionLabel}
+                </CommandItem>
+              ) : null}
               {cities.map((city) => (
                 <CommandItem
                   key={city.id}
