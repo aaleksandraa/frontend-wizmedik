@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
@@ -19,13 +19,13 @@ import { MessageSquare, Send, X, AlertCircle, CheckCircle2 } from 'lucide-react'
 const pitanjeSchema = z.object({
   naslov: z.string()
     .min(10, 'Naslov mora imati najmanje 10 karaktera')
-    .max(200, 'Naslov može imati maksimalno 200 karaktera'),
+    .max(200, 'Naslov moÅ¾e imati maksimalno 200 karaktera'),
   sadrzaj: z.string()
     .min(20, 'Pitanje mora imati najmanje 20 karaktera')
-    .max(5000, 'Pitanje može imati maksimalno 5000 karaktera'),
+    .max(5000, 'Pitanje moÅ¾e imati maksimalno 5000 karaktera'),
   ime_korisnika: z.string()
     .min(2, 'Ime mora imati najmanje 2 karaktera')
-    .max(100, 'Ime može imati maksimalno 100 karaktera'),
+    .max(100, 'Ime moÅ¾e imati maksimalno 100 karaktera'),
   email_korisnika: z.string()
     .email('Unesite validnu email adresu')
     .optional()
@@ -46,6 +46,8 @@ export default function PostaviPitanje() {
   const [noviTag, setNoviTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [slike, setSlike] = useState<File[]>([]);
   const [captchaQuestion, setCaptchaQuestion] = useState({ a: 0, b: 0 });
 
@@ -87,8 +89,8 @@ export default function PostaviPitanje() {
       const response = await specialtiesAPI.getAll();
       setSpecijalnosti(response.data);
     } catch (error) {
-      console.error('Greška pri učitavanju specijalnosti:', error);
-      toast.error('Greška pri učitavanju specijalnosti');
+      console.error('GreÅ¡ka pri uÄitavanju specijalnosti:', error);
+      toast.error('GreÅ¡ka pri uÄitavanju specijalnosti');
     }
   };
 
@@ -115,7 +117,7 @@ export default function PostaviPitanje() {
   const handleCaptchaVerify = () => {
     setCaptchaVerified(true);
     setValue('captcha_verified', true);
-    toast.success('Verifikacija uspješna');
+    toast.success('Verifikacija uspjeÅ¡na');
   };
 
   const onSubmit = async (data: PitanjeFormData) => {
@@ -129,13 +131,17 @@ export default function PostaviPitanje() {
         email_korisnika: data.email_korisnika || undefined,
         specijalnost_id: parseInt(data.specijalnost_id),
         tagovi: tagovi.length > 0 ? tagovi : undefined,
-        captcha_token: 'dummy_token', // U produkciji, koristiti pravi token
+        captcha_token: 'math_fallback',
+        captcha_a: captchaQuestion.a,
+        captcha_b: captchaQuestion.b,
+        captcha_answer: Number(captchaInput || 0),
+        website: honeypot || undefined,
       });
 
-      toast.success('Pitanje je uspješno postavljeno!');
+      toast.success('Pitanje je uspjeÅ¡no postavljeno!');
       navigate(`/pitanja/${response.data.pitanje.slug}`);
     } catch (error: any) {
-      console.error('Greška pri postavljanju pitanja:', error);
+      console.error('GreÅ¡ka pri postavljanju pitanja:', error);
       
       if (error.response?.status === 429) {
         toast.error('Dostigli ste maksimalan broj pitanja za danas');
@@ -144,7 +150,7 @@ export default function PostaviPitanje() {
           toast.error(err[0]);
         });
       } else {
-        toast.error('Greška pri postavljanju pitanja');
+        toast.error('GreÅ¡ka pri postavljanju pitanja');
       }
     } finally {
       setIsSubmitting(false);
@@ -155,7 +161,7 @@ export default function PostaviPitanje() {
     <>
       <Helmet>
         <title>Postavi Pitanje - WizMedik</title>
-        <meta name="description" content="Postavite medicinsko pitanje i dobijte odgovor od stručnih doktora u Bosni i Hercegovini" />
+        <meta name="description" content="Postavite medicinsko pitanje i dobijte odgovor od struÄnih doktora u Bosni i Hercegovini" />
         <meta name="keywords" content="medicinsko pitanje, zdravstveni savjet, doktor online, besplatno pitanje" />
         <meta name="robots" content="noindex, follow" />
         <link rel="canonical" href="https://wizmedik.com/postavi-pitanje" />
@@ -170,7 +176,7 @@ export default function PostaviPitanje() {
             Postavi Pitanje
           </h1>
           <p className="text-muted-foreground">
-            Postavite svoje medicinsko pitanje i dobijte odgovor od stručnih doktora
+            Postavite svoje medicinsko pitanje i dobijte odgovor od struÄnih doktora
           </p>
         </div>
 
@@ -198,7 +204,7 @@ export default function PostaviPitanje() {
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Stručni Odgovori</h3>
+                  <h3 className="font-semibold mb-1">StruÄni Odgovori</h3>
                   <p className="text-sm text-muted-foreground">
                     Odgovaraju samo verifikovani doktori
                   </p>
@@ -216,7 +222,7 @@ export default function PostaviPitanje() {
                 <div>
                   <h3 className="font-semibold mb-1">Javno Pitanje</h3>
                   <p className="text-sm text-muted-foreground">
-                    Pitanje će biti vidljivo svima
+                    Pitanje Ä‡e biti vidljivo svima
                   </p>
                 </div>
               </div>
@@ -226,16 +232,29 @@ export default function PostaviPitanje() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Vaše Pitanje</CardTitle>
+            <CardTitle>VaÅ¡e Pitanje</CardTitle>
             <CardDescription>
-              Popunite formu ispod. Pitanje će biti vidljivo javno.
+              Popunite formu ispod. Pitanje Ä‡e biti vidljivo javno.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div className="absolute -left-[9999px] w-px h-px overflow-hidden" aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  name="website"
+                  type="text"
+                  value={honeypot}
+                  autoComplete="off"
+                  tabIndex={-1}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
+
               {/* Ime */}
               <div className="space-y-2">
-                <Label htmlFor="ime_korisnika">Vaše Ime *</Label>
+                <Label htmlFor="ime_korisnika">VaÅ¡e Ime *</Label>
                 <Input
                   id="ime_korisnika"
                   placeholder="npr. Amina K."
@@ -256,7 +275,7 @@ export default function PostaviPitanje() {
                   {...register('email_korisnika')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email neće biti javno prikazan.
+                  Email neÄ‡e biti javno prikazan.
                 </p>
                 {errors.email_korisnika && (
                   <p className="text-sm text-destructive">{errors.email_korisnika.message}</p>
@@ -281,7 +300,7 @@ export default function PostaviPitanje() {
                         </SelectItem>
                         {parent.children?.map((child: any) => (
                           <SelectItem key={child.id} value={child.id.toString()} className="pl-6 text-sm">
-                            └ {child.naziv}
+                            â”” {child.naziv}
                           </SelectItem>
                         ))}
                       </div>
@@ -298,7 +317,7 @@ export default function PostaviPitanje() {
                 <Label htmlFor="naslov">Naslov Pitanja *</Label>
                 <Input
                   id="naslov"
-                  placeholder="npr. Bol u grudima nakon fizičke aktivnosti"
+                  placeholder="npr. Bol u grudima nakon fiziÄke aktivnosti"
                   {...register('naslov')}
                 />
                 {errors.naslov && (
@@ -306,13 +325,13 @@ export default function PostaviPitanje() {
                 )}
               </div>
 
-              {/* Sadržaj */}
+              {/* SadrÅ¾aj */}
               <div className="space-y-2">
                 <Label htmlFor="sadrzaj">Detaljan Opis Pitanja *</Label>
                 <Textarea
                   id="sadrzaj"
                   rows={8}
-                  placeholder="Opišite detaljno svoje pitanje, simptome, trajanje problema, itd."
+                  placeholder="OpiÅ¡ite detaljno svoje pitanje, simptome, trajanje problema, itd."
                   {...register('sadrzaj')}
                 />
                 {errors.sadrzaj && (
@@ -330,7 +349,7 @@ export default function PostaviPitanje() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []);
                     if (files.length > 3) {
-                      toast.error('Možete uploadovati maksimalno 3 fajla');
+                      toast.error('MoÅ¾ete uploadovati maksimalno 3 fajla');
                       e.target.value = '';
                       return;
                     }
@@ -338,7 +357,7 @@ export default function PostaviPitanje() {
                   }}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Slike/nalazi će biti vidljivi samo doktorima. Maksimalno 3 fajla.
+                  Slike/nalazi Ä‡e biti vidljivi samo doktorima. Maksimalno 3 fajla.
                 </p>
               </div>
 
@@ -383,7 +402,7 @@ export default function PostaviPitanje() {
                 <div className="border rounded-lg p-4 bg-muted/50 space-y-3">
                   {!captchaVerified ? (
                     <>
-                      <p className="text-sm font-medium">Riješite zadatak:</p>
+                      <p className="text-sm font-medium">RijeÅ¡ite zadatak:</p>
                       <div className="flex items-center gap-3">
                         <div className="text-lg font-mono bg-white p-3 rounded border">
                           {captchaQuestion.a} + {captchaQuestion.b} = ?
@@ -392,17 +411,17 @@ export default function PostaviPitanje() {
                           type="number"
                           placeholder="Rezultat"
                           className="w-24"
-                          id="captcha-input"
+                          value={captchaInput}
+                          onChange={(e) => setCaptchaInput(e.target.value)}
                         />
                         <Button
                           type="button"
                           onClick={() => {
-                            const input = document.getElementById('captcha-input') as HTMLInputElement;
-                            if (input.value === String(captchaQuestion.a + captchaQuestion.b)) {
+                            if (captchaInput === String(captchaQuestion.a + captchaQuestion.b)) {
                               handleCaptchaVerify();
                             } else {
-                              toast.error('Netačan odgovor');
-                              input.value = '';
+                              toast.error('NetaÄan odgovor');
+                              setCaptchaInput('');
                               setCaptchaQuestion({ a: Math.floor(Math.random() * 10) + 1, b: Math.floor(Math.random() * 10) + 1 });
                             }
                           }}
@@ -425,12 +444,12 @@ export default function PostaviPitanje() {
 
               {/* Napomena */}
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h4 className="font-semibold text-amber-900 mb-2">Važna Napomena:</h4>
+                <h4 className="font-semibold text-amber-900 mb-2">VaÅ¾na Napomena:</h4>
                 <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
-                  <li>Pitanje će biti javno vidljivo sa vašim imenom</li>
-                  <li>Odgovor će dati samo doktor sa odgovarajućom specijalnosti</li>
-                  <li>Ovo nije zamjena za liječnički pregled</li>
-                  <li>U hitnim slučajevima pozovite 124</li>
+                  <li>Pitanje Ä‡e biti javno vidljivo sa vaÅ¡im imenom</li>
+                  <li>Odgovor Ä‡e dati samo doktor sa odgovarajuÄ‡om specijalnosti</li>
+                  <li>Ovo nije zamjena za lijeÄniÄki pregled</li>
+                  <li>U hitnim sluÄajevima pozovite 124</li>
                 </ul>
               </div>
 
@@ -457,3 +476,4 @@ export default function PostaviPitanje() {
     </>
   );
 }
+
