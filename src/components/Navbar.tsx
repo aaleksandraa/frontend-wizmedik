@@ -38,7 +38,6 @@ import {
   Check,
   Trash2,
   Users,
-  BookOpen,
   FlaskConical,
   FileText,
   Droplet,
@@ -55,18 +54,17 @@ const navLinks = [
   { href: '/specijalnosti', label: 'Specijalnosti', icon: Stethoscope },
   // Gradovi izbaÄeni iz glavnog menija
   { href: '/laboratorije', label: 'Laboratorije', icon: FlaskConical },
-  { href: '/apoteke', label: 'Apoteke', icon: Pill },
-  { href: '/lijekovi', label: 'Lijekovi', icon: Pill },
   { href: '/banje', label: 'Banje', icon: Droplet },
   { href: '/domovi-njega', label: 'Domovi', icon: Heart },
   { href: '/pitanja', label: 'Pitanja', icon: HelpCircle },
-  { href: '/blog', label: 'Savjeti', icon: BookOpen },
 ];
 
 const infoLinks = [
   { href: '/lijekovi', label: 'Lijekovi' },
   { href: '/gradovi', label: 'Gradovi' },
   { href: '/about', label: 'O wizMedik' },
+  { href: '/apoteke', label: 'Apoteke' },
+  { href: '/blog', label: 'Savjeti' },
   { href: '/medicinski-kalendar', label: 'Medicinski Kalendar' },
   { href: '/register/doctor', label: 'Za Doktore' },
   { href: '/register/clinic', label: 'Za Klinike' },
