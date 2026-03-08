@@ -95,13 +95,11 @@ export const adminAPI = {
   getMedicines: (params?: any) => adminApiInstance.get('/admin/lijekovi', { params }),
   updateMedicine: (id: number, data: any) => adminApiInstance.put(`/admin/lijekovi/${id}`, data),
   importMedicinesXml: (formData: FormData) =>
-    adminApiInstance.post('/admin/lijekovi/import-xml', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+    adminApiInstance.post('/admin/lijekovi/import-xml', formData),
+  importMedicinesXmlDefault: () =>
+    adminApiInstance.post('/admin/lijekovi/import-xml', { use_default: true }),
   importMedicinesRegistry: (formData: FormData) =>
-    adminApiInstance.post('/admin/lijekovi/import-registar', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+    adminApiInstance.post('/admin/lijekovi/import-registar', formData),
   getMedicinesAudit: (params?: any) => adminApiInstance.get('/admin/lijekovi/audit-quality', { params }),
   getRfzoLists: () => adminApiInstance.get('/admin/rfzo-liste'),
   createRfzoList: (data: any) => adminApiInstance.post('/admin/rfzo-liste', data),

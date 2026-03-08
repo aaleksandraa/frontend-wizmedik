@@ -101,6 +101,7 @@ export function AdminLijekoviManagement() {
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [importingXml, setImportingXml] = useState(false);
+  const [importingXmlDefault, setImportingXmlDefault] = useState(false);
   const [importingRegistar, setImportingRegistar] = useState(false);
   const [allowOverwrite, setAllowOverwrite] = useState(false);
   const [truncateRegistar, setTruncateRegistar] = useState(true);
@@ -191,14 +192,28 @@ export function AdminLijekoviManagement() {
     }
   };
 
+  const onImportXmlDefault = async () => {
+    setImportingXmlDefault(true);
+    try {
+      await adminAPI.importMedicinesXmlDefault();
+      toast({ title: 'Uspjeh', description: 'RFZO XML import sa server fajla je zavrsen.' });
+      await fetchMedicines();
+      await runAudit();
+    } catch (error: any) {
+      toast({ title: 'Greska', description: getErrorMessage(error), variant: 'destructive' });
+    } finally {
+      setImportingXmlDefault(false);
+    }
+  };
+
   const onImportRegistar = async (file: File | null) => {
     if (!file) return;
     setImportingRegistar(true);
     try {
       const fd = new FormData();
       fd.append('registar_file', file);
-      fd.append('truncate', String(truncateRegistar));
-      fd.append('allow_overwrite', String(allowOverwrite));
+      fd.append('truncate', truncateRegistar ? '1' : '0');
+      fd.append('allow_overwrite', allowOverwrite ? '1' : '0');
       const response = await adminAPI.importMedicinesRegistry(fd);
       const summary = response?.data?.summary || {};
       toast({
@@ -309,6 +324,7 @@ export function AdminLijekoviManagement() {
           <input ref={xmlFileRef} type="file" accept=".xml" className="hidden" onChange={(e) => onImportXml(e.target.files?.[0] || null)} />
           <input ref={registarFileRef} type="file" accept=".csv,.xml" className="hidden" onChange={(e) => onImportRegistar(e.target.files?.[0] || null)} />
           <Button variant="outline" onClick={() => xmlFileRef.current?.click()} disabled={importingXml} className="gap-2"><Upload className="h-4 w-4" />RFZO XML</Button>
+          <Button variant="outline" onClick={onImportXmlDefault} disabled={importingXmlDefault} className="gap-2"><Upload className="h-4 w-4" />RFZO XML (server)</Button>
           <Button variant="outline" onClick={() => registarFileRef.current?.click()} disabled={importingRegistar} className="gap-2"><Upload className="h-4 w-4" />Registar</Button>
           <Button variant="outline" onClick={fetchMedicines} className="gap-2"><RefreshCw className="h-4 w-4" />Osvjezi</Button>
         </div>
