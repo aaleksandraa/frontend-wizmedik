@@ -77,6 +77,8 @@ import CareHomeDashboard from "./pages/CareHomeDashboard";
 import CareHomesVodic from "./pages/CareHomesVodic";
 import RegisterCareHome from "./pages/RegisterCareHome";
 import Mkb10 from "./pages/Mkb10";
+import Lijekovi from "./pages/Lijekovi";
+import LijekProfil from "./pages/LijekProfil";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
@@ -153,6 +155,8 @@ const App = () => {
               <Route path="/domovi-njega/vodic" element={<CareHomesVodic />} />
               <Route path="/dom-njega/:slug" element={<CareHomeProfile />} />
               <Route path="/mkb10" element={<Mkb10 />} />
+              <Route path="/lijekovi" element={<Lijekovi />} />
+              <Route path="/lijekovi/:slug" element={<LijekProfil />} />
               <Route path="/specijalnost/:naziv" element={<SpecialtyLanding />} />
               <Route path="/gradovi" element={<Cities />} />
               <Route path="/grad/:grad" element={<CityLanding />} />

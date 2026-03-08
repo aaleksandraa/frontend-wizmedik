@@ -16,6 +16,7 @@ import {
   FileText,
   Calculator,
   MapPin,
+  Pill,
 } from 'lucide-react';
 import { useLogoSettings } from '@/hooks/useLogoSettings';
 
@@ -23,6 +24,7 @@ const searchLinks = [
   { to: '/doktori', label: 'Doktori', icon: Stethoscope },
   { to: '/klinike', label: 'Klinike', icon: Building2 },
   { to: '/laboratorije', label: 'Laboratorije', icon: FlaskConical },
+  { to: '/lijekovi', label: 'Lijekovi', icon: Pill },
   { to: '/banje', label: 'Banje', icon: Droplet },
   { to: '/domovi-njega', label: 'Domovi njege', icon: HomeIcon },
   { to: '/specijalnosti', label: 'Specijalnosti', icon: Stethoscope },

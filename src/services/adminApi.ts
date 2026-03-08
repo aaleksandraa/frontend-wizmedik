@@ -90,6 +90,23 @@ export const adminAPI = {
   createPharmacy: (data: any) => adminApiInstance.post('/admin/pharmacies', data),
   updatePharmacy: (id: number, data: any) => adminApiInstance.put(`/admin/pharmacies/${id}`, data),
   deletePharmacy: (id: number) => adminApiInstance.delete(`/admin/pharmacies/${id}`),
+
+  // Medicines management
+  getMedicines: (params?: any) => adminApiInstance.get('/admin/lijekovi', { params }),
+  updateMedicine: (id: number, data: any) => adminApiInstance.put(`/admin/lijekovi/${id}`, data),
+  importMedicinesXml: (formData: FormData) =>
+    adminApiInstance.post('/admin/lijekovi/import-xml', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  importMedicinesRegistry: (formData: FormData) =>
+    adminApiInstance.post('/admin/lijekovi/import-registar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  getMedicinesAudit: (params?: any) => adminApiInstance.get('/admin/lijekovi/audit-quality', { params }),
+  getRfzoLists: () => adminApiInstance.get('/admin/rfzo-liste'),
+  createRfzoList: (data: any) => adminApiInstance.post('/admin/rfzo-liste', data),
+  updateRfzoList: (id: number, data: any) => adminApiInstance.put(`/admin/rfzo-liste/${id}`, data),
+  deleteRfzoList: (id: number) => adminApiInstance.delete(`/admin/rfzo-liste/${id}`),
 };
 
 export default adminAPI;

@@ -39,6 +39,7 @@ import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSetti
 import Mkb10Manager from '@/components/admin/Mkb10Manager';
 import { EntitiesManagement } from '@/components/admin/EntitiesManagement';
 import { AdminPharmaciesManagement } from '@/components/admin/AdminPharmaciesManagement';
+import { AdminLijekoviManagement } from '@/components/admin/AdminLijekoviManagement';
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import {
@@ -1096,6 +1097,10 @@ export default function AdminPanel() {
                 <Pill className="h-4 w-4 mr-2 hidden sm:inline" />
                 Apoteke
               </TabsTrigger>
+              <TabsTrigger value="lijekovi" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Pill className="h-4 w-4 mr-2 hidden sm:inline" />
+                Lijekovi
+              </TabsTrigger>
               <TabsTrigger value="spas" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Sparkles className="h-4 w-4 mr-2 hidden sm:inline" />
                 Banje
@@ -1634,6 +1639,11 @@ export default function AdminPanel() {
             {/* PHARMACIES TAB */}
             <TabsContent value="pharmacies">
               <AdminPharmaciesManagement />
+            </TabsContent>
+
+            {/* MEDICINES TAB */}
+            <TabsContent value="lijekovi">
+              <AdminLijekoviManagement />
             </TabsContent>
 
             {/* SPAS TAB */}

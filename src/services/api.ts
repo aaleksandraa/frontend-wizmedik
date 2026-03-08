@@ -114,6 +114,15 @@ export const specialtiesAPI = {
   smartSearch: (query: string) => api.get(`/specialties/smart-search/${encodeURIComponent(query)}`),
 };
 
+export const medicinesAPI = {
+  getAll: (params?: any) => api.get('/lijekovi', { params }),
+  getBySlug: (slug: string) => api.get(`/lijekovi/${slug}`),
+};
+
+export const rfzoAPI = {
+  getAll: () => api.get('/rfzo-liste'),
+};
+
 export const servicesAPI = {
   getMyServices: () => api.get('/services/my'),
   create: (data: any) => api.post('/services', data),

@@ -56,6 +56,7 @@ const navLinks = [
   // Gradovi izbačeni iz glavnog menija
   { href: '/laboratorije', label: 'Laboratorije', icon: FlaskConical },
   { href: '/apoteke', label: 'Apoteke', icon: Pill },
+  { href: '/lijekovi', label: 'Lijekovi', icon: Pill },
   { href: '/banje', label: 'Banje', icon: Droplet },
   { href: '/domovi-njega', label: 'Domovi', icon: Heart },
   { href: '/pitanja', label: 'Pitanja', icon: HelpCircle },
