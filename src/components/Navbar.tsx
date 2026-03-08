@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { doctorsAPI, notifikacijeAPI } from '@/services/api';
@@ -49,11 +49,11 @@ import {
 import { format } from 'date-fns';
 
 const navLinks = [
-  { href: '/', label: 'Početna', icon: Home },
+  { href: '/', label: 'PoÄetna', icon: Home },
   { href: '/doktori', label: 'Doktori', icon: Users },
   { href: '/klinike', label: 'Klinike', icon: Building2 },
   { href: '/specijalnosti', label: 'Specijalnosti', icon: Stethoscope },
-  // Gradovi izbačeni iz glavnog menija
+  // Gradovi izbaÄeni iz glavnog menija
   { href: '/laboratorije', label: 'Laboratorije', icon: FlaskConical },
   { href: '/apoteke', label: 'Apoteke', icon: Pill },
   { href: '/lijekovi', label: 'Lijekovi', icon: Pill },
@@ -64,8 +64,9 @@ const navLinks = [
 ];
 
 const infoLinks = [
+  { href: '/lijekovi', label: 'Lijekovi' },
+  { href: '/gradovi', label: 'Gradovi' },
   { href: '/about', label: 'O wizMedik' },
-  { href: '/gradovi', label: 'Gradovi' }, // prebačeno u Informacije
   { href: '/medicinski-kalendar', label: 'Medicinski Kalendar' },
   { href: '/register/doctor', label: 'Za Doktore' },
   { href: '/register/clinic', label: 'Za Klinike' },
@@ -343,7 +344,7 @@ export function Navbar() {
                       : 'text-gray-700 hover:bg-gray-100 hover:!text-gray-900 hover:shadow-sm data-[state=open]:bg-primary/10 data-[state=open]:!text-primary data-[state=open]:shadow-sm'
                   ].join(' ')}
                 >
-                  Informacije
+                  Ostalo
                   <ChevronDown className="ml-1.5 h-4 w-4 opacity-70" />
                 </Button>
               </DropdownMenuTrigger>
@@ -389,7 +390,7 @@ export function Navbar() {
                         className="text-xs h-7 hover:bg-primary/10 hover:text-primary rounded-md"
                       >
                         <Check className="w-3 h-3 mr-1" />
-                        Označi sve
+                        OznaÄi sve
                       </Button>
                     )}
                   </DropdownMenuLabel>
@@ -627,7 +628,7 @@ export function Navbar() {
                   {/* Info Links - Cyan theme */}
                   <div className="my-4 mx-3 border-t border-cyan-100" />
                   <div className="px-3 space-y-1">
-                    <div className="px-4 py-2 text-xs font-bold text-cyan-600 uppercase tracking-wider">Informacije</div>
+                    <div className="px-4 py-2 text-xs font-bold text-cyan-600 uppercase tracking-wider">Ostalo</div>
                     {infoLinks.map((link) => (
                       <SheetClose asChild key={link.href}>
                         <Link
@@ -728,3 +729,4 @@ export function Navbar() {
     </nav>
   );
 }
+

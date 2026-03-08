@@ -410,7 +410,7 @@ export default function Lijekovi() {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Spisak lijekova</h1>
             </div>
             <p className="text-gray-600 max-w-3xl">
-              Provjerite da li je lijek preko Fonda Republike Srpske i ta\u010dno koliko se dopla\u0107uje.
+              Provjerite da li je lijek preko Fonda Republike Srpske i tačdno koliko se doplaćuje.
             </p>
 
             <form onSubmit={onSearchSubmit} className="mt-6 space-y-4">
@@ -419,7 +419,7 @@ export default function Lijekovi() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     className="pl-9"
-                    placeholder="Pretraga po nazivu, proizvo\u0111a\u010du, ATC \u0161ifri ili INN-u"
+                    placeholder="Pretraga po nazivu, proizvođaču, ATC šifri ili INN-u"
                     value={searchInput}
                     onChange={(event) => setSearchInput(event.target.value)}
                   />
@@ -651,11 +651,11 @@ export default function Lijekovi() {
             <Card className="mt-10">
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Spisak lijekova i ta\u010dan iznos doplate preko Fonda Republike Srpske
+                  Spisak lijekova i tačan iznos doplate preko Fonda Republike Srpske
                 </h2>
                 <div className="space-y-3 text-gray-700 text-sm md:text-base">
                   <p>
-                    Aktuelna cijena je cijena iz najnovijeg perioda va\u017eenja za lijek. Doplata je iznos koji pla\u0107a
+                    Aktuelna cijena je cijena iz najnovijeg perioda važenja za lijek. Doplata je iznos koji plaća
                     osiguranik.
                   </p>
                   <p>
