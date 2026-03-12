@@ -28,7 +28,6 @@ type LijekListItem = {
   aktuelni_iznos_participacije: string | null;
   aktuelna_lista_id: string | null;
   aktuelni_broj_indikacija: number | null;
-  indikacije?: LijekIndikacija[];
 };
 
 type PaginatedData<T> = {
@@ -36,11 +35,6 @@ type PaginatedData<T> = {
   current_page: number;
   last_page: number;
   total: number;
-};
-
-type LijekIndikacija = {
-  oznaka: string | null;
-  naziv: string | null;
 };
 
 const SITE_URL = 'https://wizmedik.com';
@@ -65,17 +59,6 @@ const formatCopay = (value: string | null | undefined): string => {
 
 const hasFundCoverage = (listaId: string | null | undefined): boolean => {
   return !!(listaId && listaId.trim() !== '');
-};
-
-const formatIndication = (indikacija: LijekIndikacija): string => {
-  const oznaka = indikacija.oznaka?.trim();
-  const naziv = indikacija.naziv?.trim();
-
-  if (oznaka && naziv) {
-    return `${oznaka} - ${naziv}`;
-  }
-
-  return oznaka || naziv || 'Nema detalja';
 };
 
 export default function Lijekovi() {
@@ -232,10 +215,10 @@ export default function Lijekovi() {
         },
         {
           '@type': 'Question',
-          name: 'Kako dobijamo aktuelnu cijenu i indikacije?',
+          name: 'Kako dobijamo aktuelnu cijenu?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Za svaki lijek uzima se samo najnoviji period va\u017eenja. Iz tog perioda preuzimamo jednu cijenu i sve aktuelne indikacije.',
+            text: 'Za svaki lijek uzima se samo najnoviji period va\u017eenja. Iz tog perioda preuzimamo jednu aktuelnu cijenu.',
           },
         },
       ],
@@ -381,25 +364,6 @@ export default function Lijekovi() {
                               <span className="text-gray-500">Doza:</span>{' '}
                               <span className="font-medium">{item.doza || '-'}</span>
                             </p>
-                            <div>
-                              <p>
-                                <span className="text-gray-500">Indikacije:</span>
-                              </p>
-                              {Array.isArray(item.indikacije) && item.indikacije.length > 0 ? (
-                                <ul className="mt-1 list-disc pl-5 space-y-1">
-                                  {item.indikacije.map((indikacija, index) => (
-                                    <li
-                                      key={`${indikacija.oznaka || 'bez-oznake'}-${indikacija.naziv || 'bez-naziva'}-${index}`}
-                                      className="leading-snug"
-                                    >
-                                      <span className="font-medium text-gray-900">{formatIndication(indikacija)}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="mt-1 font-medium text-gray-900">Nema</p>
-                              )}
-                            </div>
                           </div>
 
                           <div className="pt-2 border-t text-sm">
