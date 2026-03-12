@@ -3,12 +3,12 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { medicinesAPI, rfzoAPI } from '@/services/api';
+import { medicinesAPI } from '@/services/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, Pill, SlidersHorizontal } from 'lucide-react';
+import { Search, Pill } from 'lucide-react';
 
 type LijekListItem = {
   id: number;
@@ -37,52 +37,8 @@ type PaginatedData<T> = {
   total: number;
 };
 
-type RfzoListItem = {
-  id: number;
-  code: string;
-  naziv: string | null;
-  pojasnjenje: string | null;
-};
-
-type FilterDraft = {
-  atc_sifra: string;
-  lista_id: string;
-  cijena_min: string;
-  cijena_max: string;
-  participacija_min: string;
-  participacija_max: string;
-  procenat_participacije_min: string;
-  procenat_participacije_max: string;
-  ima_indikacije: 'all' | 'yes' | 'no';
-};
-
-const defaultFilters: FilterDraft = {
-  atc_sifra: '',
-  lista_id: 'all',
-  cijena_min: '',
-  cijena_max: '',
-  participacija_min: '',
-  participacija_max: '',
-  procenat_participacije_min: '',
-  procenat_participacije_max: '',
-  ima_indikacije: 'all',
-};
-
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
-
-const formatPrice = (value: string | null | undefined): string => {
-  if (value === null || value === undefined || value === '') {
-    return 'Nije dostupno';
-  }
-
-  const parsed = Number(value);
-  if (Number.isNaN(parsed)) {
-    return value;
-  }
-
-  return `${parsed.toFixed(2)} KM`;
-};
 
 const formatCopay = (value: string | null | undefined): string => {
   if (value === null || value === undefined || value === '') {
@@ -108,29 +64,12 @@ const hasFundCoverage = (listaId: string | null | undefined): boolean => {
 export default function Lijekovi() {
   const [searchInput, setSearchInput] = useState('');
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<FilterDraft>(defaultFilters);
-  const [appliedFilters, setAppliedFilters] = useState<FilterDraft>(defaultFilters);
   const [items, setItems] = useState<LijekListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [rfzoLists, setRfzoLists] = useState<RfzoListItem[]>([]);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-
-  useEffect(() => {
-    const loadRfzoLists = async () => {
-      try {
-        const response = await rfzoAPI.getAll();
-        setRfzoLists(Array.isArray(response.data?.data) ? response.data.data : []);
-      } catch (err) {
-        setRfzoLists([]);
-      }
-    };
-
-    loadRfzoLists();
-  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -143,44 +82,6 @@ export default function Lijekovi() {
           page,
           per_page: 24,
         };
-
-        if (appliedFilters.atc_sifra.trim()) {
-          params.atc_sifra = appliedFilters.atc_sifra.trim();
-        }
-
-        if (appliedFilters.lista_id !== 'all') {
-          params.lista_id = appliedFilters.lista_id;
-        }
-
-        if (appliedFilters.cijena_min !== '') {
-          params.cijena_min = appliedFilters.cijena_min;
-        }
-
-        if (appliedFilters.cijena_max !== '') {
-          params.cijena_max = appliedFilters.cijena_max;
-        }
-
-        if (appliedFilters.participacija_min !== '') {
-          params.participacija_min = appliedFilters.participacija_min;
-        }
-
-        if (appliedFilters.participacija_max !== '') {
-          params.participacija_max = appliedFilters.participacija_max;
-        }
-
-        if (appliedFilters.procenat_participacije_min !== '') {
-          params.procenat_participacije_min = appliedFilters.procenat_participacije_min;
-        }
-
-        if (appliedFilters.procenat_participacije_max !== '') {
-          params.procenat_participacije_max = appliedFilters.procenat_participacije_max;
-        }
-
-        if (appliedFilters.ima_indikacije === 'yes') {
-          params.ima_indikacije = true;
-        } else if (appliedFilters.ima_indikacije === 'no') {
-          params.ima_indikacije = false;
-        }
 
         const response = await medicinesAPI.getAll({
           ...params,
@@ -200,41 +101,13 @@ export default function Lijekovi() {
     };
 
     load();
-  }, [page, query, appliedFilters]);
+  }, [page, query]);
 
   const onSearchSubmit = (event: FormEvent) => {
     event.preventDefault();
     setPage(1);
     setQuery(searchInput.trim());
-    setAppliedFilters({ ...filters });
   };
-
-  const onClearFilters = () => {
-    setSearchInput('');
-    setQuery('');
-    setFilters(defaultFilters);
-    setAppliedFilters(defaultFilters);
-    setPage(1);
-  };
-
-  const activeFilters = useMemo(() => {
-    const result: string[] = [];
-    if (query) result.push(`Upit: ${query}`);
-    if (appliedFilters.atc_sifra) result.push(`ATC: ${appliedFilters.atc_sifra}`);
-    if (appliedFilters.lista_id !== 'all') result.push(`Lista: ${appliedFilters.lista_id}`);
-    if (appliedFilters.cijena_min || appliedFilters.cijena_max) {
-      result.push(`Cijena: ${appliedFilters.cijena_min || '0'} - ${appliedFilters.cijena_max || 'inf'}`);
-    }
-    if (appliedFilters.participacija_min || appliedFilters.participacija_max) {
-      result.push(`Participacija: ${appliedFilters.participacija_min || '0'} - ${appliedFilters.participacija_max || 'inf'}`);
-    }
-    if (appliedFilters.procenat_participacije_min || appliedFilters.procenat_participacije_max) {
-      result.push(`% participacije: ${appliedFilters.procenat_participacije_min || '0'} - ${appliedFilters.procenat_participacije_max || '100'}`);
-    }
-    if (appliedFilters.ima_indikacije === 'yes') result.push('Ima indikacije');
-    if (appliedFilters.ima_indikacije === 'no') result.push('Nema indikacije');
-    return result;
-  }, [query, appliedFilters]);
 
   const canonicalUrl = `${SITE_URL}/lijekovi`;
 
@@ -425,102 +298,7 @@ export default function Lijekovi() {
                   />
                 </div>
                 <Button type="submit">{'Pretra\u017ei'}</Button>
-                <Button type="button" variant="outline" onClick={() => setShowAdvancedFilters((prev) => !prev)}>
-                  <span className="inline-flex items-center gap-2">
-                    <SlidersHorizontal className="h-4 w-4" />
-                    Filteri
-                  </span>
-                </Button>
-                <Button type="button" variant="outline" onClick={onClearFilters}>
-                  Reset
-                </Button>
               </div>
-
-              {showAdvancedFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                  <Input
-                    placeholder="ATC \u0161ifra (npr. A02BC)"
-                    value={filters.atc_sifra}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, atc_sifra: event.target.value }))}
-                  />
-                  <select
-                    className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                    value={filters.lista_id}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, lista_id: event.target.value }))}
-                  >
-                    <option value="all">Sve RFZO liste</option>
-                    {rfzoLists.map((item) => (
-                      <option key={item.id} value={item.code}>
-                        {item.code} {item.naziv ? `- ${item.naziv}` : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Cijena od"
-                    value={filters.cijena_min}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, cijena_min: event.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Cijena do"
-                    value={filters.cijena_max}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, cijena_max: event.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Participacija od"
-                    value={filters.participacija_min}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, participacija_min: event.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Participacija do"
-                    value={filters.participacija_max}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, participacija_max: event.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    placeholder="% participacije od"
-                    value={filters.procenat_participacije_min}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, procenat_participacije_min: event.target.value }))}
-                  />
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    placeholder="% participacije do"
-                    value={filters.procenat_participacije_max}
-                    onChange={(event) => setFilters((prev) => ({ ...prev, procenat_participacije_max: event.target.value }))}
-                  />
-                  <select
-                    className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                    value={filters.ima_indikacije}
-                    onChange={(event) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        ima_indikacije: event.target.value as FilterDraft['ima_indikacije'],
-                      }))
-                    }
-                  >
-                    <option value="all">Indikacije: sve</option>
-                    <option value="yes">Samo sa indikacijama</option>
-                    <option value="no">Samo bez indikacija</option>
-                  </select>
-                </div>
-              )}
             </form>
           </div>
         </section>
@@ -531,22 +309,7 @@ export default function Lijekovi() {
               <p className="text-sm text-gray-600">
                 Ukupno rezultata: <span className="font-semibold text-gray-900">{total}</span>
               </p>
-              {activeFilters.length > 0 ? (
-                <Badge variant="secondary">{activeFilters.length} aktivnih filtera</Badge>
-              ) : (
-                <Badge variant="outline">Bez filtera</Badge>
-              )}
             </div>
-
-            {activeFilters.length > 0 && (
-              <div className="mb-4 flex flex-wrap gap-2">
-                {activeFilters.map((item) => (
-                  <Badge key={item} variant="outline">
-                    {item}
-                  </Badge>
-                ))}
-              </div>
-            )}
 
             {loading ? (
               <Card>
@@ -574,7 +337,6 @@ export default function Lijekovi() {
                               {item.naziv || item.naziv_lijeka || 'Naziv nije unesen'}
                             </h2>
                             <div className="flex flex-wrap items-center justify-end gap-2">
-                              <Badge variant="outline">ID {item.lijek_id}</Badge>
                               {hasFundCoverage(item.aktuelna_lista_id) ? (
                                 <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
                                   Preko fonda
@@ -591,10 +353,6 @@ export default function Lijekovi() {
 
                           <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
                             <div>
-                              <span className="text-gray-500">ATC:</span>{' '}
-                              <span className="font-medium">{item.atc_sifra || '-'}</span>
-                            </div>
-                            <div>
                               <span className="text-gray-500">Lista:</span>{' '}
                               <span className="font-medium">{item.aktuelna_lista_id || '-'}</span>
                             </div>
@@ -606,13 +364,17 @@ export default function Lijekovi() {
                               <span className="text-gray-500">Doza:</span>{' '}
                               <span className="font-medium">{item.doza || '-'}</span>
                             </div>
+                            <div>
+                              <span className="text-gray-500">Indikacije:</span>{' '}
+                              <span className="font-medium">
+                                {item.aktuelni_broj_indikacija && item.aktuelni_broj_indikacija > 0
+                                  ? item.aktuelni_broj_indikacija
+                                  : 'Nema'}
+                              </span>
+                            </div>
                           </div>
 
                           <div className="pt-2 border-t text-sm">
-                            <p>
-                              <span className="text-gray-500">Aktuelna cijena:</span>{' '}
-                              <span className="font-semibold text-gray-900">{formatPrice(item.aktuelna_cijena)}</span>
-                            </p>
                             <p>
                               <span className="text-gray-500">Doplata:</span>{' '}
                               <span className="font-semibold text-gray-900">
