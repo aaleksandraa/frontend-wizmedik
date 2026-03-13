@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { medicinesAPI } from '@/services/api';
@@ -43,7 +43,29 @@ const DEFAULT_SEO_TITLE = 'Lista lijekova Fonda Republike Srpske - provjerite do
 const DEFAULT_SEO_DESCRIPTION =
   'Provjerite da li je lijek na listi Fonda Republike Srpske i koliki je iznos doplate. Pregled lijekova, cijena i participacije za lijekove na recept u RS.';
 const LISTING_FALLBACK_MESSAGE =
-  'Lista lijekova Fonda Republike Srpske je trenutno u fazi osvjezavanja podataka. Pokusajte ponovo za nekoliko minuta.';
+  'Lista lijekova Fonda Republike Srpske je trenutno u fazi osvježavanja podataka. Pokušajte ponovo za nekoliko minuta.';
+const SEARCH_SUGGESTIONS: Array<{ label: string; query: string }> = [
+  {
+    label: 'lista lijekova fond republike srpske',
+    query: 'lista lijekova fond republike srpske',
+  },
+  {
+    label: 'lijekovi na recept RS',
+    query: 'lijekovi na recept RS',
+  },
+  {
+    label: 'doplata za lijekove republika srpska',
+    query: 'doplata za lijekove republika srpska',
+  },
+  {
+    label: 'participacija lijekova RS',
+    query: 'participacija lijekova RS',
+  },
+  {
+    label: 'cijene lijekova fond RS',
+    query: 'cijene lijekova fond RS',
+  },
+];
 
 const formatCopay = (value: string | null | undefined): string => {
   if (value === null || value === undefined || value === '') {
@@ -67,6 +89,8 @@ const hasFundCoverage = (listaId: string | null | undefined): boolean => {
 };
 
 export default function Lijekovi() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState('');
   const [query, setQuery] = useState('');
   const [items, setItems] = useState<LijekListItem[]>([]);
@@ -75,6 +99,13 @@ export default function Lijekovi() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const searchParam = new URLSearchParams(location.search).get('search')?.trim() || '';
+    setSearchInput(searchParam);
+    setQuery(searchParam);
+    setPage(1);
+  }, [location.search]);
 
   useEffect(() => {
     const load = async () => {
@@ -111,8 +142,25 @@ export default function Lijekovi() {
 
   const onSearchSubmit = (event: FormEvent) => {
     event.preventDefault();
+    const trimmedQuery = searchInput.trim();
     setPage(1);
-    setQuery(searchInput.trim());
+    setQuery(trimmedQuery);
+
+    const params = new URLSearchParams(location.search);
+    if (trimmedQuery) {
+      params.set('search', trimmedQuery);
+    } else {
+      params.delete('search');
+    }
+
+    const nextSearch = params.toString();
+    navigate(
+      {
+        pathname: '/lijekovi',
+        search: nextSearch ? `?${nextSearch}` : '',
+      },
+      { replace: true }
+    );
   };
 
   const canonicalUrl = `${SITE_URL}/lijekovi`;
@@ -213,10 +261,10 @@ export default function Lijekovi() {
         },
         {
           '@type': 'Question',
-          name: 'Koliko se tacno doplacuje ako je lijek preko fonda?',
+          name: 'Koliko se tačno doplaćuje ako je lijek preko fonda?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Doplata je tacan iznos participacije koji placa osiguranik. Ako je iznos 0.00 KM, prikazuje se kao Bez doplate.',
+            text: 'Doplata je tačan iznos participacije koji plaća osiguranik. Ako je iznos 0.00 KM, prikazuje se kao Bez doplate.',
           },
         },
         {
@@ -289,7 +337,7 @@ export default function Lijekovi() {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Lista lijekova Fonda Republike Srpske</h1>
             </div>
             <p className="text-gray-600 max-w-3xl">
-              Provjerite da li je lijek preko Fonda Republike Srpske i tacno koliko se doplacuje.
+              Provjerite da li je lijek preko Fonda Republike Srpske i tačno koliko se doplaćuje.
             </p>
 
             <form onSubmit={onSearchSubmit} className="mt-6 space-y-4">
@@ -411,11 +459,11 @@ export default function Lijekovi() {
             <Card className="mt-10">
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Spisak lijekova i tacan iznos doplate preko Fonda Republike Srpske
+                  Spisak lijekova i tačan iznos doplate preko Fonda Republike Srpske
                 </h2>
                 <div className="space-y-3 text-gray-700 text-sm md:text-base">
                   <p>
-                    Aktuelna cijena je cijena iz najnovijeg perioda vazenja za lijek. Doplata je iznos koji placa
+                    Aktuelna cijena je cijena iz najnovijeg perioda važenja za lijek. Doplata je iznos koji plaća
                     osiguranik.
                   </p>
                   <p>
@@ -431,13 +479,18 @@ export default function Lijekovi() {
 
             <Card className="mt-6">
               <CardContent className="p-6 space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">Pretrage koje korisnici cesto traze</h2>
-                <ul className="space-y-2 text-gray-700 text-sm md:text-base">
-                  <li>lista lijekova fond republike srpske</li>
-                  <li>lijekovi na recept rs</li>
-                  <li>doplata za lijekove republika srpska</li>
-                  <li>participacija lijekova rs</li>
-                  <li>cijene lijekova fond rs</li>
+                <h2 className="text-lg font-semibold text-gray-900">Pretrage koje korisnici često traže</h2>
+                <ul className="seo-searches space-y-2 text-sm md:text-base">
+                  {SEARCH_SUGGESTIONS.map((item) => (
+                    <li key={item.query}>
+                      <Link
+                        to={`/lijekovi?search=${encodeURIComponent(item.query)}`}
+                        className="text-emerald-700 hover:text-emerald-800 hover:underline"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
