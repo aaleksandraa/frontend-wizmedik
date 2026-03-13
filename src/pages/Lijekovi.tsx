@@ -39,6 +39,11 @@ type PaginatedData<T> = {
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+const DEFAULT_SEO_TITLE = 'Lista lijekova Fonda Republike Srpske - provjerite doplatu | WizMedik';
+const DEFAULT_SEO_DESCRIPTION =
+  'Provjerite da li je lijek na listi Fonda Republike Srpske i koliki je iznos doplate. Pregled lijekova, cijena i participacije za lijekove na recept u RS.';
+const LISTING_FALLBACK_MESSAGE =
+  'Lista lijekova Fonda Republike Srpske je trenutno u fazi osvjezavanja podataka. Pokusajte ponovo za nekoliko minuta.';
 
 const formatCopay = (value: string | null | undefined): string => {
   if (value === null || value === undefined || value === '') {
@@ -93,7 +98,8 @@ export default function Lijekovi() {
         setLastPage(payload?.last_page || 1);
         setTotal(payload?.total || 0);
       } catch (err: any) {
-        setError(err?.response?.data?.message || 'Ne mo\u017eemo u\u010ditati lijekove trenutno.');
+        console.error('Lijekovi listing fetch failed', err);
+        setError(LISTING_FALLBACK_MESSAGE);
         setItems([]);
       } finally {
         setLoading(false);
@@ -113,25 +119,25 @@ export default function Lijekovi() {
 
   const seoTitle = useMemo(() => {
     if (query) {
-      return `${query} - doplata preko Fonda Republike Srpske | wizMedik`;
+      return `${query} - lista lijekova Fonda Republike Srpske | WizMedik`;
     }
 
-    return 'Spisak lijekova i doplata preko Fonda Republike Srpske | wizMedik';
+    return DEFAULT_SEO_TITLE;
   }, [query]);
 
   const seoDescription = useMemo(() => {
     if (query) {
-      return `Rezultati za ${query}: provjerite da li je lijek preko Fonda Republike Srpske i tacan iznos doplate osiguranika.`;
+      return `Pretraga za "${query}" u listi lijekova Fonda Republike Srpske. Provjerite da li je lijek pokriven osiguranjem i koliki je iznos doplate u apoteci.`;
     }
 
-    return 'Spisak lijekova sa aktuelnom cijenom i tacnim iznosom doplate ako je lijek preko Fonda Republike Srpske (RFZO lista).';
+    return DEFAULT_SEO_DESCRIPTION;
   }, [query]);
 
   const itemListSchema = useMemo(() => {
     return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: 'Spisak lijekova i doplata preko Fonda Republike Srpske',
+      name: 'Lista lijekova Fonda Republike Srpske',
       itemListOrder: 'https://schema.org/ItemListOrderAscending',
       numberOfItems: items.length,
       itemListElement: items.slice(0, 24).map((item, index) => {
@@ -280,10 +286,10 @@ export default function Lijekovi() {
           <div className="container mx-auto px-4 py-10">
             <div className="flex items-center gap-3 mb-3">
               <Pill className="h-8 w-8 text-emerald-600" />
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Spisak lijekova</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Lista lijekova Fonda Republike Srpske</h1>
             </div>
             <p className="text-gray-600 max-w-3xl">
-              Provjerite da li je lijek preko Fonda Republike Srpske i tačdno koliko se doplaćuje.
+              Provjerite da li je lijek preko Fonda Republike Srpske i tacno koliko se doplacuje.
             </p>
 
             <form onSubmit={onSearchSubmit} className="mt-6 space-y-4">
@@ -405,11 +411,11 @@ export default function Lijekovi() {
             <Card className="mt-10">
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Spisak lijekova i tačan iznos doplate preko Fonda Republike Srpske
+                  Spisak lijekova i tacan iznos doplate preko Fonda Republike Srpske
                 </h2>
                 <div className="space-y-3 text-gray-700 text-sm md:text-base">
                   <p>
-                    Aktuelna cijena je cijena iz najnovijeg perioda važenja za lijek. Doplata je iznos koji plaća
+                    Aktuelna cijena je cijena iz najnovijeg perioda vazenja za lijek. Doplata je iznos koji placa
                     osiguranik.
                   </p>
                   <p>
@@ -422,6 +428,19 @@ export default function Lijekovi() {
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="mt-6">
+              <CardContent className="p-6 space-y-4">
+                <h2 className="text-lg font-semibold text-gray-900">Pretrage koje korisnici cesto traze</h2>
+                <ul className="space-y-2 text-gray-700 text-sm md:text-base">
+                  <li>lista lijekova fond republike srpske</li>
+                  <li>lijekovi na recept rs</li>
+                  <li>doplata za lijekove republika srpska</li>
+                  <li>participacija lijekova rs</li>
+                  <li>cijene lijekova fond rs</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
@@ -430,3 +449,5 @@ export default function Lijekovi() {
     </>
   );
 }
+
+
