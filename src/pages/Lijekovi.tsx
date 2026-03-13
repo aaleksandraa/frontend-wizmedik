@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { medicinesAPI } from '@/services/api';
@@ -44,27 +44,12 @@ const DEFAULT_SEO_DESCRIPTION =
   'Provjerite da li je lijek na listi Fonda Republike Srpske i koliki je iznos doplate. Pregled lijekova, cijena i participacije za lijekove na recept u RS.';
 const LISTING_FALLBACK_MESSAGE =
   'Lista lijekova Fonda Republike Srpske je trenutno u fazi osvježavanja podataka. Pokušajte ponovo za nekoliko minuta.';
-const SEARCH_SUGGESTIONS: Array<{ label: string; query: string }> = [
-  {
-    label: 'lista lijekova fond republike srpske',
-    query: 'lista lijekova fond republike srpske',
-  },
-  {
-    label: 'lijekovi na recept RS',
-    query: 'lijekovi na recept RS',
-  },
-  {
-    label: 'doplata za lijekove republika srpska',
-    query: 'doplata za lijekove republika srpska',
-  },
-  {
-    label: 'participacija lijekova RS',
-    query: 'participacija lijekova RS',
-  },
-  {
-    label: 'cijene lijekova fond RS',
-    query: 'cijene lijekova fond RS',
-  },
+const SEARCH_SUGGESTIONS: string[] = [
+  'lista lijekova fond republike srpske',
+  'lijekovi na recept RS',
+  'doplata za lijekove republika srpska',
+  'participacija lijekova RS',
+  'cijene lijekova fond RS',
 ];
 
 const formatCopay = (value: string | null | undefined): string => {
@@ -89,8 +74,6 @@ const hasFundCoverage = (listaId: string | null | undefined): boolean => {
 };
 
 export default function Lijekovi() {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState('');
   const [query, setQuery] = useState('');
   const [items, setItems] = useState<LijekListItem[]>([]);
@@ -99,13 +82,6 @@ export default function Lijekovi() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
-
-  useEffect(() => {
-    const searchParam = new URLSearchParams(location.search).get('search')?.trim() || '';
-    setSearchInput(searchParam);
-    setQuery(searchParam);
-    setPage(1);
-  }, [location.search]);
 
   useEffect(() => {
     const load = async () => {
@@ -142,25 +118,8 @@ export default function Lijekovi() {
 
   const onSearchSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const trimmedQuery = searchInput.trim();
     setPage(1);
-    setQuery(trimmedQuery);
-
-    const params = new URLSearchParams(location.search);
-    if (trimmedQuery) {
-      params.set('search', trimmedQuery);
-    } else {
-      params.delete('search');
-    }
-
-    const nextSearch = params.toString();
-    navigate(
-      {
-        pathname: '/lijekovi',
-        search: nextSearch ? `?${nextSearch}` : '',
-      },
-      { replace: true }
-    );
+    setQuery(searchInput.trim());
   };
 
   const canonicalUrl = `${SITE_URL}/lijekovi`;
@@ -482,12 +441,9 @@ export default function Lijekovi() {
                 <h2 className="text-lg font-semibold text-gray-900">Pretrage koje korisnici često traže</h2>
                 <ul className="seo-searches space-y-2 text-sm md:text-base">
                   {SEARCH_SUGGESTIONS.map((item) => (
-                    <li key={item.query}>
-                      <Link
-                        to={`/lijekovi?search=${encodeURIComponent(item.query)}`}
-                        className="text-emerald-700 hover:text-emerald-800 hover:underline"
-                      >
-                        {item.label}
+                    <li key={item}>
+                      <Link to="/lijekovi" className="text-emerald-700 hover:text-emerald-800 hover:underline">
+                        {item}
                       </Link>
                     </li>
                   ))}
