@@ -75,6 +75,10 @@ FileETag None
   RewriteEngine On
   RewriteBase /
 
+  # Force legacy compressed asset URLs back to canonical files.
+  # Prevents module load failures from stale HTML/SW caches referencing *.js.gz/*.js.br.
+  RewriteRule ^assets/(.+)\.(js|mjs|css|json|svg)\.(gz|br)$ /assets/$1.$2 [R=302,L,NC]
+
   # Missing static assets must return 404 (never SPA index.html).
   RewriteCond %{REQUEST_URI} ^/assets/ [NC]
   RewriteCond %{REQUEST_FILENAME} !-f

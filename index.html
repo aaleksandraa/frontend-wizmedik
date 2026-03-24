@@ -68,6 +68,46 @@
     <meta name="msapplication-TileColor" content="#0891b2" />
     <meta name="msapplication-navbutton-color" content="#0891b2" />
 
+    <script>
+      (function () {
+        try {
+          if (!("serviceWorker" in navigator)) return;
+
+          var reloadKey = "wm_sw_cleanup_done";
+          var shouldReload = !sessionStorage.getItem(reloadKey);
+          var hasController = !!navigator.serviceWorker.controller;
+
+          navigator.serviceWorker.getRegistrations().then(function (registrations) {
+            if (!registrations.length && !hasController) return;
+
+            Promise.all(
+              registrations.map(function (registration) {
+                return registration.unregister();
+              })
+            )
+              .then(function () {
+                if (!("caches" in window)) return;
+                return caches.keys().then(function (keys) {
+                  return Promise.all(
+                    keys.map(function (key) {
+                      return caches.delete(key);
+                    })
+                  );
+                });
+              })
+              .finally(function () {
+                if (shouldReload) {
+                  sessionStorage.setItem(reloadKey, "1");
+                  window.location.reload();
+                }
+              });
+          });
+        } catch (error) {
+          console.warn("SW/cache reset failed", error);
+        }
+      })();
+    </script>
+
     <!-- Schema: MedicalBusiness -->
     <script type="application/ld+json">
       {
