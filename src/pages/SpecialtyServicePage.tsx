@@ -19,6 +19,7 @@ interface ServicePage {
   sadrzaj?: string;
   status: "draft" | "published";
   is_indexable: boolean;
+  show_doctor_cta?: boolean;
   meta_title?: string;
   meta_description?: string;
   meta_keywords?: string;
@@ -349,7 +350,7 @@ export default function SpecialtyServicePage() {
             </CardContent>
           </Card>
 
-          {data.specialty?.slug && (
+          {data.specialty?.slug && data.show_doctor_cta !== false && (
             <section className="mt-8">
               <Card className="p-4 sm:p-6 bg-gradient-card">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

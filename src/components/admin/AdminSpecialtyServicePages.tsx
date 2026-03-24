@@ -36,6 +36,7 @@ interface ServicePage {
   sadrzaj?: string;
   status: "draft" | "published";
   is_indexable: boolean;
+  show_doctor_cta: boolean;
   sort_order?: number;
   meta_title?: string;
   meta_description?: string;
@@ -60,6 +61,7 @@ interface FormState {
   sadrzaj: string;
   status: "draft" | "published";
   is_indexable: boolean;
+  show_doctor_cta: boolean;
   sort_order: number;
   meta_title: string;
   meta_description: string;
@@ -76,6 +78,7 @@ const initialForm: FormState = {
   sadrzaj: "",
   status: "draft",
   is_indexable: true,
+  show_doctor_cta: true,
   sort_order: 0,
   meta_title: "",
   meta_description: "",
@@ -242,6 +245,7 @@ export function AdminSpecialtyServicePages() {
     sadrzaj: page.sadrzaj || "",
     status: page.status || "draft",
     is_indexable: page.is_indexable ?? true,
+    show_doctor_cta: page.show_doctor_cta ?? true,
     sort_order: page.sort_order || 0,
     meta_title: page.meta_title || "",
     meta_description: page.meta_description || "",
@@ -291,6 +295,7 @@ export function AdminSpecialtyServicePages() {
         sadrzaj: form.sadrzaj || "",
         status: form.status,
         is_indexable: form.is_indexable,
+        show_doctor_cta: form.show_doctor_cta,
         sort_order: Number.isFinite(form.sort_order) ? form.sort_order : 0,
         meta_title: form.meta_title.trim() || undefined,
         meta_description: form.meta_description.trim() || undefined,
@@ -532,6 +537,16 @@ export function AdminSpecialtyServicePages() {
                 }
               />
               <Label>Indexable (Google moÅ¾e indeksirati)</Label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={form.show_doctor_cta}
+                onCheckedChange={(checked) =>
+                  setForm((prev) => ({ ...prev, show_doctor_cta: checked }))
+                }
+              />
+              <Label>PrikaÅ¾i blok "TraÅ¾ite doktora za ovu uslugu?"</Label>
             </div>
 
             <div className="space-y-2">
