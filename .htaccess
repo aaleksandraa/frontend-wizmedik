@@ -1,38 +1,23 @@
-﻿# ==========================================================
-# WizMedik Frontend (SPA) - Apache .htaccess (safe modules)
-# Domain: wizmedik.com
-# Backend API: api.wizmedik.com (no proxy rewrite here)
-# ==========================================================
+# WizMedik Frontend SPA .htaccess (safe)
 
-<IfModule mod_negotiation.c>
-  # Prevent Apache content negotiation from resolving .js to .js.gz/.js.br
-  Options -MultiViews
-</IfModule>
-
-# Charset
 AddDefaultCharset UTF-8
-<IfModule mod_mime.c>
-  AddCharset UTF-8 .html .htm .js .mjs .css .json .xml .txt .svg
 
-  # Ensure module scripts/styles return expected MIME type
+<IfModule mod_mime.c>
   AddType text/javascript .js .mjs
   AddType text/css .css
   AddType application/json .json
   AddType image/svg+xml .svg
 </IfModule>
 
-# Security + caching headers
 <IfModule mod_headers.c>
-  Header always set X-Frame-Options "SAMEORIGIN"
-  Header always set X-XSS-Protection "1; mode=block"
-  Header always set X-Content-Type-Options "nosniff"
-  Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "geolocation=(self), microphone=(), camera=()"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(self), microphone=(), camera=()"
 
-  Header always merge Vary "Accept-Encoding"
+  Header set Vary "Accept-Encoding"
   Header unset ETag
 
-  # Long cache for static assets
   <FilesMatch "\.(js|mjs|css)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
@@ -46,19 +31,16 @@ AddDefaultCharset UTF-8
     Header set Access-Control-Allow-Origin "*"
   </FilesMatch>
 
-  # HTML should always be fresh
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
     Header set Expires "0"
   </FilesMatch>
 
-  # Service worker should be fresh
   <FilesMatch "^sw\.js$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
   </FilesMatch>
 
-  # Manifest can be cached shorter
   <FilesMatch "^manifest\.json$">
     Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
@@ -66,7 +48,6 @@ AddDefaultCharset UTF-8
 
 FileETag None
 
-# Runtime compression (safe, no forced .gz/.br rewrites)
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
   AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript
@@ -81,20 +62,16 @@ FileETag None
   BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 </IfModule>
 
-# SPA routing
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Serve real files/directories directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Keep SEO/system files accessible
   RewriteRule ^robots\.txt$ - [L]
   RewriteRule ^sitemap.*\.xml$ - [L]
 
-  # SPA fallback
   RewriteRule ^ index.html [L]
 </IfModule>
