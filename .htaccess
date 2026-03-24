@@ -89,11 +89,6 @@ FileETag None
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Route page URLs through backend Laravel front controller when available.
-  # This enables per-route OG/meta tags for social crawlers.
-  RewriteCond %{DOCUMENT_ROOT}/backend/public/index.php -f
-  RewriteRule ^ /backend/public/index.php [L,QSA]
-
-  # Fallback to static SPA shell if backend SEO renderer is unavailable.
+  # Fallback to static SPA shell.
   RewriteRule ^ index.html [L]
 </IfModule>
