@@ -4,7 +4,6 @@ import legacy from '@vitejs/plugin-legacy';
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from 'rollup-plugin-visualizer';
-import viteCompression from 'vite-plugin-compression';
 import { createHealthCheckMiddleware } from './src/dev/health-check-middleware';
 
 export default defineConfig(({ mode }) => ({
@@ -64,16 +63,6 @@ export default defineConfig(({ mode }) => ({
         'es.object.assign',
         'es.promise.finally',
       ],
-    }),
-    // Gzip compression
-    viteCompression({
-      algorithm: 'gzip',
-      ext: '.gz',
-    }),
-    // Brotli compression (better than gzip)
-    viteCompression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
     }),
     // Bundle analyzer (only in build)
     mode === 'production' && visualizer({
