@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import DOMPurify from "dompurify";
 import { Helmet } from "react-helmet-async";
-import { servicePagesAPI } from "@/services/api";
+import { servicePagesAPI, settingsAPI } from "@/services/api";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -70,6 +70,32 @@ const sanitizeRichText = (html: string) => {
   });
 };
 
+const escapeHtml = (value: string): string => {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
+const formatServiceContent = (raw?: string): string => {
+  const text = (raw || "").trim();
+
+  if (!text) {
+    return "<p>Sadrzaj ce biti uskoro dostupan.</p>";
+  }
+
+  if (/<\/?[a-z][\s\S]*>/i.test(text)) {
+    return text;
+  }
+
+  return text
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br />")}</p>`)
+    .join("");
+};
+
 export default function SpecialtyServicePage() {
   const { specijalnost, usluga } = useParams<{
     specijalnost: string;
@@ -81,6 +107,28 @@ export default function SpecialtyServicePage() {
     () => `${window.location.origin}${location.pathname}`,
     [location.pathname]
   );
+
+  const [typography, setTypography] = useState({
+    h1_size: "28",
+    h2_size: "24",
+    h3_size: "20",
+    p_size: "19",
+    p_line_height: "34",
+    p_color: "#555",
+  });
+
+  useEffect(() => {
+    const fetchTypography = async () => {
+      try {
+        const response = await settingsAPI.getBlogTypography();
+        setTypography(response.data);
+      } catch {
+        // keep defaults
+      }
+    };
+
+    fetchTypography();
+  }, []);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["specialty-service-page", specijalnost, usluga],
@@ -117,9 +165,9 @@ export default function SpecialtyServicePage() {
           <main className="container mx-auto px-4 py-8">
             <Card className="max-w-2xl mx-auto">
               <CardContent className="pt-6 text-center">
-                <h1 className="text-xl font-bold mb-2">Stranica nije pronađena</h1>
+                <h1 className="text-xl font-bold mb-2">Stranica nije pronadjena</h1>
                 <p className="text-muted-foreground">
-                  Tražena usluga nije dostupna ili nije objavljena.
+                  Trazena usluga nije dostupna ili nije objavljena.
                 </p>
               </CardContent>
             </Card>
@@ -221,13 +269,9 @@ export default function SpecialtyServicePage() {
                 <Stethoscope className="w-7 h-7" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
-                  {data.naziv}
-                </h1>
+                <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{data.naziv}</h1>
                 {data.kratki_opis && (
-                  <p className="mt-2 text-muted-foreground leading-relaxed">
-                    {data.kratki_opis}
-                  </p>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">{data.kratki_opis}</p>
                 )}
               </div>
             </div>
@@ -235,10 +279,71 @@ export default function SpecialtyServicePage() {
 
           <Card>
             <CardContent className="pt-6">
+              <style>{`
+                .service-content {
+                  max-width: 100% !important;
+                }
+                .service-content h1 {
+                  font-size: ${typography.h2_size}px !important;
+                  font-weight: 700;
+                  margin-top: 2rem;
+                  margin-bottom: 1rem;
+                  line-height: 1.3;
+                }
+                .service-content h2 {
+                  font-size: ${typography.h3_size}px !important;
+                  font-weight: 700;
+                  margin-top: 1.5rem;
+                  margin-bottom: 0.75rem;
+                  line-height: 1.4;
+                }
+                .service-content h3 {
+                  font-size: ${typography.h3_size}px !important;
+                  font-weight: 600;
+                  margin-top: 1rem;
+                  margin-bottom: 0.25rem;
+                  line-height: 1.4;
+                }
+                .service-content p {
+                  font-size: ${typography.p_size}px !important;
+                  line-height: ${typography.p_line_height}px !important;
+                  color: ${typography.p_color} !important;
+                  margin: 1rem 0;
+                }
+                .service-content ul,
+                .service-content ol {
+                  margin: 0.75rem 0;
+                  padding-left: 1.5rem;
+                }
+                .service-content li {
+                  margin: 0.25rem 0;
+                  font-size: ${typography.p_size}px !important;
+                  line-height: ${typography.p_line_height}px !important;
+                  color: ${typography.p_color} !important;
+                }
+                .service-content img {
+                  max-width: 100%;
+                  height: auto;
+                  margin: 1.5rem 0;
+                  border-radius: 0.5rem;
+                }
+                .service-content blockquote {
+                  border-left: 4px solid #0891b2;
+                  padding-left: 1rem;
+                  margin: 1.5rem 0;
+                  font-style: italic;
+                  color: #64748b;
+                }
+                .service-content a {
+                  color: #0891b2;
+                  text-decoration: underline;
+                }
+              `}</style>
+
               <article
-                className="prose prose-sm sm:prose-base max-w-none prose-headings:leading-tight prose-p:leading-relaxed"
+                className="service-content prose prose-sm sm:prose-base max-w-none prose-headings:leading-tight prose-p:leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: sanitizeRichText(data.sadrzaj || "<p>Sadržaj će biti uskoro dostupan.</p>"),
+                  __html: sanitizeRichText(formatServiceContent(data.sadrzaj)),
                 }}
               />
             </CardContent>
@@ -250,11 +355,10 @@ export default function SpecialtyServicePage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <h2 className="text-base sm:text-lg font-semibold mb-1">
-                      Tražite doktora za ovu uslugu?
+                      Trazite doktora za ovu uslugu?
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      Pogledajte listu dostupnih doktora za oblast{" "}
-                      {data.specialty.naziv.toLowerCase()}.
+                      Pogledajte listu dostupnih doktora za oblast {data.specialty.naziv.toLowerCase()}.
                     </p>
                   </div>
                   <Button
@@ -277,4 +381,3 @@ export default function SpecialtyServicePage() {
     </>
   );
 }
-
