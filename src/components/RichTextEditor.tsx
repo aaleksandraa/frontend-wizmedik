@@ -163,14 +163,14 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           max-width: 100% !important;
         }
         .ProseMirror h1 {
-          font-size: ${typography.h1_size}px !important;
+          font-size: ${typography.h2_size}px !important;
           font-weight: 700;
           margin-top: 2rem;
           margin-bottom: 1rem;
           line-height: 1.3;
         }
         .ProseMirror h2 {
-          font-size: ${typography.h2_size}px !important;
+          font-size: ${typography.h3_size}px !important;
           font-weight: 700;
           margin-top: 1.5rem;
           margin-bottom: 0.75rem;

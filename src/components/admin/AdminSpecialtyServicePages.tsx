@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { specialtiesAPI, uploadAPI } from "@/services/api";
 import { adminAPI } from "@/services/adminApi";
@@ -89,15 +89,45 @@ const slugify = (value: string): string => {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/č/g, "c")
-    .replace(/ć/g, "c")
-    .replace(/š/g, "s")
-    .replace(/ž/g, "z")
+    .replace(/Ä‘/g, "d")
+    .replace(/Ä/g, "c")
+    .replace(/Ä‡/g, "c")
+    .replace(/Å¡/g, "s")
+    .replace(/Å¾/g, "z")
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+};
+
+const normalizeOptionalUrl = (value: string): string | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^[^/\s]+\.[^/\s]+/.test(trimmed)) return `https://${trimmed}`;
+  if (trimmed.startsWith("/")) return `${window.location.origin}${trimmed}`;
+
+  return undefined;
+};
+
+const extractApiErrorMessage = (error: any, fallback: string): string => {
+  const errors = error?.response?.data?.errors;
+  if (errors && typeof errors === "object") {
+    const firstEntry = Object.values(errors)[0];
+    if (Array.isArray(firstEntry) && firstEntry.length > 0) {
+      return String(firstEntry[0]);
+    }
+    if (typeof firstEntry === "string") {
+      return firstEntry;
+    }
+  }
+
+  return (
+    error?.response?.data?.error ||
+    error?.response?.data?.message ||
+    fallback
+  );
 };
 
 const flattenSpecialties = (items: Specialty[]): Specialty[] => {
@@ -197,7 +227,7 @@ export function AdminSpecialtyServicePages() {
         }));
       }
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Greška pri učitavanju podataka.");
+      toast.error(extractApiErrorMessage(error, "GreÅ¡ka pri uÄitavanju podataka."));
     } finally {
       setLoading(false);
     }
@@ -265,8 +295,8 @@ export function AdminSpecialtyServicePages() {
         meta_title: form.meta_title.trim() || undefined,
         meta_description: form.meta_description.trim() || undefined,
         meta_keywords: form.meta_keywords.trim() || undefined,
-        canonical_url: form.canonical_url.trim() || undefined,
-        og_image: form.og_image.trim() || undefined,
+        canonical_url: normalizeOptionalUrl(form.canonical_url),
+        og_image: normalizeOptionalUrl(form.og_image),
       };
 
       const response = form.id
@@ -288,9 +318,9 @@ export function AdminSpecialtyServicePages() {
         }
       }
 
-      toast.success(form.id ? "Stranica je ažurirana." : "Stranica je kreirana.");
+      toast.success(form.id ? "Stranica je aÅ¾urirana." : "Stranica je kreirana.");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Greška pri čuvanju stranice.");
+      toast.error(extractApiErrorMessage(error, "GreÅ¡ka pri Äuvanju stranice."));
     } finally {
       setSaving(false);
     }
@@ -307,7 +337,7 @@ export function AdminSpecialtyServicePages() {
       resetForm();
       toast.success("Stranica je obrisana.");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Greška pri brisanju.");
+      toast.error(extractApiErrorMessage(error, "GreÅ¡ka pri brisanju."));
     } finally {
       setDeleting(false);
     }
@@ -322,8 +352,8 @@ export function AdminSpecialtyServicePages() {
       const response = await uploadAPI.uploadImage(file, "blog");
       setForm((prev) => ({ ...prev, og_image: response.data.url }));
       toast.success("Slika je uploadovana.");
-    } catch {
-      toast.error("Greška pri uploadu slike.");
+    } catch (error: any) {
+      toast.error(extractApiErrorMessage(error, "GreÅ¡ka pri uploadu slike."));
     } finally {
       setUploading(false);
     }
@@ -332,7 +362,7 @@ export function AdminSpecialtyServicePages() {
   if (loading) {
     return (
       <Card>
-        <CardContent className="pt-6">Učitavanje...</CardContent>
+        <CardContent className="pt-6">UÄitavanje...</CardContent>
       </Card>
     );
   }
@@ -501,7 +531,7 @@ export function AdminSpecialtyServicePages() {
                   setForm((prev) => ({ ...prev, is_indexable: checked }))
                 }
               />
-              <Label>Indexable (Google može indeksirati)</Label>
+              <Label>Indexable (Google moÅ¾e indeksirati)</Label>
             </div>
 
             <div className="space-y-2">
@@ -512,7 +542,7 @@ export function AdminSpecialtyServicePages() {
                   setForm((prev) => ({ ...prev, kratki_opis: e.target.value }))
                 }
                 rows={3}
-                placeholder="Sažetak usluge za uvod i SEO fallback..."
+                placeholder="SaÅ¾etak usluge za uvod i SEO fallback..."
               />
             </div>
           </CardContent>
@@ -520,13 +550,13 @@ export function AdminSpecialtyServicePages() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sadržaj stranice</CardTitle>
+            <CardTitle>SadrÅ¾aj stranice</CardTitle>
           </CardHeader>
           <CardContent>
             <RichTextEditor
               content={form.sadrzaj}
               onChange={(content) => setForm((prev) => ({ ...prev, sadrzaj: content }))}
-              placeholder="Pišite sadržaj kao blog članak..."
+              placeholder="PiÅ¡ite sadrÅ¾aj kao blog Älanak..."
             />
           </CardContent>
         </Card>
@@ -627,7 +657,7 @@ export function AdminSpecialtyServicePages() {
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             <Save className="h-4 w-4" />
-            {saving ? "Čuvanje..." : "Sačuvaj stranicu"}
+            {saving ? "ÄŒuvanje..." : "SaÄuvaj stranicu"}
           </Button>
 
           {form.id && (
@@ -638,7 +668,7 @@ export function AdminSpecialtyServicePages() {
               className="gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              {deleting ? "Brisanje..." : "Obriši"}
+              {deleting ? "Brisanje..." : "ObriÅ¡i"}
             </Button>
           )}
 
