@@ -3,10 +3,19 @@
 AddDefaultCharset UTF-8
 
 <IfModule mod_mime.c>
+  # Normalize compressed extensions so .gz/.br are treated as encodings,
+  # not as final MIME type (application/x-gzip).
+  RemoveType .gz
+  RemoveType .br
+  AddEncoding gzip .gz
+  AddEncoding br .br
+
+  AddType text/html .html .html.gz .html.br
   AddType text/javascript .js .mjs
-  AddType text/css .css
-  AddType application/json .json
-  AddType image/svg+xml .svg
+  AddType text/javascript .js.gz .mjs.gz .js.br .mjs.br
+  AddType text/css .css .css.gz .css.br
+  AddType application/json .json .json.gz .json.br
+  AddType image/svg+xml .svg .svg.gz .svg.br
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -65,6 +74,11 @@ FileETag None
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Missing static assets must return 404 (never SPA index.html).
+  RewriteCond %{REQUEST_URI} ^/assets/ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
 
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
