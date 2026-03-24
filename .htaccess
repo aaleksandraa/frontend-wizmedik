@@ -84,12 +84,16 @@ FileETag None
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^ - [R=404,L]
 
+  # Existing files/directories are served as-is.
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  RewriteRule ^robots\.txt$ - [L]
-  RewriteRule ^sitemap.*\.xml$ - [L]
+  # Route page URLs through backend Laravel front controller when available.
+  # This enables per-route OG/meta tags for social crawlers.
+  RewriteCond %{DOCUMENT_ROOT}/backend/public/index.php -f
+  RewriteRule ^ /backend/public/index.php [L,QSA]
 
+  # Fallback to static SPA shell if backend SEO renderer is unavailable.
   RewriteRule ^ index.html [L]
 </IfModule>
