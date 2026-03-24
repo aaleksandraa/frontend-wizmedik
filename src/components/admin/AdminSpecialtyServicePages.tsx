@@ -613,22 +613,15 @@ export function AdminSpecialtyServicePages() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>OG image URL</Label>
-              <Input
-                value={form.og_image}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, og_image: e.target.value }))
-                }
-                placeholder="https://..."
-              />
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <Label>OG slika (upload)</Label>
+              <div className="flex flex-wrap items-center gap-2">
                 <Label
                   htmlFor="service-og-upload"
                   className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted"
                 >
                   <Upload className="h-4 w-4" />
-                  {uploading ? "Upload..." : "Upload OG slike"}
+                  {uploading ? "Upload..." : "Odaberi sliku"}
                 </Label>
                 <Input
                   id="service-og-upload"
@@ -639,17 +632,41 @@ export function AdminSpecialtyServicePages() {
                   disabled={uploading}
                 />
                 {form.og_image && (
-                  <a
-                    href={form.og_image}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm text-primary inline-flex items-center gap-1"
-                  >
-                    Pregled
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
+                  <>
+                    <a
+                      href={form.og_image}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-primary inline-flex items-center gap-1"
+                    >
+                      Pregled
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setForm((prev) => ({ ...prev, og_image: "" }))}
+                    >
+                      Ukloni sliku
+                    </Button>
+                  </>
                 )}
               </div>
+
+              {form.og_image && (
+                <div className="max-w-md rounded-md border bg-muted/20 p-2">
+                  <img
+                    src={form.og_image}
+                    alt="OG preview"
+                    className="w-full h-auto rounded-md object-cover"
+                  />
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                Preporuka: 1200x630px, JPG/PNG/WebP, do 5MB.
+              </p>
             </div>
           </CardContent>
         </Card>
