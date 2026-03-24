@@ -55,6 +55,13 @@ interface Doctor {
   slika_url?: string;
 }
 
+interface SpecialtyServicePage {
+  id: number;
+  naziv: string;
+  slug: string;
+  kratki_opis?: string;
+}
+
 const getYouTubeEmbedUrl = (url: string): string => {
   const regExp =
     /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -62,6 +69,29 @@ const getYouTubeEmbedUrl = (url: string): string => {
   return match && match[2].length === 11
     ? `https://www.youtube.com/embed/${match[2]}`
     : url;
+};
+
+const normalizeServiceUrl = (value?: unknown): string | null => {
+  if (typeof value !== "string") return null;
+
+  const url = value.trim();
+  if (!url || /^javascript:/i.test(url)) return null;
+
+  if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(url)) return url;
+  if (/^[^/\s]+\.[^/\s]+/.test(url)) return `https://${url}`;
+
+  return `/${url.replace(/^\/+/, "")}`;
+};
+
+const slugifyValue = (value: string): string => {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 };
 
 // Mobile-first prose styling (requires Tailwind Typography plugin)
@@ -175,6 +205,27 @@ export default function SpecialtyLanding() {
   const dbUsluge = specialtyInfo?.prikazi_usluge
     ? specialtyInfo?.usluge || []
     : [];
+  const specialtySlugForServices = specialtyInfo?.slug || naziv || "";
+
+  const publishedServicePages: SpecialtyServicePage[] = useMemo(() => {
+    if (!Array.isArray(specialtyInfo?.service_pages)) return [];
+    return specialtyInfo.service_pages as SpecialtyServicePage[];
+  }, [specialtyInfo?.service_pages]);
+
+  const servicePageLinkMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!specialtySlugForServices) return map;
+
+    publishedServicePages.forEach((page) => {
+      if (!page?.naziv || !page?.slug) return;
+      map.set(
+        slugifyValue(page.naziv),
+        `/specijalnost/${specialtySlugForServices}/${page.slug}`
+      );
+    });
+
+    return map;
+  }, [publishedServicePages, specialtySlugForServices]);
 
   const defaultFaqs = useMemo(
     () => [
@@ -223,8 +274,15 @@ export default function SpecialtyLanding() {
 
   const displayUsluge = useMemo(() => {
     if (dbUsluge.length > 0) return dbUsluge;
+    if (publishedServicePages.length > 0) {
+      return publishedServicePages.map((page) => ({
+        naziv: page.naziv,
+        opis: page.kratki_opis,
+        url: `/specijalnost/${specialtySlugForServices}/${page.slug}`,
+      }));
+    }
     return defaultUsluge;
-  }, [dbUsluge, defaultUsluge]);
+  }, [dbUsluge, defaultUsluge, publishedServicePages, specialtySlugForServices]);
 
   // Doctors
   const allDoctors: Doctor[] = specialtyInfo?.doktori || [];
@@ -612,21 +670,48 @@ export default function SpecialtyLanding() {
               </h3>
 
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {displayUsluge.map((usluga: any, index: number) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <span className="text-foreground font-medium text-sm sm:text-[15px]">
-                        {usluga.naziv || usluga}
-                      </span>
-                      {usluga.opis && (
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          {usluga.opis}
-                        </p>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                {displayUsluge.map((usluga: any, index: number) => {
+                  const naziv =
+                    typeof usluga === "string" ? usluga : usluga?.naziv || "";
+                  const opis =
+                    typeof usluga === "object" && usluga ? usluga.opis : "";
+                  const manualUrl =
+                    typeof usluga === "object" && usluga
+                      ? normalizeServiceUrl(usluga.url)
+                      : null;
+                  const autoUrl = naziv
+                    ? servicePageLinkMap.get(slugifyValue(naziv)) || null
+                    : null;
+                  const url = manualUrl || autoUrl;
+                  const isExternal = !!url && /^(https?:\/\/|mailto:|tel:)/i.test(url);
+
+                  return (
+                    <li key={index} className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                      <div>
+                        {url ? (
+                          <a
+                            href={url}
+                            target={isExternal ? "_blank" : undefined}
+                            rel={isExternal ? "noopener noreferrer" : undefined}
+                            className="text-foreground font-medium text-sm sm:text-[15px] hover:text-primary hover:underline"
+                          >
+                            {naziv}
+                          </a>
+                        ) : (
+                          <span className="text-foreground font-medium text-sm sm:text-[15px]">
+                            {naziv}
+                          </span>
+                        )}
+                        {opis && (
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {opis}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </CardContent>
           </Card>

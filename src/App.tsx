@@ -23,6 +23,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import CitySpecialtyDoctors from "./pages/CitySpecialtyDoctors";
 import SpecialtyLanding from "./pages/SpecialtyLanding";
+import SpecialtyServicePage from "./pages/SpecialtyServicePage";
 import CityLanding from "./pages/CityLanding";
 import Cities from "./pages/Cities";
 import Clinics from "./pages/Clinics";
@@ -157,6 +158,7 @@ const App = () => {
               <Route path="/mkb10" element={<Mkb10 />} />
               <Route path="/lijekovi" element={<Lijekovi />} />
               <Route path="/lijekovi/:slug" element={<LijekProfil />} />
+              <Route path="/specijalnost/:specijalnost/:usluga" element={<SpecialtyServicePage />} />
               <Route path="/specijalnost/:naziv" element={<SpecialtyLanding />} />
               <Route path="/gradovi" element={<Cities />} />
               <Route path="/grad/:grad" element={<CityLanding />} />

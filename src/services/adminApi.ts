@@ -78,6 +78,11 @@ export const adminAPI = {
   deleteSpecialty: (id: number) => adminApiInstance.delete(`/admin/specialties/${id}`),
   reorderSpecialties: (specialties: Array<{ id: number; sort_order: number }>) => 
     adminApiInstance.post('/admin/specialties/reorder', { specialties }),
+  getServicePages: (params?: any) => adminApiInstance.get('/admin/service-pages', { params }),
+  getServicePage: (id: number) => adminApiInstance.get(`/admin/service-pages/${id}`),
+  createServicePage: (data: any) => adminApiInstance.post('/admin/service-pages', data),
+  updateServicePage: (id: number, data: any) => adminApiInstance.put(`/admin/service-pages/${id}`, data),
+  deleteServicePage: (id: number) => adminApiInstance.delete(`/admin/service-pages/${id}`),
   getTemplates: () => adminApiInstance.get('/admin/settings/templates'),
   updateTemplates: (data: any) => adminApiInstance.put('/admin/settings/templates', data),
   getDoctorCardSettings: () => adminApiInstance.get('/admin/settings/doctor-card'),

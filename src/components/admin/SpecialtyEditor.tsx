@@ -35,7 +35,7 @@ interface Specialty {
   prikazi_faq?: boolean;
   faq?: Array<{ pitanje: string; odgovor: string }>;
   prikazi_usluge?: boolean;
-  usluge?: Array<{ naziv: string; opis?: string }>;
+  usluge?: Array<{ naziv: string; opis?: string; url?: string }>;
   uvodni_tekst?: string;
   zakljucni_tekst?: string;
   og_image?: string;
@@ -315,7 +315,7 @@ export function SpecialtyEditor({ specialty, open, onClose, onSaved, allSpecialt
   const addUsluga = () => {
     setForm({
       ...form,
-      usluge: [...(form.usluge || []), { naziv: '', opis: '' }]
+      usluge: [...(form.usluge || []), { naziv: '', opis: '', url: '' }]
     });
   };
 
@@ -776,6 +776,11 @@ export function SpecialtyEditor({ specialty, open, onClose, onSaved, allSpecialt
                         value={usluga.opis || ''}
                         onChange={(e) => updateUsluga(index, 'opis', e.target.value)}
                         placeholder="Opis (opcionalno)"
+                      />
+                      <Input
+                        value={usluga.url || ''}
+                        onChange={(e) => updateUsluga(index, 'url', e.target.value)}
+                        placeholder="URL (opcionalno)"
                       />
                     </div>
                     <Button variant="ghost" size="icon" onClick={() => removeUsluga(index)}>

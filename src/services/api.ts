@@ -114,6 +114,11 @@ export const specialtiesAPI = {
   smartSearch: (query: string) => api.get(`/specialties/smart-search/${encodeURIComponent(query)}`),
 };
 
+export const servicePagesAPI = {
+  getByPath: (specialtySlug: string, serviceSlug: string) =>
+    api.get(`/specialties/${specialtySlug}/services/${serviceSlug}`),
+};
+
 export const medicinesAPI = {
   getAll: (params?: any) => api.get('/lijekovi', { params }),
   getBySlug: (slug: string) => api.get(`/lijekovi/${slug}`),

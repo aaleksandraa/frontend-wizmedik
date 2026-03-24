@@ -42,6 +42,7 @@ import { AdminPharmaciesManagement } from '@/components/admin/AdminPharmaciesMan
 import { AdminLijekoviManagement } from '@/components/admin/AdminLijekoviManagement';
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
+import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtyServicePages';
 import {
   DndContext,
   closestCenter,
@@ -1049,6 +1050,10 @@ export default function AdminPanel() {
                 <Users className="h-4 w-4 mr-2 hidden sm:inline" />
                 Specijalnosti
               </TabsTrigger>
+              <TabsTrigger value="service-pages" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <FileText className="h-4 w-4 mr-2 hidden sm:inline" />
+                Usluge SEO
+              </TabsTrigger>
               <TabsTrigger value="templates" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Palette className="h-4 w-4 mr-2 hidden sm:inline" />
                 Templati
@@ -1352,6 +1357,11 @@ export default function AdminPanel() {
                   </div>
                 </SortableContext>
               </DndContext>
+            </TabsContent>
+
+            {/* SERVICE PAGES TAB */}
+            <TabsContent value="service-pages" className="space-y-4">
+              <AdminSpecialtyServicePages />
             </TabsContent>
 
             {/* TEMPLATES TAB */}
