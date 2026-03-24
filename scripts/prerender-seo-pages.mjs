@@ -23,7 +23,8 @@ const SEO_SOURCE_ORIGIN = normalizeOrigin(
 
 const CONCURRENCY = Math.max(1, Number(process.env.PRERENDER_CONCURRENCY || 8));
 const REQUEST_TIMEOUT_MS = Math.max(5000, Number(process.env.PRERENDER_TIMEOUT_MS || 25000));
-const INCLUDE_ROOT = parseBoolean(process.env.PRERENDER_INCLUDE_ROOT, true);
+const INCLUDE_ROOT = parseBoolean(process.env.PRERENDER_INCLUDE_ROOT, false);
+const STRICT_FAILURE = parseBoolean(process.env.PRERENDER_STRICT_FAILURE, false);
 
 const FALLBACK_SITEMAPS = [
   "sitemap-pages.xml",
@@ -56,13 +57,13 @@ async function main() {
 
   let rendered = 0;
   let failed = 0;
+  let failedLogCount = 0;
 
   await runWithConcurrency(paths, CONCURRENCY, async (routePath, index, total) => {
     const displayPath = routePath === "" ? "/" : `/${routePath}`;
-    const fetchUrl = buildSourceUrl(routePath);
 
     try {
-      const html = await fetchText(fetchUrl, REQUEST_TIMEOUT_MS);
+      const html = await fetchRouteHtml(routePath);
       const finalHtml = enforcePublicUrlMeta(html, routePath);
       const outputFile = targetFilePath(routePath);
       await fs.mkdir(path.dirname(outputFile), { recursive: true });
@@ -73,8 +74,19 @@ async function main() {
         console.log(`[seo-prerender] ${index + 1}/${total} processed`);
       }
     } catch (error) {
+      if (routePath === "" && isHttpStatusError(error, 404)) {
+        console.warn("[seo-prerender] Skipping root '/': source returned HTTP 404");
+        return;
+      }
+
       failed += 1;
-      console.warn(`[seo-prerender] Failed ${displayPath}: ${error.message}`);
+      if (failedLogCount < 50) {
+        console.warn(`[seo-prerender] Failed ${displayPath}: ${error.message}`);
+        failedLogCount += 1;
+      } else if (failedLogCount === 50) {
+        console.warn("[seo-prerender] Additional failures suppressed.");
+        failedLogCount += 1;
+      }
     }
   });
 
@@ -85,7 +97,13 @@ async function main() {
   console.log(`[seo-prerender] Rendered: ${rendered}`);
   console.log(`[seo-prerender] Failed: ${failed}`);
 
-  if (failed > 0) {
+  if (rendered === 0) {
+    console.error("[seo-prerender] No pages were rendered. Ensure /api/seo/render is deployed and reachable.");
+    process.exitCode = 1;
+    return;
+  }
+
+  if (failed > 0 && STRICT_FAILURE) {
     process.exitCode = 1;
   }
 }
@@ -138,7 +156,7 @@ async function collectSitemapUrls() {
     const locs = extractLocValues(xml);
     const urls = locs
       .filter((loc) => /\.xml(?:\?.*)?$/i.test(loc))
-      .map((loc) => toAbsoluteUrl(loc, SEO_SOURCE_ORIGIN))
+      .map((loc) => coerceSitemapUrlToSource(loc))
       .filter(Boolean);
 
     if (urls.length > 0) {
@@ -195,6 +213,15 @@ function targetFilePath(routePath) {
 }
 
 function buildSourceUrl(routePath) {
+  const route = routePath ? `/${routePath}` : "/";
+  const params = new URLSearchParams({
+    path: route,
+  });
+
+  return `${SEO_SOURCE_ORIGIN}/api/seo/render?${params.toString()}`;
+}
+
+function buildDirectSourceUrl(routePath) {
   if (!routePath) {
     return `${SEO_SOURCE_ORIGIN}/`;
   }
@@ -206,6 +233,28 @@ function buildSourceUrl(routePath) {
     .join("/");
 
   return `${SEO_SOURCE_ORIGIN}/${encodedPath}`;
+}
+
+async function fetchRouteHtml(routePath) {
+  const candidates = [buildSourceUrl(routePath), buildDirectSourceUrl(routePath)];
+  const attempted = new Set();
+  let lastError = new Error("No source candidates available");
+
+  for (const candidate of candidates) {
+    if (!candidate || attempted.has(candidate)) {
+      continue;
+    }
+
+    attempted.add(candidate);
+
+    try {
+      return await fetchText(candidate, REQUEST_TIMEOUT_MS);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
 }
 
 function enforcePublicUrlMeta(html, routePath) {
@@ -257,6 +306,24 @@ function decodeXmlEntities(value) {
 function toAbsoluteUrl(urlLike, base) {
   try {
     return new URL(urlLike, `${base}/`).toString();
+  } catch {
+    return null;
+  }
+}
+
+function coerceSitemapUrlToSource(loc) {
+  const parsed = toAbsoluteUrl(loc, SEO_SOURCE_ORIGIN);
+  if (!parsed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(parsed);
+    if (!/\.xml$/i.test(url.pathname)) {
+      return null;
+    }
+
+    return `${SEO_SOURCE_ORIGIN}${url.pathname}${url.search}`;
   } catch {
     return null;
   }
@@ -317,6 +384,11 @@ async function fetchText(url, timeoutMs) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function isHttpStatusError(error, statusCode) {
+  const message = String(error?.message || "");
+  return message.includes(`HTTP ${statusCode}`);
 }
 
 async function readPreviousManifest() {
