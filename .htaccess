@@ -81,6 +81,10 @@ FileETag None
   RewriteEngine On
   RewriteBase /
 
+  # Always serve sitemap XML from backend app routes.
+  # Prevents stale/missing static sitemap files on frontend host.
+  RewriteRule ^sitemap(?:-[A-Za-z0-9-]+)?\.xml$ https://api.wizmedik.com/$0 [R=302,L,NC,NE]
+
   # Force legacy compressed asset URLs back to canonical files.
   # Prevents module load failures from stale HTML/SW caches referencing *.js.gz/*.js.br.
   RewriteRule ^assets/(.+)\.(js|mjs|css|json|svg)\.(gz|br)$ /assets/$1.$2 [R=302,L,NC]
