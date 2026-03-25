@@ -355,7 +355,16 @@ export function AdminSpecialtyServicePages() {
     setUploading(true);
     try {
       const response = await uploadAPI.uploadImage(file, "blog");
-      setForm((prev) => ({ ...prev, og_image: response.data.url }));
+      const uploadedUrl =
+        response?.data?.url ||
+        response?.data?.data?.url ||
+        "";
+
+      if (!uploadedUrl) {
+        throw new Error("Upload odgovor ne sadrzi URL slike.");
+      }
+
+      setForm((prev) => ({ ...prev, og_image: uploadedUrl }));
       toast.success("Slika je uploadovana.");
     } catch (error: any) {
       toast.error(extractApiErrorMessage(error, "GreÅ¡ka pri uploadu slike."));
