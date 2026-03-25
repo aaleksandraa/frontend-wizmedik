@@ -151,6 +151,9 @@ Aplikacija je potpuno responsive sa breakpoints:
 npm run build
 ```
 
+`npm run build` now automatically syncs `frontend/.htaccess` into `dist/.htaccess`.
+This keeps Apache rules consistent and prevents old sitemap redirect rules from reappearing in `dist`.
+
 ### Deploy
 Build output (`dist/` folder) može biti deploy-ovan na:
 - Nginx
@@ -158,6 +161,8 @@ Build output (`dist/` folder) može biti deploy-ovan na:
 - Vercel
 - Netlify
 - AWS S3 + CloudFront
+
+For Apache deployments, always deploy the generated `dist/.htaccess` together with other `dist/*` files.
 
 ### Nginx Configuration
 ```nginx

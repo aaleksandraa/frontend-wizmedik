@@ -82,6 +82,11 @@ FileETag None
   RewriteOptions AllowNoSlash
   RewriteBase /
 
+  # Never redirect sitemap XML outside this host.
+  # If file exists locally, serve it directly.
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^sitemap(?:-[A-Za-z0-9-]+)?\.xml$ - [L,NC]
+
   # Force legacy compressed asset URLs back to canonical files.
   # Prevents module load failures from stale HTML/SW caches referencing *.js.gz/*.js.br.
   RewriteRule ^assets/(.+)\.(js|mjs|css|json|svg)\.(gz|br)$ /assets/$1.$2 [R=302,L,NC]
