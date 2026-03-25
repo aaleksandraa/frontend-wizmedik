@@ -76,7 +76,7 @@ const initialForm: FormState = {
   slug: "",
   kratki_opis: "",
   sadrzaj: "",
-  status: "draft",
+  status: "published",
   is_indexable: true,
   show_doctor_cta: true,
   sort_order: 0,
