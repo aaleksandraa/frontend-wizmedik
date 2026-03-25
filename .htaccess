@@ -53,6 +53,12 @@ AddDefaultCharset UTF-8
   <FilesMatch "^manifest\.json$">
     Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
+
+  <FilesMatch "^sitemap(?:-[A-Za-z0-9-]+)?\.xml$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
 </IfModule>
 
 FileETag None
@@ -81,6 +87,11 @@ FileETag None
 
   # Missing static assets must return 404 (never SPA index.html).
   RewriteCond %{REQUEST_URI} ^/assets/ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
+  # Missing sitemap files must return 404 (never SPA index.html).
+  RewriteCond %{REQUEST_URI} ^/sitemap(?:-[A-Za-z0-9-]+)?\.xml$ [NC]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^ - [R=404,L]
 
