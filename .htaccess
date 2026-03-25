@@ -79,6 +79,7 @@ FileETag None
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteOptions AllowNoSlash
   RewriteBase /
 
   # Always serve sitemap XML from backend app routes.
@@ -113,4 +114,8 @@ FileETag None
 
   # Fallback to static SPA shell.
   RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_dir.c>
+  DirectorySlash Off
 </IfModule>
