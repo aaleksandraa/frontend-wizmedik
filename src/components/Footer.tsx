@@ -270,6 +270,9 @@ export function Footer() {
                 <Link to="/cookie-policy" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Kolačići
                 </Link>
+                <Link to="/impressum" className="size-compact text-slate-500 hover:text-primary transition-colors">
+                  Impressum
+                </Link>
                 <Link to="/contact" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Kontakt
                 </Link>
@@ -401,6 +404,9 @@ export function Footer() {
                 </Link>
                 <Link to="/cookie-policy" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Kolačići
+                </Link>
+                <Link to="/impressum" className="size-compact text-slate-500 hover:text-primary transition-colors">
+                  Impressum
                 </Link>
                 <Link to="/contact" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Kontakt

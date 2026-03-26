@@ -85,6 +85,7 @@ import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import HealthCalculators from "./pages/HealthCalculators";
 import CookiePolicy from "./pages/CookiePolicy";
+import Impressum from "./pages/Impressum";
 import NotFound from "./pages/NotFound";
 
 // Component to track page views
@@ -231,6 +232,7 @@ const App = () => {
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/politika-privatnosti" element={<PrivacyPolicy />} />
               <Route path="/uslovi-koristenja" element={<TermsOfService />} />
+              <Route path="/impressum" element={<Impressum />} />
               
               {/* Protected routes - require authentication */}
               <Route path="/dashboard" element={
