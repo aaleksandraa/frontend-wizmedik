@@ -94,8 +94,13 @@ export default defineConfig(({ mode }) => ({
             return 'editor-vendor';
           }
 
+          // Do not force leaflet/react-leaflet into a shared manual chunk.
+          // We saw production-only runtime failures where the separate maps
+          // chunk could initialize against an invalid React binding on some
+          // deployments/cached asset combinations. Let Rollup place map code
+          // naturally with its importing chunks for safer execution order.
           if (id.includes('leaflet') || id.includes('react-leaflet')) {
-            return 'maps-vendor';
+            return undefined;
           }
 
           if (id.includes('recharts')) {
