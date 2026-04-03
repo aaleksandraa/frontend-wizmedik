@@ -22,6 +22,7 @@ import { Navbar } from '@/components/Navbar';
 import { ClinicCalendar } from '@/components/clinic/ClinicCalendar';
 import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { validatePassword } from '@/utils/validation';
 
 interface ClinicProfile {
   id: number;
@@ -344,8 +345,10 @@ export default function ClinicDashboard() {
     if (!doctorForm.prezime.trim()) errors.prezime = 'Prezime je obavezno';
     if (!doctorForm.email.trim()) errors.email = 'Email je obavezan';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(doctorForm.email)) errors.email = 'Unesite ispravan email';
-    if (!editingDoctor && !doctorForm.password) errors.password = 'Lozinka je obavezna';
-    else if (!editingDoctor && doctorForm.password.length < 8) errors.password = 'Lozinka mora imati najmanje 8 karaktera';
+    if (!editingDoctor || doctorForm.password) {
+      const passwordError = validatePassword(doctorForm.password);
+      if (passwordError) errors.password = passwordError;
+    }
     if (!doctorForm.telefon.trim()) errors.telefon = 'Telefon je obavezan';
     if (!doctorForm.specijalnost) errors.specijalnost = 'Specijalnost je obavezna';
     setFormErrors(errors);
@@ -566,8 +569,9 @@ export default function ClinicDashboard() {
       toast({ title: 'Greška', description: 'Lozinke se ne poklapaju', variant: 'destructive' });
       return;
     }
-    if (passwordForm.new_password.length < 8) {
-      toast({ title: 'Greška', description: 'Lozinka mora imati najmanje 8 karaktera', variant: 'destructive' });
+    const passwordError = validatePassword(passwordForm.new_password);
+    if (passwordError) {
+      toast({ title: 'Greška', description: passwordError, variant: 'destructive' });
       return;
     }
     

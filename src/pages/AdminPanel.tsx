@@ -38,11 +38,14 @@ import { BlogTypographySettings } from '@/components/admin/BlogTypographySetting
 import { ListingTemplateSettings } from '@/components/admin/ListingTemplateSettings';
 import Mkb10Manager from '@/components/admin/Mkb10Manager';
 import { EntitiesManagement } from '@/components/admin/EntitiesManagement';
+import { AdminLaboratoriesManagement } from '@/components/admin/AdminLaboratoriesManagement';
 import { AdminPharmaciesManagement } from '@/components/admin/AdminPharmaciesManagement';
 import { AdminLijekoviManagement } from '@/components/admin/AdminLijekoviManagement';
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtyServicePages';
+import { AdminSpasManagement } from '@/components/admin/AdminSpasManagement';
+import { AdminCareHomesManagement } from '@/components/admin/AdminCareHomesManagement';
 import {
   DndContext,
   closestCenter,
@@ -65,8 +68,8 @@ interface Doctor {
   id: number;
   ime: string;
   prezime: string;
-  email: string;
-  telefon: string;
+  email?: string;
+  telefon?: string;
   specijalnost: string;
   opis?: string;
   klinika_id?: number;
@@ -79,6 +82,14 @@ interface Doctor {
   longitude?: number;
   google_maps_link?: string;
   radno_vrijeme?: any;
+  user?: {
+    id: number;
+    email: string;
+    ime?: string;
+    prezime?: string;
+    name?: string;
+    role?: string;
+  } | null;
 }
 
 interface Clinic {
@@ -97,6 +108,14 @@ interface Clinic {
   latitude?: number;
   longitude?: number;
   google_maps_link?: string;
+  user?: {
+    id: number;
+    email: string;
+    ime?: string;
+    prezime?: string;
+    name?: string;
+    role?: string;
+  } | null;
 }
 
 interface Specialty {
@@ -279,16 +298,18 @@ export default function AdminPanel() {
   const [showDoctorDialog, setShowDoctorDialog] = useState(false);
   const [showClinicDialog, setShowClinicDialog] = useState(false);
   const [showCityDialog, setShowCityDialog] = useState(false);
+  const [sendingDoctorInviteId, setSendingDoctorInviteId] = useState<number | null>(null);
+  const [sendingClinicInviteId, setSendingClinicInviteId] = useState<number | null>(null);
   
   const [doctorForm, setDoctorForm] = useState({
-    ime: '', prezime: '', email: '', password: '', telefon: '', 
+    ime: '', prezime: '', email: '', account_email: '', telefon: '', 
     specijalnost: '', specijalnost_id: '', klinika_id: '', opis: '',
     grad: '', lokacija: '', latitude: '', longitude: '', google_maps_link: '', slika_profila: '',
     radno_vrijeme: defaultWorkingHours
   });
   
   const [clinicForm, setClinicForm] = useState({
-    naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', password: '', 
+    naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', account_email: '', 
     contact_email: '', website: '', latitude: '', longitude: '', google_maps_link: '', 
     slike: [] as string[], radno_vrijeme: defaultWorkingHours
   });
@@ -435,7 +456,7 @@ export default function AdminPanel() {
   // Doctor handlers
   const resetDoctorForm = () => {
     setDoctorForm({
-      ime: '', prezime: '', email: '', password: '', telefon: '', specijalnost: '', 
+      ime: '', prezime: '', email: '', account_email: '', telefon: '', specijalnost: '', 
       specijalnost_id: '', klinika_id: '', opis: '', grad: '', lokacija: '', 
       latitude: '', longitude: '', google_maps_link: '', slika_profila: '', radno_vrijeme: defaultWorkingHours
     });
@@ -446,8 +467,8 @@ export default function AdminPanel() {
     if (doctor) {
       setEditingDoctor(doctor);
       setDoctorForm({
-        ime: doctor.ime, prezime: doctor.prezime, email: doctor.email || '', password: '',
-        telefon: doctor.telefon, specijalnost: doctor.specijalnost,
+        ime: doctor.ime, prezime: doctor.prezime, email: doctor.email || '', account_email: doctor.user?.email || '',
+        telefon: doctor.telefon || '', specijalnost: doctor.specijalnost,
         specijalnost_id: doctor.specijalnost_id?.toString() || '',
         klinika_id: doctor.klinika_id?.toString() || '', opis: doctor.opis || '',
         grad: doctor.grad, lokacija: doctor.lokacija,
@@ -464,8 +485,8 @@ export default function AdminPanel() {
   const handleSaveDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = {
-        ime: doctorForm.ime, prezime: doctorForm.prezime, email: doctorForm.email,
+      const data: any = {
+        ime: doctorForm.ime, prezime: doctorForm.prezime, email: doctorForm.email || null,
         telefon: doctorForm.telefon, specijalnost: doctorForm.specijalnost,
         specijalnost_id: doctorForm.specijalnost_id ? parseInt(doctorForm.specijalnost_id) : null,
         klinika_id: doctorForm.klinika_id ? parseInt(doctorForm.klinika_id) : null,
@@ -473,14 +494,14 @@ export default function AdminPanel() {
         latitude: doctorForm.latitude ? parseFloat(doctorForm.latitude) : null,
         longitude: doctorForm.longitude ? parseFloat(doctorForm.longitude) : null,
         google_maps_link: doctorForm.google_maps_link || null,
-        slika_profila: doctorForm.slika_profila || null, radno_vrijeme: doctorForm.radno_vrijeme,
-        ...(doctorForm.password && { password: doctorForm.password })
+        slika_profila: doctorForm.slika_profila || null, radno_vrijeme: doctorForm.radno_vrijeme
       };
+      if (doctorForm.account_email) data.account_email = doctorForm.account_email;
       if (editingDoctor) {
         await adminAPI.updateDoctor(editingDoctor.id, data);
         toast({ title: "Uspjeh", description: "Doktor ažuriran" });
       } else {
-        await adminAPI.createDoctor({ ...data, password: doctorForm.password });
+        await adminAPI.createDoctor(data);
         toast({ title: "Uspjeh", description: "Doktor kreiran" });
       }
       setShowDoctorDialog(false);
@@ -506,7 +527,7 @@ export default function AdminPanel() {
   // Clinic handlers
   const resetClinicForm = () => {
     setClinicForm({
-      naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', password: '',
+      naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', account_email: '',
       contact_email: '', website: '', latitude: '', longitude: '', google_maps_link: '',
       slike: [], radno_vrijeme: defaultWorkingHours
     });
@@ -518,7 +539,7 @@ export default function AdminPanel() {
       setEditingClinic(clinic);
       setClinicForm({
         naziv: clinic.naziv, opis: clinic.opis || '', adresa: clinic.adresa, grad: clinic.grad,
-        telefon: clinic.telefon, email: clinic.email || '', password: '',
+        telefon: clinic.telefon || '', email: clinic.email || '', account_email: clinic.user?.email || '',
         contact_email: clinic.contact_email || '', website: clinic.website || '',
         latitude: clinic.latitude?.toString() || '', longitude: clinic.longitude?.toString() || '',
         google_maps_link: clinic.google_maps_link || '',
@@ -536,20 +557,20 @@ export default function AdminPanel() {
     try {
       const data: any = {
         naziv: clinicForm.naziv, opis: clinicForm.opis, adresa: clinicForm.adresa,
-        grad: clinicForm.grad, telefon: clinicForm.telefon, email: clinicForm.email,
+        grad: clinicForm.grad, telefon: clinicForm.telefon, email: clinicForm.email || null,
         contact_email: clinicForm.contact_email, website: clinicForm.website,
         latitude: clinicForm.latitude ? parseFloat(clinicForm.latitude) : null,
         longitude: clinicForm.longitude ? parseFloat(clinicForm.longitude) : null,
         google_maps_link: clinicForm.google_maps_link || null,
         slike: clinicForm.slike, radno_vrijeme: clinicForm.radno_vrijeme
       };
-      if (clinicForm.password) data.password = clinicForm.password;
+      if (clinicForm.account_email) data.account_email = clinicForm.account_email;
       
       if (editingClinic) {
         await adminAPI.updateClinic(editingClinic.id, data);
         toast({ title: "Uspjeh", description: "Klinika ažurirana" });
       } else {
-        await adminAPI.createClinic({ ...data, password: clinicForm.password });
+        await adminAPI.createClinic(data);
         toast({ title: "Uspjeh", description: "Klinika kreirana" });
       }
       setShowClinicDialog(false);
@@ -757,6 +778,42 @@ export default function AdminPanel() {
       fetchBlogData();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+    }
+  };
+
+  const handleSendClinicInvite = async (clinic: Clinic) => {
+    if (!clinic.user?.email) {
+      toast({ title: "Nedostaje pristupni email", description: "Prvo sačuvajte pristupni email klinike.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setSendingClinicInviteId(clinic.id);
+      await adminAPI.sendClinicInvite(clinic.id);
+      toast({ title: "Pozivnica poslana", description: `Email je poslan na ${clinic.user.email}.` });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+    } finally {
+      setSendingClinicInviteId(null);
+    }
+  };
+
+  const handleSendDoctorInvite = async (doctor: Doctor) => {
+    if (!doctor.user?.email) {
+      toast({ title: "Nedostaje pristupni email", description: "Prvo sačuvajte pristupni email doktora.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setSendingDoctorInviteId(doctor.id);
+      await adminAPI.sendDoctorInvite(doctor.id);
+      toast({ title: "Pozivnica poslana", description: `Email je poslan na ${doctor.user.email}.` });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
+    } finally {
+      setSendingDoctorInviteId(null);
     }
   };
 
@@ -1159,7 +1216,8 @@ export default function AdminPanel() {
                           {viewMode === 'grid' && (
                             <div className="mt-3 space-y-1 text-sm text-muted-foreground">
                               <p className="flex items-center gap-2"><MapPin className="h-3 w-3" /> {doctor.grad}</p>
-                              <p className="flex items-center gap-2"><Mail className="h-3 w-3" /> {doctor.email}</p>
+                              <p className="flex items-center gap-2"><Mail className="h-3 w-3" /> {doctor.email || 'Nema javnog emaila'}</p>
+                              <p className="flex items-center gap-2"><Shield className="h-3 w-3" /> {doctor.user?.email ? `Pristup: ${doctor.user.email}` : 'Bez pristupa panelu'}</p>
                             </div>
                           )}
                           {viewMode === 'list' && (
@@ -1170,6 +1228,16 @@ export default function AdminPanel() {
                           )}
                         </div>
                         <div className="flex gap-2 mt-3 md:mt-0">
+                          {doctor.user?.email && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleSendDoctorInvite(doctor)}
+                              disabled={sendingDoctorInviteId === doctor.id}
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button variant="outline" size="sm" onClick={() => openDoctorDialog(doctor)}>
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -1230,6 +1298,7 @@ export default function AdminPanel() {
                           <div className="mt-3 space-y-1 text-sm text-muted-foreground">
                             <p className="flex items-center gap-2"><MapPin className="h-3 w-3" /> {clinic.adresa}</p>
                             <p className="flex items-center gap-2"><Phone className="h-3 w-3" /> {clinic.telefon}</p>
+                            <p className="flex items-center gap-2"><Shield className="h-3 w-3" /> {clinic.user?.email ? `Pristup: ${clinic.user.email}` : 'Bez pristupa panelu'}</p>
                           </div>
                         )}
                         {viewMode === 'list' && (
@@ -1240,6 +1309,16 @@ export default function AdminPanel() {
                         )}
                       </div>
                       <div className="flex gap-2 mt-3 md:mt-0">
+                        {clinic.user?.email && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleSendClinicInvite(clinic)}
+                            disabled={sendingClinicInviteId === clinic.id}
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button variant="outline" size="sm" onClick={() => openClinicDialog(clinic)}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1643,7 +1722,7 @@ export default function AdminPanel() {
 
             {/* LABORATORIES TAB */}
             <TabsContent value="laboratories">
-              <EntitiesManagement type="laboratories" />
+              <AdminLaboratoriesManagement />
             </TabsContent>
 
             {/* PHARMACIES TAB */}
@@ -1658,12 +1737,12 @@ export default function AdminPanel() {
 
             {/* SPAS TAB */}
             <TabsContent value="spas">
-              <EntitiesManagement type="spas" />
+              <AdminSpasManagement />
             </TabsContent>
 
             {/* CARE HOMES TAB */}
             <TabsContent value="care-homes">
-              <EntitiesManagement type="care-homes" />
+              <AdminCareHomesManagement />
             </TabsContent>
 
             {/* QUESTIONS TAB */}
@@ -1701,15 +1780,18 @@ export default function AdminPanel() {
                     <Input value={doctorForm.prezime} onChange={(e) => setDoctorForm({...doctorForm, prezime: e.target.value})} required />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Email *</label>
-                    <Input type="email" value={doctorForm.email} onChange={(e) => setDoctorForm({...doctorForm, email: e.target.value})} required />
+                    <label className="text-sm font-medium">Javni email</label>
+                    <Input type="email" value={doctorForm.email} onChange={(e) => setDoctorForm({...doctorForm, email: e.target.value})} />
                   </div>
-                  {!editingDoctor && (
-                    <div>
-                      <label className="text-sm font-medium">Lozinka *</label>
-                      <Input type="password" value={doctorForm.password} onChange={(e) => setDoctorForm({...doctorForm, password: e.target.value})} required />
-                    </div>
-                  )}
+                  <div>
+                    <label className="text-sm font-medium">Pristupni email</label>
+                    <Input
+                      type="email"
+                      value={doctorForm.account_email}
+                      onChange={(e) => setDoctorForm({...doctorForm, account_email: e.target.value})}
+                      placeholder="Dodajte kad doktor preuzima panel"
+                    />
+                  </div>
                   <div>
                     <label className="text-sm font-medium">Telefon *</label>
                     <Input value={doctorForm.telefon} onChange={(e) => setDoctorForm({...doctorForm, telefon: e.target.value})} required />
@@ -1756,6 +1838,9 @@ export default function AdminPanel() {
                     </Select>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Lozinku ne postavlja admin. Nakon što sačuvate pristupni email, pošaljite pozivnicu iz liste i doktor će sam postaviti lozinku.
+                </p>
                 <div>
                   <label className="text-sm font-medium">Opis</label>
                   <RichTextEditor 
@@ -1819,12 +1904,17 @@ export default function AdminPanel() {
                     <Input value={clinicForm.telefon} onChange={(e) => setClinicForm({...clinicForm, telefon: e.target.value})} required />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Login Email *</label>
-                    <Input type="email" value={clinicForm.email} onChange={(e) => setClinicForm({...clinicForm, email: e.target.value})} required />
+                    <label className="text-sm font-medium">Javni email</label>
+                    <Input type="email" value={clinicForm.email} onChange={(e) => setClinicForm({...clinicForm, email: e.target.value})} />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">{editingClinic ? 'Nova lozinka' : 'Lozinka *'}</label>
-                    <Input type="password" value={clinicForm.password} onChange={(e) => setClinicForm({...clinicForm, password: e.target.value})} required={!editingClinic} />
+                    <label className="text-sm font-medium">Pristupni email</label>
+                    <Input
+                      type="email"
+                      value={clinicForm.account_email}
+                      onChange={(e) => setClinicForm({...clinicForm, account_email: e.target.value})}
+                      placeholder="Dodajte kad klinika preuzima panel"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium">Kontakt Email</label>
@@ -1835,6 +1925,9 @@ export default function AdminPanel() {
                     <Input value={clinicForm.website} onChange={(e) => setClinicForm({...clinicForm, website: e.target.value})} />
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Lozinku ne postavlja admin. Nakon što sačuvate pristupni email, pošaljite pozivnicu iz liste i klinika će samostalno aktivirati pristup.
+                </p>
                 <div>
                   <label className="text-sm font-medium">Opis</label>
                   <RichTextEditor 

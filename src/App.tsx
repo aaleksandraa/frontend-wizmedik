@@ -15,38 +15,60 @@ import { initSentry } from "@/config/sentry";
 import { initGA, trackPageView } from "@/config/analytics";
 import { Loader2 } from "lucide-react";
 
-// Public pages - static import (always needed)
+// Core entry pages - keep initial bundle lean
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import Dashboard from "./pages/Dashboard";
-import CitySpecialtyDoctors from "./pages/CitySpecialtyDoctors";
-import SpecialtyLanding from "./pages/SpecialtyLanding";
-import SpecialtyServicePage from "./pages/SpecialtyServicePage";
-import CityLanding from "./pages/CityLanding";
-import Cities from "./pages/Cities";
-import Clinics from "./pages/Clinics";
-import ClinicProfile from "./pages/ClinicProfile";
-import ClinicsBySpecialty from "./pages/ClinicsBySpecialty";
-import Specialties from "./pages/Specialties";
-import Doctors from "./pages/Doctors";
-import DoctorsCompactList from "./pages/DoctorsCompactList";
-import Laboratories from "./pages/Laboratories";
-import LaboratoryProfile from "./pages/LaboratoryProfile";
-import Pharmacies from "./pages/Pharmacies";
-import Spas from "./pages/Spas";
-import SpaProfile from "./pages/SpaProfile";
-import SpaIndikacije from "./pages/SpaIndikacije";
-import Pitanja from "./pages/Pitanja";
-import PitanjeDetalji from "./pages/PitanjeDetalji";
-import PostaviPitanje from "./pages/PostaviPitanje";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import NotFound from "./pages/NotFound";
 
-// Admin & Dashboard pages - lazy import (only load when needed)
+// Route-level lazy loading keeps non-critical code out of the initial bundle.
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CitySpecialtyDoctors = lazy(() => import("./pages/CitySpecialtyDoctors"));
+const SpecialtyLanding = lazy(() => import("./pages/SpecialtyLanding"));
+const SpecialtyServicePage = lazy(() => import("./pages/SpecialtyServicePage"));
+const CityLanding = lazy(() => import("./pages/CityLanding"));
+const Cities = lazy(() => import("./pages/Cities"));
+const Clinics = lazy(() => import("./pages/Clinics"));
+const ClinicProfile = lazy(() => import("./pages/ClinicProfile"));
+const ClinicsBySpecialty = lazy(() => import("./pages/ClinicsBySpecialty"));
+const Specialties = lazy(() => import("./pages/Specialties"));
+const Doctors = lazy(() => import("./pages/Doctors"));
+const DoctorsCompactList = lazy(() => import("./pages/DoctorsCompactList"));
+const Laboratories = lazy(() => import("./pages/Laboratories"));
+const LaboratoryProfile = lazy(() => import("./pages/LaboratoryProfile"));
+const Pharmacies = lazy(() => import("./pages/Pharmacies"));
+const Spas = lazy(() => import("./pages/Spas"));
+const SpaProfile = lazy(() => import("./pages/SpaProfile"));
+const SpaIndikacije = lazy(() => import("./pages/SpaIndikacije"));
+const Pitanja = lazy(() => import("./pages/Pitanja"));
+const PitanjeDetalji = lazy(() => import("./pages/PitanjeDetalji"));
+const PostaviPitanje = lazy(() => import("./pages/PostaviPitanje"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const RegistrationOptions = lazy(() => import("./pages/RegistrationOptions"));
+const RegisterDoctor = lazy(() => import("./pages/RegisterDoctor"));
+const RegisterClinic = lazy(() => import("./pages/RegisterClinic"));
+const RegisterLaboratory = lazy(() => import("./pages/RegisterLaboratory"));
+const RegisterPharmacy = lazy(() => import("./pages/RegisterPharmacy"));
+const RegisterSpa = lazy(() => import("./pages/RegisterSpa"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const CareHomes = lazy(() => import("./pages/CareHomes"));
+const CareHomeProfile = lazy(() => import("./pages/CareHomeProfile"));
+const CareHomeDashboard = lazy(() => import("./pages/CareHomeDashboard"));
+const CareHomesVodic = lazy(() => import("./pages/CareHomesVodic"));
+const RegisterCareHome = lazy(() => import("./pages/RegisterCareHome"));
+const Mkb10 = lazy(() => import("./pages/Mkb10"));
+const Lijekovi = lazy(() => import("./pages/Lijekovi"));
+const LijekProfil = lazy(() => import("./pages/LijekProfil"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const HealthCalculators = lazy(() => import("./pages/HealthCalculators"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const Impressum = lazy(() => import("./pages/Impressum"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const DoctorDashboard = lazy(() => import("./pages/DoctorDashboard"));
 const DoctorProfile = lazy(() => import("./pages/DoctorProfile"));
@@ -65,28 +87,6 @@ const PageLoader = () => (
     <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 );
-import RegistrationOptions from "./pages/RegistrationOptions";
-import RegisterDoctor from "./pages/RegisterDoctor";
-import RegisterClinic from "./pages/RegisterClinic";
-import RegisterLaboratory from "./pages/RegisterLaboratory";
-import RegisterPharmacy from "./pages/RegisterPharmacy";
-import RegisterSpa from "./pages/RegisterSpa";
-import VerifyEmail from "./pages/VerifyEmail";
-import CareHomes from "./pages/CareHomes";
-import CareHomeProfile from "./pages/CareHomeProfile";
-import CareHomeDashboard from "./pages/CareHomeDashboard";
-import CareHomesVodic from "./pages/CareHomesVodic";
-import RegisterCareHome from "./pages/RegisterCareHome";
-import Mkb10 from "./pages/Mkb10";
-import Lijekovi from "./pages/Lijekovi";
-import LijekProfil from "./pages/LijekProfil";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import FAQ from "./pages/FAQ";
-import HealthCalculators from "./pages/HealthCalculators";
-import CookiePolicy from "./pages/CookiePolicy";
-import Impressum from "./pages/Impressum";
-import NotFound from "./pages/NotFound";
 
 // Component to track page views
 const PageViewTracker = () => {
@@ -118,6 +118,7 @@ const App = () => {
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <PageViewTracker />
               <ScrollToTop />
+              <Suspense fallback={<PageLoader />}>
               <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
@@ -131,21 +132,13 @@ const App = () => {
               <Route path="/specijalnosti" element={<Specialties />} />
               <Route path="/doktori" element={<Doctors />} />
               <Route path="/doktori/lista" element={<DoctorsCompactList />} />
-              <Route path="/doktor/:slug" element={
-                <Suspense fallback={<PageLoader />}>
-                  <DoctorProfile />
-                </Suspense>
-              } />
+              <Route path="/doktor/:slug" element={<DoctorProfile />} />
               <Route path="/laboratorije" element={<Laboratories />} />
               <Route path="/laboratorije/:grad" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />
               <Route path="/apoteke" element={<Pharmacies />} />
               <Route path="/apoteke/:grad" element={<Pharmacies />} />
-              <Route path="/apoteka/:slug" element={
-                <Suspense fallback={<PageLoader />}>
-                  <PharmacyProfile />
-                </Suspense>
-              } />
+              <Route path="/apoteka/:slug" element={<PharmacyProfile />} />
               
               <Route path="/banje" element={<Spas />} />
               <Route path="/banje/:grad" element={<Spas />} />
@@ -177,34 +170,24 @@ const App = () => {
               <Route path="/blog/:slug" element={<BlogPost />} />
               
               {/* Medical Calendar */}
-              <Route path="/medicinski-kalendar" element={
-                <Suspense fallback={<PageLoader />}>
-                  <MedicalCalendar />
-                </Suspense>
-              } />
+              <Route path="/medicinski-kalendar" element={<MedicalCalendar />} />
               
               {/* Blog Management */}
               <Route path="/my-blog-posts" element={
                 <ProtectedRoute>
-                  <Suspense fallback={<PageLoader />}>
-                    <MyBlogPosts />
-                  </Suspense>
+                  <MyBlogPosts />
                 </ProtectedRoute>
               } />
               
               {/* Blog Editor - Admin & Doctors */}
               <Route path="/blog/editor" element={
                 <ProtectedRoute>
-                  <Suspense fallback={<PageLoader />}>
-                    <BlogEditor />
-                  </Suspense>
+                  <BlogEditor />
                 </ProtectedRoute>
               } />
               <Route path="/blog/editor/:slug" element={
                 <ProtectedRoute>
-                  <Suspense fallback={<PageLoader />}>
-                    <BlogEditor />
-                  </Suspense>
+                  <BlogEditor />
                 </ProtectedRoute>
               } />
               
@@ -265,9 +248,7 @@ const App = () => {
               {/* Pharmacy-only routes */}
               <Route path="/pharmacy-dashboard" element={
                 <ProtectedRoute allowedRoles={['pharmacy_owner']}>
-                  <Suspense fallback={<PageLoader />}>
-                    <PharmacyDashboard />
-                  </Suspense>
+                  <PharmacyDashboard />
                 </ProtectedRoute>
               } />
               
@@ -288,21 +269,18 @@ const App = () => {
               {/* Admin-only routes */}
               <Route path="/admin" element={
                 <ProtectedRoute requiredRole="admin">
-                  <Suspense fallback={<PageLoader />}>
-                    <AdminPanel />
-                  </Suspense>
+                  <AdminPanel />
                 </ProtectedRoute>
               } />
               <Route path="/admin/*" element={
                 <ProtectedRoute requiredRole="admin">
-                  <Suspense fallback={<PageLoader />}>
-                    <AdminPanel />
-                  </Suspense>
+                  <AdminPanel />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
               <CookieConsent />
             </BrowserRouter>
           </TooltipProvider>

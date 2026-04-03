@@ -217,12 +217,8 @@ export const validatePatientForm = (formData: any): ValidationResult => {
   const emailError = validateEmail(formData.email);
   if (emailError) errors.email = emailError;
 
-  // Password validation - minimum 8 characters for patients (less strict than providers)
-  if (!formData.password) {
-    errors.password = 'Lozinka je obavezna';
-  } else if (formData.password.length < 8) {
-    errors.password = 'Lozinka mora imati najmanje 8 karaktera';
-  }
+  const passwordError = validatePassword(formData.password);
+  if (passwordError) errors.password = passwordError;
 
   // Telefon is optional for patients, but validate if provided
   if (formData.telefon) {

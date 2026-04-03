@@ -33,6 +33,7 @@ import { CitySelect } from '@/components/CitySelect';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { validatePassword } from '@/utils/validation';
 
 interface DoctorProfile {
   id: number;
@@ -790,6 +791,22 @@ export default function DoctorDashboard() {
     if (profile.longitude) updateData.longitude = Number(profile.longitude);
     if (profile.google_maps_link) updateData.google_maps_link = profile.google_maps_link;
     if (passwordForm.current_password || passwordForm.new_password || passwordForm.new_password_confirmation) {
+      if (!passwordForm.current_password || !passwordForm.new_password || !passwordForm.new_password_confirmation) {
+        toast({ title: "Greška", description: "Popunite sva polja za promjenu lozinke.", variant: "destructive" });
+        return;
+      }
+
+      if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
+        toast({ title: "Greška", description: "Lozinke se ne poklapaju.", variant: "destructive" });
+        return;
+      }
+
+      const passwordError = validatePassword(passwordForm.new_password);
+      if (passwordError) {
+        toast({ title: "Greška", description: passwordError, variant: "destructive" });
+        return;
+      }
+
       updateData.current_password = passwordForm.current_password;
       updateData.new_password = passwordForm.new_password;
       updateData.new_password_confirmation = passwordForm.new_password_confirmation;

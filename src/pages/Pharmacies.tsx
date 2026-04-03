@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -48,9 +48,21 @@ const slugifySegment = (value: string): string => {
     .replace(/-+/g, '-');
 };
 
+const formatCityLabel = (value: string): string => {
+  return decodeURIComponent(value.replace(/\+/g, ' '))
+    .replace(/-/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
 export default function Pharmacies() {
   const { grad } = useParams<{ grad?: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [items, setItems] = useState<PharmacyItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,17 +83,50 @@ export default function Pharmacies() {
     }
   }, [grad]);
 
+  const hasSerializableFilters = useMemo(
+    () => !!search || openNow || dutyNow || is24h || pensioner || hasActions,
+    [search, openNow, dutyNow, is24h, pensioner, hasActions]
+  );
+
+  const selectedCitySlug = useMemo(() => {
+    if (!city) return '';
+    return slugifySegment(city);
+  }, [city]);
+
   useEffect(() => {
     const params = new URLSearchParams();
-    if (city) params.set('grad', city);
+
+    if (selectedCitySlug && hasSerializableFilters) {
+      params.set('grad', selectedCitySlug);
+    }
     if (search) params.set('search', search);
     if (openNow) params.set('open_now', '1');
     if (dutyNow) params.set('dezurna_now', '1');
     if (is24h) params.set('is_24h', '1');
     if (pensioner) params.set('pensioner_discount', '1');
     if (hasActions) params.set('has_actions', '1');
-    setSearchParams(params, { replace: true });
-  }, [city, dutyNow, hasActions, is24h, openNow, pensioner, search, setSearchParams]);
+
+    const nextPath = selectedCitySlug ? `/apoteke/${selectedCitySlug}` : '/apoteke';
+    const nextSearch = params.toString();
+    const nextUrl = nextSearch ? `${nextPath}?${nextSearch}` : nextPath;
+    const currentUrl = `${location.pathname}${location.search}`;
+
+    if (currentUrl !== nextUrl) {
+      navigate(nextUrl, { replace: true });
+    }
+  }, [
+    selectedCitySlug,
+    hasSerializableFilters,
+    search,
+    openNow,
+    dutyNow,
+    is24h,
+    pensioner,
+    hasActions,
+    location.pathname,
+    location.search,
+    navigate,
+  ]);
 
   useEffect(() => {
     const load = async () => {
@@ -130,34 +175,48 @@ export default function Pharmacies() {
     });
   };
 
-  const selectedCitySlug = useMemo(() => {
-    if (!city) return '';
-    return slugifySegment(city);
-  }, [city]);
+  const seoCityName = useMemo(() => {
+    if (!selectedCitySlug) return '';
+    return formatCityLabel(selectedCitySlug);
+  }, [selectedCitySlug]);
 
   const onlyCityFilter = useMemo(
     () => !!selectedCitySlug && !search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo,
     [selectedCitySlug, search, openNow, dutyNow, is24h, pensioner, hasActions, geo]
   );
 
+  const dutyCitySeoPage = useMemo(
+    () => !!selectedCitySlug && dutyNow && !search && !openNow && !is24h && !pensioner && !hasActions && !geo,
+    [selectedCitySlug, dutyNow, search, openNow, is24h, pensioner, hasActions, geo]
+  );
+
   const canonicalUrl = useMemo(() => {
+    if (dutyCitySeoPage) {
+      return `${SITE_URL}/apoteke/${selectedCitySlug}?grad=${encodeURIComponent(selectedCitySlug)}&dezurna_now=1`;
+    }
     if (onlyCityFilter) {
       return `${SITE_URL}/apoteke/${selectedCitySlug}`;
     }
     return `${SITE_URL}/apoteke`;
-  }, [onlyCityFilter, selectedCitySlug]);
+  }, [dutyCitySeoPage, onlyCityFilter, selectedCitySlug]);
 
   const robotsContent = useMemo(() => {
-    if (onlyCityFilter || (!search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo)) {
+    if (dutyCitySeoPage || onlyCityFilter || (!search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo)) {
       return 'index, follow';
     }
     return 'noindex, follow';
-  }, [onlyCityFilter, search, openNow, dutyNow, is24h, pensioner, hasActions, geo]);
+  }, [dutyCitySeoPage, onlyCityFilter, search, openNow, dutyNow, is24h, pensioner, hasActions, geo]);
 
-  const title = city ? `Apoteke - ${city}` : 'Apoteke';
-  const description = city
-    ? `Pronadjite otvorene i dezurne apoteke u gradu ${city}.`
-    : 'Pronadjite otvorene, dezurne i najblize apoteke u Bosni i Hercegovini.';
+  const title = dutyCitySeoPage
+    ? `Dezurna apoteka - ${seoCityName}`
+    : seoCityName
+      ? `Apoteke - ${seoCityName}`
+      : 'Apoteke';
+  const description = dutyCitySeoPage
+    ? `Pronadjite dezurne apoteke za ${seoCityName}. Dostupni su telefon, lokacija, status dezurstva i radno vrijeme na jednom mjestu.`
+    : seoCityName
+      ? `Pronadjite otvorene i dezurne apoteke za ${seoCityName}.`
+      : 'Pronadjite otvorene, dezurne i najblize apoteke u Bosni i Hercegovini.';
 
   const jsonLd = {
     '@context': 'https://schema.org',

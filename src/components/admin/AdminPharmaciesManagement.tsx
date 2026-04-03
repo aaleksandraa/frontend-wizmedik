@@ -82,7 +82,6 @@ interface PharmacyFormState {
   is_verified: boolean;
 
   account_email: string;
-  password: string;
 }
 
 const emptyForm: PharmacyFormState = {
@@ -107,7 +106,6 @@ const emptyForm: PharmacyFormState = {
   is_verified: true,
 
   account_email: '',
-  password: '',
 };
 
 const getErrorMessage = (error: any): string => {
@@ -147,6 +145,7 @@ export function AdminPharmaciesManagement() {
   const [editingFirm, setEditingFirm] = useState<PharmacyFirm | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<PharmacyFormState>(emptyForm);
+  const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
 
   const filteredFirms = useMemo(() => {
     if (!searchTerm.trim()) return firms;
@@ -224,7 +223,6 @@ export function AdminPharmaciesManagement() {
       is_verified: branch?.is_verified ?? firm.status === 'verified',
 
       account_email: firm.owner?.email || '',
-      password: '',
     });
     setDialogOpen(true);
   };
@@ -257,27 +255,14 @@ export function AdminPharmaciesManagement() {
       is_24h: form.is_24h,
       is_verified: form.is_verified,
 
-      account_email: form.account_email.trim(),
+      account_email: form.account_email.trim() || null,
     };
-
-    if (form.password.trim()) {
-      payload.password = form.password;
-    }
 
     return payload;
   };
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!editingFirm && !form.password.trim()) {
-      toast({
-        title: 'Greška',
-        description: 'Lozinka je obavezna kod kreiranja apoteke.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setSaving(true);
     try {
       const payload = buildPayload();
@@ -332,6 +317,35 @@ export function AdminPharmaciesManagement() {
         description: getErrorMessage(error),
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleSendInvite = async (firm: PharmacyFirm) => {
+    if (!firm.owner?.email) {
+      toast({
+        title: 'Nedostaje pristupni email',
+        description: 'Prvo sačuvajte pristupni email apoteke.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setSendingInviteId(firm.id);
+      await adminAPI.sendPharmacyInvite(firm.id);
+      toast({
+        title: 'Pozivnica poslana',
+        description: `Email je poslan na ${firm.owner.email}.`,
+      });
+      fetchFirms();
+    } catch (error: any) {
+      toast({
+        title: 'Greška',
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      });
+    } finally {
+      setSendingInviteId(null);
     }
   };
 
@@ -422,6 +436,16 @@ export function AdminPharmaciesManagement() {
                         onCheckedChange={() => handleToggleActive(firm)}
                       />
                     </div>
+                    {firm.owner?.email && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleSendInvite(firm)}
+                        disabled={sendingInviteId === firm.id}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button variant="outline" size="sm" onClick={() => openEditDialog(firm)}>
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -529,27 +553,19 @@ export function AdminPharmaciesManagement() {
 
                 <div className="space-y-4">
                   <div>
-                    <Label>Login email *</Label>
+                    <Label>Login email</Label>
                     <Input
                       type="email"
                       value={form.account_email}
                       onChange={(e) => setForm((prev) => ({ ...prev, account_email: e.target.value }))}
-                      required
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       Promjena ovog polja omogućava dodjelu pristupa drugom korisniku.
                     </p>
                   </div>
-                  <div>
-                    <Label>{editingFirm ? 'Nova lozinka (opcionalno)' : 'Lozinka *'}</Label>
-                    <Input
-                      type="password"
-                      value={form.password}
-                      onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-                      placeholder={editingFirm ? 'Ostavite prazno ako ne mijenjate lozinku' : ''}
-                      required={!editingFirm}
-                    />
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Lozinku ne postavlja admin. Nakon spremanja login emaila pošaljite pozivnicu iz liste, a vlasnik apoteke će sam postaviti lozinku.
+                  </p>
 
                   <div className="flex items-center justify-between pt-2">
                     <Label>Aktivna apoteka</Label>

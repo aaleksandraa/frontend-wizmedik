@@ -80,17 +80,43 @@ export default defineConfig(({ mode }) => ({
     dedupe: ['react', 'react-dom'],
   },
   build: {
-    // Let legacy plugin handle browser targets
-    target: 'esnext',
-    
     // Modern CSS target
     cssTarget: 'chrome90',
     
-    // Code splitting - LET VITE HANDLE IT AUTOMATICALLY
     rollupOptions: {
       output: {
-        // Remove manualChunks to avoid circular dependencies
-        // Vite will automatically split code based on dynamic imports
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined;
+          }
+
+          if (id.includes('@tiptap/') || id.includes('prosemirror') || id.includes('dompurify')) {
+            return 'editor-vendor';
+          }
+
+          if (id.includes('leaflet') || id.includes('react-leaflet')) {
+            return 'maps-vendor';
+          }
+
+          if (id.includes('recharts')) {
+            return 'charts-vendor';
+          }
+
+          if (id.includes('@sentry/') || id.includes('react-ga4')) {
+            return 'monitoring-vendor';
+          }
+
+          if (
+            id.includes('@radix-ui/') ||
+            id.includes('sonner') ||
+            id.includes('vaul') ||
+            id.includes('cmdk')
+          ) {
+            return 'ui-vendor';
+          }
+
+          return 'vendor';
+        },
       },
     },
     

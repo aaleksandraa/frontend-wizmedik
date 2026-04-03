@@ -12,6 +12,63 @@ body {
   min-width: 0;  /* Allow shrinking */
 }
 
+.wm-brand-circle {
+  stroke-dasharray: 1407;
+  stroke-dashoffset: 1407;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  animation: wm-brand-draw-circle 2.6s ease-in-out infinite;
+}
+
+.wm-brand-plus {
+  transform-origin: center;
+  animation: wm-brand-plus-breath 2.6s ease-in-out infinite;
+}
+
+.wm-brand-mark::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(14, 146, 179, 0.14) 0%, rgba(14, 146, 179, 0) 72%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.group:hover .wm-brand-mark::after {
+  opacity: 1;
+}
+
+@keyframes wm-brand-draw-circle {
+  0% {
+    stroke-dashoffset: 1407;
+  }
+
+  45% {
+    stroke-dashoffset: 0;
+  }
+
+  70% {
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    stroke-dashoffset: -1407;
+  }
+}
+
+@keyframes wm-brand-plus-breath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+}
+
 #root {
   /* Contain layout to prevent overflow */
   width: 100%;

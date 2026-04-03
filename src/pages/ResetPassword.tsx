@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, AlertCircle, CheckCircle, Heart, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Heart, ArrowLeft, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import api from '@/services/api';
 import { toast } from 'sonner';
+
+const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{12,}$/;
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -21,20 +23,20 @@ export default function ResetPassword() {
 
   useEffect(() => {
     if (!token || !email) {
-      setError('Nevažeći link za resetovanje lozinke');
+      setError('Nevazeci link za resetovanje lozinke');
     }
   }, [token, email]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (password !== passwordConfirmation) {
       toast.error('Lozinke se ne podudaraju');
       return;
     }
 
-    if (password.length < 8) {
-      toast.error('Lozinka mora imati najmanje 8 karaktera');
+    if (!passwordPolicy.test(password)) {
+      toast.error('Lozinka mora imati najmanje 12 karaktera, veliko i malo slovo, broj i specijalni znak');
       return;
     }
 
@@ -47,11 +49,12 @@ export default function ResetPassword() {
         password,
         password_confirmation: passwordConfirmation,
       });
+
       setSuccess(true);
-      toast.success('Lozinka je uspješno resetovana');
+      toast.success('Lozinka je uspjesno resetovana');
       setTimeout(() => navigate('/auth'), 3000);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Greška pri resetovanju lozinke');
+    } catch (requestError: any) {
+      toast.error(requestError.response?.data?.message || 'Greska pri resetovanju lozinke');
     } finally {
       setSubmitting(false);
     }
@@ -65,9 +68,7 @@ export default function ResetPassword() {
             <Heart className="h-8 w-8 text-primary mr-2" />
             <h1 className="text-2xl font-bold text-foreground">WizMedik</h1>
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Resetovanje lozinke
-          </h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Resetovanje lozinke</h2>
         </div>
 
         {error ? (
@@ -78,7 +79,7 @@ export default function ResetPassword() {
             <p className="text-foreground">{error}</p>
             <Link to="/forgot-password">
               <Button variant="outline" className="mt-4">
-                Zatražite novi link
+                Zatrazite novi link
               </Button>
             </Link>
           </div>
@@ -87,9 +88,7 @@ export default function ResetPassword() {
             <div className="flex justify-center">
               <CheckCircle className="h-16 w-16 text-green-500" />
             </div>
-            <p className="text-foreground">
-              Vaša lozinka je uspješno resetovana!
-            </p>
+            <p className="text-foreground">Vasa lozinka je uspjesno resetovana.</p>
             <p className="text-sm text-muted-foreground">
               Preusmjeravamo vas na stranicu za prijavu...
             </p>
@@ -106,18 +105,21 @@ export default function ResetPassword() {
                 Nova lozinka
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="********"
                   className="pl-10"
-                  minLength={8}
+                  minLength={12}
                 />
               </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Najmanje 12 karaktera, veliko i malo slovo, broj i specijalni znak.
+              </p>
             </div>
 
             <div>
@@ -125,26 +127,21 @@ export default function ResetPassword() {
                 Potvrdite lozinku
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password_confirmation"
                   type="password"
                   required
                   value={passwordConfirmation}
-                  onChange={(e) => setPasswordConfirmation(e.target.value)}
-                  placeholder="••••••••"
+                  onChange={(event) => setPasswordConfirmation(event.target.value)}
+                  placeholder="********"
                   className="pl-10"
-                  minLength={8}
+                  minLength={12}
                 />
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              variant="medical"
-              disabled={submitting}
-            >
+            <Button type="submit" className="w-full" variant="medical" disabled={submitting}>
               {submitting ? 'Resetovanje...' : 'Resetuj lozinku'}
             </Button>
 

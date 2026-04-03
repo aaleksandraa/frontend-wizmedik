@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedLogoProps {
@@ -6,57 +5,95 @@ interface AnimatedLogoProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function AnimatedLogo({ className, size = 'md' }: AnimatedLogoProps) {
-  const [isHovered, setIsHovered] = useState(false);
+const logoSizes = {
+  sm: {
+    mark: 34,
+    gap: 'gap-2',
+    title: 'text-lg',
+    subtitle: 'hidden',
+  },
+  md: {
+    mark: 46,
+    gap: 'gap-3',
+    title: 'text-[1.9rem]',
+    subtitle: 'block text-[10px]',
+  },
+  lg: {
+    mark: 52,
+    gap: 'gap-3.5',
+    title: 'text-[2rem]',
+    subtitle: 'block text-[11px]',
+  },
+} as const;
 
-  const sizeClasses = {
-    sm: 'text-xl',
-    md: 'text-2xl',
-    lg: 'text-3xl',
-  };
-
+function BrandMark({ size }: { size: number }) {
   return (
     <div
-      className={cn(
-        'inline-flex items-center font-medium cursor-pointer select-none transition-transform duration-300',
-        sizeClasses[size],
-        isHovered && 'scale-105',
-        className
-      )}
-      style={{ fontFamily: 'Poppins, sans-serif', letterSpacing: 'normal' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative shrink-0 rounded-full wm-brand-mark"
+      style={{ width: `${size}px`, height: `${size}px` }}
+      aria-hidden="true"
     >
-      {/* wiz - Cyan color #0891b2 */}
-      <span className="relative inline-block">
-        <span
-          className="relative z-10"
-          style={{ color: '#0891b2' }}
-        >
-          wiz
-        </span>
-      </span>
-      
-      {/* Medik - Dark gray, almost black */}
-      <span
-        className="relative inline-block"
-        style={{ color: '#1f2937' }}
+      <svg
+        viewBox="0 0 512 512"
+        className="h-full w-full drop-shadow-[0_6px_18px_rgba(14,146,179,0.18)]"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        Medik
-      </span>
+        <circle cx="256" cy="256" r="224" fill="#D9EEF0" />
+        <circle
+          className="wm-brand-circle"
+          cx="256"
+          cy="256"
+          r="224"
+          fill="none"
+          stroke="#0E92B3"
+          strokeWidth="32"
+          strokeLinecap="round"
+        />
+        <g className="wm-brand-plus">
+          <rect x="139" y="230" width="234" height="52" rx="26" fill="#0E92B3" />
+          <rect x="230" y="139" width="52" height="234" rx="26" fill="#0E92B3" />
+        </g>
+      </svg>
     </div>
   );
 }
 
-// Compact version for mobile
-export function AnimatedLogoCompact({ className }: { className?: string }) {
+export function AnimatedLogo({ className, size = 'md' }: AnimatedLogoProps) {
+  const config = logoSizes[size];
+  const showSubtitle = size !== 'sm';
+
   return (
-    <div 
-      className={cn('inline-flex items-center font-medium', className)}
+    <div
+      className={cn(
+        'group inline-flex items-center select-none transition-transform duration-300 hover:scale-[1.02]',
+        config.gap,
+        className
+      )}
       style={{ fontFamily: 'Poppins, sans-serif', letterSpacing: 'normal' }}
+      aria-label="WizMedik"
     >
-      <span className="text-xl" style={{ color: '#0891b2' }}>w</span>
-      <span className="text-xl" style={{ color: '#1f2937' }}>M</span>
+      <BrandMark size={config.mark} />
+
+      <div className="min-w-0">
+        <div className={cn('leading-none tracking-[-0.03em]', config.title)}>
+          <span className="font-semibold text-[#0E92B3]">wiz</span>
+          <span className="font-normal text-slate-950 dark:text-slate-50">Medik</span>
+        </div>
+        {showSubtitle ? (
+          <div
+            className={cn(
+              'mt-1 leading-none uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400',
+              config.subtitle
+            )}
+          >
+            Vase zdravlje. Vas izbor.
+          </div>
+        ) : null}
+      </div>
     </div>
   );
+}
+
+export function AnimatedLogoCompact({ className }: { className?: string }) {
+  return <AnimatedLogo size="sm" className={className} />;
 }

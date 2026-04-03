@@ -35,6 +35,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { validatePassword } from '@/utils/validation';
 
 // API URL configuration
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -413,8 +414,9 @@ export default function LaboratoryDashboard() {
       toast({ title: 'Greška', description: 'Lozinke se ne poklapaju', variant: 'destructive' });
       return;
     }
-    if (passwordForm.new_password.length < 8) {
-      toast({ title: 'Greška', description: 'Lozinka mora imati najmanje 8 karaktera', variant: 'destructive' });
+    const passwordError = validatePassword(passwordForm.new_password);
+    if (passwordError) {
+      toast({ title: 'Greška', description: passwordError, variant: 'destructive' });
       return;
     }
     

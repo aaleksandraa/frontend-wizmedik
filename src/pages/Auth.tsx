@@ -27,7 +27,7 @@ import {
 import { CitySelect } from '@/components/CitySelect';
 import { useFormValidation } from '@/hooks/useFormValidation';
 import { FormError } from '@/components/ui/form-error';
-import { validateEmail, validateRequired, validatePhone } from '@/utils/validation';
+import { validateEmail, validatePassword, validateRequired, validatePhone } from '@/utils/validation';
 
 type RegistrationType = 'patient' | 'provider';
 
@@ -114,9 +114,11 @@ export default function Auth() {
     prezime: (value) => !isLogin ? validateRequired(value, 'Prezime') : null,
     email: (value) => validateEmail(value),
     password: (value) => {
-      if (!value) return 'Lozinka je obavezna';
-      if (!isLogin && value.length < 8) return 'Lozinka mora imati najmanje 8 karaktera';
-      return null;
+      if (isLogin) {
+        return !value ? 'Lozinka je obavezna' : null;
+      }
+
+      return validatePassword(value);
     },
     telefon: (value) => {
       if (!value) return null; // Optional
