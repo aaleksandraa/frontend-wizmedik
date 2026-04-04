@@ -311,7 +311,7 @@ export default function HomepageCustom3Cyan() {
                         value={selectedMainSpecialty}
                         onChange={handleMainSpecialtyChange}
                         placeholder="Odaberite glavnu oblast..."
-                        disabled={loadingHierarchicalSpecialties || mainSpecialtyOptions.length === 0}
+                        disabled={mainSpecialtyOptions.length === 0}
                         hideLabelOnMobile={true}
                         options={mainSpecialtyOptions}
                       />
