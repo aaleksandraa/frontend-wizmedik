@@ -20,6 +20,13 @@ import { Building2, Edit, Mail, MapPin, Phone, Pill, Plus, Search, Trash2 } from
 
 type PharmacyStatus = 'pending' | 'verified' | 'rejected' | 'suspended';
 
+interface PharmacyWorkingHour {
+  day_of_week: number;
+  open_time: string | null;
+  close_time: string | null;
+  closed: boolean;
+}
+
 interface PharmacyOwner {
   id: number;
   name?: string;
@@ -39,6 +46,7 @@ interface PharmacyBranch {
   telefon?: string;
   email?: string;
   google_maps_link?: string;
+  radno_vrijeme?: PharmacyWorkingHour[];
   is_24h?: boolean;
   is_active?: boolean;
   is_verified?: boolean;
@@ -80,11 +88,63 @@ interface PharmacyFormState {
   google_maps_link: string;
   is_24h: boolean;
   is_verified: boolean;
+  radno_vrijeme: PharmacyWorkingHour[];
 
   account_email: string;
 }
 
-const emptyForm: PharmacyFormState = {
+const dayLabels: Record<number, string> = {
+  1: 'Ponedjeljak',
+  2: 'Utorak',
+  3: 'Srijeda',
+  4: 'Cetvrtak',
+  5: 'Petak',
+  6: 'Subota',
+  7: 'Nedjelja',
+};
+
+const defaultWorkingHour = (day: number): PharmacyWorkingHour => ({
+  day_of_week: day,
+  open_time: day === 7 ? null : '08:00',
+  close_time: day === 7 ? null : day === 6 ? '14:00' : '20:00',
+  closed: day === 7,
+});
+
+const defaultWorkingHours = (): PharmacyWorkingHour[] =>
+  [1, 2, 3, 4, 5, 6, 7].map((day) => defaultWorkingHour(day));
+
+const normalizeTimeInput = (value: string | null | undefined, fallback: string): string => {
+  if (!value) return fallback;
+  return value.slice(0, 5);
+};
+
+const timeInputValue = (
+  value: string | null | undefined,
+  fallback: string,
+  closed: boolean
+): string => {
+  if (closed && !value) return '';
+  return normalizeTimeInput(value, fallback);
+};
+
+const normalizeWorkingHours = (hours?: PharmacyWorkingHour[] | null): PharmacyWorkingHour[] => {
+  const byDay = new Map<number, PharmacyWorkingHour>();
+  (hours || []).forEach((item) => byDay.set(item.day_of_week, item));
+
+  return [1, 2, 3, 4, 5, 6, 7].map((day) => {
+    const defaults = defaultWorkingHour(day);
+    const existing = byDay.get(day);
+
+    return {
+      day_of_week: day,
+      open_time: existing?.open_time ? normalizeTimeInput(existing.open_time, defaults.open_time || '08:00') : defaults.open_time,
+      close_time: existing?.close_time ? normalizeTimeInput(existing.close_time, defaults.close_time || '16:00') : defaults.close_time,
+      closed: existing ? Boolean(existing.closed) : defaults.closed,
+    };
+  });
+};
+
+const createEmptyForm = (): PharmacyFormState => ({
   naziv_brenda: '',
   pravni_naziv: '',
   broj_licence: '',
@@ -104,9 +164,10 @@ const emptyForm: PharmacyFormState = {
   google_maps_link: '',
   is_24h: false,
   is_verified: true,
+  radno_vrijeme: defaultWorkingHours(),
 
   account_email: '',
-};
+});
 
 const getErrorMessage = (error: any): string => {
   if (error?.response?.data?.errors) {
@@ -144,7 +205,7 @@ export function AdminPharmaciesManagement() {
   const [firms, setFirms] = useState<PharmacyFirm[]>([]);
   const [editingFirm, setEditingFirm] = useState<PharmacyFirm | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<PharmacyFormState>(emptyForm);
+  const [form, setForm] = useState<PharmacyFormState>(() => createEmptyForm());
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
 
   const filteredFirms = useMemo(() => {
@@ -194,7 +255,7 @@ export function AdminPharmaciesManagement() {
 
   const openCreateDialog = () => {
     setEditingFirm(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
     setDialogOpen(true);
   };
 
@@ -221,6 +282,7 @@ export function AdminPharmaciesManagement() {
       google_maps_link: branch?.google_maps_link || '',
       is_24h: !!branch?.is_24h,
       is_verified: branch?.is_verified ?? firm.status === 'verified',
+      radno_vrijeme: normalizeWorkingHours(branch?.radno_vrijeme),
 
       account_email: firm.owner?.email || '',
     });
@@ -230,7 +292,34 @@ export function AdminPharmaciesManagement() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingFirm(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
+  };
+
+  const updateWorkingHour = (day: number, updates: Partial<PharmacyWorkingHour>) => {
+    setForm((prev) => ({
+      ...prev,
+      radno_vrijeme: prev.radno_vrijeme.map((item) =>
+        item.day_of_week === day ? { ...item, ...updates } : item
+      ),
+    }));
+  };
+
+  const toggleWorkingDayClosed = (day: number, closed: boolean) => {
+    const defaults = defaultWorkingHour(day);
+
+    setForm((prev) => ({
+      ...prev,
+      radno_vrijeme: prev.radno_vrijeme.map((item) =>
+        item.day_of_week === day
+          ? {
+              ...item,
+              closed,
+              open_time: closed ? null : normalizeTimeInput(item.open_time, defaults.open_time || '08:00'),
+              close_time: closed ? null : normalizeTimeInput(item.close_time, defaults.close_time || '16:00'),
+            }
+          : item
+      ),
+    }));
   };
 
   const buildPayload = () => {
@@ -254,6 +343,12 @@ export function AdminPharmaciesManagement() {
       google_maps_link: form.google_maps_link.trim() || null,
       is_24h: form.is_24h,
       is_verified: form.is_verified,
+      radno_vrijeme: form.radno_vrijeme.map((item) => ({
+        day_of_week: item.day_of_week,
+        open_time: item.closed ? null : (item.open_time?.trim() ? item.open_time.slice(0, 5) : null),
+        close_time: item.closed ? null : (item.close_time?.trim() ? item.close_time.slice(0, 5) : null),
+        closed: Boolean(item.closed),
+      })),
 
       account_email: form.account_email.trim() || null,
     };
@@ -646,6 +741,53 @@ export function AdminPharmaciesManagement() {
                     checked={form.is_verified}
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_verified: checked }))}
                   />
+                </div>
+              </div>
+
+              <div className="space-y-3 rounded-lg border border-dashed p-4">
+                <div>
+                  <h4 className="font-medium">Radno vrijeme</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Postavite sedmično radno vrijeme glavne poslovnice. Ovo se prikazuje na javnom profilu apoteke.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {form.radno_vrijeme.map((hour) => {
+                    const defaults = defaultWorkingHour(hour.day_of_week);
+
+                    return (
+                      <div
+                        key={hour.day_of_week}
+                        className="grid grid-cols-1 md:grid-cols-[140px,1fr,1fr,auto] gap-3 items-center rounded-md border p-3"
+                      >
+                        <Label className="font-medium">{dayLabels[hour.day_of_week]}</Label>
+                        <Input
+                          type="time"
+                          disabled={hour.closed}
+                          value={timeInputValue(hour.open_time, defaults.open_time || '08:00', hour.closed)}
+                          onChange={(e) => updateWorkingHour(hour.day_of_week, { open_time: e.target.value })}
+                        />
+                        <Input
+                          type="time"
+                          disabled={hour.closed}
+                          value={timeInputValue(
+                            hour.close_time,
+                            defaults.close_time || (hour.day_of_week === 6 ? '14:00' : '20:00'),
+                            hour.closed
+                          )}
+                          onChange={(e) => updateWorkingHour(hour.day_of_week, { close_time: e.target.value })}
+                        />
+                        <div className="flex items-center justify-between md:justify-end gap-2">
+                          <Label className="text-sm">Zatvoreno</Label>
+                          <Switch
+                            checked={hour.closed}
+                            onCheckedChange={(checked) => toggleWorkingDayClosed(hour.day_of_week, checked)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
