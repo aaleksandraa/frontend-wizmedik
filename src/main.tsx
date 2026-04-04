@@ -23,17 +23,21 @@ if (typeof window !== 'undefined') {
 // PWA is temporarily disabled.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .getRegistrations()
-      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
-      .then((results) => {
-        if (results.some(Boolean)) {
-          console.log('Service workers unregistered (PWA disabled).');
-        }
-      })
-      .catch((error) => {
-        console.log('Service worker cleanup failed:', error);
-      });
+    const cleanupServiceWorkers = () => {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+        .catch(() => {
+          // Old service worker cleanup is best-effort and should never affect startup.
+        });
+    };
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(cleanupServiceWorkers, { timeout: 3000 });
+      return;
+    }
+
+    window.setTimeout(cleanupServiceWorkers, 1500);
   });
 }
 
