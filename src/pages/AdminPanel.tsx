@@ -47,6 +47,11 @@ import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtySer
 import { AdminSpasManagement } from '@/components/admin/AdminSpasManagement';
 import { AdminCareHomesManagement } from '@/components/admin/AdminCareHomesManagement';
 import {
+  createDefaultNamedWorkingHours,
+  namedWorkingDayLabels,
+  normalizeNamedWorkingHours,
+} from '@/components/admin/profileFormUtils';
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -268,15 +273,7 @@ function SortableSpecialtyItem({
   );
 }
 
-const defaultWorkingHours = {
-  ponedeljak: { open: '08:00', close: '20:00', closed: false },
-  utorak: { open: '08:00', close: '20:00', closed: false },
-  sreda: { open: '08:00', close: '20:00', closed: false },
-  cetvrtak: { open: '08:00', close: '20:00', closed: false },
-  petak: { open: '08:00', close: '20:00', closed: false },
-  subota: { open: '09:00', close: '15:00', closed: false },
-  nedelja: { open: '09:00', close: '15:00', closed: true }
-};
+const workingHoursLabels: Record<string, string> = namedWorkingDayLabels;
 
 export default function AdminPanel() {
   const { user } = useAuth();
@@ -305,13 +302,13 @@ export default function AdminPanel() {
     ime: '', prezime: '', email: '', account_email: '', telefon: '', 
     specijalnost: '', specijalnost_id: '', klinika_id: '', opis: '',
     grad: '', lokacija: '', latitude: '', longitude: '', google_maps_link: '', slika_profila: '',
-    radno_vrijeme: defaultWorkingHours
+    radno_vrijeme: createDefaultNamedWorkingHours()
   });
   
   const [clinicForm, setClinicForm] = useState({
     naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', account_email: '', 
     contact_email: '', website: '', latitude: '', longitude: '', google_maps_link: '', 
-    slike: [] as string[], radno_vrijeme: defaultWorkingHours
+    slike: [] as string[], radno_vrijeme: createDefaultNamedWorkingHours()
   });
 
   const [cityForm, setCityForm] = useState({
@@ -458,8 +455,8 @@ export default function AdminPanel() {
     setDoctorForm({
       ime: '', prezime: '', email: '', account_email: '', telefon: '', specijalnost: '', 
       specijalnost_id: '', klinika_id: '', opis: '', grad: '', lokacija: '', 
-      latitude: '', longitude: '', google_maps_link: '', slika_profila: '', radno_vrijeme: defaultWorkingHours
-    });
+      latitude: '', longitude: '', google_maps_link: '', slika_profila: '', radno_vrijeme: createDefaultNamedWorkingHours()
+      });
     setEditingDoctor(null);
   };
 
@@ -474,8 +471,8 @@ export default function AdminPanel() {
         grad: doctor.grad, lokacija: doctor.lokacija,
         latitude: doctor.latitude?.toString() || '', longitude: doctor.longitude?.toString() || '',
         google_maps_link: doctor.google_maps_link || '', slika_profila: doctor.slika_profila || '',
-        radno_vrijeme: doctor.radno_vrijeme || defaultWorkingHours
-      });
+        radno_vrijeme: normalizeNamedWorkingHours(doctor.radno_vrijeme)
+        });
     } else {
       resetDoctorForm();
     }
@@ -529,8 +526,8 @@ export default function AdminPanel() {
     setClinicForm({
       naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', account_email: '',
       contact_email: '', website: '', latitude: '', longitude: '', google_maps_link: '',
-      slike: [], radno_vrijeme: defaultWorkingHours
-    });
+      slike: [], radno_vrijeme: createDefaultNamedWorkingHours()
+      });
     setEditingClinic(null);
   };
 
@@ -544,8 +541,8 @@ export default function AdminPanel() {
         latitude: clinic.latitude?.toString() || '', longitude: clinic.longitude?.toString() || '',
         google_maps_link: clinic.google_maps_link || '',
         slike: Array.isArray(clinic.slike) ? clinic.slike : [],
-        radno_vrijeme: clinic.radno_vrijeme || defaultWorkingHours
-      });
+        radno_vrijeme: normalizeNamedWorkingHours(clinic.radno_vrijeme)
+        });
     } else {
       resetClinicForm();
     }
@@ -1764,7 +1761,7 @@ export default function AdminPanel() {
 
           {/* DOCTOR DIALOG */}
           <Dialog open={showDoctorDialog} onOpenChange={setShowDoctorDialog}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingDoctor ? 'Uredi doktora' : 'Novi doktor'}</DialogTitle>
                 <DialogDescription>Unesite podatke o doktoru</DialogDescription>
@@ -1837,6 +1834,18 @@ export default function AdminPanel() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <label className="text-sm font-medium">Google Maps link</label>
+                    <Input value={doctorForm.google_maps_link} onChange={(e) => setDoctorForm({...doctorForm, google_maps_link: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Latitude</label>
+                    <Input type="number" step="0.000001" value={doctorForm.latitude} onChange={(e) => setDoctorForm({...doctorForm, latitude: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Longitude</label>
+                    <Input type="number" step="0.000001" value={doctorForm.longitude} onChange={(e) => setDoctorForm({...doctorForm, longitude: e.target.value})} />
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Lozinku ne postavlja admin. Nakon što sačuvate pristupni email, pošaljite pozivnicu iz liste i doktor će sam postaviti lozinku.
@@ -1865,6 +1874,61 @@ export default function AdminPanel() {
                   }} />
                   {doctorForm.slika_profila && <img src={doctorForm.slika_profila} alt="" className="w-20 h-20 rounded-lg object-cover mt-2" />}
                 </div>
+                <div className="space-y-3 rounded-lg border p-4">
+                  <div>
+                    <h3 className="font-medium">Radno vrijeme</h3>
+                    <p className="text-sm text-muted-foreground">Admin može unaprijed unijeti sedmični raspored doktora.</p>
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(doctorForm.radno_vrijeme).map(([day, schedule]) => (
+                      <div key={day} className="grid grid-cols-1 md:grid-cols-[140px,1fr,1fr,auto] gap-3 items-center rounded-md border p-3">
+                        <label className="text-sm font-medium">{workingHoursLabels[day] || day}</label>
+                        <Input
+                          type="time"
+                          disabled={schedule.closed}
+                          value={schedule.closed ? '' : schedule.open}
+                          onChange={(e) => setDoctorForm({
+                            ...doctorForm,
+                            radno_vrijeme: {
+                              ...doctorForm.radno_vrijeme,
+                              [day]: { ...schedule, open: e.target.value }
+                            }
+                          })}
+                        />
+                        <Input
+                          type="time"
+                          disabled={schedule.closed}
+                          value={schedule.closed ? '' : schedule.close}
+                          onChange={(e) => setDoctorForm({
+                            ...doctorForm,
+                            radno_vrijeme: {
+                              ...doctorForm.radno_vrijeme,
+                              [day]: { ...schedule, close: e.target.value }
+                            }
+                          })}
+                        />
+                        <div className="flex items-center gap-2 md:justify-end">
+                          <label className="text-sm">Zatvoreno</label>
+                          <Switch
+                            checked={schedule.closed}
+                            onCheckedChange={(checked) => setDoctorForm({
+                              ...doctorForm,
+                              radno_vrijeme: {
+                                ...doctorForm.radno_vrijeme,
+                                [day]: {
+                                  ...schedule,
+                                  closed: checked,
+                                  open: checked ? schedule.open || '08:00' : schedule.open || '08:00',
+                                  close: checked ? schedule.close || '16:00' : schedule.close || '16:00',
+                                }
+                              }
+                            })}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 <div className="flex gap-2 pt-4">
                   <Button type="submit" className="flex-1">{editingDoctor ? 'Sačuvaj' : 'Kreiraj'}</Button>
                   <Button type="button" variant="outline" onClick={() => setShowDoctorDialog(false)}>Otkaži</Button>
@@ -1875,7 +1939,7 @@ export default function AdminPanel() {
 
           {/* CLINIC DIALOG */}
           <Dialog open={showClinicDialog} onOpenChange={setShowClinicDialog}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingClinic ? 'Uredi kliniku' : 'Nova klinika'}</DialogTitle>
                 <DialogDescription>Unesite podatke o klinici</DialogDescription>
@@ -1924,6 +1988,18 @@ export default function AdminPanel() {
                     <label className="text-sm font-medium">Website</label>
                     <Input value={clinicForm.website} onChange={(e) => setClinicForm({...clinicForm, website: e.target.value})} />
                   </div>
+                  <div>
+                    <label className="text-sm font-medium">Google Maps link</label>
+                    <Input value={clinicForm.google_maps_link} onChange={(e) => setClinicForm({...clinicForm, google_maps_link: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Latitude</label>
+                    <Input type="number" step="0.000001" value={clinicForm.latitude} onChange={(e) => setClinicForm({...clinicForm, latitude: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Longitude</label>
+                    <Input type="number" step="0.000001" value={clinicForm.longitude} onChange={(e) => setClinicForm({...clinicForm, longitude: e.target.value})} />
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Lozinku ne postavlja admin. Nakon što sačuvate pristupni email, pošaljite pozivnicu iz liste i klinika će samostalno aktivirati pristup.
@@ -1963,6 +2039,61 @@ export default function AdminPanel() {
                       ))}
                     </div>
                   )}
+                </div>
+                <div className="space-y-3 rounded-lg border p-4">
+                  <div>
+                    <h3 className="font-medium">Radno vrijeme</h3>
+                    <p className="text-sm text-muted-foreground">Admin može unaprijed postaviti radno vrijeme klinike.</p>
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(clinicForm.radno_vrijeme).map(([day, schedule]) => (
+                      <div key={day} className="grid grid-cols-1 md:grid-cols-[140px,1fr,1fr,auto] gap-3 items-center rounded-md border p-3">
+                        <label className="text-sm font-medium">{workingHoursLabels[day] || day}</label>
+                        <Input
+                          type="time"
+                          disabled={schedule.closed}
+                          value={schedule.closed ? '' : schedule.open}
+                          onChange={(e) => setClinicForm({
+                            ...clinicForm,
+                            radno_vrijeme: {
+                              ...clinicForm.radno_vrijeme,
+                              [day]: { ...schedule, open: e.target.value }
+                            }
+                          })}
+                        />
+                        <Input
+                          type="time"
+                          disabled={schedule.closed}
+                          value={schedule.closed ? '' : schedule.close}
+                          onChange={(e) => setClinicForm({
+                            ...clinicForm,
+                            radno_vrijeme: {
+                              ...clinicForm.radno_vrijeme,
+                              [day]: { ...schedule, close: e.target.value }
+                            }
+                          })}
+                        />
+                        <div className="flex items-center gap-2 md:justify-end">
+                          <label className="text-sm">Zatvoreno</label>
+                          <Switch
+                            checked={schedule.closed}
+                            onCheckedChange={(checked) => setClinicForm({
+                              ...clinicForm,
+                              radno_vrijeme: {
+                                ...clinicForm.radno_vrijeme,
+                                [day]: {
+                                  ...schedule,
+                                  closed: checked,
+                                  open: checked ? schedule.open || '08:00' : schedule.open || '08:00',
+                                  close: checked ? schedule.close || '16:00' : schedule.close || '16:00',
+                                }
+                              }
+                            })}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button type="submit" className="flex-1">{editingClinic ? 'Sačuvaj' : 'Kreiraj'}</Button>

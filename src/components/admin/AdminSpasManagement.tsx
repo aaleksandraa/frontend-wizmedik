@@ -17,6 +17,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Mail, MapPin, Phone, Plus, Search, Shield, Sparkles, Trash2, Edit } from 'lucide-react';
+import { AdminImageGalleryField } from '@/components/admin/AdminImageGalleryField';
+import { AdminSingleImageUploadField } from '@/components/admin/AdminSingleImageUploadField';
+import { NamedWorkingHoursEditor } from '@/components/admin/NamedWorkingHoursEditor';
+import {
+  createDefaultNamedWorkingHours,
+  NamedWorkingHours,
+  normalizeNamedWorkingHours,
+} from '@/components/admin/profileFormUtils';
 
 interface TaxonomyOption {
   id: number;
@@ -60,6 +68,13 @@ interface SpaFormState {
   website: string;
   opis: string;
   detaljni_opis: string;
+  medicinsko_osoblje: string;
+  latitude: string;
+  longitude: string;
+  google_maps_link: string;
+  featured_slika: string;
+  galerija: string[];
+  radno_vrijeme: NamedWorkingHours;
   medicinski_nadzor: boolean;
   fizijatar_prisutan: boolean;
   ima_smjestaj: boolean;
@@ -74,7 +89,7 @@ interface SpaFormState {
   account_email: string;
 }
 
-const emptyForm: SpaFormState = {
+const createEmptyForm = (): SpaFormState => ({
   naziv: '',
   grad: '',
   regija: '',
@@ -84,6 +99,13 @@ const emptyForm: SpaFormState = {
   website: '',
   opis: '',
   detaljni_opis: '',
+  medicinsko_osoblje: '',
+  latitude: '',
+  longitude: '',
+  google_maps_link: '',
+  featured_slika: '',
+  galerija: [],
+  radno_vrijeme: createDefaultNamedWorkingHours(),
   medicinski_nadzor: false,
   fizijatar_prisutan: false,
   ima_smjestaj: false,
@@ -96,7 +118,7 @@ const emptyForm: SpaFormState = {
   aktivan: true,
   verifikovan: true,
   account_email: '',
-};
+});
 
 const getErrorMessage = (error: any): string => {
   if (error?.response?.data?.errors) {
@@ -104,7 +126,7 @@ const getErrorMessage = (error: any): string => {
     return Object.values(errors).flat().join('\n');
   }
 
-  return error?.response?.data?.message || error?.message || 'Došlo je do greške';
+  return error?.response?.data?.message || error?.message || 'Doslo je do greske';
 };
 
 const toggleArrayValue = (values: number[], id: number): number[] =>
@@ -123,7 +145,7 @@ export function AdminSpasManagement() {
   });
   const [editingSpa, setEditingSpa] = useState<Spa | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<SpaFormState>(emptyForm);
+  const [form, setForm] = useState<SpaFormState>(() => createEmptyForm());
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
 
   const filteredSpas = useMemo(() => {
@@ -153,7 +175,7 @@ export function AdminSpasManagement() {
       setSpas(list);
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -173,7 +195,7 @@ export function AdminSpasManagement() {
       });
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -182,7 +204,7 @@ export function AdminSpasManagement() {
 
   const openCreateDialog = () => {
     setEditingSpa(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
     setDialogOpen(true);
   };
 
@@ -201,6 +223,13 @@ export function AdminSpasManagement() {
         website: payload?.website || '',
         opis: payload?.opis || '',
         detaljni_opis: payload?.detaljni_opis || '',
+        medicinsko_osoblje: payload?.medicinsko_osoblje || '',
+        latitude: payload?.latitude?.toString() || '',
+        longitude: payload?.longitude?.toString() || '',
+        google_maps_link: payload?.google_maps_link || '',
+        featured_slika: payload?.featured_slika || '',
+        galerija: Array.isArray(payload?.galerija) ? payload.galerija : [],
+        radno_vrijeme: normalizeNamedWorkingHours(payload?.radno_vrijeme),
         medicinski_nadzor: !!payload?.medicinski_nadzor,
         fizijatar_prisutan: !!payload?.fizijatar_prisutan,
         ima_smjestaj: !!payload?.ima_smjestaj,
@@ -217,7 +246,7 @@ export function AdminSpasManagement() {
       setDialogOpen(true);
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -227,36 +256,39 @@ export function AdminSpasManagement() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingSpa(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
   };
 
-  const buildPayload = () => {
-    const payload: Record<string, any> = {
-      naziv: form.naziv.trim(),
-      grad: form.grad.trim(),
-      regija: form.regija.trim() || null,
-      adresa: form.adresa.trim(),
-      telefon: form.telefon.trim() || null,
-      email: form.email.trim() || null,
-      website: form.website.trim() || null,
-      opis: form.opis.trim(),
-      detaljni_opis: form.detaljni_opis.trim() || null,
-      medicinski_nadzor: form.medicinski_nadzor,
-      fizijatar_prisutan: form.fizijatar_prisutan,
-      ima_smjestaj: form.ima_smjestaj,
-      broj_kreveta: form.broj_kreveta.trim() ? Number(form.broj_kreveta) : null,
-      online_rezervacija: form.online_rezervacija,
-      online_upit: form.online_upit,
-      vrste: form.vrste,
-      indikacije: form.indikacije,
-      terapije: form.terapije,
-      aktivan: form.aktivan,
-      verifikovan: form.verifikovan,
-      account_email: form.account_email.trim() || null,
-    };
-
-    return payload;
-  };
+  const buildPayload = () => ({
+    naziv: form.naziv.trim(),
+    grad: form.grad.trim(),
+    regija: form.regija.trim() || null,
+    adresa: form.adresa.trim(),
+    telefon: form.telefon.trim() || null,
+    email: form.email.trim() || null,
+    website: form.website.trim() || null,
+    opis: form.opis.trim(),
+    detaljni_opis: form.detaljni_opis.trim() || null,
+    medicinsko_osoblje: form.medicinsko_osoblje.trim() || null,
+    latitude: form.latitude.trim() ? Number(form.latitude) : null,
+    longitude: form.longitude.trim() ? Number(form.longitude) : null,
+    google_maps_link: form.google_maps_link.trim() || null,
+    featured_slika: form.featured_slika.trim() || null,
+    galerija: form.galerija,
+    radno_vrijeme: form.radno_vrijeme,
+    medicinski_nadzor: form.medicinski_nadzor,
+    fizijatar_prisutan: form.fizijatar_prisutan,
+    ima_smjestaj: form.ima_smjestaj,
+    broj_kreveta: form.broj_kreveta.trim() ? Number(form.broj_kreveta) : null,
+    online_rezervacija: form.online_rezervacija,
+    online_upit: form.online_upit,
+    vrste: form.vrste,
+    indikacije: form.indikacije,
+    terapije: form.terapije,
+    aktivan: form.aktivan,
+    verifikovan: form.verifikovan,
+    account_email: form.account_email.trim() || null,
+  });
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -266,7 +298,7 @@ export function AdminSpasManagement() {
       const payload = buildPayload();
       if (editingSpa) {
         await adminAPI.updateSpa(editingSpa.id, payload);
-        toast({ title: 'Uspjeh', description: 'Banja je ažurirana.' });
+        toast({ title: 'Uspjeh', description: 'Banja je azurirana.' });
       } else {
         await adminAPI.createSpa(payload);
         toast({ title: 'Uspjeh', description: 'Nova banja je dodana.' });
@@ -276,7 +308,7 @@ export function AdminSpasManagement() {
       fetchSpas();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -286,7 +318,7 @@ export function AdminSpasManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Da li ste sigurni da želite obrisati ovu banju?')) return;
+    if (!confirm('Da li ste sigurni da zelite obrisati ovu banju?')) return;
 
     try {
       await adminAPI.deleteSpa(id);
@@ -294,7 +326,7 @@ export function AdminSpasManagement() {
       fetchSpas();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -311,7 +343,7 @@ export function AdminSpasManagement() {
       fetchSpas();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -322,7 +354,7 @@ export function AdminSpasManagement() {
     if (!spa.user?.email) {
       toast({
         title: 'Nedostaje pristupni email',
-        description: 'Prvo sačuvajte pristupni email banje.',
+        description: 'Prvo sacuvajte pristupni email banje.',
         variant: 'destructive',
       });
       return;
@@ -338,7 +370,7 @@ export function AdminSpasManagement() {
       fetchSpas();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -350,7 +382,7 @@ export function AdminSpasManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary" />
       </div>
     );
   }
@@ -368,10 +400,10 @@ export function AdminSpasManagement() {
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="pl-10"
-          placeholder="Pretraži po nazivu, gradu, email-u..."
+          placeholder="Pretrazi po nazivu, gradu, email-u..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -386,12 +418,12 @@ export function AdminSpasManagement() {
           </Card>
         ) : (
           filteredSpas.map((spa) => (
-            <Card key={spa.id} className="hover:shadow-md transition-shadow">
+            <Card key={spa.id} className="transition-shadow hover:shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold truncate">{spa.naziv}</h3>
+                      <h3 className="truncate font-semibold">{spa.naziv}</h3>
                       <Badge variant={spa.verifikovan ? 'default' : 'outline'}>
                         {spa.verifikovan ? 'Verifikovana' : 'Neverifikovana'}
                       </Badge>
@@ -422,8 +454,8 @@ export function AdminSpasManagement() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="flex items-center gap-2 mr-2">
+                  <div className="flex shrink-0 items-center gap-2">
+                    <div className="mr-2 flex items-center gap-2">
                       <Label className="text-xs text-muted-foreground">Aktivna</Label>
                       <Switch checked={spa.aktivan} onCheckedChange={() => handleToggleActive(spa)} />
                     </div>
@@ -452,82 +484,140 @@ export function AdminSpasManagement() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingSpa ? 'Uredi banju' : 'Nova banja'}</DialogTitle>
             <DialogDescription>
-              Profil može biti odmah vidljiv i verifikovan, a pristup panelu dodajete tek kada ustanova preuzme nalog.
+              Profil moze biti odmah vidljiv i verifikovan, a pristup panelu dodajete kada ustanova preuzme nalog.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSave} className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Naziv *</Label>
-                <Input value={form.naziv} onChange={(e) => setForm((prev) => ({ ...prev, naziv: e.target.value }))} required />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Osnovni podaci</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Naziv *</Label>
+                    <Input value={form.naziv} onChange={(e) => setForm((prev) => ({ ...prev, naziv: e.target.value }))} required />
+                  </div>
+                  <div>
+                    <Label>Grad *</Label>
+                    <Input value={form.grad} onChange={(e) => setForm((prev) => ({ ...prev, grad: e.target.value }))} required />
+                  </div>
+                  <div>
+                    <Label>Regija</Label>
+                    <Input value={form.regija} onChange={(e) => setForm((prev) => ({ ...prev, regija: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Telefon</Label>
+                    <Input value={form.telefon} onChange={(e) => setForm((prev) => ({ ...prev, telefon: e.target.value }))} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Adresa *</Label>
+                    <Input value={form.adresa} onChange={(e) => setForm((prev) => ({ ...prev, adresa: e.target.value }))} required />
+                  </div>
+                  <div>
+                    <Label>Javni email</Label>
+                    <Input type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Website</Label>
+                    <Input value={form.website} onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))} />
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label>Grad *</Label>
-                <Input value={form.grad} onChange={(e) => setForm((prev) => ({ ...prev, grad: e.target.value }))} required />
-              </div>
-              <div>
-                <Label>Regija</Label>
-                <Input value={form.regija} onChange={(e) => setForm((prev) => ({ ...prev, regija: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Telefon</Label>
-                <Input value={form.telefon} onChange={(e) => setForm((prev) => ({ ...prev, telefon: e.target.value }))} />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Adresa *</Label>
-                <Input value={form.adresa} onChange={(e) => setForm((prev) => ({ ...prev, adresa: e.target.value }))} required />
-              </div>
-              <div>
-                <Label>Javni email</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Website</Label>
-                <Input value={form.website} onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))} />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Kratki opis / uvod</Label>
-                <Textarea rows={3} value={form.opis} onChange={(e) => setForm((prev) => ({ ...prev, opis: e.target.value }))} required />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Detaljni opis</Label>
-                <Textarea rows={4} value={form.detaljni_opis} onChange={(e) => setForm((prev) => ({ ...prev, detaljni_opis: e.target.value }))} />
+
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Opis i lokacija</h3>
+                <div>
+                  <Label>Kratki opis / uvod *</Label>
+                  <Textarea rows={3} value={form.opis} onChange={(e) => setForm((prev) => ({ ...prev, opis: e.target.value }))} required />
+                </div>
+                <div>
+                  <Label>Detaljni opis</Label>
+                  <Textarea rows={5} value={form.detaljni_opis} onChange={(e) => setForm((prev) => ({ ...prev, detaljni_opis: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Medicinsko osoblje</Label>
+                  <Textarea rows={3} value={form.medicinsko_osoblje} onChange={(e) => setForm((prev) => ({ ...prev, medicinsko_osoblje: e.target.value }))} />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Latitude</Label>
+                    <Input value={form.latitude} onChange={(e) => setForm((prev) => ({ ...prev, latitude: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Longitude</Label>
+                    <Input value={form.longitude} onChange={(e) => setForm((prev) => ({ ...prev, longitude: e.target.value }))} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Google Maps link</Label>
+                    <Input value={form.google_maps_link} onChange={(e) => setForm((prev) => ({ ...prev, google_maps_link: e.target.value }))} />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="flex items-center gap-2">
-                <Switch checked={form.medicinski_nadzor} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, medicinski_nadzor: checked }))} />
-                <Label>Medicinski nadzor</Label>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Sadrzaj i dostupnost</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center gap-2">
+                    <Switch checked={form.medicinski_nadzor} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, medicinski_nadzor: checked }))} />
+                    <Label>Medicinski nadzor</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={form.fizijatar_prisutan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, fizijatar_prisutan: checked }))} />
+                    <Label>Fizijatar prisutan</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={form.ima_smjestaj} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, ima_smjestaj: checked }))} />
+                    <Label>Ima smjestaj</Label>
+                  </div>
+                  <div>
+                    <Label>Broj kreveta</Label>
+                    <Input value={form.broj_kreveta} onChange={(e) => setForm((prev) => ({ ...prev, broj_kreveta: e.target.value }))} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={form.online_rezervacija} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_rezervacija: checked }))} />
+                    <Label>Online rezervacija</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={form.online_upit} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_upit: checked }))} />
+                    <Label>Online upit</Label>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.fizijatar_prisutan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, fizijatar_prisutan: checked }))} />
-                <Label>Fizijatar prisutan</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.ima_smjestaj} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, ima_smjestaj: checked }))} />
-                <Label>Ima smještaj</Label>
-              </div>
-              <div>
-                <Label>Broj kreveta</Label>
-                <Input value={form.broj_kreveta} onChange={(e) => setForm((prev) => ({ ...prev, broj_kreveta: e.target.value }))} />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.online_rezervacija} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_rezervacija: checked }))} />
-                <Label>Online rezervacija</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.online_upit} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_upit: checked }))} />
-                <Label>Online upit</Label>
+
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Pristup i status</h3>
+                <div>
+                  <Label>Pristupni email</Label>
+                  <Input
+                    type="email"
+                    value={form.account_email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, account_email: e.target.value }))}
+                    placeholder="Dodajte kada banja preuzima panel"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Lozinku ne postavlja admin. Nakon spremanja pristupnog emaila posaljite pozivnicu iz liste.
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                    <Label>Odmah verifikovana</Label>
+                    <Switch checked={form.verifikovan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, verifikovan: checked }))} />
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                    <Label>Aktivna</Label>
+                    <Switch checked={form.aktivan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, aktivan: checked }))} />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-5 xl:grid-cols-3">
               <div className="rounded-lg border p-4 space-y-3">
                 <h3 className="font-medium">Vrste</h3>
                 {options.vrste.map((option) => (
@@ -572,41 +662,36 @@ export function AdminSpasManagement() {
               </div>
             </div>
 
-            <div className="rounded-lg border p-4 space-y-4">
-              <h3 className="font-medium">Pristup panelu</h3>
-              <div>
-                <div>
-                  <Label>Pristupni email</Label>
-                  <Input
-                    type="email"
-                    value={form.account_email}
-                    onChange={(e) => setForm((prev) => ({ ...prev, account_email: e.target.value }))}
-                    placeholder="Dodajte kada banja preuzima panel"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Lozinku ne postavlja admin. Nakon spremanja pristupnog emaila posaljite pozivnicu iz liste, a banja ce sama aktivirati pristup.
-              </p>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <AdminSingleImageUploadField
+                label="Featured slika"
+                folder="spas"
+                value={form.featured_slika}
+                onChange={(value) => setForm((prev) => ({ ...prev, featured_slika: value }))}
+                description="Glavna slika banje na javnom profilu i listingu."
+              />
+              <AdminImageGalleryField
+                label="Galerija"
+                folder="spas"
+                images={form.galerija}
+                onChange={(images) => setForm((prev) => ({ ...prev, galerija: images }))}
+                description="Galerija ostaje na profilu i nakon ownership handoff-a."
+                maxImages={20}
+              />
             </div>
 
-            <div className="flex flex-wrap gap-6">
-              <div className="flex items-center gap-2">
-                <Switch checked={form.verifikovan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, verifikovan: checked }))} />
-                <Label>Odmah verifikovana</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.aktivan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, aktivan: checked }))} />
-                <Label>Aktivna</Label>
-              </div>
-            </div>
+            <NamedWorkingHoursEditor
+              value={form.radno_vrijeme}
+              onChange={(value) => setForm((prev) => ({ ...prev, radno_vrijeme: value }))}
+              description="Sedmicno radno vrijeme javnog profila banje."
+            />
 
             <div className="flex gap-2 pt-2">
               <Button type="submit" disabled={saving} className="flex-1">
-                {saving ? 'Spremanje...' : editingSpa ? 'Sačuvaj izmjene' : 'Kreiraj banju'}
+                {saving ? 'Spremanje...' : editingSpa ? 'Sacuvaj izmjene' : 'Kreiraj banju'}
               </Button>
               <Button type="button" variant="outline" onClick={closeDialog}>
-                Otkaži
+                Otkazi
               </Button>
             </div>
           </form>

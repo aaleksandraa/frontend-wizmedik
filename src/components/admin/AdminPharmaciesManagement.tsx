@@ -17,6 +17,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Building2, Edit, Mail, MapPin, Phone, Pill, Plus, Search, Trash2 } from 'lucide-react';
+import { AdminImageGalleryField } from '@/components/admin/AdminImageGalleryField';
+import { AdminSingleImageUploadField } from '@/components/admin/AdminSingleImageUploadField';
 
 type PharmacyStatus = 'pending' | 'verified' | 'rejected' | 'suspended';
 
@@ -45,7 +47,13 @@ interface PharmacyBranch {
   longitude?: number | null;
   telefon?: string;
   email?: string;
+  kratki_opis?: string | null;
+  profilna_slika_url?: string | null;
+  galerija_slike?: string[] | null;
   google_maps_link?: string;
+  ima_dostavu?: boolean;
+  ima_parking?: boolean;
+  pristup_invalidima?: boolean;
   radno_vrijeme?: PharmacyWorkingHour[];
   is_24h?: boolean;
   is_active?: boolean;
@@ -56,11 +64,13 @@ interface PharmacyFirm {
   id: number;
   naziv_brenda: string;
   pravni_naziv?: string | null;
+  jib?: string | null;
   broj_licence?: string | null;
   telefon?: string | null;
   email?: string | null;
   website?: string | null;
   opis?: string | null;
+  logo_url?: string | null;
   status: PharmacyStatus;
   is_active: boolean;
   poslovnice_count: number;
@@ -71,11 +81,13 @@ interface PharmacyFirm {
 interface PharmacyFormState {
   naziv_brenda: string;
   pravni_naziv: string;
+  jib: string;
   broj_licence: string;
   telefon: string;
   email: string;
   website: string;
   opis: string;
+  logo_url: string;
   status: PharmacyStatus;
   is_active: boolean;
 
@@ -85,7 +97,13 @@ interface PharmacyFormState {
   postanski_broj: string;
   latitude: string;
   longitude: string;
+  kratki_opis: string;
+  profilna_slika_url: string;
+  galerija_slike: string[];
   google_maps_link: string;
+  ima_dostavu: boolean;
+  ima_parking: boolean;
+  pristup_invalidima: boolean;
   is_24h: boolean;
   is_verified: boolean;
   radno_vrijeme: PharmacyWorkingHour[];
@@ -147,11 +165,13 @@ const normalizeWorkingHours = (hours?: PharmacyWorkingHour[] | null): PharmacyWo
 const createEmptyForm = (): PharmacyFormState => ({
   naziv_brenda: '',
   pravni_naziv: '',
+  jib: '',
   broj_licence: '',
   telefon: '',
   email: '',
   website: '',
   opis: '',
+  logo_url: '',
   status: 'verified',
   is_active: true,
 
@@ -161,7 +181,13 @@ const createEmptyForm = (): PharmacyFormState => ({
   postanski_broj: '',
   latitude: '',
   longitude: '',
+  kratki_opis: '',
+  profilna_slika_url: '',
+  galerija_slike: [],
   google_maps_link: '',
+  ima_dostavu: false,
+  ima_parking: false,
+  pristup_invalidima: false,
   is_24h: false,
   is_verified: true,
   radno_vrijeme: defaultWorkingHours(),
@@ -265,11 +291,13 @@ export function AdminPharmaciesManagement() {
     setForm({
       naziv_brenda: firm.naziv_brenda || '',
       pravni_naziv: firm.pravni_naziv || '',
+      jib: firm.jib || '',
       broj_licence: firm.broj_licence || '',
       telefon: firm.telefon || '',
       email: firm.email || '',
       website: firm.website || '',
       opis: firm.opis || '',
+      logo_url: firm.logo_url || '',
       status: firm.status || 'verified',
       is_active: !!firm.is_active,
 
@@ -279,7 +307,13 @@ export function AdminPharmaciesManagement() {
       postanski_broj: branch?.postanski_broj || '',
       latitude: branch?.latitude?.toString() || '',
       longitude: branch?.longitude?.toString() || '',
+      kratki_opis: branch?.kratki_opis || '',
+      profilna_slika_url: branch?.profilna_slika_url || '',
+      galerija_slike: Array.isArray(branch?.galerija_slike) ? branch.galerija_slike : [],
       google_maps_link: branch?.google_maps_link || '',
+      ima_dostavu: !!branch?.ima_dostavu,
+      ima_parking: !!branch?.ima_parking,
+      pristup_invalidima: !!branch?.pristup_invalidima,
       is_24h: !!branch?.is_24h,
       is_verified: branch?.is_verified ?? firm.status === 'verified',
       radno_vrijeme: normalizeWorkingHours(branch?.radno_vrijeme),
@@ -326,11 +360,13 @@ export function AdminPharmaciesManagement() {
     const payload: Record<string, any> = {
       naziv_brenda: form.naziv_brenda.trim(),
       pravni_naziv: form.pravni_naziv.trim() || null,
+      jib: form.jib.trim() || null,
       broj_licence: form.broj_licence.trim() || null,
       telefon: form.telefon.trim(),
       email: form.email.trim() || null,
       website: form.website.trim() || null,
       opis: form.opis.trim() || null,
+      logo_url: form.logo_url.trim() || null,
       status: form.status,
       is_active: form.is_active,
 
@@ -340,7 +376,13 @@ export function AdminPharmaciesManagement() {
       postanski_broj: form.postanski_broj.trim() || null,
       latitude: form.latitude.trim() ? Number(form.latitude) : null,
       longitude: form.longitude.trim() ? Number(form.longitude) : null,
+      kratki_opis: form.kratki_opis.trim() || null,
+      profilna_slika_url: form.profilna_slika_url.trim() || null,
+      galerija_slike: form.galerija_slike,
       google_maps_link: form.google_maps_link.trim() || null,
+      ima_dostavu: form.ima_dostavu,
+      ima_parking: form.ima_parking,
+      pristup_invalidima: form.pristup_invalidima,
       is_24h: form.is_24h,
       is_verified: form.is_verified,
       radno_vrijeme: form.radno_vrijeme.map((item) => ({
@@ -562,7 +604,7 @@ export function AdminPharmaciesManagement() {
             <DialogDescription>
               {editingFirm
                 ? 'Ažurirajte podatke apoteke i po potrebi promijenite login email.'
-                : 'Kreirajte apoteku sa vlasničkim login nalogom.'}
+                : 'Kreirajte apoteku, pripremite profil i kasnije dodijelite pristup vlasniku.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -585,6 +627,13 @@ export function AdminPharmaciesManagement() {
                     <Input
                       value={form.pravni_naziv}
                       onChange={(e) => setForm((prev) => ({ ...prev, pravni_naziv: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label>JIB</Label>
+                    <Input
+                      value={form.jib}
+                      onChange={(e) => setForm((prev) => ({ ...prev, jib: e.target.value }))}
                     />
                   </div>
                   <div>
@@ -641,6 +690,14 @@ export function AdminPharmaciesManagement() {
                     />
                   </div>
                 </div>
+
+                <AdminSingleImageUploadField
+                  label="Logo apoteke"
+                  folder="pharmacies"
+                  value={form.logo_url}
+                  onChange={(value) => setForm((prev) => ({ ...prev, logo_url: value }))}
+                  description="Logo firme ostaje spremljen i nakon što vlasnik preuzme profil."
+                />
               </div>
 
               <div className="space-y-4 rounded-lg border p-4">
@@ -714,6 +771,14 @@ export function AdminPharmaciesManagement() {
                     onChange={(e) => setForm((prev) => ({ ...prev, google_maps_link: e.target.value }))}
                   />
                 </div>
+                <div className="md:col-span-3">
+                  <Label>Kratki opis poslovnice</Label>
+                  <Textarea
+                    rows={3}
+                    value={form.kratki_opis}
+                    onChange={(e) => setForm((prev) => ({ ...prev, kratki_opis: e.target.value }))}
+                  />
+                </div>
                 <div>
                   <Label>Latitude</Label>
                   <Input
@@ -742,6 +807,45 @@ export function AdminPharmaciesManagement() {
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_verified: checked }))}
                   />
                 </div>
+                <div className="flex items-center justify-between rounded border px-3 py-2">
+                  <Label>Ima dostavu</Label>
+                  <Switch
+                    checked={form.ima_dostavu}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, ima_dostavu: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded border px-3 py-2">
+                  <Label>Ima parking</Label>
+                  <Switch
+                    checked={form.ima_parking}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, ima_parking: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded border px-3 py-2">
+                  <Label>Pristup invalidima</Label>
+                  <Switch
+                    checked={form.pristup_invalidima}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, pristup_invalidima: checked }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <AdminSingleImageUploadField
+                  label="Profilna slika poslovnice"
+                  folder="pharmacies"
+                  value={form.profilna_slika_url}
+                  onChange={(value) => setForm((prev) => ({ ...prev, profilna_slika_url: value }))}
+                  description="Glavna fotografija poslovnice koja se prikazuje na profilu."
+                />
+                <AdminImageGalleryField
+                  label="Galerija poslovnice"
+                  folder="pharmacies"
+                  images={form.galerija_slike}
+                  onChange={(images) => setForm((prev) => ({ ...prev, galerija_slike: images }))}
+                  description="Dodajte fotografije enterijera, izloga i dodatnih usluga."
+                  maxImages={5}
+                />
               </div>
 
               <div className="space-y-3 rounded-lg border border-dashed p-4">

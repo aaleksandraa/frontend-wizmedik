@@ -18,6 +18,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Home as HomeIcon, Mail, MapPin, Phone, Plus, Search, Shield, Trash2, Edit } from 'lucide-react';
+import { AdminImageGalleryField } from '@/components/admin/AdminImageGalleryField';
+import { AdminSingleImageUploadField } from '@/components/admin/AdminSingleImageUploadField';
+import { NamedWorkingHoursEditor } from '@/components/admin/NamedWorkingHoursEditor';
+import {
+  createDefaultNamedWorkingHours,
+  NamedWorkingHours,
+  normalizeNamedWorkingHours,
+  parseTextList,
+  stringifyTextList,
+} from '@/components/admin/profileFormUtils';
 
 interface TaxonomyOption {
   id: number;
@@ -50,6 +60,11 @@ interface FilterOptions {
   smjestaj_uslovi: TaxonomyOption[];
 }
 
+interface FaqItem {
+  pitanje: string;
+  odgovor: string;
+}
+
 interface CareHomeFormState {
   naziv: string;
   grad: string;
@@ -60,8 +75,16 @@ interface CareHomeFormState {
   website: string;
   opis: string;
   detaljni_opis: string;
+  latitude: string;
+  longitude: string;
+  google_maps_link: string;
+  featured_slika: string;
+  galerija: string[];
+  radno_vrijeme: NamedWorkingHours;
   tip_doma_id: string;
   nivo_njege_id: string;
+  accepts_tags_text: string;
+  not_accepts_text: string;
   nurses_availability: '24_7' | 'shifts' | 'on_demand';
   doctor_availability: 'permanent' | 'periodic' | 'on_call';
   pricing_mode: 'public' | 'on_request';
@@ -69,12 +92,17 @@ interface CareHomeFormState {
   has_physiotherapist: boolean;
   has_physiatrist: boolean;
   emergency_protocol: boolean;
+  emergency_protocol_text: string;
   controlled_entry: boolean;
   video_surveillance: boolean;
+  visiting_rules: string;
+  price_includes: string;
+  extra_charges: string;
   online_upit: boolean;
   programi_njege: number[];
   medicinske_usluge: number[];
   smjestaj_uslovi: number[];
+  faqs: FaqItem[];
   aktivan: boolean;
   verifikovan: boolean;
   account_email: string;
@@ -90,8 +118,16 @@ const emptyForm: CareHomeFormState = {
   website: '',
   opis: '',
   detaljni_opis: '',
+  latitude: '',
+  longitude: '',
+  google_maps_link: '',
+  featured_slika: '',
+  galerija: [],
+  radno_vrijeme: createDefaultNamedWorkingHours(),
   tip_doma_id: '',
   nivo_njege_id: '',
+  accepts_tags_text: '',
+  not_accepts_text: '',
   nurses_availability: 'shifts',
   doctor_availability: 'on_call',
   pricing_mode: 'on_request',
@@ -99,12 +135,17 @@ const emptyForm: CareHomeFormState = {
   has_physiotherapist: false,
   has_physiatrist: false,
   emergency_protocol: false,
+  emergency_protocol_text: '',
   controlled_entry: false,
   video_surveillance: false,
+  visiting_rules: '',
+  price_includes: '',
+  extra_charges: '',
   online_upit: true,
   programi_njege: [],
   medicinske_usluge: [],
   smjestaj_uslovi: [],
+  faqs: [],
   aktivan: true,
   verifikovan: true,
   account_email: '',
@@ -221,8 +262,16 @@ export function AdminCareHomesManagement() {
         website: payload?.website || '',
         opis: payload?.opis || '',
         detaljni_opis: payload?.detaljni_opis || '',
+        latitude: payload?.latitude?.toString() || '',
+        longitude: payload?.longitude?.toString() || '',
+        google_maps_link: payload?.google_maps_link || '',
+        featured_slika: payload?.featured_slika || '',
+        galerija: Array.isArray(payload?.galerija) ? payload.galerija : [],
+        radno_vrijeme: normalizeNamedWorkingHours(payload?.radno_vrijeme),
         tip_doma_id: payload?.tip_doma_id?.toString() || '',
         nivo_njege_id: payload?.nivo_njege_id?.toString() || '',
+        accepts_tags_text: stringifyTextList(payload?.accepts_tags),
+        not_accepts_text: payload?.not_accepts_text || '',
         nurses_availability: payload?.nurses_availability || 'shifts',
         doctor_availability: payload?.doctor_availability || 'on_call',
         pricing_mode: payload?.pricing_mode || 'on_request',
@@ -230,12 +279,21 @@ export function AdminCareHomesManagement() {
         has_physiotherapist: !!payload?.has_physiotherapist,
         has_physiatrist: !!payload?.has_physiatrist,
         emergency_protocol: !!payload?.emergency_protocol,
+        emergency_protocol_text: payload?.emergency_protocol_text || '',
         controlled_entry: !!payload?.controlled_entry,
         video_surveillance: !!payload?.video_surveillance,
+        visiting_rules: payload?.visiting_rules || '',
+        price_includes: payload?.price_includes || '',
+        extra_charges: payload?.extra_charges || '',
         online_upit: payload?.online_upit ?? true,
         programi_njege: Array.isArray(payload?.programi_njege) ? payload.programi_njege.map((item: TaxonomyOption) => item.id) : [],
-        medicinske_usluge: Array.isArray(payload?.medicinsk_usluge) ? payload.medicinsk_usluge.map((item: TaxonomyOption) => item.id) : [],
+        medicinske_usluge: Array.isArray(payload?.medicinske_usluge)
+          ? payload.medicinske_usluge.map((item: TaxonomyOption) => item.id)
+          : Array.isArray(payload?.medicinsk_usluge)
+            ? payload.medicinsk_usluge.map((item: TaxonomyOption) => item.id)
+            : [],
         smjestaj_uslovi: Array.isArray(payload?.smjestaj_uslovi) ? payload.smjestaj_uslovi.map((item: TaxonomyOption) => item.id) : [],
+        faqs: Array.isArray(payload?.faqs) ? payload.faqs : [],
         aktivan: payload?.aktivan ?? home.aktivan ?? true,
         verifikovan: payload?.verifikovan ?? home.verifikovan ?? true,
         account_email: payload?.user?.email || home.user?.email || '',
@@ -256,6 +314,15 @@ export function AdminCareHomesManagement() {
     setForm(emptyForm);
   };
 
+  const updateFaq = (index: number, field: keyof FaqItem, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      faqs: prev.faqs.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
   const buildPayload = () => {
     const payload: Record<string, any> = {
       naziv: form.naziv.trim(),
@@ -267,8 +334,16 @@ export function AdminCareHomesManagement() {
       website: form.website.trim() || null,
       opis: form.opis.trim(),
       detaljni_opis: form.detaljni_opis.trim() || null,
+      latitude: form.latitude.trim() ? Number(form.latitude) : null,
+      longitude: form.longitude.trim() ? Number(form.longitude) : null,
+      google_maps_link: form.google_maps_link.trim() || null,
+      featured_slika: form.featured_slika.trim() || null,
+      galerija: form.galerija,
+      radno_vrijeme: form.radno_vrijeme,
       tip_doma_id: Number(form.tip_doma_id),
       nivo_njege_id: Number(form.nivo_njege_id),
+      accepts_tags: parseTextList(form.accepts_tags_text),
+      not_accepts_text: form.not_accepts_text.trim() || null,
       nurses_availability: form.nurses_availability,
       doctor_availability: form.doctor_availability,
       pricing_mode: form.pricing_mode,
@@ -276,12 +351,17 @@ export function AdminCareHomesManagement() {
       has_physiotherapist: form.has_physiotherapist,
       has_physiatrist: form.has_physiatrist,
       emergency_protocol: form.emergency_protocol,
+      emergency_protocol_text: form.emergency_protocol_text.trim() || null,
       controlled_entry: form.controlled_entry,
       video_surveillance: form.video_surveillance,
+      visiting_rules: form.visiting_rules.trim() || null,
+      price_includes: form.price_includes.trim() || null,
+      extra_charges: form.extra_charges.trim() || null,
       online_upit: form.online_upit,
       programi_njege: form.programi_njege,
       medicinske_usluge: form.medicinske_usluge,
       smjestaj_uslovi: form.smjestaj_uslovi,
+      faqs: form.faqs.filter((item) => item.pitanje.trim() && item.odgovor.trim()),
       aktivan: form.aktivan,
       verifikovan: form.verifikovan,
       account_email: form.account_email.trim() || null,
@@ -523,6 +603,18 @@ export function AdminCareHomesManagement() {
                 <Input value={form.website} onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))} />
               </div>
               <div>
+                <Label>Google Maps link</Label>
+                <Input value={form.google_maps_link} onChange={(e) => setForm((prev) => ({ ...prev, google_maps_link: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Latitude</Label>
+                <Input value={form.latitude} onChange={(e) => setForm((prev) => ({ ...prev, latitude: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Longitude</Label>
+                <Input value={form.longitude} onChange={(e) => setForm((prev) => ({ ...prev, longitude: e.target.value }))} />
+              </div>
+              <div>
                 <Label>Tip doma *</Label>
                 <Select value={form.tip_doma_id} onValueChange={(value) => setForm((prev) => ({ ...prev, tip_doma_id: value }))}>
                   <SelectTrigger>
@@ -611,6 +703,24 @@ export function AdminCareHomesManagement() {
                 <Label>Detaljni opis</Label>
                 <Textarea rows={4} value={form.detaljni_opis} onChange={(e) => setForm((prev) => ({ ...prev, detaljni_opis: e.target.value }))} />
               </div>
+              <div className="md:col-span-2">
+                <Label>Sta dom prihvata</Label>
+                <Textarea
+                  rows={3}
+                  value={form.accepts_tags_text}
+                  onChange={(e) => setForm((prev) => ({ ...prev, accepts_tags_text: e.target.value }))}
+                  placeholder="npr. demencija, nepokretni korisnici, postoperativna njega"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Unesite stavke odvojene zarezom ili novim redom.</p>
+              </div>
+              <div className="md:col-span-2">
+                <Label>Sta dom ne prihvata</Label>
+                <Textarea
+                  rows={3}
+                  value={form.not_accepts_text}
+                  onChange={(e) => setForm((prev) => ({ ...prev, not_accepts_text: e.target.value }))}
+                />
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -637,6 +747,41 @@ export function AdminCareHomesManagement() {
               <div className="flex items-center gap-2">
                 <Switch checked={form.online_upit} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_upit: checked }))} />
                 <Label>Online upit</Label>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label>Opis hitnog protokola</Label>
+                <Textarea
+                  rows={3}
+                  value={form.emergency_protocol_text}
+                  onChange={(e) => setForm((prev) => ({ ...prev, emergency_protocol_text: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Pravila posjeta</Label>
+                <Textarea
+                  rows={3}
+                  value={form.visiting_rules}
+                  onChange={(e) => setForm((prev) => ({ ...prev, visiting_rules: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Sta je ukljuceno u cijenu</Label>
+                <Textarea
+                  rows={3}
+                  value={form.price_includes}
+                  onChange={(e) => setForm((prev) => ({ ...prev, price_includes: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Dodatni troskovi</Label>
+                <Textarea
+                  rows={3}
+                  value={form.extra_charges}
+                  onChange={(e) => setForm((prev) => ({ ...prev, extra_charges: e.target.value }))}
+                />
               </div>
             </div>
 
@@ -682,6 +827,91 @@ export function AdminCareHomesManagement() {
                     <span>{option.naziv}</span>
                   </label>
                 ))}
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <AdminSingleImageUploadField
+                label="Naslovna fotografija"
+                folder="care-homes"
+                value={form.featured_slika}
+                onChange={(value) => setForm((prev) => ({ ...prev, featured_slika: value }))}
+                description="Glavna fotografija doma koja se prikazuje na listinzima i profilu."
+              />
+              <AdminImageGalleryField
+                label="Galerija doma"
+                folder="care-homes"
+                images={form.galerija}
+                onChange={(images) => setForm((prev) => ({ ...prev, galerija: images }))}
+                description="Dodajte fotografije interijera, soba i zajednickih prostora."
+                maxImages={10}
+              />
+            </div>
+
+            <NamedWorkingHoursEditor
+              value={form.radno_vrijeme}
+              onChange={(value) => setForm((prev) => ({ ...prev, radno_vrijeme: value }))}
+              description="Radno vrijeme i dostupnost doma prikazuju se javno na profilu."
+            />
+
+            <div className="rounded-lg border p-4 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-medium">FAQ</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Pitanja i odgovori ostaju na profilu i nakon preuzimanja od strane vlasnika.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      faqs: [...prev.faqs, { pitanje: '', odgovor: '' }],
+                    }))
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Dodaj FAQ
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {form.faqs.length === 0 ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    Nema unesenih FAQ stavki.
+                  </div>
+                ) : (
+                  form.faqs.map((faq, index) => (
+                    <div key={`${index}-${faq.pitanje}`} className="grid gap-3 rounded-lg border p-4">
+                      <div>
+                        <Label>Pitanje</Label>
+                        <Input value={faq.pitanje} onChange={(e) => updateFaq(index, 'pitanje', e.target.value)} />
+                      </div>
+                      <div>
+                        <Label>Odgovor</Label>
+                        <Textarea rows={3} value={faq.odgovor} onChange={(e) => updateFaq(index, 'odgovor', e.target.value)} />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            setForm((prev) => ({
+                              ...prev,
+                              faqs: prev.faqs.filter((_, itemIndex) => itemIndex !== index),
+                            }))
+                          }
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Ukloni FAQ
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 

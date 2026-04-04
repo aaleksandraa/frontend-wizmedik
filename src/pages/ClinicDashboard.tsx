@@ -22,7 +22,23 @@ import { Navbar } from '@/components/Navbar';
 import { ClinicCalendar } from '@/components/clinic/ClinicCalendar';
 import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { normalizeNamedWorkingHours } from '@/components/admin/profileFormUtils';
 import { validatePassword } from '@/utils/validation';
+
+const normalizeClinicDashboardWorkingHours = (value?: Record<string, any> | null) => {
+  const normalized = normalizeNamedWorkingHours(value);
+
+  return {
+    ponedeljak: normalized.ponedeljak,
+    utorak: normalized.utorak,
+    sreda: normalized.srijeda,
+    cetvrtak: normalized.cetvrtak,
+    'četvrtak': normalized.cetvrtak,
+    petak: normalized.petak,
+    subota: normalized.subota,
+    nedelja: normalized.nedjelja,
+  };
+};
 
 interface ClinicProfile {
   id: number;
@@ -290,7 +306,10 @@ export default function ClinicDashboard() {
         clinicDashboardAPI.getInvitations(),
         clinicDashboardAPI.getDoctorRequests()
       ]);
-      const profileData = profileRes.data;
+      const profileData = {
+        ...profileRes.data,
+        radno_vrijeme: normalizeClinicDashboardWorkingHours(profileRes.data?.radno_vrijeme),
+      };
       setProfile(profileData);
       
       // Set selected specialties if they exist

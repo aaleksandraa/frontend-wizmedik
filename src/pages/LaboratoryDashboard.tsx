@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { citiesAPI, uploadAPI } from '@/services/api';
+import { normalizeNamedWorkingHours } from '@/components/admin/profileFormUtils';
 import {
   DndContext,
   closestCenter,
@@ -336,7 +337,10 @@ export default function LaboratoryDashboard() {
         })
       ]);
       
-      setLaboratory(profileRes.data);
+      setLaboratory({
+        ...profileRes.data,
+        radno_vrijeme: normalizeNamedWorkingHours(profileRes.data?.radno_vrijeme),
+      });
       setStatistics(statsRes.data);
       setAnalyses(analyzesRes.data || []);
       setPackages(packagesRes.data || []);

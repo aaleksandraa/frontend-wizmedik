@@ -16,17 +16,31 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { FlaskConical, Mail, MapPin, Phone, Plus, Search, Shield, Trash2, Edit } from 'lucide-react';
+import { AdminImageGalleryField } from '@/components/admin/AdminImageGalleryField';
+import { AdminSingleImageUploadField } from '@/components/admin/AdminSingleImageUploadField';
+import { NamedWorkingHoursEditor } from '@/components/admin/NamedWorkingHoursEditor';
+import {
+  createDefaultNamedWorkingHours,
+  NamedWorkingHours,
+  normalizeNamedWorkingHours,
+} from '@/components/admin/profileFormUtils';
 
 interface Laboratory {
   id: number;
   naziv: string;
   email?: string | null;
   telefon?: string | null;
+  telefon_2?: string | null;
   adresa: string;
   grad: string;
+  postanski_broj?: string | null;
   opis?: string | null;
   kratak_opis?: string | null;
   website?: string | null;
+  google_maps_link?: string | null;
+  featured_slika?: string | null;
+  profilna_slika?: string | null;
+  galerija?: string[] | null;
   aktivan: boolean;
   verifikovan: boolean;
   online_rezultati?: boolean;
@@ -44,37 +58,53 @@ interface LaboratoryFormState {
   naziv: string;
   email: string;
   telefon: string;
+  telefon_2: string;
   adresa: string;
   grad: string;
+  postanski_broj: string;
   opis: string;
   kratak_opis: string;
   website: string;
+  latitude: string;
+  longitude: string;
+  google_maps_link: string;
   online_rezultati: boolean;
   prosjecno_vrijeme_rezultata: string;
   napomena: string;
   featured_slika: string;
+  profilna_slika: string;
+  galerija: string[];
+  radno_vrijeme: NamedWorkingHours;
   aktivan: boolean;
   verifikovan: boolean;
   account_email: string;
 }
 
-const emptyForm: LaboratoryFormState = {
+const createEmptyForm = (): LaboratoryFormState => ({
   naziv: '',
   email: '',
   telefon: '',
+  telefon_2: '',
   adresa: '',
   grad: '',
+  postanski_broj: '',
   opis: '',
   kratak_opis: '',
   website: '',
+  latitude: '',
+  longitude: '',
+  google_maps_link: '',
   online_rezultati: false,
   prosjecno_vrijeme_rezultata: '',
   napomena: '',
   featured_slika: '',
+  profilna_slika: '',
+  galerija: [],
+  radno_vrijeme: createDefaultNamedWorkingHours(),
   aktivan: true,
   verifikovan: true,
   account_email: '',
-};
+});
 
 const getErrorMessage = (error: any): string => {
   if (error?.response?.data?.errors) {
@@ -82,7 +112,7 @@ const getErrorMessage = (error: any): string => {
     return Object.values(errors).flat().join('\n');
   }
 
-  return error?.response?.data?.message || error?.message || 'Došlo je do greške';
+  return error?.response?.data?.message || error?.message || 'Doslo je do greske';
 };
 
 export function AdminLaboratoriesManagement() {
@@ -93,7 +123,7 @@ export function AdminLaboratoriesManagement() {
   const [laboratories, setLaboratories] = useState<Laboratory[]>([]);
   const [editingLaboratory, setEditingLaboratory] = useState<Laboratory | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<LaboratoryFormState>(emptyForm);
+  const [form, setForm] = useState<LaboratoryFormState>(() => createEmptyForm());
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
 
   const filteredLaboratories = useMemo(() => {
@@ -123,7 +153,7 @@ export function AdminLaboratoriesManagement() {
       setLaboratories(list);
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -134,7 +164,7 @@ export function AdminLaboratoriesManagement() {
 
   const openCreateDialog = () => {
     setEditingLaboratory(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
     setDialogOpen(true);
   };
 
@@ -147,15 +177,23 @@ export function AdminLaboratoriesManagement() {
         naziv: payload?.naziv || laboratory.naziv || '',
         email: payload?.email || '',
         telefon: payload?.telefon || '',
+        telefon_2: payload?.telefon_2 || '',
         adresa: payload?.adresa || laboratory.adresa || '',
         grad: payload?.grad || laboratory.grad || '',
+        postanski_broj: payload?.postanski_broj || '',
         opis: payload?.opis || '',
         kratak_opis: payload?.kratak_opis || '',
         website: payload?.website || '',
+        latitude: payload?.latitude?.toString() || '',
+        longitude: payload?.longitude?.toString() || '',
+        google_maps_link: payload?.google_maps_link || '',
         online_rezultati: !!payload?.online_rezultati,
         prosjecno_vrijeme_rezultata: payload?.prosjecno_vrijeme_rezultata || '',
         napomena: payload?.napomena || '',
         featured_slika: payload?.featured_slika || '',
+        profilna_slika: payload?.profilna_slika || '',
+        galerija: Array.isArray(payload?.galerija) ? payload.galerija : [],
+        radno_vrijeme: normalizeNamedWorkingHours(payload?.radno_vrijeme),
         aktivan: payload?.aktivan ?? laboratory.aktivan ?? true,
         verifikovan: payload?.verifikovan ?? laboratory.verifikovan ?? true,
         account_email: payload?.user?.email || laboratory.user?.email || '',
@@ -163,7 +201,7 @@ export function AdminLaboratoriesManagement() {
       setDialogOpen(true);
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -173,30 +211,34 @@ export function AdminLaboratoriesManagement() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingLaboratory(null);
-    setForm(emptyForm);
+    setForm(createEmptyForm());
   };
 
-  const buildPayload = () => {
-    const payload: Record<string, any> = {
-      naziv: form.naziv.trim(),
-      email: form.email.trim() || null,
-      telefon: form.telefon.trim() || null,
-      adresa: form.adresa.trim(),
-      grad: form.grad.trim(),
-      opis: form.opis.trim() || null,
-      kratak_opis: form.kratak_opis.trim() || null,
-      website: form.website.trim() || null,
-      online_rezultati: form.online_rezultati,
-      prosjecno_vrijeme_rezultata: form.prosjecno_vrijeme_rezultata.trim() || null,
-      napomena: form.napomena.trim() || null,
-      featured_slika: form.featured_slika.trim() || null,
-      aktivan: form.aktivan,
-      verifikovan: form.verifikovan,
-      account_email: form.account_email.trim() || null,
-    };
-
-    return payload;
-  };
+  const buildPayload = () => ({
+    naziv: form.naziv.trim(),
+    email: form.email.trim() || null,
+    telefon: form.telefon.trim() || null,
+    telefon_2: form.telefon_2.trim() || null,
+    adresa: form.adresa.trim(),
+    grad: form.grad.trim(),
+    postanski_broj: form.postanski_broj.trim() || null,
+    opis: form.opis.trim() || null,
+    kratak_opis: form.kratak_opis.trim() || null,
+    website: form.website.trim() || null,
+    latitude: form.latitude.trim() ? Number(form.latitude) : null,
+    longitude: form.longitude.trim() ? Number(form.longitude) : null,
+    google_maps_link: form.google_maps_link.trim() || null,
+    online_rezultati: form.online_rezultati,
+    prosjecno_vrijeme_rezultata: form.prosjecno_vrijeme_rezultata.trim() || null,
+    napomena: form.napomena.trim() || null,
+    featured_slika: form.featured_slika.trim() || null,
+    profilna_slika: form.profilna_slika.trim() || null,
+    galerija: form.galerija,
+    radno_vrijeme: form.radno_vrijeme,
+    aktivan: form.aktivan,
+    verifikovan: form.verifikovan,
+    account_email: form.account_email.trim() || null,
+  });
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -206,7 +248,7 @@ export function AdminLaboratoriesManagement() {
       const payload = buildPayload();
       if (editingLaboratory) {
         await adminAPI.updateLaboratory(editingLaboratory.id, payload);
-        toast({ title: 'Uspjeh', description: 'Laboratorija je ažurirana.' });
+        toast({ title: 'Uspjeh', description: 'Laboratorija je azurirana.' });
       } else {
         await adminAPI.createLaboratory(payload);
         toast({ title: 'Uspjeh', description: 'Nova laboratorija je dodana.' });
@@ -216,7 +258,7 @@ export function AdminLaboratoriesManagement() {
       fetchLaboratories();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -226,7 +268,7 @@ export function AdminLaboratoriesManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Da li ste sigurni da želite obrisati ovu laboratoriju?')) return;
+    if (!confirm('Da li ste sigurni da zelite obrisati ovu laboratoriju?')) return;
 
     try {
       await adminAPI.deleteLaboratory(id);
@@ -234,7 +276,7 @@ export function AdminLaboratoriesManagement() {
       fetchLaboratories();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -253,7 +295,7 @@ export function AdminLaboratoriesManagement() {
       fetchLaboratories();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -264,7 +306,7 @@ export function AdminLaboratoriesManagement() {
     if (!laboratory.user?.email) {
       toast({
         title: 'Nedostaje pristupni email',
-        description: 'Prvo sačuvajte pristupni email laboratorije.',
+        description: 'Prvo sacuvajte pristupni email laboratorije.',
         variant: 'destructive',
       });
       return;
@@ -280,7 +322,7 @@ export function AdminLaboratoriesManagement() {
       fetchLaboratories();
     } catch (error: any) {
       toast({
-        title: 'Greška',
+        title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
@@ -292,7 +334,7 @@ export function AdminLaboratoriesManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary" />
       </div>
     );
   }
@@ -310,10 +352,10 @@ export function AdminLaboratoriesManagement() {
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="pl-10"
-          placeholder="Pretraži po nazivu, gradu, email-u..."
+          placeholder="Pretrazi po nazivu, gradu, email-u..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -328,12 +370,12 @@ export function AdminLaboratoriesManagement() {
           </Card>
         ) : (
           filteredLaboratories.map((laboratory) => (
-            <Card key={laboratory.id} className="hover:shadow-md transition-shadow">
+            <Card key={laboratory.id} className="transition-shadow hover:shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold truncate">{laboratory.naziv}</h3>
+                      <h3 className="truncate font-semibold">{laboratory.naziv}</h3>
                       <Badge variant={laboratory.verifikovan ? 'default' : 'outline'}>
                         {laboratory.verifikovan ? 'Verifikovana' : 'Neverifikovana'}
                       </Badge>
@@ -364,8 +406,8 @@ export function AdminLaboratoriesManagement() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="flex items-center gap-2 mr-2">
+                  <div className="flex shrink-0 items-center gap-2">
+                    <div className="mr-2 flex items-center gap-2">
                       <Label className="text-xs text-muted-foreground">Aktivna</Label>
                       <Switch
                         checked={laboratory.aktivan}
@@ -397,101 +439,167 @@ export function AdminLaboratoriesManagement() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingLaboratory ? 'Uredi laboratoriju' : 'Nova laboratorija'}</DialogTitle>
             <DialogDescription>
-              Kreirajte javni profil odmah, a pristup panelu dodijelite tek kada laboratorija preuzme nalog.
+              Kreirajte javni profil odmah, a pristup panelu dodijelite kada laboratorija preuzme nalog.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSave} className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label>Naziv *</Label>
-                <Input value={form.naziv} onChange={(e) => setForm((prev) => ({ ...prev, naziv: e.target.value }))} required />
-              </div>
-              <div>
-                <Label>Grad *</Label>
-                <Input value={form.grad} onChange={(e) => setForm((prev) => ({ ...prev, grad: e.target.value }))} required />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Adresa *</Label>
-                <Input value={form.adresa} onChange={(e) => setForm((prev) => ({ ...prev, adresa: e.target.value }))} required />
-              </div>
-              <div>
-                <Label>Telefon</Label>
-                <Input value={form.telefon} onChange={(e) => setForm((prev) => ({ ...prev, telefon: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Javni email</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Website</Label>
-                <Input value={form.website} onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Vrijeme rezultata</Label>
-                <Input
-                  value={form.prosjecno_vrijeme_rezultata}
-                  onChange={(e) => setForm((prev) => ({ ...prev, prosjecno_vrijeme_rezultata: e.target.value }))}
-                  placeholder="npr. 24-48 sati"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Kratki opis</Label>
-                <Input value={form.kratak_opis} onChange={(e) => setForm((prev) => ({ ...prev, kratak_opis: e.target.value }))} />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Opis</Label>
-                <Textarea rows={4} value={form.opis} onChange={(e) => setForm((prev) => ({ ...prev, opis: e.target.value }))} />
-              </div>
-              <div className="md:col-span-2">
-                <Label>Napomena</Label>
-                <Textarea rows={3} value={form.napomena} onChange={(e) => setForm((prev) => ({ ...prev, napomena: e.target.value }))} />
-              </div>
-            </div>
-
-            <div className="rounded-lg border p-4 space-y-4">
-              <h3 className="font-medium">Pristup panelu</h3>
-              <div>
-                <div>
-                  <Label>Pristupni email</Label>
-                  <Input
-                    type="email"
-                    value={form.account_email}
-                    onChange={(e) => setForm((prev) => ({ ...prev, account_email: e.target.value }))}
-                    placeholder="Dodajte kada želite uključiti panel"
-                  />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Osnovni podaci</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Naziv *</Label>
+                    <Input value={form.naziv} onChange={(e) => setForm((prev) => ({ ...prev, naziv: e.target.value }))} required />
+                  </div>
+                  <div>
+                    <Label>Grad *</Label>
+                    <Input value={form.grad} onChange={(e) => setForm((prev) => ({ ...prev, grad: e.target.value }))} required />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Adresa *</Label>
+                    <Input value={form.adresa} onChange={(e) => setForm((prev) => ({ ...prev, adresa: e.target.value }))} required />
+                  </div>
+                  <div>
+                    <Label>Telefon</Label>
+                    <Input value={form.telefon} onChange={(e) => setForm((prev) => ({ ...prev, telefon: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Dodatni telefon</Label>
+                    <Input value={form.telefon_2} onChange={(e) => setForm((prev) => ({ ...prev, telefon_2: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Javni email</Label>
+                    <Input type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Website</Label>
+                    <Input value={form.website} onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Postanski broj</Label>
+                    <Input value={form.postanski_broj} onChange={(e) => setForm((prev) => ({ ...prev, postanski_broj: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Vrijeme rezultata</Label>
+                    <Input
+                      value={form.prosjecno_vrijeme_rezultata}
+                      onChange={(e) => setForm((prev) => ({ ...prev, prosjecno_vrijeme_rezultata: e.target.value }))}
+                      placeholder="npr. 24-48 sati"
+                    />
+                  </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Lozinku ne postavlja admin. Nakon spremanja pristupnog emaila posaljite pozivnicu iz liste, a laboratorija ce sama aktivirati pristup.
-              </p>
+
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Lokacija i pristup</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Latitude</Label>
+                    <Input value={form.latitude} onChange={(e) => setForm((prev) => ({ ...prev, latitude: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Longitude</Label>
+                    <Input value={form.longitude} onChange={(e) => setForm((prev) => ({ ...prev, longitude: e.target.value }))} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Google Maps link</Label>
+                    <Input
+                      value={form.google_maps_link}
+                      onChange={(e) => setForm((prev) => ({ ...prev, google_maps_link: e.target.value }))}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Pristupni email</Label>
+                    <Input
+                      type="email"
+                      value={form.account_email}
+                      onChange={(e) => setForm((prev) => ({ ...prev, account_email: e.target.value }))}
+                      placeholder="Dodajte kada zelite ukljuciti panel"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Lozinku ne postavlja admin. Nakon spremanja pristupnog emaila posaljite pozivnicu iz liste.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                    <Label>Online rezultati</Label>
+                    <Switch checked={form.online_rezultati} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_rezultati: checked }))} />
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                    <Label>Odmah verifikovana</Label>
+                    <Switch checked={form.verifikovan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, verifikovan: checked }))} />
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg border px-3 py-2 md:col-span-2">
+                    <Label>Aktivna</Label>
+                    <Switch checked={form.aktivan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, aktivan: checked }))} />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-6">
-              <div className="flex items-center gap-2">
-                <Switch checked={form.online_rezultati} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, online_rezultati: checked }))} />
-                <Label>Online rezultati</Label>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="space-y-4 rounded-lg border p-4">
+                <h3 className="font-semibold">Opis profila</h3>
+                <div>
+                  <Label>Kratki opis</Label>
+                  <Textarea rows={3} value={form.kratak_opis} onChange={(e) => setForm((prev) => ({ ...prev, kratak_opis: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Opis</Label>
+                  <Textarea rows={5} value={form.opis} onChange={(e) => setForm((prev) => ({ ...prev, opis: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Napomena</Label>
+                  <Textarea rows={3} value={form.napomena} onChange={(e) => setForm((prev) => ({ ...prev, napomena: e.target.value }))} />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.verifikovan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, verifikovan: checked }))} />
-                <Label>Odmah verifikovana</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.aktivan} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, aktivan: checked }))} />
-                <Label>Aktivna</Label>
+
+              <div className="space-y-4">
+                <AdminSingleImageUploadField
+                  label="Featured slika"
+                  folder="laboratories"
+                  value={form.featured_slika}
+                  onChange={(value) => setForm((prev) => ({ ...prev, featured_slika: value }))}
+                  description="Glavna vizualna slika laboratorije na javnom profilu."
+                />
+                <AdminSingleImageUploadField
+                  label="Profilna slika"
+                  folder="laboratories"
+                  value={form.profilna_slika}
+                  onChange={(value) => setForm((prev) => ({ ...prev, profilna_slika: value }))}
+                  description="Slika koja moze sluziti kao prepoznatljiv thumbnail laboratorije."
+                />
               </div>
             </div>
+
+            <AdminImageGalleryField
+              label="Galerija"
+              folder="laboratories"
+              images={form.galerija}
+              onChange={(images) => setForm((prev) => ({ ...prev, galerija: images }))}
+              description="Sve slike ostaju vezane za profil i nakon sto vlasnik preuzme nalog."
+              maxImages={20}
+            />
+
+            <NamedWorkingHoursEditor
+              value={form.radno_vrijeme}
+              onChange={(value) => setForm((prev) => ({ ...prev, radno_vrijeme: value }))}
+              description="Radno vrijeme se prikazuje na javnom profilu laboratorije."
+            />
 
             <div className="flex gap-2 pt-2">
               <Button type="submit" disabled={saving} className="flex-1">
-                {saving ? 'Spremanje...' : editingLaboratory ? 'Sačuvaj izmjene' : 'Kreiraj laboratoriju'}
+                {saving ? 'Spremanje...' : editingLaboratory ? 'Sacuvaj izmjene' : 'Kreiraj laboratoriju'}
               </Button>
               <Button type="button" variant="outline" onClick={closeDialog}>
-                Otkaži
+                Otkazi
               </Button>
             </div>
           </form>
