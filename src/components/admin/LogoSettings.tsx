@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X, Image as ImageIcon, Type, Loader2, Eye, Heart } from 'lucide-react';
 import { AnimatedLogo } from '@/components/AnimatedLogo';
+import { stripGoogleFontImports } from '@/utils/logoHtml';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 
@@ -30,7 +31,7 @@ interface LogoSettings {
 }
 
 const HEADER_LOGO_HTML_TEMPLATE = `<div style="display:flex;align-items:center;gap:12px;">
-  <div style="position:relative;height:52px;width:52px;">
+  <div style="position:relative;height:57px;width:57px;">
     <svg viewBox="0 0 512 512" style="height:100%;width:100%;filter:drop-shadow(0 6px 18px rgba(14,146,179,0.18));" aria-label="WizMedik logo">
       <circle cx="256" cy="256" r="224" fill="#D9EEF0"></circle>
       <circle class="wizmedik-circle-stroke" cx="256" cy="256" r="224" fill="none" stroke="#0E92B3" stroke-width="32" stroke-linecap="round" style="stroke-dasharray:1407;stroke-dashoffset:1407;transform-origin:center;"></circle>
@@ -44,7 +45,7 @@ const HEADER_LOGO_HTML_TEMPLATE = `<div style="display:flex;align-items:center;g
     <div style="font-family:'Poppins',sans-serif;font-size:30px;line-height:1;letter-spacing:-0.03em;">
       <span style="font-weight:600;color:#0E92B3;">wiz</span><span style="font-weight:400;color:#010101;">Medik</span>
     </div>
-    <div style="margin-top:2px;font-family:'Poppins',sans-serif;font-size:12px;color:#64748b;line-height:1.1;letter-spacing:0.02em;">
+    <div style="margin-top:2px;font-family:'Poppins',sans-serif;font-size:11px;color:#64748b;line-height:1.1;letter-spacing:0.02em;">
       Vaše zdravlje. Vaš izbor.
     </div>
   </div>
@@ -58,11 +59,13 @@ const HEADER_LOGO_HTML_TEMPLATE = `<div style="display:flex;align-items:center;g
 </div>`;
 
 const sanitizeLogoHtml = (dirty: string): string =>
-  DOMPurify.sanitize(dirty, {
-    USE_PROFILES: { html: true, svg: true, svgFilters: true },
-    ADD_TAGS: ['style'],
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-  });
+  stripGoogleFontImports(
+    DOMPurify.sanitize(dirty, {
+      USE_PROFILES: { html: true, svg: true, svgFilters: true },
+      ADD_TAGS: ['style'],
+      FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+    })
+  );
 
 export function LogoSettings() {
   const [settings, setSettings] = useState<LogoSettings>({

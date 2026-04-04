@@ -13,15 +13,15 @@ const logoSizes = {
     subtitle: 'hidden',
   },
   md: {
-    mark: 46,
+    mark: 57,
     gap: 'gap-3',
-    title: 'text-[1.9rem]',
-    subtitle: 'block text-[10px]',
+    title: 'text-[30px]',
+    subtitle: 'block text-[11px]',
   },
   lg: {
-    mark: 52,
+    mark: 57,
     gap: 'gap-3.5',
-    title: 'text-[2rem]',
+    title: 'text-[30px]',
     subtitle: 'block text-[11px]',
   },
 } as const;
@@ -82,11 +82,11 @@ export function AnimatedLogo({ className, size = 'md' }: AnimatedLogoProps) {
         {showSubtitle ? (
           <div
             className={cn(
-              'mt-1 leading-none uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400',
+              'mt-[2px] leading-[1.1] tracking-[0.02em] text-slate-500 dark:text-slate-400',
               config.subtitle
             )}
           >
-            Vase zdravlje. Vas izbor.
+            Tvoje zdravlje. Tvoj izbor.
           </div>
         ) : null}
       </div>

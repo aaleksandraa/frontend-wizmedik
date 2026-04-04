@@ -3,6 +3,7 @@ import { useLogoSettings } from '@/hooks/useLogoSettings';
 import { cn } from '@/lib/utils';
 import { Heart } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import { stripGoogleFontImports } from '@/utils/logoHtml';
 
 interface LogoProps {
   className?: string;
@@ -10,30 +11,32 @@ interface LogoProps {
 }
 
 const sanitizeLogoHtml = (html: string): string => {
-  return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true, svg: true, svgFilters: true },
-    ADD_TAGS: ['style'],
-    ADD_ATTR: [
-      'class',
-      'style',
-      'viewBox',
-      'stroke-width',
-      'stroke-linecap',
-      'stroke-dasharray',
-      'stroke-dashoffset',
-      'transform-origin',
-      'xmlns',
-      'aria-label',
-    ],
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-  });
+  return stripGoogleFontImports(
+    DOMPurify.sanitize(html, {
+      USE_PROFILES: { html: true, svg: true, svgFilters: true },
+      ADD_TAGS: ['style'],
+      ADD_ATTR: [
+        'class',
+        'style',
+        'viewBox',
+        'stroke-width',
+        'stroke-linecap',
+        'stroke-dasharray',
+        'stroke-dashoffset',
+        'transform-origin',
+        'xmlns',
+        'aria-label',
+      ],
+      FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+    })
+  );
 };
 
 export function Logo({ className, size = 'md' }: LogoProps) {
   const { settings, loading } = useLogoSettings();
 
   if (loading) {
-    return <div className="h-10 w-32 bg-muted animate-pulse rounded" />;
+    return <AnimatedLogo size={size} className={className} />;
   }
 
   if (!settings.logo_enabled) {

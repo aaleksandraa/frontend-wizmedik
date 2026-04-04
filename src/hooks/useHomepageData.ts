@@ -8,6 +8,9 @@ interface HomepageData {
     homepage_template: string;
     modern_cover_type: 'gradient' | 'image';
     modern_cover_value: string;
+    custom3_hero_bg_enabled?: boolean;
+    custom3_hero_bg_image?: string | null;
+    custom3_hero_bg_opacity?: number;
   };
   specialties: Array<{
     id: number;
@@ -61,6 +64,9 @@ export function useHomepageData() {
             homepage_template: 'classic',
             modern_cover_type: 'gradient',
             modern_cover_value: 'from-primary via-primary/90 to-primary/80',
+            custom3_hero_bg_enabled: false,
+            custom3_hero_bg_image: null,
+            custom3_hero_bg_opacity: 20,
           },
           specialties: [],
           doctors: [],

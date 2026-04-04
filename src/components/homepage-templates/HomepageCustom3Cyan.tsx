@@ -11,7 +11,8 @@ import { ClinicCard } from '@/components/ClinicCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
-import { settingsAPI, specialtiesAPI } from '@/services/api';
+import { specialtiesAPI } from '@/services/api';
+import { scheduleLowPriorityWork } from '@/utils/scheduleLowPriority';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { 
   Search, Heart, Users, Building2, MapPin, ArrowRight,
@@ -38,12 +39,6 @@ export default function HomepageCustom3Cyan() {
   const [citySearchQuery, setCitySearchQuery] = useState('');
   const [currentWord, setCurrentWord] = useState(0);
   const [hierarchicalSpecialties, setHierarchicalSpecialties] = useState<SpecialtyCategory[]>([]);
-  const [loadingHierarchicalSpecialties, setLoadingHierarchicalSpecialties] = useState(true);
-  const [heroBgSettings, setHeroBgSettings] = useState({
-    enabled: false,
-    image: null as string | null,
-    opacity: 20
-  });
 
   // Animated words that change every 2 seconds
   const words = ['ljekara', 'kliniku', 'banju', 'dom', 'savjet'];
@@ -60,48 +55,31 @@ export default function HomepageCustom3Cyan() {
   useEffect(() => {
     let isMounted = true;
 
-    const loadHierarchicalSpecialties = async () => {
-      try {
-        const response = await specialtiesAPI.getAll();
-        if (!isMounted) {
-          return;
-        }
+    const cancel = scheduleLowPriorityWork(
+      () => {
+        specialtiesAPI
+          .getAll()
+          .then((response) => {
+            if (!isMounted) {
+              return;
+            }
 
-        const categories = Array.isArray(response.data)
-          ? (response.data as SpecialtyCategory[])
-          : [];
-        setHierarchicalSpecialties(categories);
-      } catch (error) {
-        console.error('Error loading hierarchical specialties:', error);
-      } finally {
-        if (isMounted) {
-          setLoadingHierarchicalSpecialties(false);
-        }
-      }
-    };
-
-    loadHierarchicalSpecialties();
+            const categories = Array.isArray(response.data)
+              ? (response.data as SpecialtyCategory[])
+              : [];
+            setHierarchicalSpecialties(categories);
+          })
+          .catch((error) => {
+            console.error('Error loading hierarchical specialties:', error);
+          });
+      },
+      { delay: 1000, skipOnSlowConnection: true, timeout: 2500 }
+    );
 
     return () => {
       isMounted = false;
+      cancel();
     };
-  }, []);
-
-  // Load hero background settings
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const response = await settingsAPI.getTemplates();
-        setHeroBgSettings({
-          enabled: response.data.custom3_hero_bg_enabled || false,
-          image: response.data.custom3_hero_bg_image || null,
-          opacity: response.data.custom3_hero_bg_opacity || 20
-        });
-      } catch (error) {
-        console.error('Error loading hero background settings:', error);
-      }
-    };
-    loadSettings();
   }, []);
 
   const doctors = data?.doctors || [];
@@ -113,6 +91,14 @@ export default function HomepageCustom3Cyan() {
   const blogPosts = data?.blog_posts || [];
   const latestBlogPosts = data?.blog_posts_latest || blogPosts;
   const featuredBlogPosts = data?.blog_posts_featured || blogPosts;
+  const heroBgSettings = useMemo(
+    () => ({
+      enabled: Boolean(data?.settings?.custom3_hero_bg_enabled),
+      image: data?.settings?.custom3_hero_bg_image || null,
+      opacity: data?.settings?.custom3_hero_bg_opacity || 20,
+    }),
+    [data?.settings?.custom3_hero_bg_enabled, data?.settings?.custom3_hero_bg_image, data?.settings?.custom3_hero_bg_opacity]
+  );
   const supportsSpecialtySearch =
     !selectedType || selectedType === 'doktori' || selectedType === 'klinike';
   const showSpecialtyFields = supportsSpecialtySearch;

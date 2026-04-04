@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { preloadCardSettings } from "./hooks/useCardSettings";
 import { preloadSearchData } from "./hooks/useSmartSearch";
+import { scheduleLowPriorityWork } from "./utils/scheduleLowPriority";
 import "./utils/mobileScrollDebug";
 
 // Import HMR setup for development
@@ -36,9 +37,24 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Preload settings to avoid flash when rendering
-preloadCardSettings();
-preloadSearchData();
+// Warm non-critical data after the first load so it does not compete with LCP.
+if (typeof window !== "undefined") {
+  const warmNonCriticalData = () => {
+    scheduleLowPriorityWork(
+      () => {
+        void preloadCardSettings();
+        void preloadSearchData();
+      },
+      { delay: 1500, skipOnSlowConnection: true, timeout: 2500 }
+    );
+  };
+
+  if (document.readyState === "complete") {
+    warmNonCriticalData();
+  } else {
+    window.addEventListener("load", warmNonCriticalData, { once: true });
+  }
+}
 
 // Ensure root element exists before rendering
 const rootElement = document.getElementById("root");
