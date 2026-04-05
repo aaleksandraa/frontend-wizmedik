@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node ./scripts/sync-htaccess.mjs",
-    "build:seo": "npm run build && node ./scripts/prerender-seo-pages.mjs",
+    "build": "node ./scripts/build-static.mjs",
+    "build:seo": "node ./scripts/build-seo.mjs",
+    "deploy:static": "node ./scripts/deploy-static-build.mjs",
+    "deploy:static:seo": "node ./scripts/deploy-static-seo.mjs",
     "prerender:seo": "node ./scripts/prerender-seo-pages.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

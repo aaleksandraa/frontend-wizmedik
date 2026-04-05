@@ -165,6 +165,32 @@ Build output (`dist/` folder) može biti deploy-ovan na:
 For Apache deployments, always deploy the generated `dist/.htaccess` together with other `dist/*` files.
 For static Apache deploys, also replace `dist/sw.js` on the server and remove stale files from `assets/` plus old prerendered route folders before copying the new `dist/`. Otherwise browsers can keep using an old service worker or dead hashed assets on direct URL opens.
 
+### One-command static deploy
+Ako frontend build i deploy radiš na istoj mašini koja ima pristup web root folderu, možeš koristiti:
+
+```bash
+FRONTEND_DEPLOY_TARGET=/var/www/vhosts/wizmedik.ba/httpdocs npm run deploy:static:seo
+```
+
+Ova komanda:
+- napravi fresh production build
+- odradi SEO prerender
+- sigurno zamijeni kompletan sadržaj target web root foldera sadržajem iz `dist/`
+- uključi `assets/`, `index.html`, `.htaccess`, `sw.js` i prerendered route foldere
+
+Na Windows PowerShell:
+
+```powershell
+$env:FRONTEND_DEPLOY_TARGET='C:\path\to\httpdocs'
+npm run deploy:static:seo
+```
+
+Skripta odbija deploy u project folder ili filesystem root. Za nestandardne target putanje možeš eksplicitno dozvoliti:
+
+```bash
+ALLOW_ANY_DEPLOY_TARGET=1 FRONTEND_DEPLOY_TARGET=/custom/webroot npm run deploy:static:seo
+```
+
 ### Nginx Configuration
 ```nginx
 server {
