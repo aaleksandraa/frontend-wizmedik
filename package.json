@@ -12,7 +12,7 @@
     "provjeri:deploy": "node ./scripts/verify-static-deploy.mjs",
     "deploy:static": "node ./scripts/deploy-static-build.mjs",
     "deploy:static:seo": "node ./scripts/deploy-static-seo.mjs",
-    "prerender:seo": "node ./scripts/prerender-seo-pages.mjs",
+    "prerender:seo": "node ./scripts/run-seo-prerender.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

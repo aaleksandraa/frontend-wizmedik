@@ -6,7 +6,12 @@ const SERVICE_WORKER_MARKER = "// WizMedik service worker cleanup shim.";
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const origin = normalizeOrigin(args.origin || DEFAULT_ORIGIN);
-  const routes = args.routes.length > 0 ? uniqueRoutes(args.routes) : DEFAULT_ROUTES;
+  const envRoutes = parseRouteList(process.env.FRONTEND_VERIFY_ROUTES || "");
+  const routes = args.routes.length > 0
+    ? uniqueRoutes(args.routes)
+    : envRoutes.length > 0
+      ? uniqueRoutes(envRoutes)
+      : await buildDefaultRoutes();
 
   console.log(`[verify-deploy] Origin: ${origin}`);
   console.log(`[verify-deploy] Routes: ${routes.join(", ")}`);
@@ -65,6 +70,13 @@ function parseArgs(argv) {
   return args;
 }
 
+function parseRouteList(value) {
+  return String(value)
+    .split(/[,\n\r;]+/)
+    .map((route) => route.trim())
+    .filter(Boolean);
+}
+
 function uniqueRoutes(routes) {
   const routeSet = new Set();
   for (const route of routes) {
@@ -72,6 +84,31 @@ function uniqueRoutes(routes) {
   }
 
   return [...routeSet];
+}
+
+async function buildDefaultRoutes() {
+  const routes = [...DEFAULT_ROUTES];
+  const manifestRoutes = await loadManifestRoutes();
+
+  const firstQuestionDetail = manifestRoutes.find((route) => route.startsWith("pitanja/") && route !== "pitanja");
+  if (firstQuestionDetail) {
+    routes.push(`/${firstQuestionDetail}`);
+  }
+
+  return uniqueRoutes(routes);
+}
+
+async function loadManifestRoutes() {
+  try {
+    const { readFile } = await import("node:fs/promises");
+    const { resolve } = await import("node:path");
+    const manifestPath = resolve(process.cwd(), "dist", ".seo-prerendered-paths.json");
+    const raw = await readFile(manifestPath, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((entry) => typeof entry === "string") : [];
+  } catch {
+    return [];
+  }
 }
 
 function normalizeOrigin(origin) {

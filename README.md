@@ -178,6 +178,8 @@ Ova komanda:
 - sigurno zamijeni kompletan sadržaj target web root foldera sadržajem iz `dist/`
 - uključi `assets/`, `index.html`, `.htaccess`, `sw.js` i prerendered route foldere
 
+Kad je `../backend/artisan` dostupan, SEO prerender sada automatski koristi lokalni Laravel command `seo:prerender-pages` umjesto remote sitemap fetch-a. To je preporučeni production put jer koristi isti backend/database kontekst kao live sajt. Ako želiš prisilno koristiti stari remote način, postavi `SEO_PRERENDER_MODE=remote`.
+
 Nakon deploya možeš provjeriti live stanje sa:
 
 ```bash

@@ -11,7 +11,7 @@ async function main() {
     cwd: FRONTEND_DIR,
   });
 
-  await runCommand(process.execPath, [path.join(__dirname, "prerender-seo-pages.mjs")], {
+  await runCommand(process.execPath, [path.join(__dirname, "run-seo-prerender.mjs")], {
     cwd: FRONTEND_DIR,
   });
 }
