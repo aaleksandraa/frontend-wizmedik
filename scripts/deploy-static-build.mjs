@@ -7,11 +7,13 @@ const __dirname = path.dirname(__filename);
 const FRONTEND_DIR = path.resolve(__dirname, "..");
 
 async function main() {
+  const extraArgs = process.argv.slice(2);
+
   await runCommand(process.execPath, [path.join(__dirname, "build-static.mjs")], {
     cwd: FRONTEND_DIR,
   });
 
-  await runCommand(process.execPath, [path.join(__dirname, "deploy-static.mjs")], {
+  await runCommand(process.execPath, [path.join(__dirname, "deploy-static.mjs"), ...extraArgs], {
     cwd: FRONTEND_DIR,
   });
 }

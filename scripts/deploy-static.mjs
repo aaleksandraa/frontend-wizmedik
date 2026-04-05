@@ -7,6 +7,7 @@ const __dirname = path.dirname(__filename);
 const FRONTEND_DIR = path.resolve(__dirname, "..");
 const DIST_DIR = path.join(FRONTEND_DIR, "dist");
 const REPO_ROOT = path.resolve(FRONTEND_DIR, "..");
+const DEFAULT_SERVER_TARGET = "/var/www/vhosts/wizmedik.com/httpdocs";
 const DEFAULT_ALLOWED_BASENAMES = new Set([
   "httpdocs",
   "public_html",
@@ -16,17 +17,23 @@ const DEFAULT_ALLOWED_BASENAMES = new Set([
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const targetInput =
+  let targetInput =
     args.target ||
     process.env.FRONTEND_DEPLOY_TARGET ||
     process.env.DEPLOY_TARGET_DIR;
+
+  if (!targetInput && (await pathExists(DEFAULT_SERVER_TARGET))) {
+    targetInput = DEFAULT_SERVER_TARGET;
+    console.log(`[deploy-static] Using default production target: ${DEFAULT_SERVER_TARGET}`);
+  }
 
   if (!targetInput) {
     throw new Error(
       [
         "Missing deploy target.",
-        "Set FRONTEND_DEPLOY_TARGET or pass --target=/absolute/path/to/httpdocs",
-        "Example: FRONTEND_DEPLOY_TARGET=/var/www/vhosts/wizmedik.ba/httpdocs npm run deploy:static:seo",
+        `Set FRONTEND_DEPLOY_TARGET or pass --target=/absolute/path/to/httpdocs.`,
+        `Default server target '${DEFAULT_SERVER_TARGET}' was not found on this machine.`,
+        "Example: FRONTEND_DEPLOY_TARGET=/var/www/vhosts/wizmedik.com/httpdocs npm run deploy:static:seo",
       ].join(" ")
     );
   }

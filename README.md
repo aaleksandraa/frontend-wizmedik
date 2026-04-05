@@ -178,11 +178,26 @@ Ova komanda:
 - sigurno zamijeni kompletan sadržaj target web root foldera sadržajem iz `dist/`
 - uključi `assets/`, `index.html`, `.htaccess`, `sw.js` i prerendered route foldere
 
+Nakon deploya možeš provjeriti live stanje sa:
+
+```bash
+npm run provjeri:deploy
+```
+
+Po defaultu provjerava `https://wizmedik.com`, `sw.js`, `/`, `/pitanja` i `/domovi-njega`, te potvrđuje da route HTML koristi iste trenutne asset hashove kao homepage.
+
 Na Windows PowerShell:
 
 ```powershell
 $env:FRONTEND_DEPLOY_TARGET='C:\path\to\httpdocs'
 npm run deploy:static:seo
+```
+
+Za drugi domen:
+
+```powershell
+$env:FRONTEND_VERIFY_ORIGIN='https://staging.wizmedik.com'
+npm run provjeri:deploy
 ```
 
 Skripta odbija deploy u project folder ili filesystem root. Za nestandardne target putanje možeš eksplicitno dozvoliti:
