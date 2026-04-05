@@ -26,6 +26,27 @@ const IN_PLACE_PRESERVE_NAMES = new Set([
   ".idea",
   "coverage",
 ]);
+const IN_PLACE_PRESERVE_FILES = new Set([
+  ".env",
+  ".env.example",
+  ".env.production",
+  ".gitignore",
+  "bun.lockb",
+  "components.json",
+  "eslint.config.js",
+  "package-lock.json",
+  "package.json",
+  "postcss.config.js",
+  "README.md",
+  "tailwind.config.ts",
+  "test-production-build.bat",
+  "test-production-build.sh",
+  "tsconfig.app.json",
+  "tsconfig.json",
+  "tsconfig.node.json",
+  "vite.config.ts",
+  "vitest.config.ts",
+]);
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -168,21 +189,54 @@ async function validateTarget(targetDir, allowAnyTarget, inPlaceWebRoot) {
 }
 
 async function deployInPlace(targetDir) {
-  const staleGeneratedDirs = await findStaleGeneratedRouteDirectories(targetDir);
-
-  if (staleGeneratedDirs.length > 0) {
-    console.log(`[deploy-static] Removing ${staleGeneratedDirs.length} stale prerendered route directories...`);
-    for (const relativeDir of staleGeneratedDirs) {
-      await cleanupPath(path.join(targetDir, relativeDir));
-      await pruneEmptyParents(targetDir, path.dirname(relativeDir));
-    }
-  }
+  await resetGeneratedTopLevelEntries(targetDir);
 
   console.log("[deploy-static] Refreshing assets directory...");
   await cleanupPath(path.join(targetDir, "assets"));
 
   console.log("[deploy-static] Copying fresh dist output into webroot...");
   await copyDirectoryContents(DIST_DIR, targetDir);
+}
+
+async function resetGeneratedTopLevelEntries(targetDir) {
+  const entries = await fs.readdir(targetDir, { withFileTypes: true });
+  const distEntries = await fs.readdir(DIST_DIR, { withFileTypes: true }).catch(() => []);
+  const distTopLevelNames = new Set(distEntries.map((entry) => entry.name));
+  let removedDirectories = 0;
+  let removedFiles = 0;
+
+  for (const entry of entries) {
+    const entryPath = path.join(targetDir, entry.name);
+
+    if (entry.isDirectory()) {
+      if (IN_PLACE_PRESERVE_NAMES.has(entry.name)) {
+        continue;
+      }
+
+      await cleanupPath(entryPath);
+      removedDirectories += 1;
+      continue;
+    }
+
+    if (entry.isFile() || entry.isSymbolicLink()) {
+      if (IN_PLACE_PRESERVE_FILES.has(entry.name)) {
+        continue;
+      }
+
+      if (!shouldRemoveGeneratedTopLevelFile(entry.name, distTopLevelNames)) {
+        continue;
+      }
+
+      await cleanupPath(entryPath);
+      removedFiles += 1;
+    }
+  }
+
+  if (removedDirectories > 0 || removedFiles > 0) {
+    console.log(
+      `[deploy-static] Reset ${removedDirectories} generated directories and ${removedFiles} generated files before sync...`
+    );
+  }
 }
 
 async function copyDirectoryContents(sourceDir, targetDir) {
@@ -205,61 +259,6 @@ async function copyDirectoryContents(sourceDir, targetDir) {
     }
 
     await fs.copyFile(sourcePath, targetPath);
-  }
-}
-
-async function findStaleGeneratedRouteDirectories(targetDir) {
-  const currentGeneratedDirs = await collectGeneratedRouteDirectories(DIST_DIR);
-  const deployedGeneratedDirs = await collectGeneratedRouteDirectories(targetDir, {
-    ignoreTopLevelNames: IN_PLACE_PRESERVE_NAMES,
-  });
-
-  return [...deployedGeneratedDirs].filter((relativeDir) => !currentGeneratedDirs.has(relativeDir));
-}
-
-async function collectGeneratedRouteDirectories(baseDir, options = {}) {
-  const results = new Set();
-  const ignoreTopLevelNames = options.ignoreTopLevelNames || new Set();
-
-  async function walk(currentDir, relativeDir = "") {
-    const entries = await fs.readdir(currentDir, { withFileTypes: true }).catch(() => []);
-    const hasIndexHtml = entries.some((entry) => !entry.isDirectory() && entry.name === "index.html");
-
-    if (relativeDir && hasIndexHtml) {
-      results.add(relativeDir.replace(/\\/g, "/"));
-    }
-
-    for (const entry of entries) {
-      if (!entry.isDirectory()) {
-        continue;
-      }
-
-      if (!relativeDir && ignoreTopLevelNames.has(entry.name)) {
-        continue;
-      }
-
-      const nextRelativeDir = relativeDir ? path.join(relativeDir, entry.name) : entry.name;
-      await walk(path.join(currentDir, entry.name), nextRelativeDir);
-    }
-  }
-
-  await walk(baseDir);
-  return results;
-}
-
-async function pruneEmptyParents(rootDir, relativeDir) {
-  let currentRelativeDir = relativeDir;
-
-  while (currentRelativeDir && currentRelativeDir !== ".") {
-    const absoluteDir = path.join(rootDir, currentRelativeDir);
-    const entries = await fs.readdir(absoluteDir).catch(() => null);
-
-    if (!entries || entries.length > 0) {
-      break;
-    }
-
-    await fs.rmdir(absoluteDir).catch(() => null);
-    currentRelativeDir = path.dirname(currentRelativeDir);
   }
 }
 
@@ -304,6 +303,19 @@ function isSubPath(candidatePath, parentPath) {
 
 function isSamePath(left, right) {
   return path.resolve(left) === path.resolve(right);
+}
+
+function shouldRemoveGeneratedTopLevelFile(fileName, distTopLevelNames) {
+  if (distTopLevelNames.has(fileName)) {
+    return true;
+  }
+
+  return (
+    /^sitemap(?:-[A-Za-z0-9-]+)?\.xml(?:\.(?:gz|br))?$/i.test(fileName) ||
+    /^index\.html(?:\.(?:gz|br))?$/i.test(fileName) ||
+    /^sw\.js(?:\.(?:gz|br))?$/i.test(fileName) ||
+    /^robots\.txt(?:\.(?:gz|br))?$/i.test(fileName)
+  );
 }
 
 main().catch((error) => {
