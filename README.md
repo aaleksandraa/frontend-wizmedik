@@ -163,6 +163,7 @@ Build output (`dist/` folder) može biti deploy-ovan na:
 - AWS S3 + CloudFront
 
 For Apache deployments, always deploy the generated `dist/.htaccess` together with other `dist/*` files.
+For static Apache deploys, also replace `dist/sw.js` on the server and remove stale files from `assets/` plus old prerendered route folders before copying the new `dist/`. Otherwise browsers can keep using an old service worker or dead hashed assets on direct URL opens.
 
 ### Nginx Configuration
 ```nginx
