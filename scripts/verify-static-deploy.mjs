@@ -90,6 +90,11 @@ async function buildDefaultRoutes() {
   const routes = [...DEFAULT_ROUTES];
   const manifestRoutes = await loadManifestRoutes();
 
+  const firstDoctorDetail = manifestRoutes.find((route) => route.startsWith("doktor/"));
+  if (firstDoctorDetail) {
+    routes.push(`/${firstDoctorDetail}`);
+  }
+
   const firstQuestionDetail = manifestRoutes.find((route) => route.startsWith("pitanja/") && route !== "pitanja");
   if (firstQuestionDetail) {
     routes.push(`/${firstQuestionDetail}`);
