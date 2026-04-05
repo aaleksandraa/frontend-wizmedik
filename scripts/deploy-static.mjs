@@ -14,6 +14,18 @@ const DEFAULT_ALLOWED_BASENAMES = new Set([
   "htdocs",
   "wwwroot",
 ]);
+const IN_PLACE_PRESERVE_NAMES = new Set([
+  "dist",
+  "src",
+  "scripts",
+  "public",
+  "node_modules",
+  ".git",
+  ".github",
+  ".vscode",
+  ".idea",
+  "coverage",
+]);
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -40,9 +52,19 @@ async function main() {
 
   const targetDir = path.resolve(FRONTEND_DIR, targetInput);
   const allowAnyTarget = args.allowAnyTarget || parseBoolean(process.env.ALLOW_ANY_DEPLOY_TARGET);
+  const inPlaceWebRoot = isSamePath(targetDir, FRONTEND_DIR);
 
   await ensureDirectory(DIST_DIR, "Build output not found. Run npm run build or npm run build:seo first.");
-  await validateTarget(targetDir, allowAnyTarget);
+  await validateTarget(targetDir, allowAnyTarget, inPlaceWebRoot);
+
+  if (inPlaceWebRoot) {
+    console.log("[deploy-static] Detected in-place webroot layout. Syncing dist into current frontend directory...");
+    await deployInPlace(targetDir);
+    await verifyDeploy(targetDir);
+    console.log("[deploy-static] Deployment completed successfully.");
+    console.log("[deploy-static] Reminder: purge CDN/browser cache if production still serves old files.");
+    return;
+  }
 
   const parentDir = path.dirname(targetDir);
   await fs.mkdir(parentDir, { recursive: true });
@@ -113,17 +135,21 @@ function parseBoolean(value) {
   return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
 }
 
-async function validateTarget(targetDir, allowAnyTarget) {
+async function validateTarget(targetDir, allowAnyTarget, inPlaceWebRoot) {
   const parsed = path.parse(targetDir);
   if (targetDir === parsed.root) {
     throw new Error(`Refusing to deploy to filesystem root: ${targetDir}`);
   }
 
-  if (isSamePath(targetDir, FRONTEND_DIR) || isSamePath(targetDir, REPO_ROOT) || isSamePath(targetDir, DIST_DIR)) {
+  if (isSamePath(targetDir, REPO_ROOT) || isSamePath(targetDir, DIST_DIR)) {
     throw new Error(`Refusing to deploy into project source/build directory: ${targetDir}`);
   }
 
-  if (isSubPath(targetDir, REPO_ROOT)) {
+  if (!inPlaceWebRoot && isSamePath(targetDir, FRONTEND_DIR)) {
+    throw new Error(`Refusing to deploy into project source/build directory: ${targetDir}`);
+  }
+
+  if (!inPlaceWebRoot && isSubPath(targetDir, REPO_ROOT)) {
     throw new Error(`Refusing to deploy inside repository tree: ${targetDir}`);
   }
 
@@ -139,6 +165,24 @@ async function validateTarget(targetDir, allowAnyTarget) {
       );
     }
   }
+}
+
+async function deployInPlace(targetDir) {
+  const staleGeneratedDirs = await findStaleGeneratedRouteDirectories(targetDir);
+
+  if (staleGeneratedDirs.length > 0) {
+    console.log(`[deploy-static] Removing ${staleGeneratedDirs.length} stale prerendered route directories...`);
+    for (const relativeDir of staleGeneratedDirs) {
+      await cleanupPath(path.join(targetDir, relativeDir));
+      await pruneEmptyParents(targetDir, path.dirname(relativeDir));
+    }
+  }
+
+  console.log("[deploy-static] Refreshing assets directory...");
+  await cleanupPath(path.join(targetDir, "assets"));
+
+  console.log("[deploy-static] Copying fresh dist output into webroot...");
+  await copyDirectoryContents(DIST_DIR, targetDir);
 }
 
 async function copyDirectoryContents(sourceDir, targetDir) {
@@ -161,6 +205,61 @@ async function copyDirectoryContents(sourceDir, targetDir) {
     }
 
     await fs.copyFile(sourcePath, targetPath);
+  }
+}
+
+async function findStaleGeneratedRouteDirectories(targetDir) {
+  const currentGeneratedDirs = await collectGeneratedRouteDirectories(DIST_DIR);
+  const deployedGeneratedDirs = await collectGeneratedRouteDirectories(targetDir, {
+    ignoreTopLevelNames: IN_PLACE_PRESERVE_NAMES,
+  });
+
+  return [...deployedGeneratedDirs].filter((relativeDir) => !currentGeneratedDirs.has(relativeDir));
+}
+
+async function collectGeneratedRouteDirectories(baseDir, options = {}) {
+  const results = new Set();
+  const ignoreTopLevelNames = options.ignoreTopLevelNames || new Set();
+
+  async function walk(currentDir, relativeDir = "") {
+    const entries = await fs.readdir(currentDir, { withFileTypes: true }).catch(() => []);
+    const hasIndexHtml = entries.some((entry) => !entry.isDirectory() && entry.name === "index.html");
+
+    if (relativeDir && hasIndexHtml) {
+      results.add(relativeDir.replace(/\\/g, "/"));
+    }
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      if (!relativeDir && ignoreTopLevelNames.has(entry.name)) {
+        continue;
+      }
+
+      const nextRelativeDir = relativeDir ? path.join(relativeDir, entry.name) : entry.name;
+      await walk(path.join(currentDir, entry.name), nextRelativeDir);
+    }
+  }
+
+  await walk(baseDir);
+  return results;
+}
+
+async function pruneEmptyParents(rootDir, relativeDir) {
+  let currentRelativeDir = relativeDir;
+
+  while (currentRelativeDir && currentRelativeDir !== ".") {
+    const absoluteDir = path.join(rootDir, currentRelativeDir);
+    const entries = await fs.readdir(absoluteDir).catch(() => null);
+
+    if (!entries || entries.length > 0) {
+      break;
+    }
+
+    await fs.rmdir(absoluteDir).catch(() => null);
+    currentRelativeDir = path.dirname(currentRelativeDir);
   }
 }
 
