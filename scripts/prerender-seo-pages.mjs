@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DIST_DIR = path.resolve(__dirname, "..", "dist");
 const MANIFEST_FILE = path.join(DIST_DIR, ".seo-prerendered-paths.json");
+const LOCAL_TEMPLATE_FILE = path.join(DIST_DIR, "index.html");
 
 const FRONTEND_ORIGIN = normalizeOrigin(
   process.env.PRERENDER_FRONTEND_URL ||
@@ -45,6 +46,7 @@ const FALLBACK_SITEMAPS = [
 
 async function main() {
   await ensureDistDirectory();
+  const localTemplateHtml = await readLocalTemplateHtml();
 
   const paths = await collectPaths();
   if (paths.length === 0) {
@@ -63,8 +65,8 @@ async function main() {
     const displayPath = routePath === "" ? "/" : `/${routePath}`;
 
     try {
-      const html = await fetchRouteHtml(routePath);
-      const finalHtml = enforcePublicUrlMeta(html, routePath);
+      const sourceHtml = await fetchRouteHtml(routePath);
+      const finalHtml = buildPrerenderedHtml(localTemplateHtml, sourceHtml, routePath);
       const outputFile = targetFilePath(routePath);
       await fs.mkdir(path.dirname(outputFile), { recursive: true });
       await fs.writeFile(outputFile, finalHtml, "utf8");
@@ -113,6 +115,15 @@ async function ensureDistDirectory() {
   if (!stats || !stats.isDirectory()) {
     throw new Error(`dist directory not found: ${DIST_DIR}`);
   }
+}
+
+async function readLocalTemplateHtml() {
+  const html = await fs.readFile(LOCAL_TEMPLATE_FILE, "utf8").catch(() => null);
+  if (!html) {
+    throw new Error(`Local template not found: ${LOCAL_TEMPLATE_FILE}`);
+  }
+
+  return html;
 }
 
 async function collectPaths() {
@@ -275,6 +286,63 @@ function enforcePublicUrlMeta(html, routePath) {
   );
 
   return next;
+}
+
+function buildPrerenderedHtml(localTemplateHtml, sourceHtml, routePath) {
+  const sourceSeoPayload = extractSeoPayload(sourceHtml);
+  let next = stripSeoTags(localTemplateHtml);
+
+  if (sourceSeoPayload.titleTag) {
+    if (/<title[\s>][\s\S]*?<\/title>/i.test(next)) {
+      next = next.replace(/<title[\s>][\s\S]*?<\/title>/i, sourceSeoPayload.titleTag);
+    } else {
+      next = next.replace('</head>', `${sourceSeoPayload.titleTag}\n</head>`);
+    }
+  }
+
+  if (sourceSeoPayload.headTags) {
+    next = next.replace('</head>', `${sourceSeoPayload.headTags}\n</head>`);
+  }
+
+  return enforcePublicUrlMeta(next, routePath);
+}
+
+function extractSeoPayload(html) {
+  const headMatch = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
+  const head = headMatch?.[1] || html;
+  const titleTag = head.match(/<title[\s>][\s\S]*?<\/title>/i)?.[0] || "";
+
+  const patterns = [
+    /<meta[^>]+name=(["'])description\1[^>]*>/gi,
+    /<meta[^>]+name=(["'])robots\1[^>]*>/gi,
+    /<link[^>]+rel=(["'])canonical\1[^>]*>/gi,
+    /<meta[^>]+property=(["'])og:[^"']+\1[^>]*>/gi,
+    /<meta[^>]+name=(["'])twitter:[^"']+\1[^>]*>/gi,
+    /<script[^>]+type=(["'])application\/ld\+json\1[^>]*>[\s\S]*?<\/script>/gi,
+  ];
+
+  const headTags = patterns
+    .flatMap((pattern) => [...head.matchAll(pattern)].map((match) => match[0].trim()))
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    titleTag,
+    headTags,
+  };
+}
+
+function stripSeoTags(html) {
+  const patterns = [
+    /\s*<meta[^>]+name=(["'])description\1[^>]*>\s*/gi,
+    /\s*<meta[^>]+name=(["'])robots\1[^>]*>\s*/gi,
+    /\s*<link[^>]+rel=(["'])canonical\1[^>]*>\s*/gi,
+    /\s*<meta[^>]+property=(["'])og:[^"']+\1[^>]*>\s*/gi,
+    /\s*<meta[^>]+name=(["'])twitter:[^"']+\1[^>]*>\s*/gi,
+    /\s*<script[^>]+type=(["'])application\/ld\+json\1[^>]*>[\s\S]*?<\/script>\s*/gi,
+  ];
+
+  return patterns.reduce((acc, pattern) => acc.replace(pattern, "\n"), html);
 }
 
 function extractLocValues(xml) {
