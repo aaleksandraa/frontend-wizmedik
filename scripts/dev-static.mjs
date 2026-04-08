@@ -16,13 +16,13 @@ const viteEntrypoint = path.join(
 
 async function main() {
   await restoreSourceIndexHtml();
-  await runCommand(process.execPath, [viteEntrypoint, "build"], { cwd: FRONTEND_DIR });
-  await runCommand(process.execPath, [path.join(__dirname, "sync-htaccess.mjs")], {
+  const extraArgs = process.argv.slice(2);
+  await runCommand(process.execPath, [viteEntrypoint, ...(["dev", ...extraArgs])], {
     cwd: FRONTEND_DIR,
   });
 }
 
 main().catch((error) => {
-  console.error(`[build-static] ${error.message}`);
+  console.error(`[dev-static] ${error.message}`);
   process.exit(1);
 });

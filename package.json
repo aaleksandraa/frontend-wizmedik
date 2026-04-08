@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node ./scripts/dev-static.mjs",
     "build": "node ./scripts/build-static.mjs",
     "build:seo": "node ./scripts/build-seo.mjs",
     "prebaci": "node ./scripts/deploy-static-build.mjs",
