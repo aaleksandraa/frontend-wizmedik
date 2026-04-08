@@ -197,7 +197,7 @@ export default function HomepageCustom3Cyan() {
       }
     } else if (type === 'klinike') {
       if (selectedSpecialty && selectedCity) {
-        finalUrl = `/klinike/specijalnost/${selectedSpecialty}?grad=${encodeURIComponent(selectedCity)}`;
+        finalUrl = `/klinike/${selectedCity}/${selectedSpecialty}`;
       } else if (selectedSpecialty) {
         finalUrl = `/klinike/specijalnost/${selectedSpecialty}`;
       } else if (selectedCity) {

@@ -790,7 +790,7 @@ export default function SpecialtyLanding() {
                 </div>
                 <Button
                   variant="medical"
-                  onClick={() => navigate(`/klinike/specijalnost/${naziv?.toLowerCase()}`)}
+                  onClick={() => navigate(`/klinike/specijalnost/${specialtyInfo?.slug || naziv || ''}`)}
                   className="w-full sm:w-auto"
                 >
                   Pogledajte klinike

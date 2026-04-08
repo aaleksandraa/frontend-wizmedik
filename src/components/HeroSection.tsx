@@ -59,8 +59,12 @@ export function HeroSection() {
         url = '/doktori';
       }
     } else if (selectedType === 'klinike') {
-      if (selectedSpecialty) {
+      if (selectedSpecialty && selectedCity) {
+        url = `/klinike/${selectedCity}/${selectedSpecialty}`;
+      } else if (selectedSpecialty) {
         url = `/klinike/specijalnost/${selectedSpecialty}`;
+      } else if (selectedCity) {
+        url = `/klinike/${selectedCity}`;
       } else {
         url = '/klinike';
       }

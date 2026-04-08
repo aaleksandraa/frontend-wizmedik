@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { clinicsAPI, specialtiesAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
@@ -17,6 +17,27 @@ import { Label } from '@/components/ui/label';
 import { Building2, Search, MapPin, Navigation, X, ArrowUpDown } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
+interface SpecialtyNode {
+  id: number;
+  naziv: string;
+  slug: string;
+  parent_id?: number | null;
+  children?: SpecialtyNode[];
+}
+
+interface ClinicSpecialty {
+  id: number;
+  naziv: string;
+  slug: string;
+  parent_id?: number | null;
+}
+
+interface DoctorSummary {
+  id: number;
+  specijalnost?: string;
+  specijalnost_id?: number | null;
+}
+
 interface Clinic {
   id: number;
   naziv: string;
@@ -28,15 +49,18 @@ interface Clinic {
   website?: string;
   slike: any[];
   radno_vrijeme: any;
-  doktori?: any[];
+  doktori?: DoctorSummary[];
+  specijalnosti?: ClinicSpecialty[];
   latitude?: number;
   longitude?: number;
   slug?: string;
   ocjena?: number;
+  broj_ocjena?: number;
   distance?: number;
 }
 
 type SortOption = 'name' | 'rating' | 'distance';
+
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
 
@@ -51,144 +75,113 @@ const slugifySegment = (value: string): string => {
     .replace(/-+/g, '-');
 };
 
+const normalizeText = (value?: string | null): string => {
+  return (value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+};
+
 export default function Clinics() {
   const { grad, specijalnost } = useParams<{ grad?: string; specijalnost?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { template } = useListingTemplate('clinics');
-  const { cities: allCities } = useAllCities(); // Get all cities from database
+  const { cities: allCities } = useAllCities();
+
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [filteredClinics, setFilteredClinics] = useState<Clinic[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [citySearch, setCitySearch] = useState('');
-  const [selectedCity, setSelectedCity] = useState<string>(() => {
-    const gradParam = grad || searchParams.get('grad') || '';
-    return gradParam ? decodeURIComponent(gradParam.replace(/\+/g, ' ')) : '';
-  });
+  const [selectedCity, setSelectedCity] = useState('');
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  const [selectedParentSpecialty, setSelectedParentSpecialty] = useState<string>(specijalnost || '');
+  const [selectedParentSpecialty, setSelectedParentSpecialty] = useState('');
   const [selectedSubSpecialties, setSelectedSubSpecialties] = useState<string[]>([]);
-  const [specialties, setSpecialties] = useState<any[]>([]);
-  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [specialties, setSpecialties] = useState<SpecialtyNode[]>([]);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [useUserLocation, setUseUserLocation] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
-  // API already returns top-level specialties with children included
-  const hierarchicalSpecialties = useMemo(() => {
-    return specialties.map((parent: any) => ({
-      ...parent,
-      children: parent.children || []
-    }));
-  }, [specialties]);
+  const hierarchicalSpecialties = useMemo(
+    () => specialties.map((parent) => ({ ...parent, children: parent.children || [] })),
+    [specialties]
+  );
 
-  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  }, []);
+  const flatSpecialties = useMemo(() => {
+    const items: SpecialtyNode[] = [];
 
-  const filterClinics = useCallback(() => {
-    let filtered = clinics.map(clinic => ({
-      ...clinic,
-      distance: userLocation && clinic.latitude && clinic.longitude
-        ? calculateDistance(userLocation.lat, userLocation.lng, clinic.latitude, clinic.longitude)
-        : undefined
-    }));
-
-    if (searchTerm) {
-      filtered = filtered.filter(clinic =>
-        clinic.naziv.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        clinic.opis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        clinic.adresa.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (selectedCity) {
-      filtered = filtered.filter(clinic => clinic.grad === selectedCity);
-    }
-
-    // Filter by specialty
-    if (selectedParentSpecialty) {
-      const parentId = parseInt(selectedParentSpecialty);
-      const subIds = selectedSubSpecialties.map(id => parseInt(id));
-      
-      filtered = filtered.filter(clinic => {
-        if (!clinic.doktori || clinic.doktori.length === 0) return false;
-        
-        return clinic.doktori.some((doctor: any) => {
-          const docSpecId = doctor.specijalnost_id || doctor.specijalnost?.id;
-          if (!docSpecId) return false;
-          
-          // If sub-specialties selected, check those
-          if (subIds.length > 0) {
-            return subIds.includes(docSpecId);
-          }
-          // Otherwise check parent and all its children
-          if (docSpecId === parentId) return true;
-          const parent = hierarchicalSpecialties.find(s => s.id === parentId);
-          if (parent?.children) {
-            return parent.children.some((child: any) => child.id === docSpecId);
-          }
-          return false;
-        });
+    hierarchicalSpecialties.forEach((parent) => {
+      items.push({ ...parent, children: undefined });
+      (parent.children || []).forEach((child) => {
+        items.push({ ...child, children: undefined });
       });
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.naziv.localeCompare(b.naziv);
-        case 'rating':
-          return (b.ocjena || 0) - (a.ocjena || 0);
-        case 'distance':
-          if (!useUserLocation) return 0;
-          return (a.distance || 999) - (b.distance || 999);
-        default:
-          return 0;
-      }
     });
 
-    setFilteredClinics(filtered);
-  }, [clinics, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useUserLocation, sortBy, calculateDistance]);
+    return items;
+  }, [hierarchicalSpecialties]);
 
-  const fetchClinics = async () => {
-    try {
-      const response = await clinicsAPI.getAll();
-      const clinicsList = Array.isArray(response.data) 
-        ? response.data 
-        : (response.data?.data || []);
-      setClinics(clinicsList);
-    } catch (error) {
-      console.error('Error fetching clinics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const specialtyById = useMemo(() => {
+    const map = new Map<number, SpecialtyNode>();
+    flatSpecialties.forEach((specialty) => map.set(specialty.id, specialty));
+    return map;
+  }, [flatSpecialties]);
 
-  const fetchSpecialties = async () => {
-    try {
-      const response = await specialtiesAPI.getAll();
-      setSpecialties(response.data || []);
-    } catch (error) {
-      console.error('Error fetching specialties:', error);
+  const specialtyBySlug = useMemo(() => {
+    const map = new Map<string, SpecialtyNode>();
+    flatSpecialties.forEach((specialty) => map.set(specialty.slug, specialty));
+    return map;
+  }, [flatSpecialties]);
+
+  const specialtyByName = useMemo(() => {
+    const map = new Map<string, SpecialtyNode>();
+    flatSpecialties.forEach((specialty) => map.set(normalizeText(specialty.naziv), specialty));
+    return map;
+  }, [flatSpecialties]);
+
+  const resolveCityNameFromSlug = (cityValue: string) => {
+    const decoded = decodeURIComponent(cityValue.replace(/\+/g, ' '));
+    const matched = allCities.find(
+      (city) => city.slug === decoded || normalizeText(city.naziv) === normalizeText(decoded)
+    );
+
+    if (matched?.naziv) {
+      return matched.naziv;
     }
+
+    return decoded.replace(/-/g, ' ').trim();
   };
 
   useEffect(() => {
+    const fetchClinics = async () => {
+      try {
+        const response = await clinicsAPI.getAll({ limit: 1000 });
+        const clinicsList = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        setClinics(clinicsList);
+      } catch (error) {
+        console.error('Error fetching clinics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchSpecialties = async () => {
+      try {
+        const response = await specialtiesAPI.getAll();
+        const specialtiesList = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        setSpecialties(specialtiesList);
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
+
     fetchClinics();
     fetchSpecialties();
   }, []);
 
-  // Normalize legacy query URLs to clean SEO routes.
   useEffect(() => {
     if (location.pathname !== '/klinike') {
       return;
@@ -201,156 +194,369 @@ export default function Clinics() {
       return;
     }
 
-    if (specialtyQuery && !gradQuery) {
-      navigate(`/klinike/specijalnost/${slugifySegment(specialtyQuery)}`, { replace: true });
+    const citySlug = gradQuery ? slugifySegment(gradQuery) : '';
+    const specialtySlug = specialtyQuery ? slugifySegment(specialtyQuery) : '';
+
+    if (citySlug && specialtySlug) {
+      navigate(`/klinike/${citySlug}/${specialtySlug}`, { replace: true });
       return;
     }
 
-    if (gradQuery) {
-      const decodedGrad = decodeURIComponent(gradQuery.replace(/\+/g, ' ')).replace(/-/g, ' ').trim();
-      const matched = allCities.find((city) =>
-        city.slug === decodedGrad.toLowerCase() ||
-        city.naziv.toLowerCase() === decodedGrad.toLowerCase()
-      );
-      const citySlug = matched?.slug || slugifySegment(decodedGrad);
-      if (citySlug) {
-        navigate(`/klinike/${citySlug}`, { replace: true });
-      }
+    if (specialtySlug) {
+      navigate(`/klinike/specijalnost/${specialtySlug}`, { replace: true });
+      return;
     }
-  }, [allCities, location.pathname, navigate, searchParams]);
 
-  const resolveCityNameFromSlug = useCallback((cityValue: string) => {
-    const decoded = decodeURIComponent(cityValue.replace(/\+/g, ' '));
-    const matched = allCities.find((city) =>
-      city.slug === decoded || city.naziv.toLowerCase() === decoded.toLowerCase()
+    if (citySlug) {
+      navigate(`/klinike/${citySlug}`, { replace: true });
+    }
+  }, [location.pathname, navigate, searchParams]);
+
+  useEffect(() => {
+    const routeCityName = grad ? resolveCityNameFromSlug(grad) : '';
+    setSelectedCity(routeCityName);
+    setCitySearch(routeCityName);
+
+    if (!specijalnost) {
+      setSelectedParentSpecialty('');
+      setSelectedSubSpecialties([]);
+      return;
+    }
+
+    const exactParent = hierarchicalSpecialties.find((parent) => parent.slug === specijalnost);
+    if (exactParent) {
+      setSelectedParentSpecialty(exactParent.slug);
+      setSelectedSubSpecialties([]);
+      return;
+    }
+
+    const matchedParent = hierarchicalSpecialties.find((parent) =>
+      (parent.children || []).some((child) => child.slug === specijalnost)
     );
 
-    if (matched?.naziv) {
-      return matched.naziv;
+    if (matchedParent) {
+      setSelectedParentSpecialty(matchedParent.slug);
+      setSelectedSubSpecialties([specijalnost]);
+      return;
     }
 
-    return decoded.replace(/-/g, ' ').trim();
-  }, [allCities]);
-
-  // Update filters when URL params change
-  useEffect(() => {
-    if (grad) {
-      const cityName = resolveCityNameFromSlug(grad);
-      setSelectedCity(cityName);
-      setCitySearch(cityName);
-    }
-    if (specijalnost) {
-      setSelectedParentSpecialty(specijalnost);
-    }
-  }, [grad, specijalnost, resolveCityNameFromSlug]);
-
-  // Set citySearch when selectedCity is loaded from URL
-  useEffect(() => {
-    if (selectedCity) {
-      setCitySearch(selectedCity);
-    }
-  }, [selectedCity]);
-
-  useEffect(() => {
-    filterClinics();
-  }, [filterClinics]);
+    setSelectedParentSpecialty(specijalnost);
+    setSelectedSubSpecialties([]);
+  }, [grad, hierarchicalSpecialties, specijalnost, allCities]);
 
   const selectedParentData = useMemo(() => {
-    if (!selectedParentSpecialty) return null;
-    return hierarchicalSpecialties.find(s => s.id.toString() === selectedParentSpecialty);
-  }, [selectedParentSpecialty, hierarchicalSpecialties]);
+    if (!selectedParentSpecialty) {
+      return null;
+    }
 
-  // Use all cities from database instead of extracting from clinics
-  const uniqueCities = useMemo(() => {
-    return allCities.map(city => city.naziv).sort();
-  }, [allCities]);
+    return hierarchicalSpecialties.find((specialty) => specialty.slug === selectedParentSpecialty) || null;
+  }, [hierarchicalSpecialties, selectedParentSpecialty]);
+
+  const routeSpecialtyData = useMemo(() => {
+    if (!specijalnost) {
+      return null;
+    }
+
+    const exact = specialtyBySlug.get(specijalnost);
+    if (exact) {
+      return exact;
+    }
+
+    return specialtyByName.get(normalizeText(specijalnost)) || null;
+  }, [specijalnost, specialtyByName, specialtyBySlug]);
+
+  const uniqueCities = useMemo(() => allCities.map((city) => city.naziv).sort(), [allCities]);
 
   const filteredCities = useMemo(() => {
-    if (!citySearch) return uniqueCities;
-    return uniqueCities.filter(city => 
-      city.toLowerCase().includes(citySearch.toLowerCase())
-    );
-  }, [uniqueCities, citySearch]);
+    if (!citySearch) {
+      return uniqueCities;
+    }
 
-  // Dynamic page title - MOVED BEFORE LOADING CHECK
+    return uniqueCities.filter((city) => normalizeText(city).includes(normalizeText(citySearch)));
+  }, [citySearch, uniqueCities]);
+
+  const getClinicSpecialtySlugs = (clinic: Clinic): string[] => {
+    const slugs = new Set<string>();
+
+    const attachSpecialty = (specialty?: SpecialtyNode | ClinicSpecialty | null) => {
+      if (!specialty?.slug) {
+        return;
+      }
+
+      slugs.add(specialty.slug);
+
+      if (specialty.parent_id) {
+        const parent = specialtyById.get(specialty.parent_id);
+        if (parent?.slug) {
+          slugs.add(parent.slug);
+        }
+      }
+    };
+
+    (clinic.specijalnosti || []).forEach((specialty) => attachSpecialty(specialty));
+
+    (clinic.doktori || []).forEach((doctor) => {
+      if (doctor.specijalnost_id) {
+        attachSpecialty(specialtyById.get(doctor.specijalnost_id));
+      }
+
+      if (doctor.specijalnost) {
+        attachSpecialty(specialtyByName.get(normalizeText(doctor.specijalnost)));
+      }
+    });
+
+    return Array.from(slugs);
+  };
+
+  const getClinicSearchTerms = (clinic: Clinic): string[] => {
+    const terms = new Set<string>();
+
+    const addTerm = (value?: string | null) => {
+      const normalized = (value || '').trim();
+      if (normalized !== '') {
+        terms.add(normalized);
+      }
+    };
+
+    (clinic.specijalnosti || []).forEach((specialty) => {
+      addTerm(specialty.naziv);
+
+      if (specialty.parent_id) {
+        addTerm(specialtyById.get(specialty.parent_id)?.naziv);
+      }
+    });
+
+    (clinic.doktori || []).forEach((doctor) => {
+      addTerm(doctor.specijalnost);
+
+      if (doctor.specijalnost_id) {
+        const specialty = specialtyById.get(doctor.specijalnost_id);
+        addTerm(specialty?.naziv);
+        if (specialty?.parent_id) {
+          addTerm(specialtyById.get(specialty.parent_id)?.naziv);
+        }
+      }
+    });
+
+    return Array.from(terms);
+  };
+
+  useEffect(() => {
+    const normalizedSearch = normalizeText(searchTerm);
+    const normalizedCity = normalizeText(selectedCity);
+
+    const filtered = clinics
+      .map((clinic) => ({
+        ...clinic,
+        distance:
+          userLocation && clinic.latitude && clinic.longitude
+            ? calculateDistance(userLocation.lat, userLocation.lng, clinic.latitude, clinic.longitude)
+            : undefined,
+      }))
+      .filter((clinic) => {
+        if (
+          normalizedSearch &&
+          ![
+            clinic.naziv,
+            clinic.opis,
+            clinic.adresa,
+            clinic.grad,
+            clinic.telefon,
+            ...getClinicSearchTerms(clinic),
+          ]
+            .filter(Boolean)
+            .some((value) => normalizeText(String(value)).includes(normalizedSearch))
+        ) {
+          return false;
+        }
+
+        if (normalizedCity && normalizeText(clinic.grad) !== normalizedCity) {
+          return false;
+        }
+
+        if (!selectedParentData) {
+          return true;
+        }
+
+        const clinicSpecialtySlugs = getClinicSpecialtySlugs(clinic);
+
+        if (selectedSubSpecialties.length > 0) {
+          return selectedSubSpecialties.some((slug) => clinicSpecialtySlugs.includes(slug));
+        }
+
+        if (clinicSpecialtySlugs.includes(selectedParentData.slug)) {
+          return true;
+        }
+
+        return (selectedParentData.children || []).some((child) => clinicSpecialtySlugs.includes(child.slug));
+      });
+
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'rating':
+          return (b.ocjena || 0) - (a.ocjena || 0);
+        case 'distance':
+          if (!useUserLocation) {
+            return 0;
+          }
+          return (a.distance || Number.MAX_SAFE_INTEGER) - (b.distance || Number.MAX_SAFE_INTEGER);
+        case 'name':
+        default:
+          return a.naziv.localeCompare(b.naziv);
+      }
+    });
+
+    setFilteredClinics(filtered);
+  }, [
+    clinics,
+    searchTerm,
+    selectedCity,
+    selectedParentData,
+    selectedSubSpecialties,
+    sortBy,
+    useUserLocation,
+    userLocation,
+    specialtyById,
+    specialtyByName,
+  ]);
+
   const pageTitle = useMemo(() => {
-    let title = 'Klinike';
-    if (selectedCity) title += ` - ${selectedCity}`;
-    return title;
-  }, [selectedCity]);
-
-  const selectedCitySlug = useMemo(() => {
-    if (!selectedCity) {
-      return '';
+    if (selectedCity && selectedParentData?.naziv) {
+      return `Klinike za ${selectedParentData.naziv} - ${selectedCity}`;
     }
 
-    const matched = allCities.find((city) =>
-      city.naziv.toLowerCase() === selectedCity.toLowerCase() ||
-      city.slug === selectedCity.toLowerCase()
-    );
-
-    if (matched?.slug) {
-      return matched.slug;
+    if (selectedParentData?.naziv) {
+      return `Klinike za ${selectedParentData.naziv}`;
     }
 
-    return selectedCity.toLowerCase().trim().replace(/\s+/g, '-');
-  }, [allCities, selectedCity]);
+    if (selectedCity) {
+      return `Klinike - ${selectedCity}`;
+    }
+
+    return 'Klinike';
+  }, [selectedCity, selectedParentData]);
 
   const canonicalUrl = useMemo(() => {
-    const hasCityFilter = !!selectedCitySlug;
-    const hasSpecialtyFilter = !!selectedParentData?.slug;
-    const hasSubSpecialtyFilters = selectedSubSpecialties.length > 0;
-
-    if (hasCityFilter && !hasSpecialtyFilter && !hasSubSpecialtyFilters) {
-      return `${SITE_URL}/klinike/${selectedCitySlug}`;
+    if (grad && specijalnost) {
+      return `${SITE_URL}/klinike/${grad}/${specijalnost}`;
     }
-    if (!hasCityFilter && hasSpecialtyFilter && !hasSubSpecialtyFilters) {
-      return `${SITE_URL}/klinike/specijalnost/${selectedParentData.slug}`;
+
+    if (specijalnost) {
+      return `${SITE_URL}/klinike/specijalnost/${specijalnost}`;
+    }
+
+    if (grad) {
+      return `${SITE_URL}/klinike/${grad}`;
     }
 
     return `${SITE_URL}/klinike`;
-  }, [selectedCitySlug, selectedParentData, selectedSubSpecialties]);
+  }, [grad, specijalnost]);
 
   const seoTitle = useMemo(() => {
-    let title = 'Klinike';
-    if (selectedParentData?.naziv) title += ` - ${selectedParentData.naziv}`;
-    if (selectedCity) title += ` u ${selectedCity}`;
-    return `${title} | WizMedik`;
-  }, [selectedCity, selectedParentData]);
+    const routeCityName = grad ? resolveCityNameFromSlug(grad) : '';
+    const routeSpecialtyName = routeSpecialtyData?.naziv || '';
+
+    if (routeCityName && routeSpecialtyName) {
+      return `Klinike za ${routeSpecialtyName} - ${routeCityName} | WizMedik`;
+    }
+
+    if (routeSpecialtyName) {
+      return `Klinike za ${routeSpecialtyName} | WizMedik`;
+    }
+
+    if (routeCityName) {
+      return `Klinike - ${routeCityName} | WizMedik`;
+    }
+
+    return 'Klinike | WizMedik';
+  }, [grad, routeSpecialtyData]);
 
   const seoDescription = useMemo(() => {
-    let desc = 'Pronadite klinike i zdravstvene ustanove u Bosni i Hercegovini';
-    if (selectedParentData?.naziv) desc = `Pronadite klinike za ${selectedParentData.naziv.toLowerCase()} u Bosni i Hercegovini`;
-    if (selectedCity) desc += `, grad ${selectedCity}`;
-    desc += '. Uporedite profile, usluge i kontakt informacije.';
-    return desc;
-  }, [selectedCity, selectedParentData]);
+    const routeCityName = grad ? resolveCityNameFromSlug(grad) : '';
+    const routeSpecialtyName = routeSpecialtyData?.naziv || '';
+
+    if (routeCityName && routeSpecialtyName) {
+      return `Pronadjite klinike za ${routeSpecialtyName.toLowerCase()} u ${routeCityName}. Uporedite profile, usluge, doktore i kontakt informacije na WizMedik platformi.`;
+    }
+
+    if (routeSpecialtyName) {
+      return `Pronadjite klinike za ${routeSpecialtyName.toLowerCase()} u Bosni i Hercegovini. Uporedite profile, usluge, doktore i kontakt informacije.`;
+    }
+
+    if (routeCityName) {
+      return `Pronadjite klinike u ${routeCityName}. Uporedite profile, usluge, doktore i kontakt informacije na WizMedik platformi.`;
+    }
+
+    return 'Pronadjite klinike u Bosni i Hercegovini. Uporedite profile, usluge, doktore i kontakt informacije na WizMedik platformi.';
+  }, [grad, routeSpecialtyData]);
+
+  const structuredData = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: pageTitle,
+      description: seoDescription,
+      numberOfItems: filteredClinics.length,
+      itemListElement: filteredClinics.slice(0, 10).map((clinic, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'MedicalClinic',
+          name: clinic.naziv,
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: clinic.adresa,
+            addressLocality: clinic.grad,
+            addressCountry: 'BA',
+          },
+          telephone: clinic.telefon,
+          medicalSpecialty: (clinic.specijalnosti || []).map((specialty) => specialty.naziv),
+        },
+      })),
+    }),
+    [filteredClinics, pageTitle, seoDescription]
+  );
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   const toggleLocation = () => {
     if (useUserLocation) {
       setUseUserLocation(false);
       setUserLocation(null);
       setSortBy('name');
-    } else {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            });
-            setUseUserLocation(true);
-            setSortBy('distance');
-          },
-          (error) => {
-            console.error('Error getting location:', error);
-            alert('Nije moguće pristupiti vašoj lokaciji.');
-          }
-        );
-      } else {
-        alert('Vaš browser ne podržava geolokaciju.');
-      }
+      return;
     }
+
+    if (!('geolocation' in navigator)) {
+      window.alert('Vas browser ne podrzava geolokaciju.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setUseUserLocation(true);
+        setSortBy('distance');
+      },
+      () => {
+        window.alert('Nije moguce pristupiti vasoj lokaciji.');
+      }
+    );
   };
 
   const handleCitySelect = (city: string) => {
@@ -369,18 +575,15 @@ export default function Clinics() {
     setSelectedSubSpecialties([]);
   };
 
-  const toggleSubSpecialty = (subId: string) => {
-    setSelectedSubSpecialties(prev => 
-      prev.includes(subId) 
-        ? prev.filter(id => id !== subId)
-        : [...prev, subId]
+  const toggleSubSpecialty = (subSlug: string) => {
+    setSelectedSubSpecialties((prev) =>
+      prev.includes(subSlug) ? prev.filter((slug) => slug !== subSlug) : [...prev, subSlug]
     );
   };
 
   const selectAllSubSpecialties = () => {
     if (selectedParentData?.children) {
-      const allIds = selectedParentData.children.map((c: any) => c.id.toString());
-      setSelectedSubSpecialties(allIds);
+      setSelectedSubSpecialties(selectedParentData.children.map((child) => child.slug));
     }
   };
 
@@ -399,30 +602,15 @@ export default function Clinics() {
     );
   }
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "Privatne klinike u Bosni i Hercegovini",
-    "description": seoDescription,
-    "numberOfItems": filteredClinics.length,
-    "itemListElement": filteredClinics.slice(0, 10).map((clinic, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "MedicalClinic",
-        "name": clinic.naziv,
-        "address": { "@type": "PostalAddress", "streetAddress": clinic.adresa, "addressLocality": clinic.grad, "addressCountry": "BA" },
-        "telephone": clinic.telefon
-      }
-    }))
-  };
-
   return (
     <>
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
-        <meta name="keywords" content={`privatne klinike bih, klinika ${selectedCity || 'sarajevo'}, ${selectedParentData?.naziv || 'zdravstvene usluge'}, medicinski centar`} />
+        <meta
+          name="keywords"
+          content={`privatne klinike bih, klinika ${selectedCity || 'bosna i hercegovina'}, ${routeSpecialtyData?.naziv || 'zdravstvene usluge'}, medicinski centar`}
+        />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
@@ -435,228 +623,214 @@ export default function Clinics() {
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
-      
+
       <div className="min-h-screen bg-background">
         <Navbar />
-        
+
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center mb-12">
-            {/* Mobile: No icon, smaller font */}
             <div className="md:hidden mb-4">
-              <h1 className="text-2xl font-bold text-foreground">
-                {pageTitle}
-              </h1>
+              <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
             </div>
-            
-            {/* Desktop: Icon + larger font */}
+
             <div className="hidden md:flex items-center justify-center gap-3 mb-4">
               <Building2 className="h-10 w-10 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">
-                {pageTitle}
-              </h1>
+              <h1 className="text-4xl font-bold text-foreground">{pageTitle}</h1>
             </div>
-            
+
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Pregledajte profile, zakažite termin online ili kontaktirajte.
+              Pregledajte profile, usluge, tim doktora i kontakt informacije klinika.
             </p>
           </div>
 
-        {/* Filters */}
-        <div className="mb-8 space-y-4 bg-card p-4 rounded-lg border">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Pretražite klinike..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {/* City Autocomplete */}
-            <div className="relative w-full lg:w-56">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-              <Input
-                placeholder="Unesite grad..."
-                value={citySearch}
-                onChange={(e) => {
-                  setCitySearch(e.target.value);
-                  setShowCitySuggestions(true);
-                  if (!e.target.value) setSelectedCity('');
-                }}
-                onFocus={() => setShowCitySuggestions(true)}
-                onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
-                className="pl-10 pr-8"
-              />
-              {selectedCity && (
-                <button
-                  onClick={clearCity}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-              {showCitySuggestions && filteredCities.length > 0 && (
-                <div className="absolute z-20 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">
-                  <div
-                    className="px-3 py-2 hover:bg-muted cursor-pointer text-sm font-medium"
-                    onMouseDown={() => handleCitySelect('')}
+          <div className="mb-8 space-y-4 bg-card p-4 rounded-lg border">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pretrazite klinike..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <div className="relative w-full lg:w-56">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <Input
+                  placeholder="Unesite grad..."
+                  value={citySearch}
+                  onChange={(e) => {
+                    setCitySearch(e.target.value);
+                    setShowCitySuggestions(true);
+                    if (!e.target.value) {
+                      setSelectedCity('');
+                    }
+                  }}
+                  onFocus={() => setShowCitySuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
+                  className="pl-10 pr-8"
+                />
+                {selectedCity && (
+                  <button
+                    onClick={clearCity}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    Svi gradovi
-                  </div>
-                  {filteredCities.map(city => (
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+                {showCitySuggestions && filteredCities.length > 0 && (
+                  <div className="absolute z-20 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">
                     <div
-                      key={city}
-                      className={`px-3 py-2 hover:bg-muted cursor-pointer text-sm ${selectedCity === city ? 'bg-primary/10' : ''}`}
-                      onMouseDown={() => handleCitySelect(city)}
+                      className="px-3 py-2 hover:bg-muted cursor-pointer text-sm font-medium"
+                      onMouseDown={() => handleCitySelect('')}
                     >
-                      {city}
+                      Svi gradovi
+                    </div>
+                    {filteredCities.map((city) => (
+                      <div
+                        key={city}
+                        className={`px-3 py-2 hover:bg-muted cursor-pointer text-sm ${
+                          selectedCity === city ? 'bg-primary/10' : ''
+                        }`}
+                        onMouseDown={() => handleCitySelect(city)}
+                      >
+                        {city}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Select value={selectedParentSpecialty || 'all'} onValueChange={handleParentSpecialtyChange}>
+                <SelectTrigger className="w-full lg:w-56">
+                  <SelectValue placeholder="Sve specijalnosti" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Sve specijalnosti</SelectItem>
+                  {hierarchicalSpecialties.map((parent) => (
+                    <SelectItem key={parent.id} value={parent.slug}>
+                      {parent.naziv}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {selectedParentData && selectedParentData.children && selectedParentData.children.length > 0 && (
+                <div className="w-full lg:hidden flex flex-wrap gap-3">
+                  {selectedParentData.children.map((child) => (
+                    <div key={child.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`sub-mobile-${child.id}`}
+                        checked={selectedSubSpecialties.includes(child.slug)}
+                        onCheckedChange={() => toggleSubSpecialty(child.slug)}
+                      />
+                      <Label htmlFor={`sub-mobile-${child.id}`} className="text-sm cursor-pointer">
+                        {child.naziv}
+                      </Label>
                     </div>
                   ))}
                 </div>
               )}
+
+              <Button onClick={toggleLocation} variant={useUserLocation ? 'default' : 'outline'} className="w-full lg:w-auto">
+                <Navigation className={`h-4 w-4 mr-2 ${useUserLocation ? 'animate-pulse' : ''}`} />
+                {useUserLocation ? 'Lokacija ukljucena' : 'Blizu mene'}
+              </Button>
             </div>
 
-            {/* Parent Specialty */}
-            <Select value={selectedParentSpecialty || 'all'} onValueChange={handleParentSpecialtyChange}>
-              <SelectTrigger className="w-full lg:w-56">
-                <SelectValue placeholder="Sve specijalnosti" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Sve specijalnosti</SelectItem>
-                {hierarchicalSpecialties.map((parent: any) => (
-                  <SelectItem key={parent.id} value={parent.id.toString()}>
-                    {parent.naziv}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Sub-specialties checkboxes - mobile: inline after specialty */}
-            {selectedParentData && selectedParentData.children?.length > 0 && (
-              <div className="w-full lg:hidden flex flex-wrap gap-3">
-                {selectedParentData.children.map((child: any) => (
-                  <div key={child.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`sub-mobile-${child.id}`}
-                      checked={selectedSubSpecialties.includes(child.id.toString())}
-                      onCheckedChange={() => toggleSubSpecialty(child.id.toString())}
-                    />
-                    <Label htmlFor={`sub-mobile-${child.id}`} className="text-sm cursor-pointer">
-                      {child.naziv}
-                    </Label>
+            {selectedParentData && selectedParentData.children && selectedParentData.children.length > 0 && (
+              <div className="hidden lg:block pt-4 border-t">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-medium">Podkategorije: {selectedParentData.naziv}</Label>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={selectAllSubSpecialties}>
+                      Oznaci sve
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={clearSubSpecialties}>
+                      Ponisti
+                    </Button>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Location Toggle */}
-            <Button 
-              onClick={toggleLocation}
-              variant={useUserLocation ? "default" : "outline"}
-              className="w-full lg:w-auto"
-            >
-              <Navigation className={`h-4 w-4 mr-2 ${useUserLocation ? 'animate-pulse' : ''}`} />
-              {useUserLocation ? 'Lokacija uključena' : 'Blizu mene'}
-            </Button>
-          </div>
-
-          {/* Sub-specialties checkboxes - desktop: separate row */}
-          {selectedParentData && selectedParentData.children?.length > 0 && (
-            <div className="hidden lg:block pt-4 border-t">
-              <div className="flex items-center justify-between mb-3">
-                <Label className="text-sm font-medium">Podkategorije: {selectedParentData.naziv}</Label>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={selectAllSubSpecialties}>
-                    Označi sve
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={clearSubSpecialties}>
-                    Poništi
-                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {selectedParentData.children.map((child) => (
+                    <div key={child.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`sub-${child.id}`}
+                        checked={selectedSubSpecialties.includes(child.slug)}
+                        onCheckedChange={() => toggleSubSpecialty(child.slug)}
+                      />
+                      <Label htmlFor={`sub-${child.id}`} className="text-sm cursor-pointer">
+                        {child.naziv}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-4">
-                {selectedParentData.children.map((child: any) => (
-                  <div key={child.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`sub-${child.id}`}
-                      checked={selectedSubSpecialties.includes(child.id.toString())}
-                      onCheckedChange={() => toggleSubSpecialty(child.id.toString())}
-                    />
-                    <Label htmlFor={`sub-${child.id}`} className="text-sm cursor-pointer">
-                      {child.naziv}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* Sort */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
-              Pronađeno {filteredClinics.length} klinika
-              {useUserLocation && ' • Lokacija aktivna'}
-            </p>
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Po nazivu</SelectItem>
-                  <SelectItem value="rating">Po ocjeni</SelectItem>
-                  <SelectItem value="distance" disabled={!useUserLocation}>Po udaljenosti</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                Pronadjeno {filteredClinics.length} klinika
+                {useUserLocation && ' • Lokacija aktivna'}
+              </p>
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Po nazivu</SelectItem>
+                    <SelectItem value="rating">Po ocjeni</SelectItem>
+                    <SelectItem value="distance" disabled={!useUserLocation}>
+                      Po udaljenosti
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* View Tabs */}
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map')} className="space-y-6">
-          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-            <TabsTrigger value="list">
-              <Building2 className="h-4 w-4 mr-2" />
-              Lista
-            </TabsTrigger>
-            <TabsTrigger value="map">
-              <MapPin className="h-4 w-4 mr-2" />
-              Mapa
-            </TabsTrigger>
-          </TabsList>
+          <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="space-y-6">
+            <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+              <TabsTrigger value="list">
+                <Building2 className="h-4 w-4 mr-2" />
+                Lista
+              </TabsTrigger>
+              <TabsTrigger value="map">
+                <MapPin className="h-4 w-4 mr-2" />
+                Mapa
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="list">
-            {filteredClinics.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredClinics.map(clinic => (
-                  template === 'soft' ? (
-                    <ClinicCardSoft key={clinic.id} clinic={clinic} />
-                  ) : (
-                    <ClinicCard key={clinic.id} clinic={clinic} />
-                  )
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Nema rezultata</h3>
-                <p className="text-muted-foreground">Probajte sa drugim kriterijumima pretrage</p>
-              </div>
-            )}
-          </TabsContent>
+            <TabsContent value="list">
+              {filteredClinics.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredClinics.map((clinic) =>
+                    template === 'soft' ? (
+                      <ClinicCardSoft key={clinic.id} clinic={clinic} />
+                    ) : (
+                      <ClinicCard key={clinic.id} clinic={clinic} />
+                    )
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">Nema rezultata</h3>
+                  <p className="text-muted-foreground">Probajte sa drugim kriterijumima pretrage.</p>
+                </div>
+              )}
+            </TabsContent>
 
-          <TabsContent value="map">
-            <ClinicsMap clinics={filteredClinics} userLocation={userLocation} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="map">
+              <ClinicsMap clinics={filteredClinics} userLocation={userLocation} />
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
       <Footer />
     </>
   );
 }
-

@@ -265,7 +265,23 @@ export default function ClinicProfile() {
   const ogImage = clinic.slike && clinic.slike.length > 0
     ? toAbsoluteUrl(clinic.slike[0])
     : DEFAULT_OG_IMAGE;
-  const seoDescription = `${clinic.naziv} u ${clinic.grad}u. ${clinic.opis || 'Profesionalna zdravstvena ustanova sa strucnim osobljem.'}`.slice(0, 160);
+  const specialtySummary = clinicSpecialties.slice(0, 3).map((specialty) => specialty.naziv).join(', ');
+  const seoDescription = [
+    `${clinic.naziv} u ${clinic.grad}.`,
+    specialtySummary ? `Oblasti: ${specialtySummary}.` : '',
+    clinic.opis || 'Profesionalna zdravstvena ustanova sa strucnim osobljem.',
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .slice(0, 160);
+  const seoKeywords = [
+    `klinika ${clinic.grad}`,
+    clinic.naziv,
+    ...clinicSpecialties.slice(0, 5).map((specialty) => `${specialty.naziv} ${clinic.grad}`),
+    'privatna klinika',
+    'zdravstvene usluge',
+    'online zakazivanje',
+  ].join(', ');
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'MedicalClinic',
@@ -298,7 +314,7 @@ export default function ClinicProfile() {
       <Helmet>
         <title>{clinic.naziv} - Klinika u {clinic.grad} | WizMedik</title>
         <meta name="description" content={seoDescription} />
-        <meta name="keywords" content={`klinika ${clinic.grad}, ${clinic.naziv}, privatna klinika, zdravstvene usluge, online zakazivanje`} />
+        <meta name="keywords" content={seoKeywords} />
         <meta property="og:title" content={`${clinic.naziv} - ${clinic.grad}`} />
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="business.business" />

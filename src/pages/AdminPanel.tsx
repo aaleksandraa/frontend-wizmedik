@@ -46,6 +46,7 @@ import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtyServicePages';
 import { AdminSpasManagement } from '@/components/admin/AdminSpasManagement';
 import { AdminCareHomesManagement } from '@/components/admin/AdminCareHomesManagement';
+import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import {
   createDefaultNamedWorkingHours,
   namedWorkingDayLabels,
@@ -113,6 +114,7 @@ interface Clinic {
   latitude?: number;
   longitude?: number;
   google_maps_link?: string;
+  specijalnosti?: Specialty[];
   user?: {
     id: number;
     email: string;
@@ -308,7 +310,7 @@ export default function AdminPanel() {
   const [clinicForm, setClinicForm] = useState({
     naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', account_email: '', 
     contact_email: '', website: '', latitude: '', longitude: '', google_maps_link: '', 
-    slike: [] as string[], radno_vrijeme: createDefaultNamedWorkingHours()
+    slike: [] as string[], specijalnosti: [] as number[], radno_vrijeme: createDefaultNamedWorkingHours()
   });
 
   const [cityForm, setCityForm] = useState({
@@ -526,7 +528,7 @@ export default function AdminPanel() {
     setClinicForm({
       naziv: '', opis: '', adresa: '', grad: '', telefon: '', email: '', account_email: '',
       contact_email: '', website: '', latitude: '', longitude: '', google_maps_link: '',
-      slike: [], radno_vrijeme: createDefaultNamedWorkingHours()
+      slike: [], specijalnosti: [], radno_vrijeme: createDefaultNamedWorkingHours()
       });
     setEditingClinic(null);
   };
@@ -541,6 +543,7 @@ export default function AdminPanel() {
         latitude: clinic.latitude?.toString() || '', longitude: clinic.longitude?.toString() || '',
         google_maps_link: clinic.google_maps_link || '',
         slike: Array.isArray(clinic.slike) ? clinic.slike : [],
+        specijalnosti: Array.isArray(clinic.specijalnosti) ? clinic.specijalnosti.map((specialty) => specialty.id) : [],
         radno_vrijeme: normalizeNamedWorkingHours(clinic.radno_vrijeme)
         });
     } else {
@@ -551,6 +554,15 @@ export default function AdminPanel() {
 
   const handleSaveClinic = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (clinicForm.specijalnosti.length === 0) {
+      toast({
+        title: "Specijalnost je obavezna",
+        description: "Odaberite barem jednu specijalnost za kliniku.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const data: any = {
         naziv: clinicForm.naziv, opis: clinicForm.opis, adresa: clinicForm.adresa,
@@ -559,7 +571,9 @@ export default function AdminPanel() {
         latitude: clinicForm.latitude ? parseFloat(clinicForm.latitude) : null,
         longitude: clinicForm.longitude ? parseFloat(clinicForm.longitude) : null,
         google_maps_link: clinicForm.google_maps_link || null,
-        slike: clinicForm.slike, radno_vrijeme: clinicForm.radno_vrijeme
+        slike: clinicForm.slike,
+        specijalnosti: clinicForm.specijalnosti,
+        radno_vrijeme: clinicForm.radno_vrijeme
       };
       if (clinicForm.account_email) data.account_email = clinicForm.account_email;
       
@@ -2011,6 +2025,17 @@ export default function AdminPanel() {
                     onChange={(value) => setClinicForm({...clinicForm, opis: value})} 
                     rows={4} 
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Specijalnosti klinike</label>
+                  <SpecialtiesCheckboxList
+                    specialties={getAllSpecialties(specialties)}
+                    selectedIds={clinicForm.specijalnosti}
+                    onChange={(ids) => setClinicForm({ ...clinicForm, specijalnosti: ids })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Odaberite jednu ili vise oblasti koje klinika pokriva. Ovo se koristi za javnu pretragu, profil i SEO listing stranice.
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Slike</label>

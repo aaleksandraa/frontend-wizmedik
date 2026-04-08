@@ -29,6 +29,7 @@ AddDefaultCharset UTF-8
 
   <FilesMatch "\.(js|mjs|css)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set X-Robots-Tag "noindex, nofollow"
   </FilesMatch>
 
   <FilesMatch "\.(jpg|jpeg|png|gif|ico|webp|avif|svg)$">
@@ -101,6 +102,21 @@ FileETag None
   # Missing sitemap files must return 404 (never SPA index.html).
   RewriteCond %{REQUEST_URI} ^/sitemap(?:-[A-Za-z0-9-]+)?\.xml$ [NC]
   RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
+  # Canonicalize trailing slash variants to the slashless public URL.
+  # This reduces duplicate crawl paths like /grad/bihac/ vs /grad/bihac.
+  RewriteCond %{REQUEST_URI} !^/$
+  RewriteCond %{REQUEST_URI} .+/$
+  RewriteCond %{REQUEST_URI} !^/assets(?:/|$) [NC]
+  RewriteCond %{REQUEST_URI} !\.[A-Za-z0-9]{1,8}/?$ [NC]
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # If a public blog detail page is missing from the static prerender output,
+  # return 404 instead of falling through to the homepage shell with a root canonical.
+  RewriteCond %{REQUEST_URI} ^/blog/[^/]+/?$ [NC]
+  RewriteCond %{REQUEST_URI} !^/blog/editor(?:/|$) [NC]
+  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ - [R=404,L]
 
   # Serve prerendered route directories without external 301 to trailing slash.

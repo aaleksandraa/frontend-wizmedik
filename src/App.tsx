@@ -33,7 +33,6 @@ const CityLanding = lazy(() => import("./pages/CityLanding"));
 const Cities = lazy(() => import("./pages/Cities"));
 const Clinics = lazy(() => import("./pages/Clinics"));
 const ClinicProfile = lazy(() => import("./pages/ClinicProfile"));
-const ClinicsBySpecialty = lazy(() => import("./pages/ClinicsBySpecialty"));
 const Specialties = lazy(() => import("./pages/Specialties"));
 const Doctors = lazy(() => import("./pages/Doctors"));
 const DoctorsCompactList = lazy(() => import("./pages/DoctorsCompactList"));
@@ -126,9 +125,10 @@ const App = () => {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/klinike" element={<Clinics />} />
+              <Route path="/klinike/specijalnost/:specijalnost" element={<Clinics />} />
+              <Route path="/klinike/:grad/:specijalnost" element={<Clinics />} />
               <Route path="/klinike/:grad" element={<Clinics />} />
               <Route path="/klinika/:slug" element={<ClinicProfile />} />
-              <Route path="/klinike/specijalnost/:specijalnost" element={<ClinicsBySpecialty />} />
               <Route path="/specijalnosti" element={<Specialties />} />
               <Route path="/doktori" element={<Doctors />} />
               <Route path="/doktori/lista" element={<DoctorsCompactList />} />
