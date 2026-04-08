@@ -485,18 +485,29 @@ export default function AdminPanel() {
   const handleSaveDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const trimmedAccountEmail = doctorForm.account_email.trim();
+      const trimmedPublicEmail = doctorForm.email.trim();
+      const trimmedMapsLink = doctorForm.google_maps_link.trim();
+
       const data: any = {
-        ime: doctorForm.ime, prezime: doctorForm.prezime, email: doctorForm.email || null,
+        ime: doctorForm.ime, prezime: doctorForm.prezime, email: trimmedPublicEmail || null,
         telefon: doctorForm.telefon, specijalnost: doctorForm.specijalnost,
-        specijalnost_id: doctorForm.specijalnost_id ? parseInt(doctorForm.specijalnost_id) : null,
         klinika_id: doctorForm.klinika_id ? parseInt(doctorForm.klinika_id) : null,
         opis: doctorForm.opis, grad: doctorForm.grad, lokacija: doctorForm.lokacija,
         latitude: doctorForm.latitude ? parseFloat(doctorForm.latitude) : null,
         longitude: doctorForm.longitude ? parseFloat(doctorForm.longitude) : null,
-        google_maps_link: doctorForm.google_maps_link || null,
+        google_maps_link: trimmedMapsLink || null,
         slika_profila: doctorForm.slika_profila || null, radno_vrijeme: doctorForm.radno_vrijeme
       };
-      if (doctorForm.account_email) data.account_email = doctorForm.account_email;
+
+      if (doctorForm.specijalnost_id) {
+        data.specijalnost_id = parseInt(doctorForm.specijalnost_id);
+      }
+
+      if (trimmedAccountEmail) {
+        data.account_email = trimmedAccountEmail;
+      }
+
       if (editingDoctor) {
         await adminAPI.updateDoctor(editingDoctor.id, data);
         toast({ title: "Uspjeh", description: "Doktor ažuriran" });

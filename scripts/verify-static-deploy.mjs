@@ -1,5 +1,5 @@
 const DEFAULT_ORIGIN = process.env.FRONTEND_VERIFY_ORIGIN || "https://wizmedik.com";
-const DEFAULT_ROUTES = ["/", "/pitanja", "/domovi-njega"];
+const DEFAULT_ROUTES = ["/", "/gradovi", "/about", "/pitanja", "/domovi-njega"];
 const REQUEST_TIMEOUT_MS = Math.max(5000, Number(process.env.FRONTEND_VERIFY_TIMEOUT_MS || 20000));
 const SERVICE_WORKER_MARKER = "// WizMedik service worker cleanup shim.";
 
@@ -30,6 +30,7 @@ async function main() {
   }
 
   await verifyServiceWorker(origin);
+  await verifyDynamicImportAssets(origin, rootAssets.mainJs, "root bundle");
 
   const failures = [];
 
@@ -168,6 +169,26 @@ async function verifyRoute(origin, route, rootAssets) {
   }
 }
 
+async function verifyDynamicImportAssets(origin, scriptPath, label) {
+  const scriptUrl = new URL(scriptPath, `${origin}/`).toString();
+  const response = await fetchWithTimeout(scriptUrl);
+  if (!response.ok) {
+    throw new Error(`${label} ${scriptPath} returned HTTP ${response.status}`);
+  }
+
+  const script = await response.text();
+  const assetPaths = extractScriptAssetUrls(script);
+
+  for (const assetPath of assetPaths) {
+    const status = await fetchAssetStatus(origin, assetPath);
+    if (status !== 200) {
+      throw new Error(`${label} references missing asset ${assetPath} (HTTP ${status})`);
+    }
+  }
+
+  console.log(`[verify-deploy] PASS ${label} asset graph (${assetPaths.length} assets)`);
+}
+
 async function fetchHtml(origin, route) {
   const separator = route.includes("?") ? "&" : "?";
   const url = `${origin}${route}${separator}deploy_verify=${Date.now()}`;
@@ -194,6 +215,11 @@ function extractCoreAssets(html) {
 function extractAllAssetUrls(html) {
   const matches = html.match(/\/assets\/[^"' )]+?\.(?:js|css)/gi) || [];
   return [...new Set(matches)];
+}
+
+function extractScriptAssetUrls(script) {
+  const matches = script.match(/assets\/[^"'`\s)\\]+?\.(?:js|css)/gi) || [];
+  return [...new Set(matches.map((assetPath) => (assetPath.startsWith("/") ? assetPath : `/${assetPath}`)))];
 }
 
 function firstMatch(input, regex) {
