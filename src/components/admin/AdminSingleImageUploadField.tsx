@@ -33,9 +33,14 @@ export function AdminSingleImageUploadField({
       onChange(response.data.path || response.data.url);
       toast({ title: 'Uspjeh', description: 'Slika je uploadovana.' });
     } catch (error: any) {
+      const validationMessage =
+        error?.response?.data?.errors?.image?.[0]
+        || error?.response?.data?.message
+        || 'Upload slike nije uspio.';
+
       toast({
         title: 'Greška',
-        description: error?.response?.data?.message || 'Upload slike nije uspio.',
+        description: validationMessage,
         variant: 'destructive',
       });
     } finally {
@@ -52,7 +57,7 @@ export function AdminSingleImageUploadField({
 
       <Input
         type="file"
-        accept="image/*"
+        accept=".jpg,.jpeg,.png,.webp,.svg,.heic,.heif,.avif,image/*"
         disabled={uploading}
         onChange={(event) => {
           const file = event.target.files?.[0];
