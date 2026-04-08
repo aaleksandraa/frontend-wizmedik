@@ -46,6 +46,7 @@ import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtyServicePages';
 import { AdminSpasManagement } from '@/components/admin/AdminSpasManagement';
 import { AdminCareHomesManagement } from '@/components/admin/AdminCareHomesManagement';
+import { AdminImageGalleryField } from '@/components/admin/AdminImageGalleryField';
 import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import {
   createDefaultNamedWorkingHours,
@@ -108,7 +109,7 @@ interface Clinic {
   email?: string;
   contact_email?: string;
   website?: string;
-  slike: any[];
+  slike: string[];
   radno_vrijeme: any;
   aktivan: boolean;
   latitude?: number;
@@ -542,7 +543,7 @@ export default function AdminPanel() {
         contact_email: clinic.contact_email || '', website: clinic.website || '',
         latitude: clinic.latitude?.toString() || '', longitude: clinic.longitude?.toString() || '',
         google_maps_link: clinic.google_maps_link || '',
-        slike: Array.isArray(clinic.slike) ? clinic.slike : [],
+        slike: Array.isArray(clinic.slike) ? clinic.slike.filter((image): image is string => typeof image === 'string') : [],
         specijalnosti: Array.isArray(clinic.specijalnosti) ? clinic.specijalnosti.map((specialty) => specialty.id) : [],
         radno_vrijeme: normalizeNamedWorkingHours(clinic.radno_vrijeme)
         });
@@ -1294,7 +1295,11 @@ export default function AdminPanel() {
                       <div className={viewMode === 'grid' ? '' : 'flex items-center gap-4 flex-1'}>
                         <div className="flex items-center gap-3">
                           {clinic.slike?.[0] ? (
-                            <img src={clinic.slike[0]} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                            <img
+                              src={fixImageUrl(clinic.slike[0]) || clinic.slike[0]}
+                              alt=""
+                              className="w-10 h-10 rounded-lg object-cover"
+                            />
                           ) : (
                             <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                               <Building2 className="h-5 w-5 text-purple-600" />
@@ -2037,34 +2042,14 @@ export default function AdminPanel() {
                     Odaberite jednu ili vise oblasti koje klinika pokriva. Ovo se koristi za javnu pretragu, profil i SEO listing stranice.
                   </p>
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Slike</label>
-                  <Input type="file" accept="image/*" onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      try {
-                        const url = await uploadImage(file, 'clinics');
-                        setClinicForm({...clinicForm, slike: [...clinicForm.slike, url]});
-                        toast({ title: "Slika uploadovana" });
-                      } catch (err) {
-                        toast({ title: "Greška", variant: "destructive" });
-                      }
-                    }
-                  }} />
-                  {clinicForm.slike.length > 0 && (
-                    <div className="flex gap-2 mt-2 flex-wrap">
-                      {clinicForm.slike.map((img, i) => (
-                        <div key={i} className="relative">
-                          <img src={img} alt="" className="w-16 h-16 rounded object-cover" />
-                          <button type="button" onClick={() => setClinicForm({...clinicForm, slike: clinicForm.slike.filter((_, idx) => idx !== i)})}
-                            className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5">
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <AdminImageGalleryField
+                  label="Slike klinike"
+                  folder="clinics"
+                  images={clinicForm.slike}
+                  onChange={(images) => setClinicForm((prev) => ({ ...prev, slike: images }))}
+                  description="Prva slika se koristi kao glavna profilna slika klinike na javnim listing stranicama i ostaje vezana za profil i nakon ownership handoff-a."
+                  maxImages={12}
+                />
                 <div className="space-y-3 rounded-lg border p-4">
                   <div>
                     <h3 className="font-medium">Radno vrijeme</h3>

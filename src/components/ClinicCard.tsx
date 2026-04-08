@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Phone, Mail, Globe, Clock, Users, Building2, Star, ChevronRight } from 'lucide-react';
 import { useClinicCardSettings } from '@/hooks/useCardSettings';
 import { formatNumber } from '@/utils/formatters';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 interface Clinic {
   id: number;
@@ -51,6 +52,9 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
   const { settings, loading } = useClinicCardSettings();
   const currentVariant = (propVariant || settings.variant) as ClinicCardVariant;
   const goToClinic = () => navigate(`/klinika/${clinic.slug || clinic.id}`);
+  const mainImage = clinic.slike && clinic.slike.length > 0
+    ? (fixImageUrl(clinic.slike[0]) || clinic.slike[0])
+    : null;
 
   // Show skeleton while loading settings (only if no propVariant provided)
   if (loading && !propVariant) {
@@ -75,8 +79,8 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
             className="h-48 bg-gradient-to-r from-primary/20 to-accent/20 relative cursor-pointer"
             onClick={goToClinic}
           >
-            {clinic.slike && clinic.slike.length > 0 ? (
-              <img src={clinic.slike[0]} alt={clinic.naziv} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
+            {mainImage ? (
+              <img src={mainImage} alt={clinic.naziv} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
             ) : (
               <div className="flex items-center justify-center h-full hover:bg-primary/30 transition-colors">
                 <Building2 className="h-16 w-16 text-primary/40" />
@@ -152,8 +156,8 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
         <div className="relative">
           {settings.showImage && (
             <div className="h-40 bg-gradient-to-br from-primary to-primary/60 relative overflow-hidden">
-              {clinic.slike && clinic.slike.length > 0 ? (
-                <img src={clinic.slike[0]} alt={clinic.naziv} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              {mainImage ? (
+                <img src={mainImage} alt={clinic.naziv} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <Building2 className="h-12 w-12 text-white/60" />
@@ -194,8 +198,8 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
         <div className="flex items-center gap-4">
           {settings.showImage && (
             <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
-              {clinic.slike && clinic.slike.length > 0 ? (
-                <img src={clinic.slike[0]} alt={clinic.naziv} className="w-full h-full object-cover" />
+              {mainImage ? (
+                <img src={mainImage} alt={clinic.naziv} className="w-full h-full object-cover" />
               ) : (
                 <Building2 className="h-8 w-8 text-primary/60" />
               )}
@@ -226,8 +230,8 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
               className="w-full md:w-48 h-40 md:h-auto bg-primary/10 shrink-0 cursor-pointer"
               onClick={goToClinic}
             >
-              {clinic.slike && clinic.slike.length > 0 ? (
-                <img src={clinic.slike[0]} alt={clinic.naziv} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
+              {mainImage ? (
+                <img src={mainImage} alt={clinic.naziv} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
               ) : (
                 <div className="flex items-center justify-center h-full hover:bg-primary/20 transition-colors">
                   <Building2 className="h-12 w-12 text-primary/40" />
@@ -301,8 +305,8 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
                 className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"
                 style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})` }}
               >
-                {clinic.slike && clinic.slike.length > 0 ? (
-                  <img src={clinic.slike[0]} alt={clinic.naziv} className="w-full h-full object-cover" />
+                {mainImage ? (
+                  <img src={mainImage} alt={clinic.naziv} className="w-full h-full object-cover" />
                 ) : (
                   <Building2 className="h-7 w-7 text-white" />
                 )}

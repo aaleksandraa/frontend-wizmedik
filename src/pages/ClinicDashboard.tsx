@@ -24,6 +24,7 @@ import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { normalizeNamedWorkingHours } from '@/components/admin/profileFormUtils';
 import { validatePassword } from '@/utils/validation';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 const normalizeClinicDashboardWorkingHours = (value?: Record<string, any> | null) => {
   const normalized = normalizeNamedWorkingHours(value);
@@ -625,7 +626,8 @@ export default function ClinicDashboard() {
     setUploadingGalleryImage(true);
     try {
       const response = await uploadAPI.uploadImage(file, 'clinics');
-      const newImages = [...(profile?.slike || []), response.data.url];
+      const imageReference = response.data.path || response.data.url;
+      const newImages = [...(profile?.slike || []), imageReference];
       
       await clinicDashboardAPI.updateProfile({ slike: newImages });
       
@@ -712,7 +714,11 @@ export default function ClinicDashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
               {profile?.slike?.[0] ? (
-                <img src={profile.slike[0]} alt="" className="w-16 h-16 rounded-lg object-cover border-4 border-primary/20" />
+                <img
+                  src={fixImageUrl(profile.slike[0]) || profile.slike[0]}
+                  alt=""
+                  className="w-16 h-16 rounded-lg object-cover border-4 border-primary/20"
+                />
               ) : (
                 <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border-4 border-primary/20">
                   <Building2 className="h-8 w-8 text-primary" />
@@ -1389,7 +1395,7 @@ export default function ClinicDashboard() {
                           >
                             <div className="aspect-square relative">
                               <img
-                                src={imageUrl}
+                                src={fixImageUrl(imageUrl) || imageUrl}
                                 alt={`Slika ${index + 1}`}
                                 className="w-full h-full object-cover"
                               />

@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Phone, Clock, Building2, ChevronRight, Users } from 'lucide-react';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 interface Clinic {
   id: number;
@@ -22,7 +23,9 @@ interface ClinicCardSoftProps {
 }
 
 export function ClinicCardSoft({ clinic }: ClinicCardSoftProps) {
-  const mainImage = clinic.slike && clinic.slike.length > 0 ? clinic.slike[0] : null;
+  const mainImage = clinic.slike && clinic.slike.length > 0
+    ? (fixImageUrl(clinic.slike[0]) || clinic.slike[0])
+    : null;
   const hasMultipleImages = clinic.slike && clinic.slike.length > 1;
 
   return (

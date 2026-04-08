@@ -15,6 +15,7 @@ import { ReviewCard } from '@/components/ReviewCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { Breadcrumb } from '@/components/Breadcrumb';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 interface Clinic {
   id: number;
@@ -366,7 +367,7 @@ export default function ClinicProfile() {
                     }}
                   >
                     <img 
-                      src={clinic.slike[selectedImage]} 
+                      src={fixImageUrl(clinic.slike[selectedImage]) || clinic.slike[selectedImage]} 
                       alt={`${clinic.naziv} ${selectedImage + 1}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -375,7 +376,7 @@ export default function ClinicProfile() {
                     {clinic.slike.map((img: string, idx: number) => (
                       <img
                         key={idx}
-                        src={img}
+                        src={fixImageUrl(img) || img}
                         alt={`${clinic.naziv} thumbnail ${idx + 1}`}
                         className={`w-full h-16 object-cover rounded cursor-pointer border-2 ${
                           selectedImage === idx ? 'border-primary' : 'border-transparent'

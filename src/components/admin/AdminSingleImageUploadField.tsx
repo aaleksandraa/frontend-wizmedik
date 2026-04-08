@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { uploadAPI } from '@/services/api';
+import { fixImageUrl } from '@/utils/imageUrl';
 
 interface AdminSingleImageUploadFieldProps {
   label: string;
@@ -29,7 +30,7 @@ export function AdminSingleImageUploadField({
     setUploading(true);
     try {
       const response = await uploadAPI.uploadImage(file, folder);
-      onChange(response.data.url);
+      onChange(response.data.path || response.data.url);
       toast({ title: 'Uspjeh', description: 'Slika je uploadovana.' });
     } catch (error: any) {
       toast({
@@ -53,7 +54,11 @@ export function AdminSingleImageUploadField({
         type="file"
         accept="image/*"
         disabled={uploading}
-        onChange={(event) => handleUpload(event.target.files?.[0])}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          handleUpload(file);
+          event.currentTarget.value = '';
+        }}
       />
 
       {uploading ? (
@@ -65,7 +70,11 @@ export function AdminSingleImageUploadField({
 
       {value ? (
         <div className="space-y-3">
-          <img src={value} alt={label} className="h-32 w-full rounded-lg object-cover" />
+          <img
+            src={fixImageUrl(value) || value}
+            alt={label}
+            className="h-32 w-full rounded-lg object-cover"
+          />
           <Button type="button" variant="outline" size="sm" onClick={() => onChange('')}>
             <Trash2 className="mr-2 h-4 w-4" />
             Ukloni sliku
