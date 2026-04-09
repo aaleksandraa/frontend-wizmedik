@@ -118,6 +118,13 @@ FileETag None
   RewriteCond %{REQUEST_URI} !\.[A-Za-z0-9]{1,8}/?$ [NC]
   RewriteRule ^(.+)/$ /$1 [R=301,L]
 
+  # Serve prerendered public blog detail pages directly when their static
+  # route file exists. This must run before the "missing blog detail => 404"
+  # guard because some Apache/Plesk setups do not resolve REQUEST_FILENAME
+  # consistently for nested virtual routes.
+  RewriteCond %{DOCUMENT_ROOT}/blog/$1/index.html -f
+  RewriteRule ^blog/([^/]+)$ blog/$1/index.html [L,NC]
+
   # If a public blog detail page is missing from the static prerender output,
   # return 404 instead of falling through to the homepage shell with a root canonical.
   # Use THE_REQUEST so internal rewrites like /blog -> /blog/index.html are not blocked.
