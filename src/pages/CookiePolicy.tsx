@@ -1,136 +1,187 @@
+import { Helmet } from 'react-helmet-async';
+import { Cookie, ShieldCheck } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { Cookie } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import { Button } from '@/components/ui/button';
+import { useCookieConsent } from '@/contexts/CookieConsentContext';
+import {
+  COOKIE_CATEGORIES,
+  COOKIE_TECHNOLOGIES,
+  formatConsentDate,
+  getCookieStatusLabel,
+} from '@/lib/cookie-consent';
+
+const statusStyles = {
+  active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  conditional: 'bg-sky-50 text-sky-700 border-sky-200',
+  planned: 'bg-amber-50 text-amber-700 border-amber-200',
+} as const;
 
 export default function CookiePolicy() {
+  const { consentRecord, openPreferences } = useCookieConsent();
+
   return (
     <>
       <Helmet>
-        <title>Politika Kolačića - wizMedik</title>
-        <meta name="description" content="Saznajte kako wizMedik koristi kolačiće i kako možete kontrolisati njihovu upotrebu." />
+        <title>Politika kolacica - wizMedik</title>
+        <meta
+          name="description"
+          content="Pregled svih kolacica i slicnih tehnologija koje WizMedik koristi, njihove svrhe, trajanja i postavki pristanka."
+        />
       </Helmet>
 
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-slate-50">
         <Navbar />
 
-        {/* Hero */}
-        <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <Cookie className="h-16 w-16 mx-auto mb-6" />
-            <h1 className="text-5xl font-bold mb-6">Politika Kolačića</h1>
-            <p className="text-xl text-white/90">
-              Posljednje ažurirano: {new Date().toLocaleDateString('bs-BA')}
-            </p>
+        <section className="bg-gradient-to-br from-cyan-700 via-cyan-600 to-slate-900 text-white">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium">
+                <Cookie className="h-4 w-4" />
+                Politika kolacica i slicnih tehnologija
+              </div>
+
+              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+                Jasne postavke privatnosti i potpun pregled tehnologija
+              </h1>
+
+              <p className="mt-5 text-lg leading-8 text-white/85">
+                Ovdje su navedeni svi kolacici, localStorage i sessionStorage zapisi, kao i opcioni alati za
+                funkcionalnost, analitiku i buduce marketinske integracije koje WizMedik koristi ili ima spremne.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  onClick={openPreferences}
+                  className="rounded-xl bg-white text-cyan-800 hover:bg-slate-100"
+                >
+                  Upravljaj kolacicima
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-xl border-white/30 bg-white/10 text-white hover:bg-white/15"
+                >
+                  <a href="/privacy-policy">Politika privatnosti</a>
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Content */}
-        <section className="py-20">
-          <div className="max-w-4xl mx-auto px-4">
-            <div className="prose prose-lg max-w-none">
-              <h2 className="text-3xl font-bold mb-6">Šta su kolačići?</h2>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                Kolačići (cookies) su male tekstualne datoteke koje se čuvaju na vašem uređaju 
-                (računar, tablet, telefon) kada posjetite našu web stranicu. Oni nam pomažu da 
-                poboljšamo vaše iskustvo korištenja i pružimo vam bolje usluge.
-              </p>
+        <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+          <div className="grid gap-6 lg:grid-cols-[1.05fr_1.45fr]">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">Vasa trenutna odluka</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Neophodne tehnologije ostaju ukljucene radi rada platforme. Sve ostalo zavisi od vaseg pristanka.
+                  </p>
+                </div>
+              </div>
 
-              <h2 className="text-3xl font-bold mb-6">Koje kolačiće koristimo?</h2>
-              
-              <h3 className="text-2xl font-semibold mb-4">1. Neophodni Kolačići</h3>
-              <p className="text-muted-foreground mb-6">
-                Ovi kolačići su neophodni za funkcionisanje web stranice i ne mogu se isključiti. 
-                Oni omogućavaju osnovne funkcije kao što su navigacija i pristup sigurnim dijelovima sajta.
-              </p>
-              <ul className="list-disc pl-6 mb-8 text-muted-foreground space-y-2">
-                <li>Autentifikacija korisnika</li>
-                <li>Sigurnosne funkcije</li>
-                <li>Pamćenje postavki</li>
-              </ul>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {COOKIE_CATEGORIES.map((category) => {
+                  const enabled = category.isRequired ? true : Boolean(consentRecord?.preferences[category.key]);
 
-              <h3 className="text-2xl font-semibold mb-4">2. Analitički Kolačići</h3>
-              <p className="text-muted-foreground mb-6">
-                Ovi kolačići nam pomažu da razumijemo kako posjetioci koriste našu stranicu, 
-                što nam omogućava da poboljšamo funkcionalnost i sadržaj.
-              </p>
-              <ul className="list-disc pl-6 mb-8 text-muted-foreground space-y-2">
-                <li>Google Analytics - praćenje posjeta i ponašanja korisnika</li>
-                <li>Statistika korištenja funkcija</li>
-                <li>Analiza performansi stranice</li>
-              </ul>
+                  return (
+                    <div key={category.key} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-sm font-semibold text-slate-900">{category.title}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{category.shortDescription}</p>
+                      <span
+                        className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                          enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                        }`}
+                      >
+                        {enabled ? 'Ukljuceno' : 'Iskljuceno'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
 
-              <h3 className="text-2xl font-semibold mb-4">3. Funkcionalni Kolačići</h3>
-              <p className="text-muted-foreground mb-6">
-                Ovi kolačići omogućavaju poboljšane funkcionalnosti i personalizaciju.
-              </p>
-              <ul className="list-disc pl-6 mb-8 text-muted-foreground space-y-2">
-                <li>Pamćenje jezika i regiona</li>
-                <li>Pamćenje preferencija</li>
-                <li>Personalizovani sadržaj</li>
-              </ul>
-
-              <h3 className="text-2xl font-semibold mb-4">4. Marketing Kolačići</h3>
-              <p className="text-muted-foreground mb-6">
-                Ovi kolačići se koriste za praćenje posjetilaca kroz različite web stranice 
-                kako bi se prikazale relevantne reklame.
-              </p>
-              <ul className="list-disc pl-6 mb-8 text-muted-foreground space-y-2">
-                <li>Facebook Pixel</li>
-                <li>Google Ads</li>
-                <li>Retargeting kampanje</li>
-              </ul>
-
-              <h2 className="text-3xl font-bold mb-6">Kako kontrolisati kolačiće?</h2>
-              <p className="text-muted-foreground mb-6">
-                Možete kontrolisati i/ili obrisati kolačiće kako želite. Možete obrisati sve 
-                kolačiće koji su već na vašem računaru i možete podesiti većinu browsera da 
-                spriječe njihovo postavljanje.
-              </p>
-
-              <h3 className="text-2xl font-semibold mb-4">Postavke Browsera</h3>
-              <ul className="list-disc pl-6 mb-8 text-muted-foreground space-y-2">
-                <li><strong>Chrome:</strong> Settings → Privacy and security → Cookies</li>
-                <li><strong>Firefox:</strong> Options → Privacy & Security → Cookies</li>
-                <li><strong>Safari:</strong> Preferences → Privacy → Cookies</li>
-                <li><strong>Edge:</strong> Settings → Privacy → Cookies</li>
-              </ul>
-
-              <h3 className="text-2xl font-semibold mb-4">Naše Postavke</h3>
-              <p className="text-muted-foreground mb-6">
-                Možete upravljati kolačićima kroz naš Cookie Consent banner koji se pojavljuje 
-                pri prvoj posjeti. Možete prihvatiti sve, odbiti opcione ili prilagoditi postavke.
-              </p>
-
-              <h2 className="text-3xl font-bold mb-6">Koliko dugo čuvamo kolačiće?</h2>
-              <ul className="list-disc pl-6 mb-8 text-muted-foreground space-y-2">
-                <li><strong>Session kolačići:</strong> Brišu se kada zatvorite browser</li>
-                <li><strong>Persistent kolačići:</strong> Ostaju do 12 mjeseci</li>
-                <li><strong>Analitički kolačići:</strong> Do 24 mjeseca</li>
-              </ul>
-
-              <h2 className="text-3xl font-bold mb-6">Kontakt</h2>
-              <p className="text-muted-foreground mb-6">
-                Ako imate pitanja o našoj politici kolačića, kontaktirajte nas:
-              </p>
-              <ul className="list-none mb-8 text-muted-foreground space-y-2">
-                <li><strong>Email:</strong> privacy@wizmedik.com</li>
-                <li><strong>Telefon:</strong> +387 33 123 456</li>
-                <li><strong>Adresa:</strong> Zmaja od Bosne 7, 71000 Sarajevo, BiH</li>
-              </ul>
-
-              <div className="bg-primary/5 border-l-4 border-primary p-6 rounded-r-lg mt-12">
-                <p className="text-muted-foreground">
-                  <strong>Napomena:</strong> Ova politika kolačića je dio naše{' '}
-                  <a href="/privacy-policy" className="text-primary hover:underline">
-                    Politike Privatnosti
-                  </a>
-                  {' '}i{' '}
-                  <a href="/terms-of-service" className="text-primary hover:underline">
-                    Uslova Korištenja
-                  </a>.
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                <p>
+                  Zadnji put sacuvano:
+                  <span className="ml-2 font-medium text-slate-900">
+                    {consentRecord ? formatConsentDate(consentRecord.savedAt) : 'jos nije odabrano'}
+                  </span>
+                </p>
+                <p className="mt-2">
+                  Ako u buducnosti uvedemo Meta/Facebook Pixel ili dataset integraciju, ona ce biti smjestena u
+                  marketinsku kategoriju i nece se aktivirati bez zasebnog pristanka.
                 </p>
               </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-xl font-semibold text-slate-900">Kako koristimo kolacice i slicne tehnologije</h2>
+              <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
+                <p>
+                  Na WizMedik platformi koristimo kombinaciju browser kolacica, localStorage i sessionStorage zapisa.
+                  Neophodni zapisi podrzavaju prijavu, sigurnost i antispam logiku. Opcioni zapisi se aktiviraju samo
+                  nakon pristanka i sluze za funkcionalne preference ili analitiku.
+                </p>
+                <p>
+                  Ove postavke mozete promijeniti u bilo kojem trenutku preko linka <strong>Upravljaj kolacicima</strong>{' '}
+                  u futeru. Kada iskljucite vec aktivne opcione tehnologije, aplikacija se moze kratko osvjeziti kako
+                  bi promjena bila sigurno primijenjena.
+                </p>
+                <p>
+                  Ako obrisete podatke pregledaca ili promijenite uredjaj, ponovo cemo vas pitati za izbor. Odluka o
+                  kolacicima se inace cuva 6 mjeseci.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-2 border-b border-slate-200 pb-4">
+              <h2 className="text-xl font-semibold text-slate-900">Detaljan pregled svih tehnologija</h2>
+              <p className="text-sm leading-6 text-slate-600">
+                Spisak ispod prikazuje naziv, dobavljaca, vrstu pohrane, okvirno trajanje i svrhu svake tehnologije
+                koju trenutno koristimo ili smo unaprijed pripremili za buducu aktivaciju.
+              </p>
+            </div>
+
+            <div className="mt-6 grid gap-4">
+              {COOKIE_TECHNOLOGIES.map((item) => (
+                <div key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="max-w-3xl">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-sm font-semibold text-slate-900">{item.name}</h3>
+                        <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-medium text-white">
+                          {COOKIE_CATEGORIES.find((category) => category.key === item.category)?.title}
+                        </span>
+                        <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${statusStyles[item.status]}`}>
+                          {getCookieStatusLabel(item)}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">{item.purpose}</p>
+                    </div>
+
+                    <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3 lg:min-w-[420px]">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Provider</p>
+                        <p className="mt-1 font-medium text-slate-900">{item.provider}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Vrsta pohrane</p>
+                        <p className="mt-1 font-medium text-slate-900">{item.storage}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Trajanje</p>
+                        <p className="mt-1 font-medium text-slate-900">{item.duration}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>

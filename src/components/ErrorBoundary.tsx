@@ -2,7 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import * as Sentry from '@sentry/react';
+import { captureError } from '@/config/sentry';
 
 interface Props {
   children: ReactNode;
@@ -39,11 +39,8 @@ class ErrorBoundary extends Component<Props, State> {
     console.error('📝 Error Message:', error.message);
     console.error('🔍 Error Stack:', error.stack);
     
-    // Send to Sentry
-    Sentry.captureException(error, {
-      extra: {
-        componentStack: errorInfo.componentStack,
-      },
+    captureError(error, {
+      componentStack: errorInfo.componentStack,
     });
     
     this.setState({

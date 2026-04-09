@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { canUseFunctionalStorage } from '@/lib/cookie-consent';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const LOGO_SETTINGS_STORAGE_KEY = 'wm_logo_settings_cache_v1';
@@ -55,6 +56,10 @@ function readPersistedSettings(): LogoSettings | null {
     return null;
   }
 
+  if (!canUseFunctionalStorage()) {
+    return null;
+  }
+
   try {
     const raw = window.sessionStorage.getItem(LOGO_SETTINGS_STORAGE_KEY);
     if (!raw) {
@@ -75,6 +80,10 @@ function persistSettings(settings: LogoSettings): void {
   logoSettingsCache = settings;
 
   if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (!canUseFunctionalStorage()) {
     return;
   }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,12 +7,12 @@ import { queryClient } from "@/lib/queryClient";
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { initSentry } from "@/config/sentry";
-import { initGA, trackPageView } from "@/config/analytics";
+import { trackPageView } from "@/config/analytics";
 import { Loader2 } from "lucide-react";
 
 // Core entry pages - keep initial bundle lean
@@ -100,12 +100,6 @@ const PageViewTracker = () => {
 };
 
 const App = () => {
-  // Initialize Sentry and Google Analytics on app load
-  useEffect(() => {
-    initSentry();
-    initGA();
-  }, []);
-
   return (
     <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -115,6 +109,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <CookieConsentProvider>
               <PageViewTracker />
               <ScrollToTop />
               <Suspense fallback={<PageLoader />}>
@@ -282,6 +277,7 @@ const App = () => {
               </Routes>
               </Suspense>
               <CookieConsent />
+              </CookieConsentProvider>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>

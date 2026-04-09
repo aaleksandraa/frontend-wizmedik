@@ -19,6 +19,7 @@ import {
   Pill,
 } from 'lucide-react';
 import { useLogoSettings } from '@/hooks/useLogoSettings';
+import { useCookieConsent } from '@/contexts/CookieConsentContext';
 
 const searchLinks = [
   { to: '/doktori', label: 'Doktori', icon: Stethoscope },
@@ -75,6 +76,7 @@ function FooterItem({
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { settings: logoSettings, loading: logoLoading } = useLogoSettings();
+  const { openPreferences } = useCookieConsent();
 
   // Footer Logo Component
   const FooterLogo = () => {
@@ -270,6 +272,13 @@ export function Footer() {
                 <Link to="/cookie-policy" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Kolačići
                 </Link>
+                <button
+                  type="button"
+                  onClick={openPreferences}
+                  className="size-compact text-slate-500 hover:text-primary transition-colors"
+                >
+                  Upravljaj kolacicima
+                </button>
                 <Link to="/impressum" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Impressum
                 </Link>
@@ -405,6 +414,13 @@ export function Footer() {
                 <Link to="/cookie-policy" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Kolačići
                 </Link>
+                <button
+                  type="button"
+                  onClick={openPreferences}
+                  className="size-compact text-slate-500 hover:text-primary transition-colors"
+                >
+                  Upravljaj kolacicima
+                </button>
                 <Link to="/impressum" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Impressum
                 </Link>

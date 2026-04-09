@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/react';
+import { hasConsentFor } from '@/lib/cookie-consent';
 
 /**
  * Initialize Sentry for error tracking
@@ -13,10 +14,18 @@ import * as Sentry from '@sentry/react';
 export const initSentry = () => {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
   const environment = import.meta.env.MODE;
+  const existingClient = Sentry.getClient();
+
+  if (!hasConsentFor('functional')) {
+    return;
+  }
+
+  if (existingClient) {
+    return;
+  }
 
   // Only initialize if DSN is provided
   if (!dsn) {
-    console.warn('Sentry DSN not configured. Error tracking disabled.');
     return;
   }
 
@@ -95,6 +104,21 @@ export const initSentry = () => {
   });
 };
 
+export const disableSentry = () => {
+  const client = Sentry.getClient();
+  if (!client) {
+    return;
+  }
+
+  Sentry.setUser(null);
+
+  try {
+    void client.close(2000);
+  } catch (error) {
+    console.warn('Failed to close Sentry client cleanly:', error);
+  }
+};
+
 /**
  * Capture custom error with context
  */
@@ -102,6 +126,10 @@ export const captureError = (
   error: Error,
   context?: Record<string, any>
 ) => {
+  if (!Sentry.getClient() || !hasConsentFor('functional')) {
+    return;
+  }
+
   Sentry.captureException(error, {
     extra: context,
   });
@@ -115,6 +143,10 @@ export const captureMessage = (
   level: Sentry.SeverityLevel = 'info',
   context?: Record<string, any>
 ) => {
+  if (!Sentry.getClient() || !hasConsentFor('functional')) {
+    return;
+  }
+
   Sentry.captureMessage(message, {
     level,
     extra: context,
@@ -129,6 +161,10 @@ export const setUserContext = (user: {
   email?: string;
   role?: string;
 }) => {
+  if (!Sentry.getClient() || !hasConsentFor('functional')) {
+    return;
+  }
+
   Sentry.setUser({
     id: String(user.id),
     email: user.email,
@@ -140,6 +176,10 @@ export const setUserContext = (user: {
  * Clear user context (on logout)
  */
 export const clearUserContext = () => {
+  if (!Sentry.getClient()) {
+    return;
+  }
+
   Sentry.setUser(null);
 };
 
@@ -151,6 +191,10 @@ export const addBreadcrumb = (
   category: string,
   data?: Record<string, any>
 ) => {
+  if (!Sentry.getClient() || !hasConsentFor('functional')) {
+    return;
+  }
+
   Sentry.addBreadcrumb({
     message,
     category,

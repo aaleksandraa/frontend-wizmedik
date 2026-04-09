@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { homepageAPI } from '@/services/api';
+import { canUseFunctionalStorage } from '@/lib/cookie-consent';
 
 export interface HomepageData {
   settings: {
@@ -114,6 +115,10 @@ function readPersistedHomepageData(): HomepageData | null {
     return null;
   }
 
+  if (!canUseFunctionalStorage()) {
+    return null;
+  }
+
   try {
     const raw = window.sessionStorage.getItem(HOMEPAGE_DATA_STORAGE_KEY);
     if (!raw) {
@@ -133,6 +138,10 @@ function persistHomepageData(data: HomepageData): void {
   homepageDataCache = data;
 
   if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (!canUseFunctionalStorage()) {
     return;
   }
 

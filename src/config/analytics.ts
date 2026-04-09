@@ -1,4 +1,5 @@
 import ReactGA from 'react-ga4';
+import { hasConsentFor } from '@/lib/cookie-consent';
 
 /**
  * Initialize Google Analytics 4
@@ -10,14 +11,55 @@ import ReactGA from 'react-ga4';
  */
 
 let isInitialized = false;
+let activeMeasurementId: string | null = null;
+
+function getMeasurementId(): string {
+  return import.meta.env.VITE_GA_MEASUREMENT_ID;
+}
+
+function setAnalyticsDisabled(disabled: boolean): void {
+  const measurementId = getMeasurementId();
+  if (!measurementId || typeof window === 'undefined') {
+    return;
+  }
+
+  const flagName = `ga-disable-${measurementId}`;
+  (window as Record<string, unknown>)[flagName] = disabled;
+}
+
+function deleteCookie(name: string): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  const host = window.location.hostname;
+  const domains = [host];
+  if (host.includes('.')) {
+    domains.push(`.${host}`);
+  }
+
+  const base = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+  document.cookie = base;
+  domains.forEach((domain) => {
+    document.cookie = `${base}; domain=${domain}`;
+  });
+}
 
 export const initGA = () => {
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = getMeasurementId();
   const environment = import.meta.env.MODE;
+
+  if (!hasConsentFor('analytics')) {
+    return;
+  }
+
+  if (isInitialized && activeMeasurementId === measurementId) {
+    setAnalyticsDisabled(false);
+    return;
+  }
 
   // Only initialize if measurement ID is provided
   if (!measurementId) {
-    console.warn('Google Analytics Measurement ID not configured. Analytics disabled.');
     return;
   }
 
@@ -28,6 +70,7 @@ export const initGA = () => {
   }
 
   try {
+    setAnalyticsDisabled(false);
     ReactGA.initialize(measurementId, {
       gaOptions: {
         // Anonymize IP addresses for GDPR compliance
@@ -42,9 +85,22 @@ export const initGA = () => {
     });
 
     isInitialized = true;
-    console.log('Google Analytics initialized:', measurementId);
+    activeMeasurementId = measurementId;
   } catch (error) {
     console.error('Failed to initialize Google Analytics:', error);
+  }
+};
+
+export const disableGA = () => {
+  setAnalyticsDisabled(true);
+
+  if (typeof document !== 'undefined') {
+    document.cookie
+      .split(';')
+      .map((entry) => entry.trim().split('=')[0])
+      .filter(Boolean)
+      .filter((name) => name === '_ga' || name.startsWith('_ga_') || name === '_gid' || name === '_gat')
+      .forEach((name) => deleteCookie(name));
   }
 };
 
@@ -52,7 +108,7 @@ export const initGA = () => {
  * Track page view
  */
 export const trackPageView = (path?: string, title?: string) => {
-  if (!isInitialized) return;
+  if (!isInitialized || !hasConsentFor('analytics')) return;
 
   const page = path || window.location.pathname + window.location.search;
   const pageTitle = title || document.title;
@@ -63,7 +119,6 @@ export const trackPageView = (path?: string, title?: string) => {
     title: pageTitle,
   });
 
-  console.log('GA: Page view tracked:', page);
 };
 
 /**
@@ -75,7 +130,7 @@ export const trackEvent = (
   label?: string,
   value?: number
 ) => {
-  if (!isInitialized) return;
+  if (!isInitialized || !hasConsentFor('analytics')) return;
 
   ReactGA.event({
     category,
@@ -84,7 +139,6 @@ export const trackEvent = (
     value,
   });
 
-  console.log('GA: Event tracked:', { category, action, label, value });
 };
 
 /**
@@ -339,7 +393,7 @@ export const trackError = (errorMessage: string, errorPage: string) => {
  * Set user properties
  */
 export const setUserProperties = (properties: Record<string, any>) => {
-  if (!isInitialized) return;
+  if (!isInitialized || !hasConsentFor('analytics')) return;
   
   ReactGA.set(properties);
 };
@@ -353,7 +407,7 @@ export const trackTiming = (
   value: number,
   label?: string
 ) => {
-  if (!isInitialized) return;
+  if (!isInitialized || !hasConsentFor('analytics')) return;
   
   ReactGA.event('timing_complete', {
     name: variable,
