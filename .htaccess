@@ -104,6 +104,24 @@ FileETag None
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^ - [R=404,L]
 
+  # Never expose hidden query-variant prerender directories publicly.
+  RewriteRule ^__query(?:/|$) - [R=404,L,NC]
+
+  # Serve prerendered pharmacy city query SEO pages for duty and 24h variants.
+  # These variants live under hidden static directories because static hosting
+  # cannot otherwise distinguish HTML output by query string.
+  RewriteCond %{QUERY_STRING} (^|&)grad=[^&]+(&|$) [NC]
+  RewriteCond %{QUERY_STRING} (^|&)dezurna_now=1(&|$) [NC]
+  RewriteCond %{QUERY_STRING} !(^|&)is_24h=1(&|$) [NC]
+  RewriteCond %{DOCUMENT_ROOT}/__query/apoteke/$1/dezurna_now/index.html -f
+  RewriteRule ^apoteke/([^/]+)$ __query/apoteke/$1/dezurna_now/index.html [L,NC]
+
+  RewriteCond %{QUERY_STRING} (^|&)grad=[^&]+(&|$) [NC]
+  RewriteCond %{QUERY_STRING} (^|&)is_24h=1(&|$) [NC]
+  RewriteCond %{QUERY_STRING} !(^|&)dezurna_now=1(&|$) [NC]
+  RewriteCond %{DOCUMENT_ROOT}/__query/apoteke/$1/is_24h/index.html -f
+  RewriteRule ^apoteke/([^/]+)$ __query/apoteke/$1/is_24h/index.html [L,NC]
+
   # Serve key top-level prerendered listing routes directly to their static
   # route index.html. This avoids Plesk/Apache edge cases where an existing
   # directory like /blog can still resolve to 404 instead of /blog/index.html.

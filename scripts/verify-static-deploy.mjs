@@ -124,6 +124,20 @@ async function buildDefaultRoutes() {
     routes.push(`/${firstBlogDetail}`);
   }
 
+  const firstDutyPharmacyCity = manifestRoutes.find(
+    (route) => route.startsWith("apoteke/") && route.includes("?grad=") && route.includes("dezurna_now=1")
+  );
+  if (firstDutyPharmacyCity) {
+    routes.push(`/${firstDutyPharmacyCity}`);
+  }
+
+  const firstTwentyFourHourPharmacyCity = manifestRoutes.find(
+    (route) => route.startsWith("apoteke/") && route.includes("?grad=") && route.includes("is_24h=1")
+  );
+  if (firstTwentyFourHourPharmacyCity) {
+    routes.push(`/${firstTwentyFourHourPharmacyCity}`);
+  }
+
   return uniqueRoutes(routes);
 }
 

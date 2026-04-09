@@ -196,7 +196,8 @@ function normalizeRoutePath(loc) {
     return null;
   }
 
-  return pathname;
+  const normalizedQuery = normalizeSeoQueryForPath(pathname, url.searchParams);
+  return buildRouteTarget(pathname, normalizedQuery);
 }
 
 function isSkippablePath(pathname) {
@@ -216,11 +217,13 @@ function isSkippablePath(pathname) {
 }
 
 function targetFilePath(routePath) {
-  if (!routePath) {
+  const relativeOutputPath = relativeOutputPathForRouteTarget(routePath);
+
+  if (!relativeOutputPath) {
     return path.join(DIST_DIR, "index.html");
   }
 
-  return path.join(DIST_DIR, ...routePath.split("/"), "index.html");
+  return path.join(DIST_DIR, ...relativeOutputPath.split("/"), "index.html");
 }
 
 function buildSourceUrl(routePath) {
@@ -237,13 +240,18 @@ function buildDirectSourceUrl(routePath) {
     return `${SEO_SOURCE_ORIGIN}/`;
   }
 
-  const encodedPath = routePath
+  const [pathname, queryString] = splitRouteTarget(routePath);
+  const encodedPath = pathname
     .split("/")
     .filter(Boolean)
     .map((segment) => encodeURIComponent(segment))
     .join("/");
 
-  return `${SEO_SOURCE_ORIGIN}/${encodedPath}`;
+  if (!queryString) {
+    return `${SEO_SOURCE_ORIGIN}/${encodedPath}`;
+  }
+
+  return `${SEO_SOURCE_ORIGIN}/${encodedPath}?${queryString}`;
 }
 
 async function fetchRouteHtml(routePath) {
@@ -492,6 +500,85 @@ async function deleteRemovedPaths(previousPaths, currentPaths) {
     await fs.unlink(filePath).catch(() => null);
     await removeEmptyParents(path.dirname(filePath), DIST_DIR);
   }
+}
+
+function buildRouteTarget(pathname, query) {
+  const normalizedPath = String(pathname || "").replace(/^\/|\/$/g, "");
+  if (!normalizedPath) {
+    return "";
+  }
+
+  const params = new URLSearchParams(query);
+  const queryString = params.toString();
+
+  return queryString ? `${normalizedPath}?${queryString}` : normalizedPath;
+}
+
+function splitRouteTarget(routeTarget) {
+  const [pathname, queryString = ""] = String(routeTarget || "").split("?", 2);
+  return [pathname.replace(/^\/|\/$/g, ""), queryString];
+}
+
+function relativeOutputPathForRouteTarget(routeTarget) {
+  const [pathname, queryString] = splitRouteTarget(routeTarget);
+
+  if (!pathname) {
+    return "";
+  }
+
+  const query = new URLSearchParams(queryString);
+  const pharmacyMatch = pathname.match(/^apoteke\/([^/]+)$/);
+
+  if (pharmacyMatch) {
+    const citySlug = pharmacyMatch[1];
+    const hasDuty = queryFlagIsEnabled(query.get("dezurna_now"));
+    const has24Hour = queryFlagIsEnabled(query.get("is_24h"));
+
+    if (hasDuty && !has24Hour) {
+      return `__query/apoteke/${citySlug}/dezurna_now`;
+    }
+
+    if (has24Hour && !hasDuty) {
+      return `__query/apoteke/${citySlug}/is_24h`;
+    }
+  }
+
+  return pathname;
+}
+
+function normalizeSeoQueryForPath(pathname, searchParams) {
+  const pharmacyMatch = String(pathname || "").match(/^apoteke\/([^/]+)$/);
+  if (!pharmacyMatch) {
+    return new URLSearchParams();
+  }
+
+  return normalizePharmacySeoQuery(searchParams, pharmacyMatch[1]);
+}
+
+function normalizePharmacySeoQuery(searchParams, citySlug) {
+  const hasDuty = queryFlagIsEnabled(searchParams.get("dezurna_now"));
+  const has24Hour = queryFlagIsEnabled(searchParams.get("is_24h"));
+  const normalized = new URLSearchParams();
+
+  if (hasDuty === has24Hour) {
+    return normalized;
+  }
+
+  normalized.set("grad", citySlug);
+
+  if (hasDuty) {
+    normalized.set("dezurna_now", "1");
+  }
+
+  if (has24Hour) {
+    normalized.set("is_24h", "1");
+  }
+
+  return normalized;
+}
+
+function queryFlagIsEnabled(value) {
+  return ["1", "true", "yes", "on"].includes(String(value || "").trim().toLowerCase());
 }
 
 async function removeEmptyParents(startDir, stopDir) {

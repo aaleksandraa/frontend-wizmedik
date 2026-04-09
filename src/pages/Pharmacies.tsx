@@ -176,9 +176,12 @@ export default function Pharmacies() {
   };
 
   const seoCityName = useMemo(() => {
+    const apiCityName = items.find((item) => item.grad_naziv && item.grad_naziv.trim() !== '')?.grad_naziv?.trim();
+    if (apiCityName) return apiCityName;
+    if (city.trim()) return city.trim();
     if (!selectedCitySlug) return '';
     return formatCityLabel(selectedCitySlug);
-  }, [selectedCitySlug]);
+  }, [city, items, selectedCitySlug]);
 
   const onlyCityFilter = useMemo(
     () => !!selectedCitySlug && !search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo,
@@ -190,33 +193,50 @@ export default function Pharmacies() {
     [selectedCitySlug, dutyNow, search, openNow, is24h, pensioner, hasActions, geo]
   );
 
+  const twentyFourHourCitySeoPage = useMemo(
+    () => !!selectedCitySlug && is24h && !search && !openNow && !dutyNow && !pensioner && !hasActions && !geo,
+    [selectedCitySlug, is24h, search, openNow, dutyNow, pensioner, hasActions, geo]
+  );
+
   const canonicalUrl = useMemo(() => {
     if (dutyCitySeoPage) {
       return `${SITE_URL}/apoteke/${selectedCitySlug}?grad=${encodeURIComponent(selectedCitySlug)}&dezurna_now=1`;
+    }
+    if (twentyFourHourCitySeoPage) {
+      return `${SITE_URL}/apoteke/${selectedCitySlug}?grad=${encodeURIComponent(selectedCitySlug)}&is_24h=1`;
     }
     if (onlyCityFilter) {
       return `${SITE_URL}/apoteke/${selectedCitySlug}`;
     }
     return `${SITE_URL}/apoteke`;
-  }, [dutyCitySeoPage, onlyCityFilter, selectedCitySlug]);
+  }, [dutyCitySeoPage, onlyCityFilter, selectedCitySlug, twentyFourHourCitySeoPage]);
 
   const robotsContent = useMemo(() => {
-    if (dutyCitySeoPage || onlyCityFilter || (!search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo)) {
+    if (
+      dutyCitySeoPage ||
+      twentyFourHourCitySeoPage ||
+      onlyCityFilter ||
+      (!search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo)
+    ) {
       return 'index, follow';
     }
     return 'noindex, follow';
-  }, [dutyCitySeoPage, onlyCityFilter, search, openNow, dutyNow, is24h, pensioner, hasActions, geo]);
+  }, [dutyCitySeoPage, twentyFourHourCitySeoPage, onlyCityFilter, search, openNow, dutyNow, is24h, pensioner, hasActions, geo]);
 
   const title = dutyCitySeoPage
-    ? `Dezurna apoteka - ${seoCityName}`
+    ? `Dežurna apoteka - ${seoCityName}`
+    : twentyFourHourCitySeoPage
+      ? `Apoteka 24h - ${seoCityName}`
     : seoCityName
       ? `Apoteke - ${seoCityName}`
       : 'Apoteke';
   const description = dutyCitySeoPage
-    ? `Pronadjite dezurne apoteke za ${seoCityName}. Dostupni su telefon, lokacija, status dezurstva i radno vrijeme na jednom mjestu.`
+    ? `Pronađite dežurne apoteke za ${seoCityName}. Dostupni su telefon, lokacija, status dežurstva i radno vrijeme na jednom mjestu.`
+    : twentyFourHourCitySeoPage
+      ? `Pronađite apoteke koje rade 24h za ${seoCityName}. Dostupni su telefon, lokacija i radno vrijeme na jednom mjestu.`
     : seoCityName
-      ? `Pronadjite otvorene i dezurne apoteke za ${seoCityName}.`
-      : 'Pronadjite otvorene, dezurne i najblize apoteke u Bosni i Hercegovini.';
+      ? `Pronađite otvorene, dežurne i 24h apoteke za ${seoCityName}.`
+      : 'Pronađite otvorene, dežurne, 24h i najbliže apoteke u Bosni i Hercegovini.';
 
   const jsonLd = {
     '@context': 'https://schema.org',
