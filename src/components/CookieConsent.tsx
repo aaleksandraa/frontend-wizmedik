@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { BarChart3, CheckCircle2, Clock3, Cookie, Database, Megaphone, Settings2, Shield } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -97,7 +98,7 @@ function CategoryPreferenceCard({
   const Icon = categoryIconMap[category.key];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex gap-3">
           <div className={cn('mt-0.5 rounded-xl border p-2', badgeClassMap[category.key])}>
@@ -113,7 +114,6 @@ function CategoryPreferenceCard({
               ) : null}
             </div>
             <p className="mt-1 text-sm text-slate-600">{category.shortDescription}</p>
-            <p className="mt-2 text-xs leading-5 text-slate-500">{category.description}</p>
           </div>
         </div>
 
@@ -152,7 +152,7 @@ export function CookieConsent() {
     }
   }, [isPreferencesOpen, preferences, hasDecision]);
 
-  const shouldShowBanner = !loadingSettings && settings.enabled && !hasDecision;
+  const shouldShowBanner = !loadingSettings && settings.enabled && !hasDecision && !isPreferencesOpen;
 
   const groupedTechnologies = useMemo(
     () =>
@@ -244,9 +244,10 @@ export function CookieConsent() {
       {isClient && bannerContent ? createPortal(bannerContent, document.body) : null}
 
       <Dialog open={isPreferencesOpen} onOpenChange={setPreferencesOpen}>
-        <DialogContent className="max-w-6xl gap-0 overflow-hidden border-none p-0 shadow-2xl">
-          <div className="grid max-h-[90vh] grid-cols-1 overflow-hidden lg:grid-cols-[1.05fr_1.35fr]">
-            <div className="overflow-y-auto border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-cyan-50 p-6 lg:border-b-0 lg:border-r">
+        <DialogContent className="max-w-6xl gap-0 overflow-hidden border-none p-0 shadow-2xl sm:max-h-[92vh]">
+          <div className="grid max-h-[92dvh] grid-cols-1 overflow-hidden lg:grid-cols-[1.02fr_1.38fr]">
+            <div className="flex min-h-0 flex-col border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-cyan-50 lg:border-b-0 lg:border-r">
+              <div className="min-h-0 flex-1 overflow-y-auto p-6">
               <DialogHeader className="space-y-3 text-left">
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-cyan-100 p-3 text-cyan-700">
@@ -293,8 +294,9 @@ export function CookieConsent() {
                   kategoriji marketing i nece se pokretati bez vaseg pristanka.
                 </p>
               </div>
+              </div>
 
-              <DialogFooter className="mt-6 flex-col gap-2 sm:flex-col sm:space-x-0">
+              <DialogFooter className="border-t border-slate-200 bg-white/95 p-6 backdrop-blur supports-[backdrop-filter]:bg-white/85">
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <Button variant="outline" onClick={() => rejectOptional(hasDecision ? 'settings' : 'banner')} className="flex-1 rounded-xl">
                     Odbij opcione
@@ -320,48 +322,65 @@ export function CookieConsent() {
               </DialogFooter>
             </div>
 
-            <div className="overflow-y-auto bg-white p-6">
+            <div className="min-h-0 overflow-y-auto bg-white p-6">
               <div className="flex flex-col gap-2 border-b border-slate-200 pb-4">
                 <h3 className="text-lg font-semibold text-slate-900">Pregled tehnologija i trajanja</h3>
                 <p className="text-sm leading-6 text-slate-600">
-                  Ispod je pregled svih trenutnih zapisa, kolacica i slicnih tehnologija koje WizMedik koristi ili ima
-                  spremne za buducu integraciju.
+                  Kategorije ispod mozete otvoriti jednu po jednu da vidite opis, svrhu, trajanje i trenutno stanje
+                  svake tehnologije koju WizMedik koristi ili drzi spremnu za buducu integraciju.
                 </p>
               </div>
 
-              <div className="mt-6 space-y-6">
+              <Accordion type="multiple" defaultValue={['essential']} className="mt-6 space-y-4">
                 {groupedTechnologies.map(({ category, items }) => (
-                  <section key={category.key} className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className={cn('rounded-xl border p-2', badgeClassMap[category.key])}>
-                        {(() => {
-                          const Icon = categoryIconMap[category.key];
-                          return <Icon className="h-4 w-4" />;
-                        })()}
+                  <AccordionItem
+                    key={category.key}
+                    value={category.key}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/60 px-4"
+                  >
+                    <AccordionTrigger className="gap-4 py-4 text-left no-underline hover:no-underline">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <div className={cn('mt-0.5 rounded-xl border p-2', badgeClassMap[category.key])}>
+                          {(() => {
+                            const Icon = categoryIconMap[category.key];
+                            return <Icon className="h-4 w-4" />;
+                          })()}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="text-sm font-semibold text-slate-900">{category.title}</h4>
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                              {items.length} {items.length === 1 ? 'stavka' : 'stavki'}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-500">{category.shortDescription}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-slate-900">{category.title}</h4>
-                        <p className="text-xs text-slate-500">{category.shortDescription}</p>
-                      </div>
-                    </div>
+                    </AccordionTrigger>
 
-                    <div className="grid gap-3 xl:grid-cols-2">
-                      {items.map((item) => (
-                        <TechnologyCard
-                          key={item.id}
-                          name={item.name}
-                          provider={item.provider}
-                          storage={item.storage}
-                          duration={item.duration}
-                          purpose={item.purpose}
-                          statusLabel={getCookieStatusLabel(item)}
-                          category={category.key}
-                        />
-                      ))}
-                    </div>
-                  </section>
+                    <AccordionContent className="pt-0">
+                      <div className="border-t border-slate-200 pt-4">
+                        <p className="text-sm leading-6 text-slate-600">{category.description}</p>
+
+                        <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                          {items.map((item) => (
+                            <TechnologyCard
+                              key={item.id}
+                              name={item.name}
+                              provider={item.provider}
+                              storage={item.storage}
+                              duration={item.duration}
+                              purpose={item.purpose}
+                              statusLabel={getCookieStatusLabel(item)}
+                              category={category.key}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
-              </div>
+              </Accordion>
 
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                 <p>
