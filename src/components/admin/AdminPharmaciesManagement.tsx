@@ -19,6 +19,7 @@ import {
 import { Building2, Edit, Mail, MapPin, Phone, Pill, Plus, Search, Trash2 } from 'lucide-react';
 import { AdminImageGalleryField } from '@/components/admin/AdminImageGalleryField';
 import { AdminSingleImageUploadField } from '@/components/admin/AdminSingleImageUploadField';
+import { CitySelect } from '@/components/CitySelect';
 
 type PharmacyStatus = 'pending' | 'verified' | 'rejected' | 'suspended';
 
@@ -40,6 +41,7 @@ interface PharmacyOwner {
 interface PharmacyBranch {
   id: number;
   naziv: string;
+  grad_id?: number | null;
   grad_naziv?: string;
   adresa?: string;
   postanski_broj?: string;
@@ -93,6 +95,7 @@ interface PharmacyFormState {
 
   branch_naziv: string;
   grad: string;
+  grad_id: string;
   adresa: string;
   postanski_broj: string;
   latitude: string;
@@ -177,6 +180,7 @@ const createEmptyForm = (): PharmacyFormState => ({
 
   branch_naziv: '',
   grad: '',
+  grad_id: '',
   adresa: '',
   postanski_broj: '',
   latitude: '',
@@ -303,6 +307,7 @@ export function AdminPharmaciesManagement() {
 
       branch_naziv: branch?.naziv || '',
       grad: branch?.grad_naziv || '',
+      grad_id: branch?.grad_id ? String(branch.grad_id) : '',
       adresa: branch?.adresa || '',
       postanski_broj: branch?.postanski_broj || '',
       latitude: branch?.latitude?.toString() || '',
@@ -372,6 +377,7 @@ export function AdminPharmaciesManagement() {
 
       branch_naziv: form.branch_naziv.trim() || null,
       grad: form.grad.trim(),
+      grad_id: form.grad_id ? Number(form.grad_id) : undefined,
       adresa: form.adresa.trim(),
       postanski_broj: form.postanski_broj.trim() || null,
       latitude: form.latitude.trim() ? Number(form.latitude) : null,
@@ -400,6 +406,16 @@ export function AdminPharmaciesManagement() {
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    if (!editingFirm && !form.grad_id) {
+      toast({
+        title: 'Greska',
+        description: 'Molimo odaberite grad iz nase liste gradova.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = buildPayload();
@@ -743,10 +759,15 @@ export function AdminPharmaciesManagement() {
                 </div>
                 <div>
                   <Label>Grad *</Label>
-                  <Input
+                  <CitySelect
                     value={form.grad}
-                    onChange={(e) => setForm((prev) => ({ ...prev, grad: e.target.value }))}
-                    required
+                    valueId={form.grad_id}
+                    onChange={(value) => setForm((prev) => ({ ...prev, grad: value }))}
+                    onSelectCity={(city) => setForm((prev) => ({
+                      ...prev,
+                      grad: city?.naziv || '',
+                      grad_id: city ? String(city.id) : '',
+                    }))}
                   />
                 </div>
                 <div>

@@ -144,6 +144,15 @@ const formatDateOnly = (value?: string | null): string => {
   return new Intl.DateTimeFormat('bs-BA', { dateStyle: 'medium' }).format(date);
 };
 
+const formatTimeOnly = (value?: string | null): string => {
+  if (!value) return '--:--';
+
+  const normalized = value.trim();
+  const timeMatch = normalized.match(/^(\d{2}:\d{2})(?::\d{2})?$/);
+
+  return timeMatch ? timeMatch[1] : normalized;
+};
+
 export default function PharmacyProfile() {
   const { slug } = useParams<{ slug: string }>();
   const [pharmacy, setPharmacy] = useState<PharmacyProfileResponse | null>(null);
@@ -536,7 +545,7 @@ export default function PharmacyProfile() {
                           <span className="text-gray-500">Zatvoreno</span>
                         ) : (
                           <span className="font-medium">
-                            {entry.item.open_time || '--:--'} - {entry.item.close_time || '--:--'}
+                            {formatTimeOnly(entry.item.open_time)} - {formatTimeOnly(entry.item.close_time)}
                           </span>
                         )}
                       </div>
@@ -562,7 +571,7 @@ export default function PharmacyProfile() {
                             <Badge variant="secondary">Zatvoreno</Badge>
                           ) : (
                             <Badge variant="outline">
-                              {exception.open_time || '--:--'} - {exception.close_time || '--:--'}
+                              {formatTimeOnly(exception.open_time)} - {formatTimeOnly(exception.close_time)}
                             </Badge>
                           )}
                         </div>

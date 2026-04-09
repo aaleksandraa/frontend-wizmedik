@@ -25,6 +25,7 @@ type FormState = {
   branch_naziv: string;
   adresa: string;
   grad: string;
+  grad_id: string;
   postanski_broj: string;
   latitude: string;
   longitude: string;
@@ -50,6 +51,7 @@ const initialState: FormState = {
   branch_naziv: '',
   adresa: '',
   grad: '',
+  grad_id: '',
   postanski_broj: '',
   latitude: '',
   longitude: '',
@@ -95,10 +97,20 @@ export function PharmacyRegistrationForm() {
       return;
     }
 
+    if (!form.grad_id) {
+      toast({
+        title: 'Greska',
+        description: 'Molimo odaberite grad iz ponudjene liste.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
         ...form,
+        grad_id: form.grad_id ? Number(form.grad_id) : undefined,
         latitude: form.latitude ? Number(form.latitude) : undefined,
         longitude: form.longitude ? Number(form.longitude) : undefined,
       };
@@ -182,7 +194,12 @@ export function PharmacyRegistrationForm() {
                 </div>
                 <div className="space-y-2">
                   <Label>Grad *</Label>
-                  <CitySelect value={form.grad} onChange={(value) => setField('grad', value)} />
+                  <CitySelect
+                    value={form.grad}
+                    valueId={form.grad_id}
+                    onChange={(value) => setField('grad', value)}
+                    onSelectCity={(city) => setField('grad_id', city ? String(city.id) : '')}
+                  />
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label>Adresa poslovnice *</Label>

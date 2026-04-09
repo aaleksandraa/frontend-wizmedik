@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/popover';
 import { citiesAPI } from '@/services/api';
 
-interface City {
+export interface CityOption {
   id: number;
   naziv: string;
   slug: string;
@@ -26,6 +26,8 @@ interface City {
 interface CitySelectProps {
   value: string;
   onChange: (value: string) => void;
+  valueId?: number | string | null;
+  onSelectCity?: (city: CityOption | null) => void;
   placeholder?: string;
   disabled?: boolean;
   error?: boolean;
@@ -38,6 +40,8 @@ interface CitySelectProps {
 export function CitySelect({
   value,
   onChange,
+  valueId,
+  onSelectCity,
   placeholder = 'Odaberite grad',
   disabled = false,
   error = false,
@@ -47,7 +51,7 @@ export function CitySelect({
   allOptionLabel = 'Svi gradovi',
 }: CitySelectProps) {
   const [open, setOpen] = useState(false);
-  const [cities, setCities] = useState<City[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,12 +69,18 @@ export function CitySelect({
     fetchCities();
   }, []);
 
-  const selectedCity = cities.find((city) => city.naziv === value);
-  const displayValue = value
-    ? selectedCity?.naziv || value
-    : showAllOption
-      ? allOptionLabel
-      : placeholder;
+  const normalizedValueId =
+    valueId === null || valueId === undefined || valueId === ''
+      ? null
+      : Number(valueId);
+
+  const selectedCity = normalizedValueId !== null
+    ? cities.find((city) => city.id === normalizedValueId)
+    : cities.find((city) => city.naziv === value);
+  const displayValue =
+    selectedCity?.naziv ||
+    value ||
+    (showAllOption ? allOptionLabel : placeholder);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -82,7 +92,7 @@ export function CitySelect({
           disabled={disabled || loading}
           className={cn(
             'w-full justify-between font-normal',
-            !value && !showAllOption && 'text-muted-foreground',
+            !selectedCity && !value && !showAllOption && 'text-muted-foreground',
             error && 'border-red-500',
             className
           )}
@@ -105,6 +115,7 @@ export function CitySelect({
                   value="__all_cities__"
                   onSelect={() => {
                     onChange('');
+                    onSelectCity?.(null);
                     setOpen(false);
                   }}
                 >
@@ -118,13 +129,14 @@ export function CitySelect({
                   value={city.naziv}
                   onSelect={() => {
                     onChange(city.naziv);
+                    onSelectCity?.(city);
                     setOpen(false);
                   }}
                 >
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      value === city.naziv ? 'opacity-100' : 'opacity-0'
+                      city.id === normalizedValueId || value === city.naziv ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   {city.naziv}
