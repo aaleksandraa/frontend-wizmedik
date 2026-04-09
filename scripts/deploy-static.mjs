@@ -47,6 +47,18 @@ const IN_PLACE_PRESERVE_FILES = new Set([
   "vite.config.ts",
   "vitest.config.ts",
 ]);
+const VERIFY_ROUTE_PATHS = [
+  "/blog",
+  "/gradovi",
+  "/about",
+  "/pitanja",
+  "/domovi-njega",
+  "/doktori",
+  "/klinike",
+  "/laboratorije",
+  "/apoteke",
+  "/banje",
+];
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -275,6 +287,8 @@ async function verifyDeploy(targetDir) {
       throw new Error(`Deploy verification failed. Missing ${requiredEntry}`);
     }
   }
+
+  await verifyDeployedAssetSet(targetDir);
 }
 
 async function ensureDirectory(directory, errorMessage) {
@@ -316,6 +330,121 @@ function shouldRemoveGeneratedTopLevelFile(fileName, distTopLevelNames) {
     /^sw\.js(?:\.(?:gz|br))?$/i.test(fileName) ||
     /^robots\.txt(?:\.(?:gz|br))?$/i.test(fileName)
   );
+}
+
+async function verifyDeployedAssetSet(targetDir) {
+  const requireSeoRoutes = parseBoolean(process.env.FRONTEND_EXPECT_SEO_ROUTES);
+  const rootHtmlPath = path.join(targetDir, "index.html");
+  const rootHtml = await fs.readFile(rootHtmlPath, "utf8");
+  const rootAssets = extractCoreAssets(rootHtml);
+
+  if (!rootAssets.mainJs || !rootAssets.mainCss) {
+    throw new Error("Deploy verification failed. Could not resolve root JS/CSS assets from index.html.");
+  }
+
+  await ensureRelativeAssetExists(targetDir, rootAssets.mainJs);
+  await ensureRelativeAssetExists(targetDir, rootAssets.mainCss);
+
+  if (rootAssets.legacyJs) {
+    await ensureRelativeAssetExists(targetDir, rootAssets.legacyJs);
+  }
+
+  const verifiedBundlePaths = new Set();
+  await verifyBundleAssetGraphOnDisk(targetDir, rootAssets.mainJs, verifiedBundlePaths);
+
+  for (const route of VERIFY_ROUTE_PATHS) {
+    const routeHtmlPath = path.join(targetDir, route.replace(/^\/+/, ""), "index.html");
+    if (!(await pathExists(routeHtmlPath))) {
+      if (requireSeoRoutes) {
+        throw new Error(`Deploy verification failed. Missing prerendered route ${route}.`);
+      }
+
+      continue;
+    }
+
+    const routeHtml = await fs.readFile(routeHtmlPath, "utf8");
+    const routeAssets = extractCoreAssets(routeHtml);
+
+    if (routeAssets.mainJs !== rootAssets.mainJs) {
+      throw new Error(
+        `Deploy verification failed. Route ${route} references ${routeAssets.mainJs || "missing"} instead of ${rootAssets.mainJs}.`
+      );
+    }
+
+    if (routeAssets.mainCss !== rootAssets.mainCss) {
+      throw new Error(
+        `Deploy verification failed. Route ${route} references ${routeAssets.mainCss || "missing"} instead of ${rootAssets.mainCss}.`
+      );
+    }
+
+    if (rootAssets.legacyJs && routeAssets.legacyJs !== rootAssets.legacyJs) {
+      throw new Error(
+        `Deploy verification failed. Route ${route} references ${routeAssets.legacyJs || "missing"} instead of ${rootAssets.legacyJs}.`
+      );
+    }
+
+    const routeHtmlAssets = extractAllAssetUrls(routeHtml);
+    for (const assetPath of routeHtmlAssets) {
+      await ensureRelativeAssetExists(targetDir, assetPath);
+    }
+
+    if (routeAssets.mainJs) {
+      await verifyBundleAssetGraphOnDisk(targetDir, routeAssets.mainJs, verifiedBundlePaths);
+    }
+  }
+}
+
+function extractCoreAssets(html) {
+  return {
+    mainJs: firstMatch(html, /<script[^>]+type="module"[^>]+src="([^"]*\/assets\/index-[^"]+\.js)"/i),
+    mainCss: firstMatch(html, /<link[^>]+rel="stylesheet"[^>]+href="([^"]*\/assets\/index-[^"]+\.css)"/i),
+    legacyJs: firstMatch(html, /\/assets\/index-legacy-[^"' ]+\.js/i),
+  };
+}
+
+function extractAllAssetUrls(html) {
+  const matches = html.match(/\/assets\/[^"' )]+?\.(?:js|css)/gi) || [];
+  return [...new Set(matches)];
+}
+
+function extractScriptAssetUrls(script) {
+  const matches = script.match(/assets\/[^"'`\s)\\]+?\.(?:js|css)/gi) || [];
+  return [...new Set(matches.map((assetPath) => (assetPath.startsWith("/") ? assetPath : `/${assetPath}`)))];
+}
+
+function firstMatch(input, regex) {
+  const match = input.match(regex);
+  if (!match) {
+    return "";
+  }
+
+  return match[1] || match[0] || "";
+}
+
+async function verifyBundleAssetGraphOnDisk(targetDir, scriptPath, verifiedBundlePaths) {
+  if (!scriptPath || verifiedBundlePaths.has(scriptPath)) {
+    return;
+  }
+
+  verifiedBundlePaths.add(scriptPath);
+  const scriptFilePath = toTargetPath(targetDir, scriptPath);
+  const script = await fs.readFile(scriptFilePath, "utf8");
+  const assetPaths = extractScriptAssetUrls(script);
+
+  for (const assetPath of assetPaths) {
+    await ensureRelativeAssetExists(targetDir, assetPath);
+  }
+}
+
+async function ensureRelativeAssetExists(targetDir, assetPath) {
+  const targetPath = toTargetPath(targetDir, assetPath);
+  if (!(await pathExists(targetPath))) {
+    throw new Error(`Deploy verification failed. Missing asset ${assetPath}`);
+  }
+}
+
+function toTargetPath(targetDir, assetPath) {
+  return path.join(targetDir, assetPath.replace(/^\/+/, "").split("/").join(path.sep));
 }
 
 main().catch((error) => {

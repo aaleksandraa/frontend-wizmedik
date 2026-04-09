@@ -16,6 +16,16 @@ async function main() {
   await runCommand(process.execPath, [path.join(__dirname, "deploy-static.mjs"), ...extraArgs], {
     cwd: FRONTEND_DIR,
   });
+
+  const shouldVerifyAfterDeploy = !["0", "false", "no", "off"].includes(
+    String(process.env.FRONTEND_VERIFY_AFTER_DEPLOY || "1").trim().toLowerCase()
+  );
+
+  if (shouldVerifyAfterDeploy) {
+    await runCommand(process.execPath, [path.join(__dirname, "verify-static-deploy.mjs")], {
+      cwd: FRONTEND_DIR,
+    });
+  }
 }
 
 main().catch((error) => {

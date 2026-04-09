@@ -1,5 +1,17 @@
 const DEFAULT_ORIGIN = process.env.FRONTEND_VERIFY_ORIGIN || "https://wizmedik.com";
-const DEFAULT_ROUTES = ["/", "/gradovi", "/about", "/pitanja", "/domovi-njega"];
+const DEFAULT_ROUTES = [
+  "/",
+  "/blog",
+  "/gradovi",
+  "/about",
+  "/pitanja",
+  "/domovi-njega",
+  "/doktori",
+  "/klinike",
+  "/laboratorije",
+  "/apoteke",
+  "/banje",
+];
 const REQUEST_TIMEOUT_MS = Math.max(5000, Number(process.env.FRONTEND_VERIFY_TIMEOUT_MS || 20000));
 const SERVICE_WORKER_MARKER = "// WizMedik service worker cleanup shim.";
 
@@ -30,13 +42,19 @@ async function main() {
   }
 
   await verifyServiceWorker(origin);
+  const verifiedBundles = new Set();
   await verifyDynamicImportAssets(origin, rootAssets.mainJs, "root bundle");
+  verifiedBundles.add(rootAssets.mainJs);
 
   const failures = [];
 
   for (const route of routes) {
     try {
-      await verifyRoute(origin, route, rootAssets);
+      const routeAssets = await verifyRoute(origin, route, rootAssets);
+      if (routeAssets.mainJs && !verifiedBundles.has(routeAssets.mainJs)) {
+        await verifyDynamicImportAssets(origin, routeAssets.mainJs, `${route} bundle`);
+        verifiedBundles.add(routeAssets.mainJs);
+      }
       console.log(`[verify-deploy] PASS ${route}`);
     } catch (error) {
       failures.push(`${route}: ${error.message}`);
@@ -101,19 +119,59 @@ async function buildDefaultRoutes() {
     routes.push(`/${firstQuestionDetail}`);
   }
 
+  const firstBlogDetail = manifestRoutes.find((route) => route.startsWith("blog/") && route !== "blog");
+  if (firstBlogDetail) {
+    routes.push(`/${firstBlogDetail}`);
+  }
+
   return uniqueRoutes(routes);
 }
 
 async function loadManifestRoutes() {
   try {
-    const { readFile } = await import("node:fs/promises");
-    const { resolve } = await import("node:path");
-    const manifestPath = resolve(process.cwd(), "dist", ".seo-prerendered-paths.json");
+    const { readFile, readdir } = await import("node:fs/promises");
+    const { resolve, join, relative } = await import("node:path");
+    const distDir = resolve(process.cwd(), "dist");
+    const manifestPath = resolve(distDir, ".seo-prerendered-paths.json");
     const raw = await readFile(manifestPath, "utf8");
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((entry) => typeof entry === "string") : [];
+
+    if (Array.isArray(parsed)) {
+      return parsed.filter((entry) => typeof entry === "string");
+    }
+
+    const discovered = [];
+    await collectRouteDirectories(distDir, "", discovered, readdir, join, relative);
+    return discovered;
   } catch {
-    return [];
+    try {
+      const { readdir } = await import("node:fs/promises");
+      const { resolve, join, relative } = await import("node:path");
+      const distDir = resolve(process.cwd(), "dist");
+      const discovered = [];
+      await collectRouteDirectories(distDir, "", discovered, readdir, join, relative);
+      return discovered;
+    } catch {
+      return [];
+    }
+  }
+}
+
+async function collectRouteDirectories(baseDir, relativeDir, results, readdir, join, relative) {
+  const entries = await readdir(join(baseDir, relativeDir), { withFileTypes: true });
+  const hasIndexHtml = entries.some((entry) => entry.isFile() && entry.name === "index.html");
+
+  if (relativeDir && hasIndexHtml) {
+    results.push(relativeDir.replace(/\\/g, "/"));
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const nextRelativeDir = relative(join(baseDir), join(baseDir, relativeDir, entry.name));
+    await collectRouteDirectories(baseDir, nextRelativeDir, results, readdir, join, relative);
   }
 }
 
@@ -167,6 +225,8 @@ async function verifyRoute(origin, route, rootAssets) {
       throw new Error(`asset ${assetPath} returned HTTP ${status}`);
     }
   }
+
+  return routeAssets;
 }
 
 async function verifyDynamicImportAssets(origin, scriptPath, label) {
