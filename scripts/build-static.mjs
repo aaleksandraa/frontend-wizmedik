@@ -16,6 +16,9 @@ const viteEntrypoint = path.join(
 
 async function main() {
   await restoreSourceIndexHtml();
+  await runCommand(process.execPath, [path.join(__dirname, "verify-react-hooks-imports.mjs")], {
+    cwd: FRONTEND_DIR,
+  });
   await runCommand(process.execPath, [viteEntrypoint, "build"], { cwd: FRONTEND_DIR });
   await runCommand(process.execPath, [path.join(__dirname, "sync-htaccess.mjs")], {
     cwd: FRONTEND_DIR,

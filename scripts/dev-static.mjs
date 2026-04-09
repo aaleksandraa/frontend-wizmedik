@@ -16,6 +16,9 @@ const viteEntrypoint = path.join(
 
 async function main() {
   await restoreSourceIndexHtml();
+  await runCommand(process.execPath, [path.join(__dirname, "verify-react-hooks-imports.mjs")], {
+    cwd: FRONTEND_DIR,
+  });
   const extraArgs = process.argv.slice(2);
   await runCommand(process.execPath, [viteEntrypoint, ...(["dev", ...extraArgs])], {
     cwd: FRONTEND_DIR,
