@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { BarChart3, CheckCircle2, Clock3, Cookie, Database, Megaphone, Settings2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { useCookieConsent } from '@/contexts/CookieConsentContext';
 import {
+  ACCEPT_ALL_COOKIE_PREFERENCES,
   COOKIE_CATEGORIES,
   CookieConsentCategory,
   CookieConsentPreferences,
@@ -135,13 +137,20 @@ export function CookieConsent() {
     savePreferences,
   } = useCookieConsent();
 
-  const [draftPreferences, setDraftPreferences] = useState<CookieConsentPreferences>(preferences);
+  const [draftPreferences, setDraftPreferences] = useState<CookieConsentPreferences>(
+    hasDecision ? preferences : ACCEPT_ALL_COOKIE_PREFERENCES,
+  );
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (isPreferencesOpen) {
-      setDraftPreferences(preferences);
+      setDraftPreferences(hasDecision ? preferences : ACCEPT_ALL_COOKIE_PREFERENCES);
     }
-  }, [isPreferencesOpen, preferences]);
+  }, [isPreferencesOpen, preferences, hasDecision]);
 
   const shouldShowBanner = !loadingSettings && settings.enabled && !hasDecision;
 
@@ -169,54 +178,60 @@ export function CookieConsent() {
     savePreferences(draftPreferences, hasDecision ? 'settings' : 'banner');
   };
 
-  return (
-    <>
-      {shouldShowBanner ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] border-t-2 border-slate-200 bg-white shadow-[0_-18px_48px_rgba(15,23,42,0.18)]">
-          <div className="pointer-events-auto mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+1rem)]">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-3xl">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-cyan-100 p-2.5 text-cyan-700">
-                    <Cookie className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Postavke kolacica i privatnosti</p>
-                    <p className="text-xs text-slate-600">Ova traka ostaje vidljiva pri dnu ekrana dok ne odaberete sta zelite dozvoliti.</p>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm leading-6 text-slate-600">{settings.text}</p>
-
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                  <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                    U svakom trenutku mozete promijeniti izbor iz futera
-                  </span>
-                  <Link to="/cookie-policy" className="font-medium text-cyan-700 hover:text-cyan-800 hover:underline">
-                    Politika kolacica
-                  </Link>
-                  <Link to="/privacy-policy" className="font-medium text-cyan-700 hover:text-cyan-800 hover:underline">
-                    Politika privatnosti
-                  </Link>
-                </div>
+  const bannerContent = shouldShowBanner ? (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] flex justify-center px-3 sm:px-4 lg:px-6 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+0.75rem)]">
+      <div className="pointer-events-auto w-full max-w-5xl rounded-3xl border border-slate-300 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.24)] md:p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-cyan-100 p-2.5 text-cyan-700">
+                <Cookie className="h-5 w-5" />
               </div>
-
-              <div className="flex flex-col gap-2 sm:flex-row md:justify-end">
-                <Button variant="ghost" onClick={() => setPreferencesOpen(true)} className="justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
-                  Prilagodi
-                </Button>
-                <Button variant="outline" onClick={() => rejectOptional('banner')} className="rounded-xl">
-                  {settings.reject_button || 'Odbij opcione'}
-                </Button>
-                <Button onClick={() => acceptAll('banner')} className="rounded-xl bg-cyan-600 text-white hover:bg-cyan-700">
-                  {settings.accept_button || 'Prihvati sve'}
-                </Button>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Postavke kolacica i privatnosti</p>
+                <p className="text-xs text-slate-600">Ovaj popup ostaje zalijepljen za dno ekrana dok ne odaberete postavke.</p>
               </div>
             </div>
+
+            <p className="mt-4 text-sm leading-6 text-slate-700">{settings.text}</p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                Opcione kategorije su unaprijed ukljucene, a vi ih mozete prilagoditi
+              </span>
+              <Link to="/cookie-policy" className="font-medium text-cyan-700 hover:text-cyan-800 hover:underline">
+                Politika kolacica
+              </Link>
+              <Link to="/privacy-policy" className="font-medium text-cyan-700 hover:text-cyan-800 hover:underline">
+                Politika privatnosti
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row md:justify-end">
+            <Button
+              variant="ghost"
+              onClick={() => setPreferencesOpen(true)}
+              className="justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+            >
+              Prilagodi
+            </Button>
+            <Button variant="outline" onClick={() => rejectOptional('banner')} className="rounded-xl">
+              {settings.reject_button || 'Odbij opcione'}
+            </Button>
+            <Button onClick={() => acceptAll('banner')} className="rounded-xl bg-cyan-600 text-white hover:bg-cyan-700">
+              {settings.accept_button || 'Prihvati sve'}
+            </Button>
           </div>
         </div>
-      ) : null}
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      {isClient && bannerContent ? createPortal(bannerContent, document.body) : null}
 
       <Dialog open={isPreferencesOpen} onOpenChange={setPreferencesOpen}>
         <DialogContent className="max-w-6xl gap-0 overflow-hidden border-none p-0 shadow-2xl">
