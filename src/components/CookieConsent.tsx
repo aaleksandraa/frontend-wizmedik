@@ -172,17 +172,17 @@ export function CookieConsent() {
   return (
     <>
       {shouldShowBanner ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9997] px-3 sm:px-4 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+0.75rem)]">
-          <div className="pointer-events-auto mx-auto max-w-6xl rounded-3xl border border-slate-200 bg-white/96 p-4 shadow-2xl backdrop-blur md:p-5">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] border-t-2 border-slate-200 bg-white shadow-[0_-18px_48px_rgba(15,23,42,0.18)]">
+          <div className="pointer-events-auto mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+1rem)]">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-cyan-50 p-2.5 text-cyan-700">
+                  <div className="rounded-2xl bg-cyan-100 p-2.5 text-cyan-700">
                     <Cookie className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Postavke kolacica i privatnosti</p>
-                    <p className="text-xs text-slate-500">Traka ostaje pri dnu ekrana dok ne odaberete sta zelite dozvoliti.</p>
+                    <p className="text-xs text-slate-600">Ova traka ostaje vidljiva pri dnu ekrana dok ne odaberete sta zelite dozvoliti.</p>
                   </div>
                 </div>
 
@@ -203,7 +203,7 @@ export function CookieConsent() {
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row md:justify-end">
-                <Button variant="ghost" onClick={() => setPreferencesOpen(true)} className="justify-center rounded-xl">
+                <Button variant="ghost" onClick={() => setPreferencesOpen(true)} className="justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100">
                   Prilagodi
                 </Button>
                 <Button variant="outline" onClick={() => rejectOptional('banner')} className="rounded-xl">
