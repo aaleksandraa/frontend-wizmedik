@@ -134,6 +134,14 @@ const defaultWorkingHour = (day: number): PharmacyWorkingHour => ({
 const defaultWorkingHours = (): PharmacyWorkingHour[] =>
   [1, 2, 3, 4, 5, 6, 7].map((day) => defaultWorkingHour(day));
 
+const nonStopWorkingHours = (): PharmacyWorkingHour[] =>
+  [1, 2, 3, 4, 5, 6, 7].map((day) => ({
+    day_of_week: day,
+    open_time: '00:00',
+    close_time: '23:59',
+    closed: false,
+  }));
+
 const normalizeTimeInput = (value: string | null | undefined, fallback: string): string => {
   if (!value) return fallback;
   return value.slice(0, 5);
@@ -147,6 +155,18 @@ const timeInputValue = (
   if (closed && !value) return '';
   return normalizeTimeInput(value, fallback);
 };
+
+const isNonStopSchedule = (hours: PharmacyWorkingHour[]): boolean =>
+  [1, 2, 3, 4, 5, 6, 7].every((day) => {
+    const item = hours.find((entry) => entry.day_of_week === day);
+
+    return (
+      !!item &&
+      !item.closed &&
+      normalizeTimeInput(item.open_time, '00:00') === '00:00' &&
+      normalizeTimeInput(item.close_time, '23:59') === '23:59'
+    );
+  });
 
 const normalizeWorkingHours = (hours?: PharmacyWorkingHour[] | null): PharmacyWorkingHour[] => {
   const byDay = new Map<number, PharmacyWorkingHour>();
@@ -358,6 +378,18 @@ export function AdminPharmaciesManagement() {
             }
           : item
       ),
+    }));
+  };
+
+  const setNonStopMode = (enabled: boolean) => {
+    setForm((prev) => ({
+      ...prev,
+      is_24h: enabled,
+      radno_vrijeme: enabled
+        ? nonStopWorkingHours()
+        : prev.is_24h && isNonStopSchedule(prev.radno_vrijeme)
+          ? defaultWorkingHours()
+          : prev.radno_vrijeme,
     }));
   };
 
@@ -815,13 +847,6 @@ export function AdminPharmaciesManagement() {
                   />
                 </div>
                 <div className="flex items-center justify-between rounded border px-3 py-2">
-                  <Label>Radi 24h</Label>
-                  <Switch
-                    checked={form.is_24h}
-                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_24h: checked }))}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded border px-3 py-2">
                   <Label>Poslovnica verifikovana</Label>
                   <Switch
                     checked={form.is_verified}
@@ -877,7 +902,22 @@ export function AdminPharmaciesManagement() {
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-md border px-3 py-3">
+                  <div className="space-y-1">
+                    <Label className="font-medium">Radi non-stop</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Ukljucite ako poslovnica radi 0-24 svaki dan. Tada ne trebate unositi pojedinacne sate.
+                    </p>
+                  </div>
+                  <Switch checked={form.is_24h} onCheckedChange={setNonStopMode} />
+                </div>
+
+                {form.is_24h ? (
+                  <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    Ova poslovnica je postavljena da radi non-stop, 0-24 svaki dan.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
                   {form.radno_vrijeme.map((hour) => {
                     const defaults = defaultWorkingHour(hour.day_of_week);
 
@@ -913,7 +953,8 @@ export function AdminPharmaciesManagement() {
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 

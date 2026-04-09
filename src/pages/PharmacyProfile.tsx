@@ -130,8 +130,8 @@ const dayLabels: Record<number, string> = {
   7: 'Nedjelja',
 };
 
-const toAbsoluteUrl = (value?: string | null): string => {
-  if (!value) return DEFAULT_OG_IMAGE;
+const toAbsoluteUrl = (value?: string | null): string | null => {
+  if (!value) return null;
   const fixed = fixImageUrl(value) || value;
   if (fixed.startsWith('http://') || fixed.startsWith('https://')) return fixed;
   return `${SITE_URL}${fixed.startsWith('/') ? '' : '/'}${fixed}`;
@@ -180,6 +180,7 @@ export default function PharmacyProfile() {
   const city = pharmacy?.grad_naziv || 'Bosna i Hercegovina';
   const canonicalUrl = pharmacy ? `${SITE_URL}/apoteka/${pharmacy.slug}` : `${SITE_URL}/apoteka`;
   const primaryImage = toAbsoluteUrl(pharmacy?.profilna_slika_url || pharmacy?.galerija_slike?.[0] || null);
+  const seoImage = primaryImage || DEFAULT_OG_IMAGE;
   const seoDescription = useMemo(() => {
     if (!pharmacy) {
       return 'Profil apoteke na wizMedik platformi.';
@@ -214,9 +215,9 @@ export default function PharmacyProfile() {
       '@context': 'https://schema.org',
       ...pharmacy.schema_ready,
       url: canonicalUrl,
-      image: primaryImage,
+      image: seoImage,
     };
-  }, [pharmacy, canonicalUrl, primaryImage]);
+  }, [pharmacy, canonicalUrl, seoImage]);
 
   const hasPensionerDiscount = useMemo(() => {
     if (!pharmacy) return false;
@@ -279,11 +280,11 @@ export default function PharmacyProfile() {
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={primaryImage} />
+        <meta property="og:image" content={seoImage} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${pharmacy.naziv} - Apoteka`} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content={primaryImage} />
+        <meta name="twitter:image" content={seoImage} />
         <link rel="canonical" href={canonicalUrl} />
         <meta name="robots" content="index, follow" />
         {schemaData ? <script type="application/ld+json">{JSON.stringify(schemaData)}</script> : null}
@@ -297,13 +298,15 @@ export default function PharmacyProfile() {
             <Card className="border shadow-sm">
               <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col md:flex-row gap-5">
-                  <div className="shrink-0">
-                    <img
-                      src={primaryImage}
-                      alt={pharmacy.naziv}
-                      className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl border"
-                    />
-                  </div>
+                  {primaryImage ? (
+                    <div className="shrink-0">
+                      <img
+                        src={primaryImage}
+                        alt={pharmacy.naziv}
+                        className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl border"
+                      />
+                    </div>
+                  ) : null}
 
                   <div className="flex-1 space-y-3">
                     <div className="space-y-2">
@@ -538,18 +541,24 @@ export default function PharmacyProfile() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {hoursByDay.map((entry) => (
-                      <div key={entry.day} className="flex items-center justify-between py-2 px-3 rounded-lg border">
-                        <span className="font-medium">{entry.label}</span>
-                        {!entry.item || entry.item.closed ? (
-                          <span className="text-gray-500">Zatvoreno</span>
-                        ) : (
-                          <span className="font-medium">
-                            {formatTimeOnly(entry.item.open_time)} - {formatTimeOnly(entry.item.close_time)}
-                          </span>
-                        )}
+                    {pharmacy.is_24h ? (
+                      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                        Ova apoteka radi non-stop, 0-24 svaki dan.
                       </div>
-                    ))}
+                    ) : (
+                      hoursByDay.map((entry) => (
+                        <div key={entry.day} className="flex items-center justify-between py-2 px-3 rounded-lg border">
+                          <span className="font-medium">{entry.label}</span>
+                          {!entry.item || entry.item.closed ? (
+                            <span className="text-gray-500">Zatvoreno</span>
+                          ) : (
+                            <span className="font-medium">
+                              {formatTimeOnly(entry.item.open_time)} - {formatTimeOnly(entry.item.close_time)}
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
 

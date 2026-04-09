@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,14 @@ const defaultHours = () =>
     open_time: day === 7 ? null : '08:00',
     close_time: day === 7 ? null : '16:00',
     closed: day === 7,
+  }));
+
+const nonStopHours = () =>
+  [1, 2, 3, 4, 5, 6, 7].map((day) => ({
+    day_of_week: day,
+    open_time: '00:00',
+    close_time: '23:59',
+    closed: false,
   }));
 
 const num = (value: string) => {
@@ -139,6 +148,18 @@ const toTimeOrNull = (value?: string | null) => {
   if (!match) return null;
   return `${match[1].padStart(2, '0')}:${match[2]}`;
 };
+
+const isNonStopHours = (hours: Array<{ day_of_week: number; open_time?: string | null; close_time?: string | null; closed?: boolean }>) =>
+  [1, 2, 3, 4, 5, 6, 7].every((day) => {
+    const item = hours.find((entry) => entry.day_of_week === day);
+
+    return (
+      !!item &&
+      !item.closed &&
+      normalizeTimeInput(item.open_time, '00:00') === '00:00' &&
+      normalizeTimeInput(item.close_time, '23:59') === '23:59'
+    );
+  });
 
 export default function PharmacyDashboard() {
   const { user } = useAuth();
@@ -363,6 +384,11 @@ export default function PharmacyDashboard() {
 
   const saveHours = async () => {
     if (!selectedBranch) return;
+    if (branchDraft) {
+      await pharmaciesAPI.updateBranch(selectedBranch.id, {
+        is_24h: Boolean(branchDraft.is_24h),
+      });
+    }
     await pharmaciesAPI.updateHours(
       selectedBranch.id,
       hoursDraft.map((item) => ({
@@ -374,6 +400,25 @@ export default function PharmacyDashboard() {
     );
     toast({ title: 'Uspjeh', description: 'Radno vrijeme je sacuvano.' });
     await loadDashboard();
+  };
+
+  const setSelectedBranchNonStopMode = (enabled: boolean) => {
+    setBranchDraft((prev: any) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        is_24h: enabled,
+      };
+    });
+
+    setHoursDraft((prev) =>
+      enabled
+        ? nonStopHours()
+        : isNonStopHours(prev)
+          ? defaultHours()
+          : prev
+    );
   };
 
   const saveProfileImage = async () => {
@@ -667,6 +712,13 @@ export default function PharmacyDashboard() {
                     <div className="md:col-span-2"><Label>Adresa</Label><Input value={newBranch.adresa} onChange={(e) => setNewBranch((p) => ({ ...p, adresa: e.target.value }))} /></div>
                     <div><Label>Latitude</Label><Input value={newBranch.latitude} onChange={(e) => setNewBranch((p) => ({ ...p, latitude: e.target.value }))} /></div>
                     <div><Label>Longitude</Label><Input value={newBranch.longitude} onChange={(e) => setNewBranch((p) => ({ ...p, longitude: e.target.value }))} /></div>
+                    <div className="md:col-span-2 flex items-center justify-between rounded-md border px-3 py-2">
+                      <div>
+                        <Label>Radi non-stop</Label>
+                        <p className="text-xs text-gray-500">Označite ako nova poslovnica radi 0-24 svaki dan.</p>
+                      </div>
+                      <Switch checked={newBranch.is_24h} onCheckedChange={(checked) => setNewBranch((p) => ({ ...p, is_24h: checked }))} />
+                    </div>
                     <div className="md:col-span-2 flex justify-end"><Button onClick={createBranch}><Plus className="w-4 h-4 mr-1" />Dodaj</Button></div>
                   </CardContent></Card>
                   {selectedBranch && branchDraft ? <Card><CardHeader><CardTitle>Uredi poslovnicu</CardTitle></CardHeader><CardContent className="space-y-4">
@@ -676,6 +728,13 @@ export default function PharmacyDashboard() {
                       <div className="md:col-span-2"><Label>Adresa</Label><Input value={branchDraft.adresa || ''} onChange={(e) => setBranchDraft((p: any) => ({ ...p, adresa: e.target.value }))} /></div>
                       <div><Label>Latitude</Label><Input value={String(branchDraft.latitude ?? '')} onChange={(e) => setBranchDraft((p: any) => ({ ...p, latitude: e.target.value }))} /></div>
                       <div><Label>Longitude</Label><Input value={String(branchDraft.longitude ?? '')} onChange={(e) => setBranchDraft((p: any) => ({ ...p, longitude: e.target.value }))} /></div>
+                      <div className="md:col-span-2 flex items-center justify-between rounded-md border px-3 py-2">
+                        <div>
+                          <Label>Radi non-stop</Label>
+                          <p className="text-xs text-gray-500">Uključite ako poslovnica radi 0-24 svaki dan.</p>
+                        </div>
+                        <Switch checked={Boolean(branchDraft.is_24h)} onCheckedChange={setSelectedBranchNonStopMode} />
+                      </div>
                     </div>
                     <div className="flex gap-2 justify-end"><Button variant="outline" onClick={deleteBranch}><Trash2 className="w-4 h-4 mr-1" />Obrisi</Button><Button onClick={saveBranch}>Sacuvaj</Button></div>
                     <div className="grid md:grid-cols-2 gap-4 border-t pt-4">
@@ -729,54 +788,60 @@ export default function PharmacyDashboard() {
                     </div>
                     <div className="border-t pt-4 space-y-2">
                       <Label>Radno vrijeme (evropski format HH:mm, 24h)</Label>
-                      {hoursDraft.map((h, i) => (
-                        <div key={h.day_of_week} className="grid grid-cols-[120px,1fr,1fr,auto] gap-2 items-center">
-                          <span className="text-sm">{dayLabels[h.day_of_week]}</span>
-                          <Input
-                            type="time"
-                            step={60}
-                            disabled={h.closed}
-                            value={normalizeTimeInput(h.open_time, '08:00')}
-                            onChange={(e) =>
-                              setHoursDraft((prev) =>
-                                prev.map((x, j) => (j === i ? { ...x, open_time: e.target.value } : x))
-                              )
-                            }
-                          />
-                          <Input
-                            type="time"
-                            step={60}
-                            disabled={h.closed}
-                            value={normalizeTimeInput(h.close_time, '16:00')}
-                            onChange={(e) =>
-                              setHoursDraft((prev) =>
-                                prev.map((x, j) => (j === i ? { ...x, close_time: e.target.value } : x))
-                              )
-                            }
-                          />
-                          <label className="text-xs flex items-center gap-1">
-                            <input
-                              type="checkbox"
-                              checked={h.closed}
+                      {branchDraft?.is_24h ? (
+                        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                          Ova poslovnica je postavljena da radi non-stop, 0-24 svaki dan.
+                        </div>
+                      ) : (
+                        hoursDraft.map((h, i) => (
+                          <div key={h.day_of_week} className="grid grid-cols-[120px,1fr,1fr,auto] gap-2 items-center">
+                            <span className="text-sm">{dayLabels[h.day_of_week]}</span>
+                            <Input
+                              type="time"
+                              step={60}
+                              disabled={h.closed}
+                              value={normalizeTimeInput(h.open_time, '08:00')}
                               onChange={(e) =>
                                 setHoursDraft((prev) =>
-                                  prev.map((x, j) =>
-                                    j === i
-                                      ? {
-                                          ...x,
-                                          closed: e.target.checked,
-                                          open_time: e.target.checked ? null : normalizeTimeInput(x.open_time, '08:00'),
-                                          close_time: e.target.checked ? null : normalizeTimeInput(x.close_time, '16:00'),
-                                        }
-                                      : x
-                                  )
+                                  prev.map((x, j) => (j === i ? { ...x, open_time: e.target.value } : x))
                                 )
                               }
                             />
-                            Zatvoreno
-                          </label>
-                        </div>
-                      ))}
+                            <Input
+                              type="time"
+                              step={60}
+                              disabled={h.closed}
+                              value={normalizeTimeInput(h.close_time, '16:00')}
+                              onChange={(e) =>
+                                setHoursDraft((prev) =>
+                                  prev.map((x, j) => (j === i ? { ...x, close_time: e.target.value } : x))
+                                )
+                              }
+                            />
+                            <label className="text-xs flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                checked={h.closed}
+                                onChange={(e) =>
+                                  setHoursDraft((prev) =>
+                                    prev.map((x, j) =>
+                                      j === i
+                                        ? {
+                                            ...x,
+                                            closed: e.target.checked,
+                                            open_time: e.target.checked ? null : normalizeTimeInput(x.open_time, '08:00'),
+                                            close_time: e.target.checked ? null : normalizeTimeInput(x.close_time, '16:00'),
+                                          }
+                                        : x
+                                    )
+                                  )
+                                }
+                              />
+                              Zatvoreno
+                            </label>
+                          </div>
+                        ))
+                      )}
                       <div className="flex justify-end">
                         <Button variant="outline" onClick={saveHours}>Sacuvaj radno vrijeme</Button>
                       </div>
