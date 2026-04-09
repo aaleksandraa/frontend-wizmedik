@@ -179,8 +179,18 @@ export function CookieConsent() {
   };
 
   const bannerContent = shouldShowBanner ? (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] flex justify-center px-3 sm:px-4 lg:px-6 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+0.75rem)]">
-      <div className="pointer-events-auto w-full max-w-5xl rounded-3xl border border-slate-300 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.24)] md:p-5">
+    <div
+      aria-live="polite"
+      className="pointer-events-none fixed inset-0 z-[2147483000] flex items-end justify-center p-3 sm:p-4 lg:p-6"
+      style={{
+        paddingBottom: 'max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
+      }}
+    >
+      <div
+        className="pointer-events-auto w-full max-w-5xl rounded-[28px] border border-slate-300 bg-white px-4 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/80 md:px-5 md:py-5"
+        role="dialog"
+        aria-label="Postavke kolacica i privatnosti"
+      >
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
             <div className="flex items-center gap-3">
@@ -189,7 +199,7 @@ export function CookieConsent() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-900">Postavke kolacica i privatnosti</p>
-                <p className="text-xs text-slate-600">Ovaj popup ostaje zalijepljen za dno ekrana dok ne odaberete postavke.</p>
+                <p className="text-xs text-slate-600">Ovaj popup je fiksiran za dno vaseg ekrana dok ne odaberete postavke.</p>
               </div>
             </div>
 

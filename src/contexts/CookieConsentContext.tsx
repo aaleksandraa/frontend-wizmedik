@@ -156,7 +156,7 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
   const value = useMemo<CookieConsentContextValue>(
     () => ({
       consentRecord,
-      preferences: consentRecord?.preferences ?? DEFAULT_COOKIE_PREFERENCES,
+      preferences: consentRecord?.preferences ?? ACCEPT_ALL_COOKIE_PREFERENCES,
       settings,
       loadingSettings,
       hasDecision: Boolean(consentRecord),

@@ -41,7 +41,7 @@ export interface CookieTechnologyDefinition {
 const COOKIE_CONSENT_STORAGE_KEY = 'wm_cookie_consent_v2';
 const LEGACY_COOKIE_CONSENT_STORAGE_KEY = 'cookie_consent';
 export const COOKIE_CONSENT_UPDATED_EVENT = 'wizmedik:cookie-consent-updated';
-export const COOKIE_CONSENT_VERSION = 2;
+export const COOKIE_CONSENT_VERSION = 3;
 export const COOKIE_CONSENT_TTL_DAYS = 180;
 
 export const DEFAULT_COOKIE_PREFERENCES: CookieConsentPreferences = {
@@ -308,6 +308,10 @@ export function readCookieConsentRecord(): CookieConsentRecord | null {
     const raw = window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as CookieConsentRecord;
+      if (parsed?.version !== COOKIE_CONSENT_VERSION) {
+        window.localStorage.removeItem(COOKIE_CONSENT_STORAGE_KEY);
+        return null;
+      }
       if (parsed?.expiresAt && new Date(parsed.expiresAt).getTime() < Date.now()) {
         window.localStorage.removeItem(COOKIE_CONSENT_STORAGE_KEY);
         return null;
