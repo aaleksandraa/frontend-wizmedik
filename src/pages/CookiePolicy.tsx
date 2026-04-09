@@ -55,7 +55,7 @@ export default function CookiePolicy() {
                   onClick={openPreferences}
                   className="rounded-xl bg-white text-cyan-800 hover:bg-slate-100"
                 >
-                  Upravljaj kolacicima
+                  Postavke kolacica i privatnosti
                 </Button>
                 <Button
                   asChild

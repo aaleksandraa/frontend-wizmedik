@@ -277,7 +277,7 @@ export function Footer() {
                   onClick={openPreferences}
                   className="size-compact text-slate-500 hover:text-primary transition-colors"
                 >
-                  Upravljaj kolacicima
+                  Postavke kolacica i privatnosti
                 </button>
                 <Link to="/impressum" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Impressum
@@ -419,7 +419,7 @@ export function Footer() {
                   onClick={openPreferences}
                   className="size-compact text-slate-500 hover:text-primary transition-colors"
                 >
-                  Upravljaj kolacicima
+                  Postavke kolacica i privatnosti
                 </button>
                 <Link to="/impressum" className="size-compact text-slate-500 hover:text-primary transition-colors">
                   Impressum

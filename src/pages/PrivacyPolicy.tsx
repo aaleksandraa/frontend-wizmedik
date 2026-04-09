@@ -3,13 +3,17 @@ import DOMPurify from 'dompurify';
 import { Helmet } from 'react-helmet-async';
 import { legalAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useCookieConsent } from '@/contexts/CookieConsentContext';
 import { Shield } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   const [title, setTitle] = useState('Politika privatnosti');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
+  const { openPreferences } = useCookieConsent();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -37,11 +41,17 @@ export default function PrivacyPolicy() {
 
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <Shield className="h-8 w-8 text-primary" />
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-3">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <h1 className="text-3xl font-bold">{title}</h1>
             </div>
-            <h1 className="text-3xl font-bold">{title}</h1>
+
+            <Button onClick={openPreferences} variant="outline" className="rounded-xl">
+              Postavke kolacica i privatnosti
+            </Button>
           </div>
 
           <Card>
@@ -63,6 +73,8 @@ export default function PrivacyPolicy() {
             </CardContent>
           </Card>
         </div>
+
+        <Footer />
       </div>
     </>
   );

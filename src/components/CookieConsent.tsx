@@ -172,8 +172,8 @@ export function CookieConsent() {
   return (
     <>
       {shouldShowBanner ? (
-        <div className="fixed inset-x-0 bottom-0 z-[9997] px-3 pb-3 sm:px-4 sm:pb-4">
-          <div className="mx-auto max-w-6xl rounded-3xl border border-slate-200 bg-white/96 p-4 shadow-2xl backdrop-blur md:p-5">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9997] px-3 sm:px-4 [padding-bottom:calc(env(safe-area-inset-bottom,0px)+0.75rem)]">
+          <div className="pointer-events-auto mx-auto max-w-6xl rounded-3xl border border-slate-200 bg-white/96 p-4 shadow-2xl backdrop-blur md:p-5">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-3">
@@ -182,7 +182,7 @@ export function CookieConsent() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Postavke kolacica i privatnosti</p>
-                    <p className="text-xs text-slate-500">Neophodni alati rade uvijek, a ostale birate sami.</p>
+                    <p className="text-xs text-slate-500">Traka ostaje pri dnu ekrana dok ne odaberete sta zelite dozvoliti.</p>
                   </div>
                 </div>
 
@@ -194,7 +194,10 @@ export function CookieConsent() {
                     U svakom trenutku mozete promijeniti izbor iz futera
                   </span>
                   <Link to="/cookie-policy" className="font-medium text-cyan-700 hover:text-cyan-800 hover:underline">
-                    Detaljna politika kolacica
+                    Politika kolacica
+                  </Link>
+                  <Link to="/privacy-policy" className="font-medium text-cyan-700 hover:text-cyan-800 hover:underline">
+                    Politika privatnosti
                   </Link>
                 </div>
               </div>
