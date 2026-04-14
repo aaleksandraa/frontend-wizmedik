@@ -66,7 +66,7 @@ npm run build
 bun run build
 ```
 
-`npm run build` sada radi production build plus SEO prerender, tako da `dist/` sadrži i statičke SEO rute kao `blog/{slug}/index.html`.
+`npm run build` sada radi production build plus lokalni `sitemap:generate` i SEO prerender, tako da `dist/` sadrži i sitemap XML fajlove i statičke SEO rute kao `blog/{slug}/index.html`.
 
 Ako želiš samo obični SPA build bez prerenderovanih ruta:
 

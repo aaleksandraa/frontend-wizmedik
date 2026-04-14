@@ -143,67 +143,41 @@ export default function Lijekovi() {
   const itemListSchema = useMemo(() => {
     return {
       '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      name: 'Lista lijekova Fonda Republike Srpske',
-      itemListOrder: 'https://schema.org/ItemListOrderAscending',
-      numberOfItems: items.length,
-      itemListElement: items.slice(0, 24).map((item, index) => {
-        const medicineName = item.naziv || item.naziv_lijeka || `Lijek ${item.lijek_id}`;
-        const medicineUrl = `${SITE_URL}/lijekovi/${item.slug}`;
+      '@type': 'CollectionPage',
+      name: seoTitle,
+      url: canonicalUrl,
+      description: seoDescription,
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListOrder: 'https://schema.org/ItemListOrderAscending',
+        numberOfItems: items.length,
+        itemListElement: items.slice(0, 24).map((item, index) => {
+          const medicineName = item.naziv || item.naziv_lijeka || `Lijek ${item.lijek_id}`;
+          const medicineUrl = `${SITE_URL}/lijekovi/${item.slug}`;
+          const detailParts = [
+            hasFundCoverage(item.aktuelna_lista_id) ? `Lista RFZO ${item.aktuelna_lista_id}` : 'Nije na listi fonda',
+            `Doplata ${formatCopay(item.aktuelni_iznos_participacije)}`,
+          ];
 
-        const additionalProperty: Array<Record<string, string>> = [
-          {
-            '@type': 'PropertyValue',
-            name: 'Status preko fonda',
-            value: hasFundCoverage(item.aktuelna_lista_id) ? 'Da' : 'Ne',
-          },
-          {
-            '@type': 'PropertyValue',
-            name: 'Doplata',
-            value: formatCopay(item.aktuelni_iznos_participacije),
-          },
-        ];
+          if (item.doza) {
+            detailParts.push(`Doza ${item.doza}`);
+          }
 
-        if (item.atc_sifra) {
-          additionalProperty.push({
-            '@type': 'PropertyValue',
-            name: 'ATC \u0161ifra',
-            value: item.atc_sifra,
-          });
-        }
+          if (item.pakovanje) {
+            detailParts.push(`Pakovanje ${item.pakovanje}`);
+          }
 
-        if (item.doza) {
-          additionalProperty.push({
-            '@type': 'PropertyValue',
-            name: 'Doza',
-            value: item.doza,
-          });
-        }
-
-        if (item.pakovanje) {
-          additionalProperty.push({
-            '@type': 'PropertyValue',
-            name: 'Pakovanje',
-            value: item.pakovanje,
-          });
-        }
-
-        return {
-          '@type': 'ListItem',
-          position: index + 1,
-          url: medicineUrl,
-          item: {
-            '@type': 'Product',
+          return {
+            '@type': 'ListItem',
+            position: index + 1,
             name: medicineName,
-            sku: String(item.lijek_id),
             url: medicineUrl,
-            category: item.aktuelna_lista_id ? `Lista RFZO ${item.aktuelna_lista_id}` : 'Nije na listi fonda',
-            additionalProperty,
-          },
-        };
-      }),
+            description: detailParts.join('. '),
+          };
+        }),
+      },
     };
-  }, [items]);
+  }, [items, canonicalUrl, seoDescription, seoTitle]);
 
   const faqSchema = useMemo(() => {
     return {

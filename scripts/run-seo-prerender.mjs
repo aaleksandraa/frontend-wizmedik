@@ -60,6 +60,11 @@ async function main() {
 }
 
 async function runLocalArtisanPrerender(backendArtisanPath) {
+  console.log(`[seo-prerender] Generating sitemap files via local backend artisan: ${backendArtisanPath}`);
+  await runCommand("php", [backendArtisanPath, "sitemap:generate", `--output=${OUTPUT_DIR}`], {
+    cwd: path.dirname(backendArtisanPath),
+  });
+
   console.log(`[seo-prerender] Using local backend artisan prerender: ${backendArtisanPath}`);
   await runCommand("php", [backendArtisanPath, "seo:prerender-pages", `--output=${OUTPUT_DIR}`], {
     cwd: path.dirname(backendArtisanPath),

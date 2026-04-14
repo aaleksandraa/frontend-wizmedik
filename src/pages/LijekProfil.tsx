@@ -254,87 +254,64 @@ export default function LijekProfil() {
     };
   }, [medicineName, canonicalUrl]);
 
-  const productSchema = useMemo(() => {
+  const medicineSchema = useMemo(() => {
     if (!data) {
       return null;
     }
 
-    const additionalProperty: Array<Record<string, string>> = [
+    const identifier: Array<Record<string, string>> = [
       {
         '@type': 'PropertyValue',
-        name: 'Status preko fonda',
-        value: prekoFonda ? 'Da' : 'Ne',
-      },
-      {
-        '@type': 'PropertyValue',
-        name: 'Doplata',
-        value: doplataLabel,
+        name: 'wizMedik lijek ID',
+        value: String(data.lijek_id),
       },
     ];
 
     if (hasValue(data.atc_sifra)) {
-      additionalProperty.push({
+      identifier.push({
         '@type': 'PropertyValue',
         name: 'ATC \u0161ifra',
         value: data.atc_sifra as string,
       });
     }
 
-    if (hasValue(data.inn)) {
-      additionalProperty.push({
-        '@type': 'PropertyValue',
-        name: 'INN',
-        value: data.inn as string,
-      });
-    }
-
-    if (hasValue(data.doza)) {
-      additionalProperty.push({
-        '@type': 'PropertyValue',
-        name: 'Doza',
-        value: data.doza as string,
-      });
-    }
-
-    if (hasValue(data.pakovanje)) {
-      additionalProperty.push({
-        '@type': 'PropertyValue',
-        name: 'Pakovanje',
-        value: data.pakovanje as string,
-      });
-    }
-
-    const schema: Record<string, any> = {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
+    const medicineEntity: Record<string, unknown> = {
+      '@type': 'Thing',
       name: medicineName,
-      sku: String(data.lijek_id),
       url: canonicalUrl,
       description: hasValue(data.opis) ? data.opis : seoDescription,
-      additionalProperty,
+      identifier,
     };
 
-    const proizvodjac = data.proizvodjac || data.brend;
-    if (hasValue(proizvodjac)) {
-      schema.brand = {
-        '@type': 'Brand',
-        name: proizvodjac,
-      };
+    if (hasValue(data.inn)) {
+      medicineEntity.alternateName = data.inn;
     }
 
-    const cijenaRaw = data.aktuelni_fond?.cijena;
-    const cijenaParsed = cijenaRaw !== null && cijenaRaw !== undefined && cijenaRaw !== '' ? Number(cijenaRaw) : NaN;
-    if (!Number.isNaN(cijenaParsed)) {
-      schema.offers = {
-        '@type': 'Offer',
-        price: cijenaParsed.toFixed(2),
-        priceCurrency: 'BAM',
-        url: canonicalUrl,
+    const farmaceutskiOblik = data.farmaceutski_oblik || data.oblik;
+    if (hasValue(farmaceutskiOblik)) {
+      medicineEntity.disambiguatingDescription = `Farmaceutski oblik: ${farmaceutskiOblik}`;
+    }
+
+    const schema: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'MedicalWebPage',
+      name: seoTitle,
+      url: canonicalUrl,
+      description: seoDescription,
+      primaryImageOfPage: DEFAULT_OG_IMAGE,
+      mainEntity: medicineEntity,
+    };
+
+    if (hasValue(data.atc_sifra)) {
+      schema.about = {
+        '@type': 'MedicalCode',
+        codeValue: data.atc_sifra,
+        codingSystem: 'ATC',
       };
     }
 
     return schema;
-  }, [data, medicineName, canonicalUrl, seoDescription, prekoFonda, doplataLabel]);
+  }, [data, medicineName, canonicalUrl, seoDescription, seoTitle]);
 
   const faqSchema = useMemo(() => {
     if (!data) {
@@ -384,7 +361,7 @@ export default function LijekProfil() {
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:type" content="product" />
+        <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:image" content={DEFAULT_OG_IMAGE} />
         <meta property="og:locale" content="bs_BA" />
@@ -393,7 +370,7 @@ export default function LijekProfil() {
         <meta name="twitter:description" content={seoDescription} />
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
-        {productSchema && <script type="application/ld+json">{JSON.stringify(productSchema)}</script>}
+        {medicineSchema && <script type="application/ld+json">{JSON.stringify(medicineSchema)}</script>}
         {faqSchema && <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>}
       </Helmet>
 
