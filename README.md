@@ -66,7 +66,13 @@ npm run build
 bun run build
 ```
 
-Build output će biti u `dist/` folderu.
+`npm run build` sada radi production build plus SEO prerender, tako da `dist/` sadrži i statičke SEO rute kao `blog/{slug}/index.html`.
+
+Ako želiš samo obični SPA build bez prerenderovanih ruta:
+
+```bash
+npm run build:spa
+```
 
 ### Preview Production Build
 ```bash
@@ -153,6 +159,7 @@ npm run build
 
 `npm run build` now automatically syncs `frontend/.htaccess` into `dist/.htaccess`.
 This keeps Apache rules consistent and prevents old sitemap redirect rules from reappearing in `dist`.
+It also runs SEO prerender and verifies that every manifest route file was actually generated before deploy.
 
 ### Deploy
 Build output (`dist/` folder) može biti deploy-ovan na:
@@ -164,6 +171,15 @@ Build output (`dist/` folder) može biti deploy-ovan na:
 
 For Apache deployments, always deploy the generated `dist/.htaccess` together with other `dist/*` files.
 For static Apache deploys, also replace `dist/sw.js` on the server and remove stale files from `assets/` plus old prerendered route folders before copying the new `dist/`. Otherwise browsers can keep using an old service worker or dead hashed assets on direct URL opens.
+
+If you want newly published blog posts to become indexable immediately without a full frontend redeploy, configure backend mirroring in production:
+
+```env
+SITEMAP_OUTPUT_PATH=/path/to/project/frontend/dist
+SITEMAP_OUTPUT_MIRROR_PATHS=/var/www/vhosts/your-domain/httpdocs
+```
+
+Blog create/update already triggers backend prerender for `blog` and `blog/{slug}`, so with a live webroot mirror configured those static files stay fresh automatically.
 
 ### One-command static deploy
 Ako frontend build i deploy radiš na istoj mašini koja ima pristup web root folderu, možeš koristiti:

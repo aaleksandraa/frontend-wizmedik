@@ -17,6 +17,7 @@ async function main() {
 
   if (mode === "remote") {
     await runRemotePrerender();
+    await verifySeoOutput();
     return;
   }
 
@@ -55,6 +56,7 @@ async function main() {
   }
 
   await runRemotePrerender();
+  await verifySeoOutput();
 }
 
 async function runLocalArtisanPrerender(backendArtisanPath) {
@@ -62,11 +64,19 @@ async function runLocalArtisanPrerender(backendArtisanPath) {
   await runCommand("php", [backendArtisanPath, "seo:prerender-pages", `--output=${OUTPUT_DIR}`], {
     cwd: path.dirname(backendArtisanPath),
   });
+
+  await verifySeoOutput();
 }
 
 async function runRemotePrerender() {
   console.log("[seo-prerender] Using remote sitemap/source prerender.");
   await runCommand(process.execPath, [path.join(__dirname, "prerender-seo-pages.mjs")], {
+    cwd: FRONTEND_DIR,
+  });
+}
+
+async function verifySeoOutput() {
+  await runCommand(process.execPath, [path.join(__dirname, "verify-seo-output.mjs")], {
     cwd: FRONTEND_DIR,
   });
 }
