@@ -182,7 +182,6 @@ export default function Pharmacies() {
       if (geo) {
         params.lat = geo.lat;
         params.lng = geo.lng;
-        params.radius_km = 25;
       }
 
       const response = await pharmaciesAPI.getAll(params);
@@ -381,8 +380,13 @@ export default function Pharmacies() {
                 </Button>
                 <Button variant={geo ? 'default' : 'outline'} size="sm" onClick={useMyLocation}>
                   <Navigation className="w-4 h-4 mr-1" />
-                  Najblize meni
+                  {geo ? 'Najblize meni ukljuceno' : 'Najblize meni'}
                 </Button>
+                {geo ? (
+                  <Button variant="outline" size="sm" onClick={() => setGeo(null)}>
+                    Prikazi sve
+                  </Button>
+                ) : null}
               </div>
             </div>
           </div>
