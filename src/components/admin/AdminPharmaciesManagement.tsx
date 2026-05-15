@@ -57,6 +57,7 @@ interface PharmacyBranch {
   ima_parking?: boolean;
   pristup_invalidima?: boolean;
   radno_vrijeme?: PharmacyWorkingHour[];
+  is_dezurna?: boolean;
   is_24h?: boolean;
   is_active?: boolean;
   is_verified?: boolean;
@@ -107,6 +108,7 @@ interface PharmacyFormState {
   ima_dostavu: boolean;
   ima_parking: boolean;
   pristup_invalidima: boolean;
+  is_dezurna: boolean;
   is_24h: boolean;
   is_verified: boolean;
   radno_vrijeme: PharmacyWorkingHour[];
@@ -212,6 +214,7 @@ const createEmptyForm = (): PharmacyFormState => ({
   ima_dostavu: false,
   ima_parking: false,
   pristup_invalidima: false,
+  is_dezurna: false,
   is_24h: false,
   is_verified: true,
   radno_vrijeme: defaultWorkingHours(),
@@ -339,6 +342,7 @@ export function AdminPharmaciesManagement() {
       ima_dostavu: !!branch?.ima_dostavu,
       ima_parking: !!branch?.ima_parking,
       pristup_invalidima: !!branch?.pristup_invalidima,
+      is_dezurna: !!branch?.is_dezurna,
       is_24h: !!branch?.is_24h,
       is_verified: branch?.is_verified ?? firm.status === 'verified',
       radno_vrijeme: normalizeWorkingHours(branch?.radno_vrijeme),
@@ -421,6 +425,7 @@ export function AdminPharmaciesManagement() {
       ima_dostavu: form.ima_dostavu,
       ima_parking: form.ima_parking,
       pristup_invalidima: form.pristup_invalidima,
+      is_dezurna: form.is_dezurna,
       is_24h: form.is_24h,
       is_verified: form.is_verified,
       radno_vrijeme: form.radno_vrijeme.map((item) => ({
@@ -585,6 +590,12 @@ export function AdminPharmaciesManagement() {
                       <Badge variant={firm.is_active ? 'default' : 'secondary'}>
                         {firm.is_active ? 'Aktivna' : 'Neaktivna'}
                       </Badge>
+                      {firm.glavna_poslovnica?.is_dezurna && (
+                        <Badge variant="outline">Dezurna</Badge>
+                      )}
+                      {firm.glavna_poslovnica?.is_24h && (
+                        <Badge variant="secondary">24/7</Badge>
+                      )}
                     </div>
 
                     <div className="grid gap-1 text-sm text-muted-foreground">
@@ -872,6 +883,13 @@ export function AdminPharmaciesManagement() {
                   <Switch
                     checked={form.pristup_invalidima}
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, pristup_invalidima: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded border px-3 py-2">
+                  <Label>Trenutno dezurna</Label>
+                  <Switch
+                    checked={form.is_dezurna}
+                    onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_dezurna: checked }))}
                   />
                 </div>
               </div>

@@ -12,6 +12,8 @@ import { CitySelect } from '@/components/CitySelect';
 import { MapView } from '@/components/MapView';
 import { pharmaciesAPI } from '@/services/api';
 import { fixImageUrl } from '@/utils/imageUrl';
+import { formatCityLabel, resolvePharmacySeoCityName, slugifyCitySegment } from '@/utils/pharmacySeo';
+import { useAllCities } from '@/hooks/useAllCities';
 import { Clock3, MapPin, Navigation, Pill, Search, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 type PharmacyItem = {
@@ -38,27 +40,6 @@ type PharmacyItem = {
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
 
-const slugifySegment = (value: string): string => {
-  return decodeURIComponent(value.replace(/\+/g, ' '))
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-};
-
-const formatCityLabel = (value: string): string => {
-  return decodeURIComponent(value.replace(/\+/g, ' '))
-    .replace(/-/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(' ');
-};
-
 const toAbsoluteImageUrl = (value?: string | null): string | null => {
   const fixed = fixImageUrl(value);
 
@@ -73,12 +54,13 @@ export default function Pharmacies() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { cities } = useAllCities();
 
   const [items, setItems] = useState<PharmacyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [city, setCity] = useState(grad ? decodeURIComponent(grad).replace(/-/g, ' ') : (searchParams.get('grad') || ''));
+  const [city, setCity] = useState(grad ? formatCityLabel(grad) : formatCityLabel(searchParams.get('grad') || ''));
   const [openNow, setOpenNow] = useState(searchParams.get('open_now') === '1');
   const [dutyNow, setDutyNow] = useState(searchParams.get('dezurna_now') === '1');
   const [is24h, setIs24h] = useState(searchParams.get('is_24h') === '1');
@@ -89,7 +71,7 @@ export default function Pharmacies() {
 
   useEffect(() => {
     if (grad) {
-      setCity(decodeURIComponent(grad).replace(/-/g, ' '));
+      setCity(formatCityLabel(grad));
     }
   }, [grad]);
 
@@ -100,8 +82,24 @@ export default function Pharmacies() {
 
   const selectedCitySlug = useMemo(() => {
     if (!city) return '';
-    return slugifySegment(city);
+    return slugifyCitySegment(city);
   }, [city]);
+
+  useEffect(() => {
+    if (!selectedCitySlug || cities.length === 0) return;
+
+    const matchedCity = cities.find((cityOption) => {
+      return (
+        slugifyCitySegment(cityOption.slug || '') === selectedCitySlug ||
+        slugifyCitySegment(cityOption.naziv) === selectedCitySlug
+      );
+    });
+    const officialCityName = matchedCity?.naziv?.trim();
+
+    if (officialCityName && officialCityName !== city && slugifyCitySegment(city) === selectedCitySlug) {
+      setCity(officialCityName);
+    }
+  }, [cities, city, selectedCitySlug]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -148,7 +146,7 @@ export default function Pharmacies() {
           // Backend API trenutno validira per_page max 50.
           per_page: 50,
         };
-        if (city) params.grad = city;
+        if (selectedCitySlug) params.grad = selectedCitySlug;
         if (search) params.search = search;
         if (openNow) params.open_now = 1;
         if (dutyNow) params.dezurna_now = 1;
@@ -173,7 +171,7 @@ export default function Pharmacies() {
     };
 
     load();
-  }, [city, dutyNow, geo, hasActions, is24h, openNow, pensioner, search]);
+  }, [dutyNow, geo, hasActions, is24h, openNow, pensioner, search, selectedCitySlug]);
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return;
@@ -186,12 +184,8 @@ export default function Pharmacies() {
   };
 
   const seoCityName = useMemo(() => {
-    const apiCityName = items.find((item) => item.grad_naziv && item.grad_naziv.trim() !== '')?.grad_naziv?.trim();
-    if (apiCityName) return apiCityName;
-    if (city.trim()) return city.trim();
-    if (!selectedCitySlug) return '';
-    return formatCityLabel(selectedCitySlug);
-  }, [city, items, selectedCitySlug]);
+    return resolvePharmacySeoCityName(items, cities, selectedCitySlug);
+  }, [cities, items, selectedCitySlug]);
 
   const onlyCityFilter = useMemo(
     () => !!selectedCitySlug && !search && !openNow && !dutyNow && !is24h && !pensioner && !hasActions && !geo,
