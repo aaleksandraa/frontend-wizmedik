@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminAPI } from '@/services/adminApi';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,6 +79,13 @@ interface PharmacyFirm {
   poslovnice_count: number;
   owner?: PharmacyOwner | null;
   glavna_poslovnica?: PharmacyBranch | null;
+}
+
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
 }
 
 interface PharmacyFormState {
@@ -244,6 +251,15 @@ const statusVariant: Record<PharmacyStatus, 'default' | 'secondary' | 'destructi
   suspended: 'secondary',
 };
 
+const PAGE_SIZE = 20;
+
+const defaultMeta: PaginationMeta = {
+  current_page: 1,
+  last_page: 1,
+  per_page: PAGE_SIZE,
+  total: 0,
+};
+
 const formatOwnerName = (owner?: PharmacyOwner | null): string => {
   if (!owner) return 'Nema vlasnika';
   const name = `${owner.ime || ''} ${owner.prezime || ''}`.trim();
@@ -254,37 +270,37 @@ export function AdminPharmaciesManagement() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<PaginationMeta>(defaultMeta);
   const [firms, setFirms] = useState<PharmacyFirm[]>([]);
   const [editingFirm, setEditingFirm] = useState<PharmacyFirm | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<PharmacyFormState>(() => createEmptyForm());
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
 
-  const filteredFirms = useMemo(() => {
-    if (!searchTerm.trim()) return firms;
-    const q = searchTerm.toLowerCase();
-    return firms.filter((firm) => {
-      return (
-        firm.naziv_brenda?.toLowerCase().includes(q) ||
-        firm.email?.toLowerCase().includes(q) ||
-        firm.telefon?.toLowerCase().includes(q) ||
-        firm.owner?.email?.toLowerCase().includes(q) ||
-        firm.glavna_poslovnica?.naziv?.toLowerCase().includes(q) ||
-        firm.glavna_poslovnica?.grad_naziv?.toLowerCase().includes(q) ||
-        firm.glavna_poslovnica?.adresa?.toLowerCase().includes(q)
-      );
-    });
-  }, [firms, searchTerm]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setSearchTerm(searchInput.trim());
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
   useEffect(() => {
-    fetchFirms();
-  }, []);
+    fetchFirms(page);
+  }, [page, searchTerm]);
 
-  const fetchFirms = async () => {
+  const fetchFirms = async (targetPage = page) => {
     setLoading(true);
     try {
-      const response = await adminAPI.getPharmacies({ per_page: 100 });
+      const response = await adminAPI.getPharmacies({
+        page: targetPage,
+        per_page: PAGE_SIZE,
+        search: searchTerm || undefined,
+      });
       const payload = response?.data;
       let list: any[] = [];
       if (Array.isArray(payload)) {
@@ -295,12 +311,20 @@ export function AdminPharmaciesManagement() {
         list = payload.data.data;
       }
       setFirms(Array.isArray(list) ? list : []);
+      setMeta({
+        current_page: Number(payload?.current_page || payload?.data?.current_page || targetPage),
+        last_page: Number(payload?.last_page || payload?.data?.last_page || 1),
+        per_page: Number(payload?.per_page || payload?.data?.per_page || PAGE_SIZE),
+        total: Number(payload?.total || payload?.data?.total || list.length || 0),
+      });
     } catch (error) {
       toast({
         title: 'Greška',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
+      setFirms([]);
+      setMeta(defaultMeta);
     } finally {
       setLoading(false);
     }
@@ -464,7 +488,7 @@ export function AdminPharmaciesManagement() {
         toast({ title: 'Uspjeh', description: 'Nova apoteka je dodana.' });
       }
       closeDialog();
-      fetchFirms();
+      fetchFirms(page);
     } catch (error: any) {
       toast({
         title: 'Greška',
@@ -481,7 +505,7 @@ export function AdminPharmaciesManagement() {
     try {
       await adminAPI.deletePharmacy(id);
       toast({ title: 'Uspjeh', description: 'Apoteka je obrisana.' });
-      fetchFirms();
+      fetchFirms(page);
     } catch (error: any) {
       toast({
         title: 'Greška',
@@ -500,7 +524,7 @@ export function AdminPharmaciesManagement() {
         title: 'Uspjeh',
         description: !firm.is_active ? 'Apoteka je aktivirana.' : 'Apoteka je deaktivirana.',
       });
-      fetchFirms();
+      fetchFirms(page);
     } catch (error: any) {
       toast({
         title: 'Greška',
@@ -527,7 +551,7 @@ export function AdminPharmaciesManagement() {
         title: 'Pozivnica poslana',
         description: `Email je poslan na ${firm.owner.email}.`,
       });
-      fetchFirms();
+      fetchFirms(page);
     } catch (error: any) {
       toast({
         title: 'Greška',
@@ -539,7 +563,7 @@ export function AdminPharmaciesManagement() {
     }
   };
 
-  if (loading) {
+  if (loading && firms.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
@@ -552,7 +576,7 @@ export function AdminPharmaciesManagement() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Pill className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Apoteke ({filteredFirms.length})</h2>
+          <h2 className="text-lg font-semibold">Apoteke ({meta.total})</h2>
         </div>
         <Button onClick={openCreateDialog} className="gap-2">
           <Plus className="h-4 w-4" /> Nova apoteka
@@ -564,20 +588,20 @@ export function AdminPharmaciesManagement() {
         <Input
           className="pl-10"
           placeholder="Pretraži po nazivu, gradu, email-u..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
 
       <div className="space-y-3">
-        {filteredFirms.length === 0 ? (
+        {firms.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
               Nema apoteka za prikaz.
             </CardContent>
           </Card>
         ) : (
-          filteredFirms.map((firm) => (
+          firms.map((firm) => (
             <Card key={firm.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -654,6 +678,32 @@ export function AdminPharmaciesManagement() {
             </Card>
           ))
         )}
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Stranica {meta.current_page} / {meta.last_page}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={meta.current_page <= 1 || loading}
+            onClick={() => setPage((current) => Math.max(current - 1, 1))}
+          >
+            Prethodna
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={meta.current_page >= meta.last_page || loading}
+            onClick={() => setPage((current) => Math.min(current + 1, meta.last_page))}
+          >
+            Sljedeca
+          </Button>
+        </div>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
