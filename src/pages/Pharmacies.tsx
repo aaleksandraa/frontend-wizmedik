@@ -90,8 +90,12 @@ export default function Pharmacies() {
   useEffect(() => {
     if (grad) {
       setCity(formatCityLabel(grad));
+      return;
     }
-  }, [grad]);
+
+    const queryCity = searchParams.get('grad');
+    setCity(queryCity ? formatCityLabel(queryCity) : '');
+  }, [grad, searchParams]);
 
   const hasSerializableFilters = useMemo(
     () => !!search || openNow || dutyNow || is24h || pensioner || hasActions,
@@ -188,12 +192,17 @@ export default function Pharmacies() {
       if (requestId !== requestIdRef.current) return;
 
       const payload = response.data || {};
-      const list = Array.isArray(payload?.data) ? payload.data : [];
+      const paginationPayload = Array.isArray(payload?.data?.data) ? payload.data : payload;
+      const list = Array.isArray(paginationPayload?.data)
+        ? paginationPayload.data
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
       const nextPagination = {
-        current_page: Number(payload?.current_page || pageToLoad),
-        last_page: Number(payload?.last_page || 1),
-        per_page: Number(payload?.per_page || PHARMACIES_PAGE_SIZE),
-        total: Number(payload?.total || list.length || 0),
+        current_page: Number(paginationPayload?.current_page || pageToLoad),
+        last_page: Number(paginationPayload?.last_page || 1),
+        per_page: Number(paginationPayload?.per_page || PHARMACIES_PAGE_SIZE),
+        total: Number(paginationPayload?.total || list.length || 0),
       };
 
       setPagination(nextPagination);
