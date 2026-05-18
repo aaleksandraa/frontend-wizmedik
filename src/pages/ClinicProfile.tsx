@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, Phone, Mail, Globe, MapPin, Clock, Star, MessageSquare, Calendar, UserPlus } from 'lucide-react';
-import { MapView } from '@/components/MapView';
+import { LocationMapCard } from '@/components/LocationMapCard';
 import { Helmet } from 'react-helmet-async';
 import { reviewsAPI as newReviewsAPI, Recenzija } from '@/services/reviewsAPI';
 import { ReviewCard } from '@/components/ReviewCard';
@@ -595,41 +595,16 @@ export default function ClinicProfile() {
               </Card>
             )}
 
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Lokacija na mapi
-              </h2>
-              {clinic.latitude && clinic.longitude ? (
-                <>
-                  <MapView
-                    latitude={clinic.latitude}
-                    longitude={clinic.longitude}
-                    markerLabel={clinic.naziv}
-                    className="h-[400px]"
-                  />
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      {clinic.adresa}, {clinic.grad}
-                    </p>
-                    {clinic.google_maps_link && (
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => window.open(clinic.google_maps_link, '_blank')}
-                      >
-                        <MapPin className="w-4 h-4 mr-2" />
-                        Vodi me do...
-                      </Button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="h-[400px] flex items-center justify-center bg-muted rounded-lg">
-                  <p className="text-muted-foreground">Lokacija nije dostupna</p>
-                </div>
-              )}
-            </Card>
+            <LocationMapCard
+              naziv={clinic.naziv}
+              adresa={clinic.adresa}
+              grad={clinic.grad}
+              latitude={clinic.latitude}
+              longitude={clinic.longitude}
+              googleMapsLink={clinic.google_maps_link}
+              markerColor="orange"
+              mapHeightClass="h-[400px]"
+            />
 
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Rezervišite termin</h2>

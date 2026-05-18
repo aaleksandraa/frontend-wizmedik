@@ -12,17 +12,21 @@ export interface MapItem {
   adresa: string;
   grad: string;
   telefon?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
   slug?: string;
   distance?: number;
   icon?: React.ReactNode;
 }
 
 interface MapViewProps {
-  items: MapItem[];
+  items?: MapItem[];
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  markerLabel?: string;
+  className?: string;
   userLocation?: { lat: number; lng: number } | null;
-  itemType: 'laboratorija' | 'banja' | 'dom-njega' | 'doktor' | 'klinika' | 'apoteka';
+  itemType?: 'laboratorija' | 'banja' | 'dom-njega' | 'doktor' | 'klinika' | 'apoteka';
   itemIcon?: React.ReactNode;
   emptyMessage?: string;
   height?: string;
@@ -46,8 +50,21 @@ const markerColors: Record<string, string> = {
   'apoteka': 'red',
 };
 
+const toCoordinate = (value: number | string | null | undefined): number | null => {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const coordinate = typeof value === 'string' ? Number(value) : value;
+  return Number.isFinite(coordinate) ? coordinate : null;
+};
+
 export function MapView({ 
-  items, 
+  items = [],
+  latitude,
+  longitude,
+  markerLabel,
+  className,
   userLocation, 
   itemType, 
   itemIcon,
@@ -55,9 +72,36 @@ export function MapView({
   height = '600px'
 }: MapViewProps) {
   const navigate = useNavigate();
+  const singleLatitude = toCoordinate(latitude);
+  const singleLongitude = toCoordinate(longitude);
+  const mapItems = items.length > 0
+    ? items
+    : singleLatitude !== null && singleLongitude !== null
+      ? [{
+          id: 0,
+          naziv: markerLabel || 'Lokacija',
+          adresa: '',
+          grad: '',
+          latitude: singleLatitude,
+          longitude: singleLongitude,
+        }]
+      : [];
 
   // Filter items with valid coordinates
-  const validItems = items.filter(item => item.latitude && item.longitude);
+  const validItems = mapItems.reduce<Array<MapItem & { latitude: number; longitude: number }>>((acc, item) => {
+    const itemLatitude = toCoordinate(item.latitude);
+    const itemLongitude = toCoordinate(item.longitude);
+
+    if (itemLatitude !== null && itemLongitude !== null) {
+      acc.push({
+        ...item,
+        latitude: itemLatitude,
+        longitude: itemLongitude,
+      });
+    }
+
+    return acc;
+  }, []);
 
   // Default center - Sarajevo
   const defaultCenter: [number, number] = [43.8563, 18.4131];
@@ -123,7 +167,7 @@ export function MapView({
 
   // Create custom icon based on type
   const getMarkerIcon = () => {
-    const color = markerColors[itemType] || 'blue';
+    const color = itemType ? markerColors[itemType] : 'blue';
     return new Icon({
       iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -135,7 +179,7 @@ export function MapView({
   };
 
   return (
-    <div className="rounded-lg overflow-hidden border shadow-sm">
+    <div className={`rounded-lg overflow-hidden border shadow-sm ${className || ''}`}>
       <MapContainer
         center={center}
         zoom={validItems.length === 1 ? 14 : 8}
@@ -163,7 +207,7 @@ export function MapView({
                 <div className="space-y-2 text-sm mb-3">
                   <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <span>{item.adresa}, {item.grad}</span>
+                    <span>{[item.adresa, item.grad].filter(Boolean).join(', ')}</span>
                   </div>
                   
                   {item.telefon && (
@@ -183,14 +227,16 @@ export function MapView({
                   )}
                 </div>
 
-                <Button
-                  size="sm"
-                  className="w-full"
-                  onClick={() => navigate(getItemRoute(item))}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Pogledaj profil
-                </Button>
+                {itemType && (
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => navigate(getItemRoute(item))}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Pogledaj profil
+                  </Button>
+                )}
               </div>
             </Popup>
           </Marker>
