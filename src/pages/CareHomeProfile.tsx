@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
@@ -69,6 +69,7 @@ interface Dom {
 
 export default function CareHomeProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [dom, setDom] = useState<Dom | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +94,11 @@ export default function CareHomeProfile() {
     try {
       setLoading(true);
       const response = await domoviAPI.getBySlug(slug!);
+      if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
+        navigate(response.data.redirect_to, { replace: true });
+        return;
+      }
+
       if (response.data.success) {
         setDom(response.data.data);
       } else {

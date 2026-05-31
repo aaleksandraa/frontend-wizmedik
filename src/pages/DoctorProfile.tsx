@@ -272,6 +272,11 @@ export default function DoctorProfile() {
 
     try {
       const response = await doctorsAPI.getBySlug(slug);
+      if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
+        navigate(response.data.redirect_to, { replace: true });
+        return;
+      }
+
       // Normalize the data - use snake_case if available
       const normalizedData = {
         ...response.data,

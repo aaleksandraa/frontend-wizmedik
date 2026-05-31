@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { medicinesAPI } from '@/services/api';
@@ -110,6 +110,7 @@ const valueOrFallback = (value: string | null | undefined): string => {
 
 export default function LijekProfil() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [data, setData] = useState<LijekDetalji | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -127,6 +128,11 @@ export default function LijekProfil() {
 
       try {
         const response = await medicinesAPI.getBySlug(slug);
+        if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
+          navigate(response.data.redirect_to, { replace: true });
+          return;
+        }
+
         setData(response.data?.data || null);
       } catch (err: any) {
         setError(err?.response?.data?.message || 'Ne mo\u017eemo u\u010ditati profil lijeka.');

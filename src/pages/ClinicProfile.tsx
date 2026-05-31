@@ -124,6 +124,11 @@ export default function ClinicProfile() {
     try {
       const response = await clinicsAPI.getBySlug(slug!);
       const clinicData = response.data;
+
+      if (typeof clinicData?.redirect_to === 'string' && clinicData.redirect_to !== '') {
+        navigate(clinicData.redirect_to, { replace: true });
+        return;
+      }
       
       if (!clinicData) {
         navigate('/klinike');

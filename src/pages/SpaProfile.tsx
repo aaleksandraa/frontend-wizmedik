@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Helmet } from 'react-helmet-async';
 import { 
@@ -29,6 +29,7 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
 
 export default function SpaProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [banja, setBanja] = useState<Banja | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUpitForm, setShowUpitForm] = useState(false);
@@ -76,6 +77,11 @@ export default function SpaProfile() {
     setLoading(true);
     try {
       const response = await spasAPI.getBySlug(slug!);
+      if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
+        navigate(response.data.redirect_to, { replace: true });
+        return;
+      }
+
       // API returns { success: true, data: {...} }
       setBanja(response.data.data || response.data);
     } catch (error) {
