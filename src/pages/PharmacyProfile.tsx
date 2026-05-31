@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Navbar } from '@/components/Navbar';
 import { LocationMapCard } from '@/components/LocationMapCard';
@@ -155,6 +155,7 @@ const formatTimeOnly = (value?: string | null): string => {
 
 export default function PharmacyProfile() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [pharmacy, setPharmacy] = useState<PharmacyProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -165,7 +166,14 @@ export default function PharmacyProfile() {
       setLoading(true);
       try {
         const response = await pharmaciesAPI.getBySlug(slug);
-        setPharmacy(response.data);
+        const payload = response.data;
+        if (typeof payload?.redirect_to === 'string' && payload.redirect_to !== '') {
+          setPharmacy(null);
+          navigate(payload.redirect_to, { replace: true });
+          return;
+        }
+
+        setPharmacy(payload);
       } catch (error) {
         console.error('Error loading pharmacy profile', error);
         setPharmacy(null);
@@ -175,7 +183,7 @@ export default function PharmacyProfile() {
     };
 
     load();
-  }, [slug]);
+  }, [navigate, slug]);
 
   const city = pharmacy?.grad_naziv || 'Bosna i Hercegovina';
   const canonicalUrl = pharmacy ? `${SITE_URL}/apoteka/${pharmacy.slug}` : `${SITE_URL}/apoteka`;

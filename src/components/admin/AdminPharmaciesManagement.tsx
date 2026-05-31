@@ -435,7 +435,7 @@ export function AdminPharmaciesManagement() {
       status: form.status,
       is_active: form.is_active,
 
-      branch_naziv: form.branch_naziv.trim() || null,
+      branch_naziv: form.naziv_brenda.trim() || null,
       grad: form.grad.trim(),
       grad_id: form.grad_id ? Number(form.grad_id) : undefined,
       adresa: form.adresa.trim(),
@@ -724,7 +724,7 @@ export function AdminPharmaciesManagement() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Naziv brenda *</Label>
+                    <Label>Naziv apoteke *</Label>
                     <Input
                       value={form.naziv_brenda}
                       onChange={(e) => setForm((prev) => ({ ...prev, naziv_brenda: e.target.value }))}
@@ -843,13 +843,6 @@ export function AdminPharmaciesManagement() {
               <h3 className="font-semibold">Glavna poslovnica</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Naziv poslovnice</Label>
-                  <Input
-                    value={form.branch_naziv}
-                    onChange={(e) => setForm((prev) => ({ ...prev, branch_naziv: e.target.value }))}
-                  />
-                </div>
                 <div>
                   <Label>Grad *</Label>
                   <CitySelect
