@@ -17,6 +17,7 @@ import {
 import { laboratoriesAPI } from '@/services/api';
 import { motion } from 'framer-motion';
 import { LocationMapCard } from '@/components/LocationMapCard';
+import { trackClarityProfileView } from '@/config/clarity';
 
 interface Laboratory {
   id: number;
@@ -95,6 +96,9 @@ export default function LaboratoryProfile() {
       const labRes = await laboratoriesAPI.getBySlug(slug!);
       const lab = labRes.data;
       setLaboratory(lab);
+      trackClarityProfileView('laboratory', {
+        city: lab?.grad,
+      });
 
       // Fetch analyses and packages
       const [analizeRes, paketiRes] = await Promise.all([

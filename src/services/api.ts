@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { trackAdminEntitySaved } from '@/config/analytics';
+import { setClarityTag, trackClarityEvent } from '@/config/clarity';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -10,6 +12,64 @@ const api = axios.create({
   },
   withCredentials: false,
 });
+
+function getTrackedPath(url?: string): string {
+  if (!url) {
+    return '';
+  }
+
+  try {
+    const parsed = new URL(url, API_URL);
+    return parsed.pathname.replace(/^\/api/, '');
+  } catch {
+    return url.split('?')[0] || '';
+  }
+}
+
+function getRegistrationType(path: string): string {
+  if (path.includes('/register/doctor')) return 'doctor';
+  if (path.includes('/register/clinic')) return 'clinic';
+  if (path.includes('/register/laboratory')) return 'laboratory';
+  if (path.includes('/register/pharmacy')) return 'pharmacy';
+  if (path.includes('/register/spa')) return 'spa';
+  if (path.includes('/register/care-home')) return 'care_home';
+  return 'patient';
+}
+
+function getAdminEntityType(path: string): string {
+  if (path.includes('/admin/pharmacies')) return 'pharmacy';
+  if (path.includes('/admin/clinics')) return 'clinic';
+  if (path.includes('/admin/doctors')) return 'doctor';
+  if (path.includes('/admin/laborator')) return 'laboratory';
+  if (path.includes('/admin/spas')) return 'spa';
+  if (path.includes('/admin/care-homes') || path.includes('/admin/domovi')) return 'care_home';
+  if (path.includes('/admin/lijek')) return 'medicine';
+  return 'admin_entity';
+}
+
+function trackSuccessfulMutation(method?: string, url?: string): void {
+  const normalizedMethod = (method || 'get').toLowerCase();
+  if (!['post', 'put', 'patch'].includes(normalizedMethod)) {
+    return;
+  }
+
+  const path = getTrackedPath(url);
+
+  if (path === '/register' || path.startsWith('/register/')) {
+    setClarityTag('registration_type', getRegistrationType(path));
+    trackClarityEvent('registration_submitted');
+    return;
+  }
+
+  if (path === '/appointments' || path === '/appointments/guest') {
+    trackClarityEvent('booking_submitted');
+    return;
+  }
+
+  if (path.startsWith('/admin/')) {
+    trackAdminEntitySaved(getAdminEntityType(path));
+  }
+}
 
 api.interceptors.request.use(
   (config) => {
@@ -23,7 +83,10 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    trackSuccessfulMutation(response.config.method, response.config.url);
+    return response;
+  },
   (error) => {
     // Only clear auth data on 401, but don't redirect
     // Let ProtectedRoute component handle redirects for protected pages

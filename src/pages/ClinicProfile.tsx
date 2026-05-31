@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { fixImageUrl } from '@/utils/imageUrl';
+import { trackClarityProfileView } from '@/config/clarity';
 
 interface Clinic {
   id: number;
@@ -138,6 +139,12 @@ export default function ClinicProfile() {
       setClinic({
         ...clinicData,
         slike: Array.isArray(clinicData.slike) ? clinicData.slike : []
+      });
+      trackClarityProfileView('clinic', {
+        city: clinicData.grad,
+        specialty: Array.isArray(clinicData.specijalnosti) && clinicData.specijalnosti.length > 0
+          ? clinicData.specijalnosti[0]?.naziv
+          : null,
       });
 
       const doctorsResponse = await doctorsAPI.getAll({ klinika_id: clinicData.id });

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Pill } from 'lucide-react';
+import { trackClarityProfileView } from '@/config/clarity';
 
 type LijekIndikacija = {
   oznaka: string | null;
@@ -133,7 +134,9 @@ export default function LijekProfil() {
           return;
         }
 
-        setData(response.data?.data || null);
+        const payload = response.data?.data || null;
+        setData(payload);
+        trackClarityProfileView('medicine');
       } catch (err: any) {
         setError(err?.response?.data?.message || 'Ne mo\u017eemo u\u010ditati profil lijeka.');
         setData(null);

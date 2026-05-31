@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { trackAdminEntitySaved } from '@/config/analytics';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -11,6 +12,28 @@ const adminApiInstance = axios.create({
   },
   withCredentials: false,
 });
+
+function getAdminEntityType(url?: string): string {
+  const path = url?.split('?')[0] || '';
+
+  if (path.includes('/admin/pharmacies')) return 'pharmacy';
+  if (path.includes('/admin/clinics')) return 'clinic';
+  if (path.includes('/admin/doctors')) return 'doctor';
+  if (path.includes('/admin/laborator')) return 'laboratory';
+  if (path.includes('/admin/spas')) return 'spa';
+  if (path.includes('/admin/care-homes')) return 'care_home';
+  if (path.includes('/admin/lijek')) return 'medicine';
+  return 'admin_entity';
+}
+
+function trackSuccessfulAdminMutation(method?: string, url?: string): void {
+  const normalizedMethod = (method || 'get').toLowerCase();
+  if (!['post', 'put', 'patch'].includes(normalizedMethod)) {
+    return;
+  }
+
+  trackAdminEntitySaved(getAdminEntityType(url));
+}
 
 // Add auth token interceptor
 adminApiInstance.interceptors.request.use(
@@ -26,7 +49,10 @@ adminApiInstance.interceptors.request.use(
 
 // Add response interceptor for 401 errors
 adminApiInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    trackSuccessfulAdminMutation(response.config.method, response.config.url);
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');

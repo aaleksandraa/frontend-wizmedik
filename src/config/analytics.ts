@@ -1,5 +1,6 @@
 import ReactGA from 'react-ga4';
 import { hasConsentFor } from '@/lib/cookie-consent';
+import { setClarityTag, setClarityTags, trackClarityEvent } from '@/config/clarity';
 
 /**
  * Initialize Google Analytics 4
@@ -146,6 +147,8 @@ export const trackEvent = (
  */
 export const trackSearch = (searchTerm: string, category?: string) => {
   trackEvent('Search', 'search_query', searchTerm);
+  setClarityTag('search_category', category || 'general');
+  trackClarityEvent('search_performed');
   
   // Also send as GA4 search event
   if (isInitialized) {
@@ -161,6 +164,8 @@ export const trackSearch = (searchTerm: string, category?: string) => {
  */
 export const trackDoctorView = (doctorId: number, doctorName: string) => {
   trackEvent('Doctor', 'view_profile', doctorName, doctorId);
+  setClarityTags({ page_type: 'profile', entity_type: 'doctor' });
+  trackClarityEvent('profile_viewed');
   
   if (isInitialized) {
     ReactGA.event('view_item', {
@@ -176,6 +181,8 @@ export const trackDoctorView = (doctorId: number, doctorName: string) => {
  */
 export const trackClinicView = (clinicId: number, clinicName: string) => {
   trackEvent('Clinic', 'view_profile', clinicName, clinicId);
+  setClarityTags({ page_type: 'profile', entity_type: 'clinic' });
+  trackClarityEvent('profile_viewed');
   
   if (isInitialized) {
     ReactGA.event('view_item', {
@@ -195,6 +202,8 @@ export const trackAppointmentBooking = (
   appointmentType: string
 ) => {
   trackEvent('Appointment', 'book', `${doctorName} - ${appointmentType}`, doctorId);
+  setClarityTag('entity_type', 'doctor');
+  trackClarityEvent('booking_started');
   
   if (isInitialized) {
     ReactGA.event('begin_checkout', {
@@ -215,6 +224,8 @@ export const trackAppointmentComplete = (
   appointmentType: string
 ) => {
   trackEvent('Appointment', 'complete', `${doctorName} - ${appointmentType}`, doctorId);
+  setClarityTag('entity_type', 'doctor');
+  trackClarityEvent('booking_submitted');
   
   if (isInitialized) {
     ReactGA.event('purchase', {
@@ -236,6 +247,8 @@ export const trackAppointmentComplete = (
  */
 export const trackRegistration = (userType: string) => {
   trackEvent('User', 'register', userType);
+  setClarityTag('registration_type', userType);
+  trackClarityEvent('registration_submitted');
   
   if (isInitialized) {
     ReactGA.event('sign_up', {
@@ -268,6 +281,8 @@ export const trackFilter = (
   page: string
 ) => {
   trackEvent('Filter', `${page}_${filterType}`, filterValue);
+  setClarityTags({ page_type: 'listing', filter_type: filterType, listing_type: page });
+  trackClarityEvent('search_performed');
 };
 
 /**
@@ -348,6 +363,8 @@ export const trackOutboundLink = (url: string, label?: string) => {
  */
 export const trackPhoneCall = (phoneNumber: string, entityType: string, entityName: string) => {
   trackEvent('Contact', 'phone_call', `${entityType}: ${entityName}`, 0);
+  setClarityTag('entity_type', entityType);
+  trackClarityEvent('phone_click');
   
   if (isInitialized) {
     ReactGA.event('generate_lead', {
@@ -364,6 +381,8 @@ export const trackPhoneCall = (phoneNumber: string, entityType: string, entityNa
  */
 export const trackEmailClick = (email: string, entityType: string, entityName: string) => {
   trackEvent('Contact', 'email', `${entityType}: ${entityName}`, 0);
+  setClarityTag('entity_type', entityType);
+  trackClarityEvent('email_click');
   
   if (isInitialized) {
     ReactGA.event('generate_lead', {
@@ -387,6 +406,21 @@ export const trackError = (errorMessage: string, errorPage: string) => {
       fatal: false,
     });
   }
+};
+
+export const trackRegistrationStarted = (userType: string) => {
+  setClarityTag('registration_type', userType);
+  trackClarityEvent('registration_started');
+};
+
+export const trackMapClick = (entityType: string) => {
+  setClarityTag('entity_type', entityType);
+  trackClarityEvent('map_click');
+};
+
+export const trackAdminEntitySaved = (entityType: string) => {
+  setClarityTag('entity_type', entityType);
+  trackClarityEvent('admin_entity_saved');
 };
 
 /**

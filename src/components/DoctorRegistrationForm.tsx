@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CitySelect } from '@/components/CitySelect';
 import { SpecialtyMultiSelect } from '@/components/SpecialtyMultiSelect';
 import { cn } from '@/lib/utils';
+import { setClarityTag, trackClarityEvent } from '@/config/clarity';
 
 const registrationSchema = z.object({
   ime: z.string().min(2, 'Ime mora imati najmanje 2 karaktera'),
@@ -174,6 +175,8 @@ export function DoctorRegistrationForm() {
       }
 
       setSuccess(true);
+      setClarityTag('registration_type', 'doctor');
+      trackClarityEvent('registration_submitted');
     } catch (err: any) {
       setError(err.message || 'Došlo je do greške. Pokušajte ponovo.');
       // Scroll to top to show error

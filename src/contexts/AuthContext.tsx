@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { authAPI } from '@/services/api';
 import { useToast } from '@/components/ui/use-toast';
+import { identifyClarityUser, setClarityTag } from '@/config/clarity';
 
 interface User {
   id: number;
@@ -13,6 +14,7 @@ interface User {
   adresa?: string;
   grad?: string;
   role: string;
+  analytics_id?: string;
   permissions?: string[];
 }
 
@@ -69,6 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initAuth();
   }, []);
+
+  useEffect(() => {
+    setClarityTag('auth_state', user ? 'authenticated' : 'anonymous');
+
+    if (user?.analytics_id) {
+      identifyClarityUser(user.analytics_id);
+    }
+  }, [user ? 'authenticated' : 'anonymous', user?.analytics_id]);
 
   const signUp = async (
     email: string,

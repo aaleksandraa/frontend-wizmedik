@@ -13,6 +13,7 @@ import {
   shouldHardReloadAfterConsentChange,
 } from '@/lib/cookie-consent';
 import { disableGA, initGA } from '@/config/analytics';
+import { disableClarity, initClarity } from '@/config/clarity';
 import { disableSentry, initSentry } from '@/config/sentry';
 
 interface CookieBannerSettings {
@@ -107,10 +108,12 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (consentRecord?.preferences.analytics) {
       initGA();
+      initClarity();
       return;
     }
 
     disableGA();
+    disableClarity();
   }, [consentRecord?.preferences.analytics]);
 
   useEffect(() => {

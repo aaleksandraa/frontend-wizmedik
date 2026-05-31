@@ -25,6 +25,7 @@ import { ReviewCard } from '@/components/ReviewCard';
 import { useTemplateSettings } from '@/hooks/useTemplateSettings';
 import { DoctorTemplate, DoctorTemplateType } from '@/components/doctor-templates';
 import { formatRating } from '@/utils/formatters';
+import { trackClarityEvent, trackClarityProfileView } from '@/config/clarity';
 
 interface Doctor {
   id: number;
@@ -262,10 +263,11 @@ export default function DoctorProfile() {
 
   // Fetch booked slots samo kada se otvori booking dialog
   useEffect(() => {
-    if (showBooking || showGuestBooking) {
+    if (showBooking || showGuestBooking || showGuestVisitBooking) {
       fetchBookedSlots();
+      trackClarityEvent('booking_started');
     }
-  }, [showBooking, showGuestBooking, doctor?.id]);
+  }, [showBooking, showGuestBooking, showGuestVisitBooking, doctor?.id]);
 
   const fetchDoctor = async () => {
     if (!slug) return;
@@ -283,6 +285,10 @@ export default function DoctorProfile() {
         kategorijeUsluga: response.data.kategorije_usluga || response.data.kategorijeUsluga
       };
       setDoctor(normalizedData);
+      trackClarityProfileView('doctor', {
+        city: normalizedData.grad,
+        specialty: normalizedData.specijalnost,
+      });
     } catch (error) {
       console.error('Error fetching doctor:', error);
       navigate('/');

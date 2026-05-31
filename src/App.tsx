@@ -13,6 +13,7 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { trackPageView } from "@/config/analytics";
+import { trackClarityPageView } from "@/config/clarity";
 import { Loader2 } from "lucide-react";
 
 // Core entry pages - keep initial bundle lean
@@ -94,6 +95,7 @@ const PageViewTracker = () => {
   useEffect(() => {
     // Track page view on route change
     trackPageView(location.pathname + location.search, document.title);
+    trackClarityPageView(location.pathname + location.search);
   }, [location]);
 
   return null;

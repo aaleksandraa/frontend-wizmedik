@@ -20,6 +20,7 @@ import { LocationMapCard } from '@/components/LocationMapCard';
 import { domoviAPI } from '@/services/api';
 import { DomUpitFormData } from '@/types/careHome';
 import { toast } from 'sonner';
+import { trackClarityProfileView } from '@/config/clarity';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -101,6 +102,10 @@ export default function CareHomeProfile() {
 
       if (response.data.success) {
         setDom(response.data.data);
+        trackClarityProfileView('care_home', {
+          city: response.data.data?.grad,
+          specialty: response.data.data?.tip_doma?.slug,
+        });
       } else {
         setError('Dom nije pronađen');
       }

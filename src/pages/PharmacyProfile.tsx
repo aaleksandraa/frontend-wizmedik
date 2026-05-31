@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { pharmaciesAPI } from '@/services/api';
+import { trackClarityProfileView } from '@/config/clarity';
 import {
   Clock3,
   ExternalLink,
@@ -174,6 +175,9 @@ export default function PharmacyProfile() {
         }
 
         setPharmacy(payload);
+        trackClarityProfileView('pharmacy', {
+          city: payload?.grad_naziv,
+        });
       } catch (error) {
         console.error('Error loading pharmacy profile', error);
         setPharmacy(null);

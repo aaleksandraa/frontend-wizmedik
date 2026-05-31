@@ -78,9 +78,9 @@ export const COOKIE_CATEGORIES: CookieCategoryDefinition[] = [
   {
     key: 'analytics',
     title: 'Analitika',
-    shortDescription: 'Mjerenje koristenja sajta i performansi stranica.',
+    shortDescription: 'Mjerenje koristenja sajta, heatmaps i session recordings.',
     description:
-      'Analitika nam pomaze da razumijemo koje stranice i funkcije korisnici koriste, ali se ne aktivira bez vaseg pristanka.',
+      'Analitika nam pomaze da razumijemo koje stranice i funkcije korisnici koriste, ukljucujuci agregirane izvjestaje, heatmaps i session recordings. Ne aktivira se bez vaseg pristanka.',
     isRequired: false,
   },
   {
@@ -94,6 +94,7 @@ export const COOKIE_CATEGORIES: CookieCategoryDefinition[] = [
 ];
 
 const hasConfiguredAnalytics = Boolean(import.meta.env.VITE_GA_MEASUREMENT_ID);
+const hasConfiguredClarity = Boolean(import.meta.env.VITE_CLARITY_PROJECT_ID);
 const hasConfiguredSentry = Boolean(import.meta.env.VITE_SENTRY_DSN);
 
 export const COOKIE_TECHNOLOGIES: CookieTechnologyDefinition[] = [
@@ -210,6 +211,18 @@ export const COOKIE_TECHNOLOGIES: CookieTechnologyDefinition[] = [
       'Anonimno razlikuje korisnike i sesije radi mjerenja posjeta, ponasanja na stranicama i performansi sajta.',
     required: false,
     status: hasConfiguredAnalytics ? 'conditional' : 'planned',
+  },
+  {
+    id: 'microsoft_clarity',
+    name: '_clck, _clsk i Microsoft Clarity',
+    category: 'analytics',
+    provider: 'Microsoft',
+    storage: 'cookie',
+    duration: hasConfiguredClarity ? 'Do 1 godine za _clck i do 24 sata za _clsk' : 'Trenutno nije konfigurisan',
+    purpose:
+      'Heatmaps, session recordings i agregirana analiza ponasanja na sajtu. Aktivira se samo nakon analytics pristanka i koristi maskiranje osjetljivih polja.',
+    required: false,
+    status: hasConfiguredClarity ? 'conditional' : 'planned',
   },
   {
     id: 'meta_pixel',
@@ -426,7 +439,14 @@ function clearAnalyticsArtifacts(): void {
     .filter(Boolean);
 
   cookieNames
-    .filter((name) => name === '_ga' || name.startsWith('_ga_') || name === '_gid' || name === '_gat')
+    .filter((name) =>
+      name === '_ga' ||
+      name.startsWith('_ga_') ||
+      name === '_gid' ||
+      name === '_gat' ||
+      name === '_clck' ||
+      name === '_clsk'
+    )
     .forEach((name) => deleteCookie(name));
 }
 

@@ -23,6 +23,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { LocationMapCard } from '@/components/LocationMapCard';
 import { toast } from 'sonner';
+import { trackClarityProfileView } from '@/config/clarity';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -83,7 +84,11 @@ export default function SpaProfile() {
       }
 
       // API returns { success: true, data: {...} }
-      setBanja(response.data.data || response.data);
+      const payload = response.data.data || response.data;
+      setBanja(payload);
+      trackClarityProfileView('spa', {
+        city: payload?.grad,
+      });
     } catch (error) {
       console.error('Error loading banja:', error);
       toast.error('Greška pri učitavanju podataka');
