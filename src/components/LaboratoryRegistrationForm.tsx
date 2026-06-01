@@ -18,6 +18,7 @@ import { CitySelect } from '@/components/CitySelect';
 import { useFormValidation } from '@/hooks/useFormValidation';
 import { FormError } from '@/components/ui/form-error';
 import { validateEmail, validatePhone, validatePassword, validatePasswordConfirmation, validateRequired } from '@/utils/validation';
+import { trackSignUp } from '@/config/analytics';
 
 interface FormData {
   // Step 1: Basic Info
@@ -162,6 +163,7 @@ export function LaboratoryRegistrationForm() {
         title: 'Uspješno!',
         description: 'Zahtjev za registraciju je poslat. Provjerite email za verifikaciju.',
       });
+      trackSignUp('laboratory', 'email');
 
       navigate('/auth', { 
         state: { 

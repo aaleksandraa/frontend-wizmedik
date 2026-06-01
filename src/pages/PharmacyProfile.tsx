@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { pharmaciesAPI } from '@/services/api';
-import { trackClarityProfileView } from '@/config/clarity';
+import { trackContactClick, trackProfileView } from '@/config/analytics';
 import {
   Clock3,
   ExternalLink,
@@ -175,8 +175,16 @@ export default function PharmacyProfile() {
         }
 
         setPharmacy(payload);
-        trackClarityProfileView('pharmacy', {
+        trackProfileView({
+          entity_type: 'pharmacy',
+          entity_id: payload?.id,
+          entity_name: payload?.naziv,
+          pharmacy_id: payload?.id,
+          pharmacy_name: payload?.naziv,
           city: payload?.grad_naziv,
+          profile_slug: payload?.slug || slug,
+          is_24h: payload?.is_24h,
+          is_on_duty: payload?.status?.is_dezurna,
         });
       } catch (error) {
         console.error('Error loading pharmacy profile', error);
@@ -283,6 +291,18 @@ export default function PharmacyProfile() {
     );
   }
 
+  const pharmacyAnalyticsEntity = {
+    entity_type: 'pharmacy' as const,
+    entity_id: pharmacy.id,
+    entity_name: pharmacy.naziv,
+    pharmacy_id: pharmacy.id,
+    pharmacy_name: pharmacy.naziv,
+    city,
+    profile_slug: pharmacy.slug,
+    is_24h: pharmacy.is_24h,
+    is_on_duty: pharmacy.status.is_dezurna,
+  };
+
   return (
     <>
       <Helmet>
@@ -366,7 +386,11 @@ export default function PharmacyProfile() {
                           {pharmacy.telefon ? (
                             <div className="flex items-start gap-2">
                               <Phone className="w-4 h-4 mt-0.5 text-red-600" />
-                              <a href={`tel:${pharmacy.telefon}`} className="hover:underline">
+                              <a
+                                href={`tel:${pharmacy.telefon}`}
+                                className="hover:underline"
+                                onClick={() => trackContactClick('phone', pharmacyAnalyticsEntity, 'profile_contact_info')}
+                              >
                                 {pharmacy.telefon}
                               </a>
                             </div>
@@ -374,7 +398,11 @@ export default function PharmacyProfile() {
                           {pharmacy.email ? (
                             <div className="flex items-start gap-2">
                               <Mail className="w-4 h-4 mt-0.5 text-red-600" />
-                              <a href={`mailto:${pharmacy.email}`} className="hover:underline">
+                              <a
+                                href={`mailto:${pharmacy.email}`}
+                                className="hover:underline"
+                                onClick={() => trackContactClick('email', pharmacyAnalyticsEntity, 'profile_contact_info')}
+                              >
                                 {pharmacy.email}
                               </a>
                             </div>
@@ -389,6 +417,7 @@ export default function PharmacyProfile() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:underline"
+                            onClick={() => trackContactClick('website', pharmacyAnalyticsEntity, 'profile_contact_info')}
                           >
                             Web stranica
                           </a>
@@ -540,6 +569,7 @@ export default function PharmacyProfile() {
                     googleMapsLink={pharmacy.google_maps_link || undefined}
                     markerColor="orange"
                     mapHeightClass="h-[320px] md:h-[420px]"
+                    onDirectionsClick={() => trackContactClick('map', pharmacyAnalyticsEntity, 'map_card')}
                   />
                 </div>
               </div>
@@ -618,6 +648,7 @@ export default function PharmacyProfile() {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackContactClick('map', pharmacyAnalyticsEntity, 'profile_bottom_cta')}
               >
                 <Button>
                   <Navigation className="w-4 h-4 mr-2" />

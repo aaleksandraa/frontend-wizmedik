@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { registrationAPI } from '@/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackSignUp } from '@/config/analytics';
 
 interface FormData {
   // Step 1: Basic Info
@@ -127,6 +128,7 @@ export function SpaRegistrationForm() {
         title: 'Uspješno!',
         description: 'Zahtjev za registraciju je poslat. Provjerite email za verifikaciju.',
       });
+      trackSignUp('spa', 'email');
 
       navigate('/auth', { 
         state: { 

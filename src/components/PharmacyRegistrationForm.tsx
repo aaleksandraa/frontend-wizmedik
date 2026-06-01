@@ -11,6 +11,7 @@ import { CitySelect } from '@/components/CitySelect';
 import { useToast } from '@/components/ui/use-toast';
 import { legalAPI, registrationAPI } from '@/services/api';
 import { Loader2 } from 'lucide-react';
+import { trackSignUp } from '@/config/analytics';
 
 type FormState = {
   naziv_brenda: string;
@@ -120,6 +121,7 @@ export function PharmacyRegistrationForm() {
         title: 'Uspjesno',
         description: 'Zahtjev je poslan. Provjerite email za verifikaciju.',
       });
+      trackSignUp('pharmacy', 'email');
 
       navigate('/auth', {
         state: {

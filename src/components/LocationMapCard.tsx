@@ -14,6 +14,7 @@ interface LocationMapCardProps {
   googleMapsLink?: string;
   markerColor?: 'blue' | 'green' | 'violet' | 'gold' | 'orange';
   mapHeightClass?: string;
+  onDirectionsClick?: () => void;
 }
 
 // Fix for default marker icon
@@ -33,6 +34,7 @@ export function LocationMapCard({
   googleMapsLink,
   markerColor = 'blue',
   mapHeightClass = 'h-[250px]',
+  onDirectionsClick,
 }: LocationMapCardProps) {
   // Generate Google Maps link if not provided but coordinates exist
   const mapsLink = googleMapsLink || 
@@ -103,6 +105,7 @@ export function LocationMapCard({
             href={mapsLink} 
             target="_blank" 
             rel="noopener noreferrer"
+            onClick={onDirectionsClick}
           >
             <Navigation className="w-4 h-4 mr-2" />
             Vodi me do lokacije

@@ -25,7 +25,8 @@ import { ReviewCard } from '@/components/ReviewCard';
 import { useTemplateSettings } from '@/hooks/useTemplateSettings';
 import { DoctorTemplate, DoctorTemplateType } from '@/components/doctor-templates';
 import { formatRating } from '@/utils/formatters';
-import { trackClarityEvent, trackClarityProfileView } from '@/config/clarity';
+import { trackClarityEvent } from '@/config/clarity';
+import { trackContactClick, trackProfileView } from '@/config/analytics';
 
 interface Doctor {
   id: number;
@@ -285,9 +286,15 @@ export default function DoctorProfile() {
         kategorijeUsluga: response.data.kategorije_usluga || response.data.kategorijeUsluga
       };
       setDoctor(normalizedData);
-      trackClarityProfileView('doctor', {
+      trackProfileView({
+        entity_type: 'doctor',
+        entity_id: normalizedData.id,
+        entity_name: `Dr. ${normalizedData.ime} ${normalizedData.prezime}`,
+        doctor_id: normalizedData.id,
+        doctor_name: `Dr. ${normalizedData.ime} ${normalizedData.prezime}`,
         city: normalizedData.grad,
-        specialty: normalizedData.specijalnost,
+        specialization: normalizedData.specijalnost,
+        profile_slug: normalizedData.slug || slug,
       });
     } catch (error) {
       console.error('Error fetching doctor:', error);
@@ -467,6 +474,16 @@ export default function DoctorProfile() {
   }
 
   const profileSlug = doctor.slug || slug || '';
+  const doctorAnalyticsEntity = {
+    entity_type: 'doctor' as const,
+    entity_id: doctor.id,
+    entity_name: `Dr. ${doctor.ime} ${doctor.prezime}`,
+    doctor_id: doctor.id,
+    doctor_name: `Dr. ${doctor.ime} ${doctor.prezime}`,
+    city: doctor.grad,
+    specialization: doctor.specijalnost,
+    profile_slug: profileSlug,
+  };
   const canonicalUrl = `${SITE_URL}/doktor/${profileSlug}`;
   const ogImage = toAbsoluteUrl(doctor.slika_profila);
   const seoDescription = `${doctor.opis || `${doctor.specijalnost} u ${doctor.grad}u`}`.slice(0, 160);
@@ -685,6 +702,7 @@ export default function DoctorProfile() {
                             <a
                               href={`mailto:${doctor.public_email || doctor.email}`}
                               className="text-primary hover:underline"
+                              onClick={() => trackContactClick('email', doctorAnalyticsEntity, 'profile_contact_info')}
                             >
                               {doctor.public_email || doctor.email}
                             </a>
@@ -701,6 +719,7 @@ export default function DoctorProfile() {
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 text-primary hover:underline"
+                              onClick={() => trackContactClick('map', doctorAnalyticsEntity, 'profile_contact_info')}
                             >
                               <MapPin className="w-5 h-5" />
                               Otvori navigaciju
@@ -747,7 +766,10 @@ export default function DoctorProfile() {
                           className="w-full sm:flex-1"
                           asChild
                         >
-                          <a href={`tel:${doctor.telefon}`}>
+                          <a
+                            href={`tel:${doctor.telefon}`}
+                            onClick={() => trackContactClick('phone', doctorAnalyticsEntity, 'profile_about_cta')}
+                          >
                             <Phone className="w-5 h-5 mr-2" />
                             Pozovite
                           </a>
@@ -794,7 +816,10 @@ export default function DoctorProfile() {
                         className="flex-1" style={{ backgroundColor: '#0891b2' }}
                         asChild
                       >
-                        <a href={`tel:${doctor.telemedicine_phone}`}>
+                        <a
+                          href={`tel:${doctor.telemedicine_phone}`}
+                          onClick={() => trackContactClick('phone', doctorAnalyticsEntity, 'telemedicine_cta')}
+                        >
                           <Phone className="w-5 h-5 mr-2" />
                           Zakažite video poziv: {doctor.telemedicine_phone}
                         </a>
@@ -1015,7 +1040,17 @@ export default function DoctorProfile() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => visit.klinika.telefon && window.open(`tel:${visit.klinika.telefon}`)}
+                              onClick={() => {
+                                trackContactClick('phone', {
+                                  entity_type: 'clinic',
+                                  entity_id: visit.klinika.id,
+                                  entity_name: visit.klinika.naziv,
+                                  city: visit.klinika.grad,
+                                }, 'doctor_guest_visit_clinic');
+                                if (visit.klinika.telefon) {
+                                  window.open(`tel:${visit.klinika.telefon}`);
+                                }
+                              }}
                             >
                               <Phone className="w-4 h-4 mr-2" />
                               {visit.klinika.telefon || 'Pozovite kliniku'}
@@ -1361,6 +1396,7 @@ export default function DoctorProfile() {
                   longitude={doctor.longitude}
                   googleMapsLink={doctor.google_maps_link}
                   markerColor="gold"
+                  onDirectionsClick={() => trackContactClick('map', doctorAnalyticsEntity, 'mobile_map_card')}
                 />
               </div>
 
@@ -1431,7 +1467,10 @@ export default function DoctorProfile() {
                     variant="medical-outline"
                     className="w-full"
                     size="lg"
-                    onClick={() => window.open(`tel:${doctor.telefon}`)}
+                    onClick={() => {
+                      trackContactClick('phone', doctorAnalyticsEntity, 'booking_sidebar');
+                      window.open(`tel:${doctor.telefon}`);
+                    }}
                   >
                     <Phone className="w-5 h-5 mr-2" />
                     Pozovite {doctor.telefon}
@@ -1461,6 +1500,7 @@ export default function DoctorProfile() {
                   longitude={doctor.longitude}
                   googleMapsLink={doctor.google_maps_link}
                   markerColor="gold"
+                  onDirectionsClick={() => trackContactClick('map', doctorAnalyticsEntity, 'desktop_map_card')}
                 />
               </div>
             </div>

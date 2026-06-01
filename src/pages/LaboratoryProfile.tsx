@@ -17,7 +17,7 @@ import {
 import { laboratoriesAPI } from '@/services/api';
 import { motion } from 'framer-motion';
 import { LocationMapCard } from '@/components/LocationMapCard';
-import { trackClarityProfileView } from '@/config/clarity';
+import { trackContactClick, trackProfileView } from '@/config/analytics';
 
 interface Laboratory {
   id: number;
@@ -96,8 +96,14 @@ export default function LaboratoryProfile() {
       const labRes = await laboratoriesAPI.getBySlug(slug!);
       const lab = labRes.data;
       setLaboratory(lab);
-      trackClarityProfileView('laboratory', {
+      trackProfileView({
+        entity_type: 'laboratory',
+        entity_id: lab?.id,
+        entity_name: lab?.naziv,
+        laboratory_id: lab?.id,
+        laboratory_name: lab?.naziv,
         city: lab?.grad,
+        profile_slug: lab?.slug || slug,
       });
 
       // Fetch analyses and packages
@@ -169,6 +175,15 @@ export default function LaboratoryProfile() {
   }
 
   const dani = ['ponedeljak', 'utorak', 'srijeda', 'cetvrtak', 'petak', 'subota', 'nedjelja'];
+  const laboratoryAnalyticsEntity = {
+    entity_type: 'laboratory' as const,
+    entity_id: laboratory.id,
+    entity_name: laboratory.naziv,
+    laboratory_id: laboratory.id,
+    laboratory_name: laboratory.naziv,
+    city: laboratory.grad,
+    profile_slug: laboratory.slug,
+  };
   const canonicalUrl = `${SITE_URL}/laboratorija/${laboratory.slug}`;
   const seoDescription = `${laboratory.opis || `${laboratory.naziv} - Medicinska laboratorija u ${laboratory.grad}u`}`.slice(0, 160);
   const ogImage = toAbsoluteUrl(laboratory.featured_slika || laboratory.profilna_slika);
@@ -282,13 +297,21 @@ export default function LaboratoryProfile() {
                       </div>
                       <div className="flex gap-2.5 text-sm md:text-base text-gray-700">
                         <Phone className="w-4 h-4 text-primary flex-shrink-0 translate-y-[3px]" />
-                        <a href={`tel:${laboratory.telefon}`} className="hover:text-primary transition-colors leading-[1.4]">
+                        <a
+                          href={`tel:${laboratory.telefon}`}
+                          className="hover:text-primary transition-colors leading-[1.4]"
+                          onClick={() => trackContactClick('phone', laboratoryAnalyticsEntity, 'profile_contact_info')}
+                        >
                           {laboratory.telefon}
                         </a>
                       </div>
                       <div className="flex gap-2.5 text-sm md:text-base text-gray-700">
                         <Mail className="w-4 h-4 text-primary flex-shrink-0 translate-y-[3px]" />
-                        <a href={`mailto:${laboratory.email}`} className="hover:text-primary transition-colors break-all leading-[1.4]">
+                        <a
+                          href={`mailto:${laboratory.email}`}
+                          className="hover:text-primary transition-colors break-all leading-[1.4]"
+                          onClick={() => trackContactClick('email', laboratoryAnalyticsEntity, 'profile_contact_info')}
+                        >
                           {laboratory.email}
                         </a>
                       </div>
@@ -300,6 +323,7 @@ export default function LaboratoryProfile() {
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="hover:text-primary transition-colors flex items-center gap-1 leading-[1.4]"
+                            onClick={() => trackContactClick('website', laboratoryAnalyticsEntity, 'profile_contact_info')}
                           >
                             Web stranica
                             <ExternalLink className="w-3 h-3" />
@@ -582,6 +606,7 @@ export default function LaboratoryProfile() {
                   longitude={laboratory.longitude}
                   googleMapsLink={laboratory.google_maps_link}
                   markerColor="violet"
+                  onDirectionsClick={() => trackContactClick('map', laboratoryAnalyticsEntity, 'map_card')}
                 />
               </TabsContent>
 

@@ -20,7 +20,7 @@ import { LocationMapCard } from '@/components/LocationMapCard';
 import { domoviAPI } from '@/services/api';
 import { DomUpitFormData } from '@/types/careHome';
 import { toast } from 'sonner';
-import { trackClarityProfileView } from '@/config/clarity';
+import { trackContactClick, trackContactSubmit, trackProfileView } from '@/config/analytics';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -102,9 +102,15 @@ export default function CareHomeProfile() {
 
       if (response.data.success) {
         setDom(response.data.data);
-        trackClarityProfileView('care_home', {
+        trackProfileView({
+          entity_type: 'care_home',
+          entity_id: response.data.data?.id,
+          entity_name: response.data.data?.naziv,
+          care_home_id: response.data.data?.id,
+          care_home_name: response.data.data?.naziv,
           city: response.data.data?.grad,
-          specialty: response.data.data?.tip_doma?.slug,
+          specialization: response.data.data?.tip_doma?.slug,
+          profile_slug: response.data.data?.slug || slug,
         });
       } else {
         setError('Dom nije pronađen');
@@ -123,6 +129,15 @@ export default function CareHomeProfile() {
     setSubmitting(true);
     try {
       await domoviAPI.posaljiUpit(dom.id, upitForm);
+      trackContactSubmit({
+        entity_type: 'care_home',
+        entity_id: dom.id,
+        entity_name: dom.naziv,
+        care_home_id: dom.id,
+        care_home_name: dom.naziv,
+        city: dom.grad,
+        profile_slug: dom.slug,
+      }, 'care_home_inquiry');
       toast.success('Upit je uspješno poslat!');
       setShowUpitForm(false);
       setUpitForm({
@@ -181,6 +196,15 @@ export default function CareHomeProfile() {
   }
 
   const canonicalUrl = `${SITE_URL}/dom-njega/${dom.slug}`;
+  const careHomeAnalyticsEntity = {
+    entity_type: 'care_home' as const,
+    entity_id: dom.id,
+    entity_name: dom.naziv,
+    care_home_id: dom.id,
+    care_home_name: dom.naziv,
+    city: dom.grad,
+    profile_slug: dom.slug,
+  };
   const seoTitle = `${dom.naziv} - Dom za njegu u ${dom.grad}u | WizMedik`;
   const seoDescription = `${dom.opis || `${dom.naziv} dom za njegu u ${dom.grad}u`}`.slice(0, 160);
   const ogImage = toAbsoluteUrl(dom.featured_slika || dom.slike?.[0]);
@@ -370,19 +394,33 @@ export default function CareHomeProfile() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {dom.telefon && (
-                    <a href={`tel:${dom.telefon}`} className="flex items-center gap-3 hover:text-primary">
+                    <a
+                      href={`tel:${dom.telefon}`}
+                      className="flex items-center gap-3 hover:text-primary"
+                      onClick={() => trackContactClick('phone', careHomeAnalyticsEntity, 'profile_contact_info')}
+                    >
                       <Phone className="h-5 w-5 text-muted-foreground" />
                       <span>{dom.telefon}</span>
                     </a>
                   )}
                   {dom.email && (
-                    <a href={`mailto:${dom.email}`} className="flex items-center gap-3 hover:text-primary">
+                    <a
+                      href={`mailto:${dom.email}`}
+                      className="flex items-center gap-3 hover:text-primary"
+                      onClick={() => trackContactClick('email', careHomeAnalyticsEntity, 'profile_contact_info')}
+                    >
                       <Mail className="h-5 w-5 text-muted-foreground" />
                       <span>{dom.email}</span>
                     </a>
                   )}
                   {dom.website && (
-                    <a href={dom.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary">
+                    <a
+                      href={dom.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 hover:text-primary"
+                      onClick={() => trackContactClick('website', careHomeAnalyticsEntity, 'profile_contact_info')}
+                    >
                       <Globe className="h-5 w-5 text-muted-foreground" />
                       <span>Web stranica</span>
                     </a>
@@ -453,6 +491,7 @@ export default function CareHomeProfile() {
                 longitude={dom.longitude}
                 googleMapsLink={dom.google_maps_link}
                 markerColor="green"
+                onDirectionsClick={() => trackContactClick('map', careHomeAnalyticsEntity, 'map_card')}
               />
 
               {/* Action Button */}

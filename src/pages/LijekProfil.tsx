@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Pill } from 'lucide-react';
-import { trackClarityProfileView } from '@/config/clarity';
+import { trackProfileView } from '@/config/analytics';
 
 type LijekIndikacija = {
   oznaka: string | null;
@@ -136,7 +136,18 @@ export default function LijekProfil() {
 
         const payload = response.data?.data || null;
         setData(payload);
-        trackClarityProfileView('medicine');
+        if (payload) {
+          trackProfileView({
+            entity_type: 'medicine',
+            entity_id: payload.lijek_id || payload.id,
+            entity_name: payload.naziv || payload.naziv_lijeka,
+            medicine_id: payload.lijek_id || payload.id,
+            medicine_name: payload.naziv || payload.naziv_lijeka,
+            atc_code: payload.atc_sifra,
+            fund_status: payload.aktuelni_fond?.lista_id ? 'covered' : 'not_covered',
+            profile_slug: payload.slug || slug,
+          });
+        }
       } catch (err: any) {
         setError(err?.response?.data?.message || 'Ne mo\u017eemo u\u010ditati profil lijeka.');
         setData(null);

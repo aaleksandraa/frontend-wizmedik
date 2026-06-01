@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { fixImageUrl } from '@/utils/imageUrl';
-import { trackClarityProfileView } from '@/config/clarity';
+import { trackContactClick, trackProfileView } from '@/config/analytics';
 
 interface Clinic {
   id: number;
@@ -140,11 +140,17 @@ export default function ClinicProfile() {
         ...clinicData,
         slike: Array.isArray(clinicData.slike) ? clinicData.slike : []
       });
-      trackClarityProfileView('clinic', {
+      trackProfileView({
+        entity_type: 'clinic',
+        entity_id: clinicData.id,
+        entity_name: clinicData.naziv,
+        clinic_id: clinicData.id,
+        clinic_name: clinicData.naziv,
         city: clinicData.grad,
-        specialty: Array.isArray(clinicData.specijalnosti) && clinicData.specijalnosti.length > 0
+        specialization: Array.isArray(clinicData.specijalnosti) && clinicData.specijalnosti.length > 0
           ? clinicData.specijalnosti[0]?.naziv
           : null,
+        profile_slug: slug,
       });
 
       const doctorsResponse = await doctorsAPI.getAll({ klinika_id: clinicData.id });
@@ -274,6 +280,16 @@ export default function ClinicProfile() {
   }
 
   const currentStatus = getCurrentStatus(clinic.radno_vrijeme);
+  const clinicAnalyticsEntity = {
+    entity_type: 'clinic' as const,
+    entity_id: clinic.id,
+    entity_name: clinic.naziv,
+    clinic_id: clinic.id,
+    clinic_name: clinic.naziv,
+    city: clinic.grad,
+    specialization: clinicSpecialties[0]?.naziv || undefined,
+    profile_slug: slug || '',
+  };
   const canonicalUrl = `${SITE_URL}/klinika/${slug || ''}`;
   const ogImage = clinic.slike && clinic.slike.length > 0
     ? toAbsoluteUrl(clinic.slike[0])
@@ -571,6 +587,7 @@ export default function ClinicProfile() {
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-primary hover:underline"
+                      onClick={() => trackContactClick('map', clinicAnalyticsEntity, 'profile_contact_info')}
                     >
                       <MapPin className="w-5 h-5" />
                       Otvori navigaciju
@@ -588,6 +605,7 @@ export default function ClinicProfile() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
+                        onClick={() => trackContactClick('website', clinicAnalyticsEntity, 'profile_contact_info')}
                       >
                         {clinic.website}
                       </a>
@@ -616,6 +634,7 @@ export default function ClinicProfile() {
               googleMapsLink={clinic.google_maps_link}
               markerColor="orange"
               mapHeightClass="h-[400px]"
+              onDirectionsClick={() => trackContactClick('map', clinicAnalyticsEntity, 'map_card')}
             />
 
             <Card className="p-6">
@@ -625,6 +644,7 @@ export default function ClinicProfile() {
               </p>
               <div className="space-y-2">
                 <Button variant="medical" className="w-full" onClick={() => {
+                  trackContactClick('phone', clinicAnalyticsEntity, 'booking_card');
                   window.location.href = `tel:${clinic.telefon}`;
                 }}>
                   <Phone className="h-4 w-4 mr-2" />
@@ -632,6 +652,7 @@ export default function ClinicProfile() {
                 </Button>
                 {clinic.contact_email && (
                   <Button variant="outline" className="w-full" onClick={() => {
+                    trackContactClick('email', clinicAnalyticsEntity, 'booking_card');
                     window.location.href = `mailto:${clinic.contact_email}`;
                   }}>
                     <Mail className="h-4 w-4 mr-2" />

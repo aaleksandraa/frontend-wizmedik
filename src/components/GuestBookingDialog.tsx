@@ -11,6 +11,7 @@ import { appointmentsAPI } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, UserPlus, LogIn, ArrowLeft, Stethoscope, Clock, Shield } from 'lucide-react';
+import { trackAppointmentCompleted } from '@/config/analytics';
 
 interface GuestBookingDialogProps {
   open: boolean;
@@ -135,6 +136,16 @@ export function GuestBookingDialog({
         address: doctorData?.grad ? `${doctorData.lokacija}, ${doctorData.grad}` : doctorData?.lokacija,
         phone: doctorData?.telefon,
         serviceName: selectedServiceData?.naziv || (selectedService === 'ostalo' ? otherService : undefined),
+      });
+      trackAppointmentCompleted({
+        doctor_id: doctorId,
+        doctor_name: doctorName,
+        specialization: doctorData?.specijalnost,
+        city: doctorData?.grad,
+        appointment_type: 'online_booking',
+        booking_type: 'guest',
+        service_id: selectedService === 'ostalo' ? null : selectedService,
+        service_name: selectedServiceData?.naziv || (selectedService === 'ostalo' ? otherService : undefined),
       });
       
       setStep('success');

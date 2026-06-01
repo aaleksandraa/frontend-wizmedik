@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { TimeSlotPicker } from '@/components/TimeSlotPicker';
 import { AppointmentConfirmation } from '@/components/AppointmentConfirmation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { trackAppointmentCompleted } from '@/config/analytics';
 
 interface BookAppointmentFormProps {
   doctorId: number;
@@ -140,6 +141,16 @@ export function BookAppointmentForm({ doctorId, doctorName, selectedServiceId, o
         address: doctorData?.grad ? `${doctorData.lokacija}, ${doctorData.grad}` : doctorData?.lokacija,
         phone: doctorData?.telefon,
         serviceName: selectedServiceData?.naziv || (selectedService === 'ostalo' ? otherService : undefined),
+      });
+      trackAppointmentCompleted({
+        doctor_id: doctorId,
+        doctor_name: doctorName,
+        specialization: doctorData?.specijalnost,
+        city: doctorData?.grad,
+        appointment_type: 'online_booking',
+        booking_type: 'patient',
+        service_id: selectedService === 'ostalo' ? null : selectedService,
+        service_name: selectedServiceData?.naziv || (selectedService === 'ostalo' ? otherService : undefined),
       });
       
       setShowConfirmation(true);

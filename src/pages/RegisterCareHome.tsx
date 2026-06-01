@@ -20,6 +20,7 @@ import { validateEmail, validatePhone, validatePassword, validatePasswordConfirm
 import { HoneypotField } from '@/components/HoneypotField';
 import { checkRateLimit, recordAttempt, formatTimeRemaining, validateHoneypot, calculateSubmissionTime, isSuspiciouslyFast } from '@/utils/antispam';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { trackSignUp } from '@/config/analytics';
 
 export default function RegisterCareHome() {
   const navigate = useNavigate();
@@ -165,6 +166,7 @@ export default function RegisterCareHome() {
     try {
       await api.post('/register/care-home', formData);
       setSubmitted(true);
+      trackSignUp('care_home', 'email');
       toast({
         title: 'Uspješno',
         description: 'Vaš zahtjev za registraciju je poslan. Kontaktiraćemo vas uskoro.',

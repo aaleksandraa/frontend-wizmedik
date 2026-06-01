@@ -19,6 +19,7 @@ import { validateEmail, validatePhone, validatePassword, validatePasswordConfirm
 import { HoneypotField } from '@/components/HoneypotField';
 import { checkRateLimit, recordAttempt, formatTimeRemaining, validateHoneypot, calculateSubmissionTime, isSuspiciouslyFast } from '@/utils/antispam';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { trackSignUp } from '@/config/analytics';
 
 export default function RegisterSpa() {
   const navigate = useNavigate();
@@ -154,6 +155,7 @@ export default function RegisterSpa() {
     try {
       await api.post('/register/spa', formData);
       setSubmitted(true);
+      trackSignUp('spa', 'email');
       toast({
         title: 'Uspješno',
         description: 'Vaš zahtjev za registraciju je poslan. Kontaktiraćemo vas uskoro.',

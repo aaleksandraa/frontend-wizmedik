@@ -12,6 +12,7 @@ import { Calendar, Building2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { sr } from 'date-fns/locale';
+import { trackAppointmentCompleted } from '@/config/analytics';
 
 interface GuestVisitService {
   id: number;
@@ -187,6 +188,17 @@ export function GuestVisitBookingDialog({
           napomene: guestData.napomena
         });
       }
+
+      const selectedService = services.find((service) => service.id === selectedServiceId);
+      trackAppointmentCompleted({
+        doctor_id: doctorId,
+        doctor_name: doctorName,
+        city: guestVisit.klinika.grad,
+        appointment_type: 'guest_visit',
+        booking_type: user ? 'patient' : 'guest',
+        service_id: selectedServiceId,
+        service_name: selectedService?.naziv,
+      });
 
       setBookingSuccess(true);
       setBookingDetails({

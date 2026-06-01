@@ -23,7 +23,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { LocationMapCard } from '@/components/LocationMapCard';
 import { toast } from 'sonner';
-import { trackClarityProfileView } from '@/config/clarity';
+import { trackContactClick, trackContactSubmit, trackProfileView } from '@/config/analytics';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -86,8 +86,14 @@ export default function SpaProfile() {
       // API returns { success: true, data: {...} }
       const payload = response.data.data || response.data;
       setBanja(payload);
-      trackClarityProfileView('spa', {
+      trackProfileView({
+        entity_type: 'spa',
+        entity_id: payload?.id,
+        entity_name: payload?.naziv,
+        spa_id: payload?.id,
+        spa_name: payload?.naziv,
         city: payload?.grad,
+        profile_slug: payload?.slug || slug,
       });
     } catch (error) {
       console.error('Error loading banja:', error);
@@ -104,6 +110,15 @@ export default function SpaProfile() {
     setSubmitting(true);
     try {
       await spasAPI.posaljiUpit(banja.id, upitForm);
+      trackContactSubmit({
+        entity_type: 'spa',
+        entity_id: banja.id,
+        entity_name: banja.naziv,
+        spa_id: banja.id,
+        spa_name: banja.naziv,
+        city: banja.grad,
+        profile_slug: banja.slug,
+      }, 'spa_inquiry');
       toast.success('Upit je uspješno poslat!');
       setShowUpitForm(false);
       setUpitForm({
@@ -182,6 +197,15 @@ export default function SpaProfile() {
   }
 
   const canonicalUrl = `${SITE_URL}/banja/${banja.slug}`;
+  const spaAnalyticsEntity = {
+    entity_type: 'spa' as const,
+    entity_id: banja.id,
+    entity_name: banja.naziv,
+    spa_id: banja.id,
+    spa_name: banja.naziv,
+    city: banja.grad,
+    profile_slug: banja.slug,
+  };
   const seoTitle = banja.meta_title || `${banja.naziv} - Banja i rehabilitacija | WizMedik`;
   const seoDescription = `${banja.meta_description || banja.opis || `${banja.naziv} u ${banja.grad}u`}`.slice(0, 160);
   const normalizedOgImage = normalizeImageUrl(banja.featured_slika || '');
@@ -548,7 +572,12 @@ export default function SpaProfile() {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-600">Telefon</p>
-                        <a href={`tel:${banja.telefon}`} className="font-medium hover:underline" style={{ color: '#0891b2' }}>
+                        <a
+                          href={`tel:${banja.telefon}`}
+                          className="font-medium hover:underline"
+                          style={{ color: '#0891b2' }}
+                          onClick={() => trackContactClick('phone', spaAnalyticsEntity, 'profile_contact_info')}
+                        >
                           {banja.telefon}
                         </a>
                       </div>
@@ -560,7 +589,12 @@ export default function SpaProfile() {
                       <Mail className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-600">Email</p>
-                        <a href={`mailto:${banja.email}`} className="font-medium hover:underline" style={{ color: '#0891b2' }}>
+                        <a
+                          href={`mailto:${banja.email}`}
+                          className="font-medium hover:underline"
+                          style={{ color: '#0891b2' }}
+                          onClick={() => trackContactClick('email', spaAnalyticsEntity, 'profile_contact_info')}
+                        >
                           {banja.email}
                         </a>
                       </div>
@@ -577,6 +611,7 @@ export default function SpaProfile() {
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="font-medium hover:underline" style={{ color: '#0891b2' }}
+                          onClick={() => trackContactClick('website', spaAnalyticsEntity, 'profile_contact_info')}
                         >
                           Posjeti website
                         </a>
@@ -672,6 +707,7 @@ export default function SpaProfile() {
                 longitude={banja.longitude}
                 googleMapsLink={banja.google_maps_link}
                 markerColor="blue"
+                onDirectionsClick={() => trackContactClick('map', spaAnalyticsEntity, 'map_card')}
               />
 
               {/* Action Buttons */}

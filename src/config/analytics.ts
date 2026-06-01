@@ -13,6 +13,67 @@ import { setClarityTag, setClarityTags, trackClarityEvent } from '@/config/clari
 
 let isInitialized = false;
 let activeMeasurementId: string | null = null;
+const trackedOnceEvents = new Set<string>();
+
+type AnalyticsValue = string | number | boolean | null | undefined;
+type AnalyticsParams = Record<string, AnalyticsValue>;
+
+export type ProfileEntityType =
+  | 'doctor'
+  | 'clinic'
+  | 'laboratory'
+  | 'pharmacy'
+  | 'spa'
+  | 'care_home'
+  | 'medicine';
+
+export type ContactClickType = 'phone' | 'email' | 'website' | 'map' | 'whatsapp';
+export type RegistrationUserType =
+  | 'patient'
+  | 'doctor'
+  | 'clinic'
+  | 'laboratory'
+  | 'pharmacy'
+  | 'spa'
+  | 'care_home';
+
+export interface AnalyticsEntity {
+  entity_type: ProfileEntityType;
+  entity_id?: string | number | null;
+  entity_name?: string | null;
+  city?: string | null;
+  profile_slug?: string | null;
+  specialization?: string | null;
+  doctor_id?: string | number | null;
+  doctor_name?: string | null;
+  clinic_id?: string | number | null;
+  clinic_name?: string | null;
+  laboratory_id?: string | number | null;
+  laboratory_name?: string | null;
+  pharmacy_id?: string | number | null;
+  pharmacy_name?: string | null;
+  spa_id?: string | number | null;
+  spa_name?: string | null;
+  care_home_id?: string | number | null;
+  care_home_name?: string | null;
+  medicine_id?: string | number | null;
+  medicine_name?: string | null;
+  atc_code?: string | null;
+  fund_status?: string | null;
+  is_24h?: boolean | null;
+  is_on_duty?: boolean | null;
+}
+
+export interface AppointmentCompletedPayload {
+  doctor_id: string | number;
+  doctor_name: string;
+  specialization?: string | null;
+  city?: string | null;
+  appointment_type?: string | null;
+  booking_type?: 'patient' | 'guest' | 'guest_visit' | string;
+  service_id?: string | number | null;
+  service_name?: string | null;
+}
 
 function getMeasurementId(): string {
   return import.meta.env.VITE_GA_MEASUREMENT_ID;
@@ -44,6 +105,204 @@ function deleteCookie(name: string): void {
   domains.forEach((domain) => {
     document.cookie = `${base}; domain=${domain}`;
   });
+}
+
+function getCurrentPath(): string {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return `${window.location.pathname}${window.location.search}`;
+}
+
+function normalizeEventName(eventName: string): string {
+  return eventName
+    .trim()
+    .replace(/[^a-zA-Z0-9_]/g, '_')
+    .slice(0, 40);
+}
+
+function normalizeAnalyticsValue(value: AnalyticsValue): string | number | boolean | undefined {
+  if (value === null || value === undefined || value === '') {
+    return undefined;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed ? trimmed.slice(0, 100) : undefined;
+  }
+
+  return value;
+}
+
+function sanitizeParams(params: AnalyticsParams = {}): Record<string, string | number | boolean> {
+  const sanitized: Record<string, string | number | boolean> = {};
+
+  Object.entries(params).forEach(([rawKey, rawValue]) => {
+    if (Object.keys(sanitized).length >= 25) {
+      return;
+    }
+
+    const key = rawKey.trim().replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 40);
+    const value = normalizeAnalyticsValue(rawValue);
+
+    if (!key || value === undefined) {
+      return;
+    }
+
+    sanitized[key] = value;
+  });
+
+  return sanitized;
+}
+
+function getEntityId(entity: AnalyticsEntity): string | number | null | undefined {
+  return (
+    entity.entity_id ??
+    entity.doctor_id ??
+    entity.clinic_id ??
+    entity.laboratory_id ??
+    entity.pharmacy_id ??
+    entity.spa_id ??
+    entity.care_home_id ??
+    entity.medicine_id
+  );
+}
+
+function getEntityName(entity: AnalyticsEntity): string | null | undefined {
+  return (
+    entity.entity_name ??
+    entity.doctor_name ??
+    entity.clinic_name ??
+    entity.laboratory_name ??
+    entity.pharmacy_name ??
+    entity.spa_name ??
+    entity.care_home_name ??
+    entity.medicine_name
+  );
+}
+
+function buildEntityParams(entity: AnalyticsEntity): AnalyticsParams {
+  const entityId = getEntityId(entity);
+  const entityName = getEntityName(entity);
+
+  return {
+    entity_type: entity.entity_type,
+    entity_id: entityId,
+    entity_name: entityName,
+    city: entity.city,
+    profile_slug: entity.profile_slug,
+    specialization: entity.specialization,
+    doctor_id: entity.doctor_id,
+    doctor_name: entity.doctor_name,
+    clinic_id: entity.clinic_id,
+    clinic_name: entity.clinic_name,
+    laboratory_id: entity.laboratory_id,
+    laboratory_name: entity.laboratory_name,
+    pharmacy_id: entity.pharmacy_id,
+    pharmacy_name: entity.pharmacy_name,
+    spa_id: entity.spa_id,
+    spa_name: entity.spa_name,
+    care_home_id: entity.care_home_id,
+    care_home_name: entity.care_home_name,
+    medicine_id: entity.medicine_id,
+    medicine_name: entity.medicine_name,
+    atc_code: entity.atc_code,
+    fund_status: entity.fund_status,
+    is_24h: entity.is_24h,
+    is_on_duty: entity.is_on_duty,
+  };
+}
+
+function canTrackGA(): boolean {
+  return isInitialized && hasConsentFor('analytics');
+}
+
+export function trackGaEvent(eventName: string, params: AnalyticsParams = {}, options: { onceKey?: string } = {}) {
+  if (!canTrackGA()) {
+    return;
+  }
+
+  const normalizedEventName = normalizeEventName(eventName);
+  if (!normalizedEventName) {
+    return;
+  }
+
+  if (options.onceKey) {
+    const dedupeKey = `${normalizedEventName}:${options.onceKey}`;
+    if (trackedOnceEvents.has(dedupeKey)) {
+      return;
+    }
+    trackedOnceEvents.add(dedupeKey);
+  }
+
+  ReactGA.event(normalizedEventName, sanitizeParams(params));
+}
+
+export function trackProfileView(entity: AnalyticsEntity) {
+  const entityId = getEntityId(entity);
+  const eventName = `${entity.entity_type}_profile_view`;
+  const onceKey = entityId ? String(entityId) : entity.profile_slug || getEntityName(entity) || undefined;
+
+  trackGaEvent(eventName, buildEntityParams(entity), { onceKey });
+  setClarityTags({
+    page_type: 'profile',
+    entity_type: entity.entity_type,
+    city: entity.city || 'none',
+    specialty: entity.specialization || 'none',
+  });
+  trackClarityEvent('profile_viewed');
+}
+
+export function trackContactClick(type: ContactClickType, entity: AnalyticsEntity, placement = 'profile') {
+  const eventName = `${type}_click`;
+
+  trackGaEvent(eventName, {
+    entity_type: entity.entity_type,
+    entity_id: getEntityId(entity),
+    entity_name: getEntityName(entity),
+    city: entity.city,
+    placement,
+    page_path: getCurrentPath(),
+  });
+  setClarityTag('entity_type', entity.entity_type);
+  trackClarityEvent(eventName);
+}
+
+export function trackContactSubmit(entity: AnalyticsEntity, formType: string) {
+  trackGaEvent('contact_submit', {
+    entity_type: entity.entity_type,
+    entity_id: getEntityId(entity),
+    entity_name: getEntityName(entity),
+    city: entity.city,
+    form_type: formType,
+  });
+  setClarityTags({ entity_type: entity.entity_type, form_type: formType });
+  trackClarityEvent('contact_submit');
+}
+
+export function trackAppointmentCompleted(payload: AppointmentCompletedPayload) {
+  trackGaEvent('appointment_completed', {
+    doctor_id: payload.doctor_id,
+    doctor_name: payload.doctor_name,
+    specialization: payload.specialization,
+    city: payload.city,
+    appointment_type: payload.appointment_type,
+    booking_type: payload.booking_type,
+    service_id: payload.service_id,
+    service_name: payload.service_name,
+  });
+  setClarityTag('entity_type', 'doctor');
+  trackClarityEvent('booking_submitted');
+}
+
+export function trackSignUp(userType: RegistrationUserType | string, method = 'email') {
+  trackGaEvent('sign_up', {
+    registration_type: userType,
+    method,
+  });
+  setClarityTag('registration_type', userType);
+  trackClarityEvent('registration_submitted');
 }
 
 export const initGA = () => {
@@ -94,6 +353,7 @@ export const initGA = () => {
 
 export const disableGA = () => {
   setAnalyticsDisabled(true);
+  trackedOnceEvents.clear();
 
   if (typeof document !== 'undefined') {
     document.cookie
@@ -151,8 +411,8 @@ export const trackSearch = (searchTerm: string, category?: string) => {
   trackClarityEvent('search_performed');
   
   // Also send as GA4 search event
-  if (isInitialized) {
-    ReactGA.event('search', {
+  if (canTrackGA()) {
+    trackGaEvent('search', {
       search_term: searchTerm,
       search_category: category,
     });
@@ -164,16 +424,13 @@ export const trackSearch = (searchTerm: string, category?: string) => {
  */
 export const trackDoctorView = (doctorId: number, doctorName: string) => {
   trackEvent('Doctor', 'view_profile', doctorName, doctorId);
-  setClarityTags({ page_type: 'profile', entity_type: 'doctor' });
-  trackClarityEvent('profile_viewed');
-  
-  if (isInitialized) {
-    ReactGA.event('view_item', {
-      item_id: String(doctorId),
-      item_name: doctorName,
-      item_category: 'Doctor',
-    });
-  }
+  trackProfileView({
+    entity_type: 'doctor',
+    entity_id: doctorId,
+    entity_name: doctorName,
+    doctor_id: doctorId,
+    doctor_name: doctorName,
+  });
 };
 
 /**
@@ -181,16 +438,13 @@ export const trackDoctorView = (doctorId: number, doctorName: string) => {
  */
 export const trackClinicView = (clinicId: number, clinicName: string) => {
   trackEvent('Clinic', 'view_profile', clinicName, clinicId);
-  setClarityTags({ page_type: 'profile', entity_type: 'clinic' });
-  trackClarityEvent('profile_viewed');
-  
-  if (isInitialized) {
-    ReactGA.event('view_item', {
-      item_id: String(clinicId),
-      item_name: clinicName,
-      item_category: 'Clinic',
-    });
-  }
+  trackProfileView({
+    entity_type: 'clinic',
+    entity_id: clinicId,
+    entity_name: clinicName,
+    clinic_id: clinicId,
+    clinic_name: clinicName,
+  });
 };
 
 /**
@@ -205,8 +459,8 @@ export const trackAppointmentBooking = (
   setClarityTag('entity_type', 'doctor');
   trackClarityEvent('booking_started');
   
-  if (isInitialized) {
-    ReactGA.event('begin_checkout', {
+  if (canTrackGA()) {
+    trackGaEvent('begin_checkout', {
       item_id: String(doctorId),
       item_name: doctorName,
       item_category: 'Appointment',
@@ -227,17 +481,11 @@ export const trackAppointmentComplete = (
   setClarityTag('entity_type', 'doctor');
   trackClarityEvent('booking_submitted');
   
-  if (isInitialized) {
-    ReactGA.event('purchase', {
-      transaction_id: `apt_${Date.now()}`,
-      value: 0, // Set actual value if applicable
-      currency: 'BAM',
-      items: [{
-        item_id: String(doctorId),
-        item_name: doctorName,
-        item_category: 'Appointment',
-        appointment_type: appointmentType,
-      }],
+  if (canTrackGA()) {
+    trackAppointmentCompleted({
+      doctor_id: doctorId,
+      doctor_name: doctorName,
+      appointment_type: appointmentType,
     });
   }
 };
@@ -247,15 +495,7 @@ export const trackAppointmentComplete = (
  */
 export const trackRegistration = (userType: string) => {
   trackEvent('User', 'register', userType);
-  setClarityTag('registration_type', userType);
-  trackClarityEvent('registration_submitted');
-  
-  if (isInitialized) {
-    ReactGA.event('sign_up', {
-      method: 'email',
-      user_type: userType,
-    });
-  }
+  trackSignUp(userType);
 };
 
 /**
@@ -264,8 +504,8 @@ export const trackRegistration = (userType: string) => {
 export const trackLogin = (userType: string) => {
   trackEvent('User', 'login', userType);
   
-  if (isInitialized) {
-    ReactGA.event('login', {
+  if (canTrackGA()) {
+    trackGaEvent('login', {
       method: 'email',
       user_type: userType,
     });
@@ -291,8 +531,8 @@ export const trackFilter = (
 export const trackSpecialtyClick = (specialtyName: string, specialtyId: number) => {
   trackEvent('Specialty', 'click', specialtyName, specialtyId);
   
-  if (isInitialized) {
-    ReactGA.event('select_content', {
+  if (canTrackGA()) {
+    trackGaEvent('select_content', {
       content_type: 'specialty',
       content_id: String(specialtyId),
       content_name: specialtyName,
@@ -306,8 +546,8 @@ export const trackSpecialtyClick = (specialtyName: string, specialtyId: number) 
 export const trackCityClick = (cityName: string) => {
   trackEvent('City', 'click', cityName);
   
-  if (isInitialized) {
-    ReactGA.event('select_content', {
+  if (canTrackGA()) {
+    trackGaEvent('select_content', {
       content_type: 'city',
       content_name: cityName,
     });
@@ -320,8 +560,8 @@ export const trackCityClick = (cityName: string) => {
 export const trackQuestionPost = (questionTitle: string) => {
   trackEvent('Question', 'post', questionTitle);
   
-  if (isInitialized) {
-    ReactGA.event('generate_lead', {
+  if (canTrackGA()) {
+    trackGaEvent('generate_lead', {
       content_type: 'question',
       content_name: questionTitle,
     });
@@ -334,8 +574,8 @@ export const trackQuestionPost = (questionTitle: string) => {
 export const trackBlogView = (postId: number, postTitle: string) => {
   trackEvent('Blog', 'view', postTitle, postId);
   
-  if (isInitialized) {
-    ReactGA.event('view_item', {
+  if (canTrackGA()) {
+    trackGaEvent('view_item', {
       item_id: String(postId),
       item_name: postTitle,
       item_category: 'Blog',
@@ -349,8 +589,8 @@ export const trackBlogView = (postId: number, postTitle: string) => {
 export const trackOutboundLink = (url: string, label?: string) => {
   trackEvent('Outbound', 'click', label || url);
   
-  if (isInitialized) {
-    ReactGA.event('click', {
+  if (canTrackGA()) {
+    trackGaEvent('click', {
       link_url: url,
       link_text: label,
       outbound: true,
@@ -363,17 +603,11 @@ export const trackOutboundLink = (url: string, label?: string) => {
  */
 export const trackPhoneCall = (phoneNumber: string, entityType: string, entityName: string) => {
   trackEvent('Contact', 'phone_call', `${entityType}: ${entityName}`, 0);
-  setClarityTag('entity_type', entityType);
-  trackClarityEvent('phone_click');
-  
-  if (isInitialized) {
-    ReactGA.event('generate_lead', {
-      contact_method: 'phone',
-      entity_type: entityType,
-      entity_name: entityName,
-      phone_number: phoneNumber,
-    });
-  }
+  void phoneNumber;
+  trackContactClick('phone', {
+    entity_type: entityType as ProfileEntityType,
+    entity_name: entityName,
+  });
 };
 
 /**
@@ -381,17 +615,11 @@ export const trackPhoneCall = (phoneNumber: string, entityType: string, entityNa
  */
 export const trackEmailClick = (email: string, entityType: string, entityName: string) => {
   trackEvent('Contact', 'email', `${entityType}: ${entityName}`, 0);
-  setClarityTag('entity_type', entityType);
-  trackClarityEvent('email_click');
-  
-  if (isInitialized) {
-    ReactGA.event('generate_lead', {
-      contact_method: 'email',
-      entity_type: entityType,
-      entity_name: entityName,
-      email,
-    });
-  }
+  void email;
+  trackContactClick('email', {
+    entity_type: entityType as ProfileEntityType,
+    entity_name: entityName,
+  });
 };
 
 /**
@@ -400,8 +628,8 @@ export const trackEmailClick = (email: string, entityType: string, entityName: s
 export const trackError = (errorMessage: string, errorPage: string) => {
   trackEvent('Error', errorPage, errorMessage);
   
-  if (isInitialized) {
-    ReactGA.event('exception', {
+  if (canTrackGA()) {
+    trackGaEvent('exception', {
       description: errorMessage,
       fatal: false,
     });
@@ -416,6 +644,10 @@ export const trackRegistrationStarted = (userType: string) => {
 export const trackMapClick = (entityType: string) => {
   setClarityTag('entity_type', entityType);
   trackClarityEvent('map_click');
+  trackGaEvent('map_click', {
+    entity_type: entityType,
+    page_path: getCurrentPath(),
+  });
 };
 
 export const trackAdminEntitySaved = (entityType: string) => {
@@ -423,11 +655,22 @@ export const trackAdminEntitySaved = (entityType: string) => {
   trackClarityEvent('admin_entity_saved');
 };
 
+export const __analyticsTest = {
+  reset: () => {
+    isInitialized = false;
+    activeMeasurementId = null;
+    trackedOnceEvents.clear();
+  },
+  setInitialized: (value: boolean) => {
+    isInitialized = value;
+  },
+};
+
 /**
  * Set user properties
  */
 export const setUserProperties = (properties: Record<string, any>) => {
-  if (!isInitialized || !hasConsentFor('analytics')) return;
+  if (!canTrackGA()) return;
   
   ReactGA.set(properties);
 };
@@ -441,9 +684,9 @@ export const trackTiming = (
   value: number,
   label?: string
 ) => {
-  if (!isInitialized || !hasConsentFor('analytics')) return;
+  if (!canTrackGA()) return;
   
-  ReactGA.event('timing_complete', {
+  trackGaEvent('timing_complete', {
     name: variable,
     value,
     event_category: category,

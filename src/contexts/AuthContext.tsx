@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { authAPI } from '@/services/api';
 import { useToast } from '@/components/ui/use-toast';
 import { identifyClarityUser, setClarityTag } from '@/config/clarity';
+import { trackSignUp } from '@/config/analytics';
 
 interface User {
   id: number;
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: 'Registracija uspješna',
         description: 'Dobrodošli!',
       });
+      trackSignUp(type, 'email');
 
       return { error: null };
     } catch (error: any) {

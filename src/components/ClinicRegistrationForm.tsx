@@ -25,7 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CitySelect } from '@/components/CitySelect';
 import { specialtiesAPI } from '@/services/api';
 import { SpecialtyMultiSelect } from '@/components/SpecialtyMultiSelect';
-import { setClarityTag, trackClarityEvent } from '@/config/clarity';
+import { trackSignUp } from '@/config/analytics';
 
 interface Specialty {
   id: number;
@@ -195,8 +195,7 @@ export function ClinicRegistrationForm() {
       }
 
       setSuccess(true);
-      setClarityTag('registration_type', 'clinic');
-      trackClarityEvent('registration_submitted');
+      trackSignUp('clinic', 'email');
     } catch (submitError: any) {
       setError(submitError.message || 'Doslo je do greske. Pokusajte ponovo.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
