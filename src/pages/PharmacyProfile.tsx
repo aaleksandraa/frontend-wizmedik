@@ -12,10 +12,20 @@ import { fixImageUrl } from '@/utils/imageUrl';
 import { pharmaciesAPI } from '@/services/api';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
 import {
+  Accessibility,
+  BadgePercent,
+  Building2,
+  Camera,
+  ChevronRight,
+  CircleParking,
   Clock3,
   ExternalLink,
+  Gift,
+  ImageIcon,
+  Info,
   Mail,
   MapPin,
+  Megaphone,
   Navigation,
   Phone,
   Pill,
@@ -23,7 +33,6 @@ import {
   ShieldCheck,
   Star,
   Truck,
-  Accessibility,
   X,
 } from 'lucide-react';
 
@@ -125,10 +134,35 @@ const dayLabels: Record<number, string> = {
   1: 'Ponedjeljak',
   2: 'Utorak',
   3: 'Srijeda',
-  4: 'Cetvrtak',
+  4: 'Četvrtak',
   5: 'Petak',
   6: 'Subota',
   7: 'Nedjelja',
+};
+
+const shortDayLabels: Record<number, string> = {
+  1: 'Pon',
+  2: 'Uto',
+  3: 'Sri',
+  4: 'Čet',
+  5: 'Pet',
+  6: 'Sub',
+  7: 'Ned',
+};
+
+const discountTypeLabels: Record<PharmacyDiscount['tip'], string> = {
+  penzioneri: 'Penzioneri',
+  studenti: 'Studenti',
+  porodicni: 'Porodični',
+  svi: 'Svi kupci',
+};
+
+const targetGroupLabels: Record<string, string> = {
+  svi: 'Svi kupci',
+  penzioneri: 'Penzioneri',
+  studenti: 'Studenti',
+  djeca: 'Djeca',
+  hronicni_bolesnici: 'Hronični bolesnici',
 };
 
 const toAbsoluteUrl = (value?: string | null): string | null => {
@@ -136,6 +170,13 @@ const toAbsoluteUrl = (value?: string | null): string | null => {
   const fixed = fixImageUrl(value) || value;
   if (fixed.startsWith('http://') || fixed.startsWith('https://')) return fixed;
   return `${SITE_URL}${fixed.startsWith('/') ? '' : '/'}${fixed}`;
+};
+
+const normalizeExternalUrl = (value?: string | null): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 };
 
 const formatDateOnly = (value?: string | null): string => {
@@ -152,6 +193,17 @@ const formatTimeOnly = (value?: string | null): string => {
   const timeMatch = normalized.match(/^(\d{2}:\d{2})(?::\d{2})?$/);
 
   return timeMatch ? timeMatch[1] : normalized;
+};
+
+const getTodayDayNumber = (): number => {
+  const jsDay = new Date().getDay();
+  return jsDay === 0 ? 7 : jsDay;
+};
+
+const formatDiscountValue = (item: PharmacyDiscount | PharmacyOffer): string | null => {
+  if (item.discount_percent) return `-${item.discount_percent}%`;
+  if (item.discount_amount) return `-${item.discount_amount} KM`;
+  return null;
 };
 
 export default function PharmacyProfile() {
@@ -215,7 +267,8 @@ export default function PharmacyProfile() {
     if (!pharmacy) return [] as string[];
     const all = [pharmacy.profilna_slika_url, ...(pharmacy.galerija_slike || [])]
       .filter(Boolean)
-      .map((item) => toAbsoluteUrl(item));
+      .map((item) => toAbsoluteUrl(item))
+      .filter((item): item is string => Boolean(item));
     return Array.from(new Set(all));
   }, [pharmacy]);
 
@@ -225,6 +278,7 @@ export default function PharmacyProfile() {
     return [1, 2, 3, 4, 5, 6, 7].map((day) => ({
       day,
       label: dayLabels[day],
+      shortLabel: shortDayLabels[day],
       item: map.get(day),
     }));
   }, [pharmacy]);
@@ -252,22 +306,19 @@ export default function PharmacyProfile() {
     return pensionerDiscount || pensionerOffer;
   }, [pharmacy]);
 
-  const hasActiveOffers = (pharmacy?.active_offers || []).length > 0;
-  const hasActiveDiscounts = (pharmacy?.active_discounts || []).length > 0;
-  const hasActiveActions = (pharmacy?.active_actions || []).length > 0;
-  const hasAnyBenefits = hasActiveOffers || hasActiveDiscounts || hasActiveActions;
-  const benefitsCount = Number(hasActiveOffers) + Number(hasActiveDiscounts) + Number(hasActiveActions);
-  const benefitsGridClass =
-    benefitsCount <= 1 ? 'lg:grid-cols-1' : benefitsCount === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3';
-
   if (loading) {
     return (
       <>
         <Navbar />
-        <div className="container mx-auto px-4 py-8 space-y-4">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-12 w-2/3" />
-          <Skeleton className="h-72 w-full" />
+        <div className="container mx-auto px-4 py-8 space-y-5">
+          <Skeleton className="h-[420px] w-full rounded-lg" />
+          <div className="grid md:grid-cols-4 gap-3">
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
+          </div>
+          <Skeleton className="h-72 w-full rounded-lg" />
         </div>
         <Footer />
       </>
@@ -280,7 +331,7 @@ export default function PharmacyProfile() {
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
           <Pill className="w-14 h-14 mx-auto text-gray-300 mb-3" />
-          <h1 className="text-2xl font-bold mb-2">Apoteka nije pronadjena</h1>
+          <h1 className="text-2xl font-bold mb-2">Apoteka nije pronađena</h1>
           <p className="text-gray-600 mb-6">Profil ne postoji ili nije javno dostupan.</p>
           <Link to="/apoteke">
             <Button>Nazad na listu apoteka</Button>
@@ -303,6 +354,117 @@ export default function PharmacyProfile() {
     is_on_duty: pharmacy.status.is_dezurna,
   };
 
+  const websiteUrl = normalizeExternalUrl(pharmacy.website || pharmacy.firma?.website);
+  const mapsLink =
+    pharmacy.google_maps_link ||
+    (pharmacy.latitude && pharmacy.longitude
+      ? `https://www.google.com/maps/dir/?api=1&destination=${pharmacy.latitude},${pharmacy.longitude}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pharmacy.naziv}, ${pharmacy.adresa}, ${city}`)}`);
+  const displayAddress = `${pharmacy.adresa}, ${city}${pharmacy.postanski_broj ? `, ${pharmacy.postanski_broj}` : ''}`;
+  const today = hoursByDay.find((entry) => entry.day === getTodayDayNumber());
+  const todayHours =
+    pharmacy.is_24h
+      ? 'Otvoreno 0-24'
+      : today?.item && !today.item.closed
+        ? `${formatTimeOnly(today.item.open_time)} - ${formatTimeOnly(today.item.close_time)}`
+        : 'Zatvoreno';
+  const statusClass = pharmacy.status.open_now
+    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    : 'bg-rose-50 text-rose-700 border-rose-200';
+  const statusBadgeClass = pharmacy.status.open_now
+    ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50'
+    : 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-50';
+  const statusDotClass = pharmacy.status.open_now ? 'bg-emerald-500' : 'bg-rose-500';
+  const hasActiveOffers = (pharmacy.active_offers || []).length > 0;
+  const hasActiveDiscounts = (pharmacy.active_discounts || []).length > 0;
+  const hasActiveActions = (pharmacy.active_actions || []).length > 0;
+  const hasAnyBenefits = hasActiveOffers || hasActiveDiscounts || hasActiveActions;
+  const ratingValue = Number(pharmacy.ocjena || 0);
+
+  const featureCards = [
+    {
+      show: true,
+      icon: Clock3,
+      title: pharmacy.status.open_now ? 'Trenutno otvoreno' : 'Status rada',
+      description: pharmacy.is_24h ? 'Non-stop apoteka dostupna 0-24.' : `Danas: ${todayHours}`,
+      className: pharmacy.status.open_now ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50',
+    },
+    {
+      show: pharmacy.ima_dostavu,
+      icon: Truck,
+      title: 'Dostava lijekova',
+      description: 'Označeno u profilu apoteke.',
+      className: 'text-cyan-700 bg-cyan-50',
+    },
+    {
+      show: pharmacy.ima_parking,
+      icon: CircleParking,
+      title: 'Parking',
+      description: 'Dostupan parking za posjetioce.',
+      className: 'text-blue-700 bg-blue-50',
+    },
+    {
+      show: pharmacy.pristup_invalidima,
+      icon: Accessibility,
+      title: 'Pristup invalidima',
+      description: 'Objekat ima označen pristupačan ulaz.',
+      className: 'text-violet-700 bg-violet-50',
+    },
+    {
+      show: pharmacy.status.is_dezurna,
+      icon: ShieldAlert,
+      title: 'Dežurna apoteka',
+      description: 'Apoteka je trenutno u režimu dežurstva.',
+      className: 'text-amber-700 bg-amber-50',
+    },
+    {
+      show: hasPensionerDiscount,
+      icon: BadgePercent,
+      title: 'Popust za penzionere',
+      description: 'Aktivna pogodnost za penzionere.',
+      className: 'text-emerald-700 bg-emerald-50',
+    },
+  ].filter((item) => item.show).slice(0, 4);
+
+  const serviceTiles = [
+    {
+      show: true,
+      icon: Pill,
+      title: 'Apotekarski profil',
+      description: 'Kontakt, lokacija i osnovne informacije.',
+    },
+    {
+      show: pharmacy.ima_dostavu,
+      icon: Truck,
+      title: 'Dostava',
+      description: 'Dostava je označena kao dostupna.',
+    },
+    {
+      show: pharmacy.is_24h || pharmacy.status.is_dezurna,
+      icon: ShieldCheck,
+      title: pharmacy.is_24h ? 'Non-stop rad' : 'Dežurstvo',
+      description: pharmacy.is_24h ? 'Rad 24 sata dnevno.' : 'Trenutno aktivno dežurstvo.',
+    },
+    {
+      show: hasActiveDiscounts,
+      icon: BadgePercent,
+      title: 'Popusti',
+      description: `${pharmacy.active_discounts?.length || 0} aktivnih popusta.`,
+    },
+    {
+      show: hasActiveActions,
+      icon: Megaphone,
+      title: 'Akcije',
+      description: `${pharmacy.active_actions?.length || 0} aktivnih akcija.`,
+    },
+    {
+      show: hasActiveOffers,
+      icon: Gift,
+      title: 'Posebne ponude',
+      description: `${pharmacy.active_offers?.length || 0} aktivnih ponuda.`,
+    },
+  ].filter((item) => item.show);
+
   return (
     <>
       <Helmet>
@@ -322,244 +484,432 @@ export default function PharmacyProfile() {
         {schemaData ? <script type="application/ld+json">{JSON.stringify(schemaData)}</script> : null}
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#f6f8fb]">
         <Navbar />
 
-        <section className="pt-5">
-          <div className="container mx-auto px-4">
-            <Card className="border shadow-sm">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex flex-col md:flex-row gap-5">
-                  {primaryImage ? (
-                    <div className="shrink-0">
-                      <img
-                        src={primaryImage}
-                        alt={pharmacy.naziv}
-                        className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl border"
-                      />
-                    </div>
-                  ) : null}
-
-                  <div className="flex-1 space-y-3">
-                    <div className="space-y-2">
-                      <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{pharmacy.naziv}</h1>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant={pharmacy.status.open_now ? 'default' : 'secondary'}>
-                          {pharmacy.status.status_label}
-                        </Badge>
-                        {pharmacy.status.is_dezurna ? (
-                          <Badge className="bg-orange-500 hover:bg-orange-600">
-                            <ShieldAlert className="w-3.5 h-3.5 mr-1" />
-                            Dezurna
-                          </Badge>
-                        ) : null}
-                        {pharmacy.is_24h ? (
-                          <Badge className="bg-blue-600 hover:bg-blue-700">24/7</Badge>
-                        ) : null}
-                      {hasPensionerDiscount ? (
-                          <Badge className="bg-emerald-600 hover:bg-emerald-700">
-                            <Pill className="w-3.5 h-3.5 mr-1" />
-                            Popust za penzionere
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {(pharmacy.ocjena || 0) > 0 ? (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <span className="font-semibold">{Number(pharmacy.ocjena).toFixed(1)}</span>
-                        <span className="text-gray-600">({pharmacy.broj_ocjena || 0} ocjena)</span>
-                      </div>
-                    ) : null}
-
-                    <div className="space-y-1.5 text-sm text-gray-700">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="w-4 h-4 mt-0.5 text-red-600" />
-                        <span>
-                          {pharmacy.adresa}, {city}
-                          {pharmacy.postanski_broj ? `, ${pharmacy.postanski_broj}` : ''}
-                        </span>
-                      </div>
-                      {pharmacy.telefon || pharmacy.email ? (
-                        <div className="space-y-0 sm:space-y-1.5">
-                          {pharmacy.telefon ? (
-                            <div className="flex items-start gap-2">
-                              <Phone className="w-4 h-4 mt-0.5 text-red-600" />
-                              <a
-                                href={`tel:${pharmacy.telefon}`}
-                                className="hover:underline"
-                                onClick={() => trackContactClick('phone', pharmacyAnalyticsEntity, 'profile_contact_info')}
-                              >
-                                {pharmacy.telefon}
-                              </a>
-                            </div>
-                          ) : null}
-                          {pharmacy.email ? (
-                            <div className="flex items-start gap-2">
-                              <Mail className="w-4 h-4 mt-0.5 text-red-600" />
-                              <a
-                                href={`mailto:${pharmacy.email}`}
-                                className="hover:underline"
-                                onClick={() => trackContactClick('email', pharmacyAnalyticsEntity, 'profile_contact_info')}
-                              >
-                                {pharmacy.email}
-                              </a>
-                            </div>
-                          ) : null}
+        <main className="pb-12">
+          <section className="pt-4 md:pt-6">
+            <div className="container mx-auto px-4">
+              <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div className="grid lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)]">
+                  <div className="relative min-h-[300px] md:min-h-[440px] bg-slate-100">
+                    {primaryImage ? (
+                      <button
+                        type="button"
+                        className="block h-full w-full"
+                        onClick={() => setSelectedImage(primaryImage)}
+                      >
+                        <img
+                          src={primaryImage}
+                          alt={pharmacy.naziv}
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
+                    ) : (
+                      <div className="flex h-full min-h-[320px] items-center justify-center bg-gradient-to-br from-slate-100 via-white to-cyan-50">
+                        <div className="text-center text-slate-500">
+                          <Building2 className="mx-auto mb-3 h-14 w-14 text-slate-300" />
+                          <p className="font-medium">{pharmacy.naziv}</p>
                         </div>
+                      </div>
+                    )}
+
+                    {images.length > 1 ? (
+                      <button
+                        type="button"
+                        className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-md bg-slate-950/80 px-3 py-2 text-sm font-medium text-white backdrop-blur transition hover:bg-slate-950"
+                        onClick={() => setSelectedImage(images[0])}
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                        {images.length} slika
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <div className="flex flex-col justify-center p-5 md:p-8">
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                      <Badge className={statusBadgeClass}>
+                        <span className={`mr-2 h-2 w-2 rounded-full ${statusDotClass}`} />
+                        {pharmacy.status.status_label}
+                      </Badge>
+                      {pharmacy.status.is_dezurna ? (
+                        <Badge className="border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-50">
+                          <ShieldAlert className="mr-1 h-3.5 w-3.5" />
+                          Dežurna
+                        </Badge>
                       ) : null}
-                      {pharmacy.firma?.website ? (
-                        <div className="flex items-start gap-2">
-                          <ExternalLink className="w-4 h-4 mt-0.5 text-red-600" />
+                      {pharmacy.is_24h ? (
+                        <Badge className="border border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-50">24/7</Badge>
+                      ) : null}
+                    </div>
+
+                    <h1 className="text-3xl font-bold leading-tight text-slate-950 md:text-4xl">
+                      {pharmacy.naziv}
+                    </h1>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
+                      {ratingValue > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-4 w-4 ${
+                                  star <= Math.round(ratingValue)
+                                    ? 'fill-amber-400 text-amber-400'
+                                    : 'text-slate-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="font-semibold text-slate-900">{ratingValue.toFixed(1)}</span>
+                          <span>({pharmacy.broj_ocjena || 0} ocjena)</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Star className="h-4 w-4 text-slate-300" />
+                          <span>Ocjene još nisu dostupne</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-6 space-y-3 text-sm text-slate-700">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-50 text-cyan-700">
+                          <MapPin className="h-4 w-4" />
+                        </span>
+                        <span className="pt-1.5">{displayAddress}</span>
+                      </div>
+                      {pharmacy.telefon ? (
+                        <div className="flex items-start gap-3">
+                          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-50 text-cyan-700">
+                            <Phone className="h-4 w-4" />
+                          </span>
                           <a
-                            href={pharmacy.firma.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:underline"
-                            onClick={() => trackContactClick('website', pharmacyAnalyticsEntity, 'profile_contact_info')}
+                            href={`tel:${pharmacy.telefon}`}
+                            className="pt-1.5 font-medium text-slate-900 hover:text-cyan-700"
+                            onClick={() => trackContactClick('phone', pharmacyAnalyticsEntity, 'profile_hero_info')}
                           >
-                            Web stranica
+                            {pharmacy.telefon}
                           </a>
                         </div>
                       ) : null}
+                      {pharmacy.ima_dostavu ? (
+                        <div className="flex items-start gap-3">
+                          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
+                            <Truck className="h-4 w-4" />
+                          </span>
+                          <span className="pt-1.5">Dostava lijekova označena kao dostupna</span>
+                        </div>
+                      ) : null}
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {pharmacy.ima_dostavu ? (
-                        <Badge variant="outline">
-                          <Truck className="w-3.5 h-3.5 mr-1" />
-                          Dostava
-                        </Badge>
+                    <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {pharmacy.telefon ? (
+                        <Button asChild className="h-12 bg-cyan-700 text-white hover:bg-cyan-800">
+                          <a
+                            href={`tel:${pharmacy.telefon}`}
+                            onClick={() => trackContactClick('phone', pharmacyAnalyticsEntity, 'profile_hero_cta')}
+                          >
+                            <Phone className="mr-2 h-4 w-4" />
+                            Pozovi
+                          </a>
+                        </Button>
                       ) : null}
-                      {pharmacy.ima_parking ? <Badge variant="outline">Parking</Badge> : null}
-                      {pharmacy.pristup_invalidima ? (
-                        <Badge variant="outline">
-                          <Accessibility className="w-3.5 h-3.5 mr-1" />
-                          Pristup invalidima
-                        </Badge>
+                      <Button asChild className="h-12 bg-emerald-600 text-white hover:bg-emerald-700">
+                        <a
+                          href={mapsLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => trackContactClick('map', pharmacyAnalyticsEntity, 'profile_hero_cta')}
+                        >
+                          <Navigation className="mr-2 h-4 w-4" />
+                          Navigacija
+                        </a>
+                      </Button>
+                      {websiteUrl ? (
+                        <Button asChild variant="outline" className="h-12 border-slate-200 bg-white">
+                          <a
+                            href={websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => trackContactClick('website', pharmacyAnalyticsEntity, 'profile_hero_cta')}
+                          >
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Web
+                          </a>
+                        </Button>
                       ) : null}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {images.length > 0 ? (
-          <section className="pt-4">
-            <div className="container mx-auto px-4">
-              <div className="overflow-x-auto pb-2">
-                <div className="flex gap-3 snap-x snap-mandatory">
-                  {images.map((image, index) => (
-                    <button
-                      key={`${image}-${index}`}
-                      type="button"
-                      className="snap-start flex-none w-[220px] h-[150px] md:w-[280px] md:h-[180px] rounded-lg overflow-hidden border group"
-                      onClick={() => setSelectedImage(image)}
-                    >
-                      <img
-                        src={image}
-                        alt={`${pharmacy.naziv} ${index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    </button>
-                  ))}
-                </div>
               </div>
-            </div>
-          </section>
-        ) : null}
 
-        <section className="py-6">
-          <div className="container mx-auto px-4">
-            <div className="space-y-4">
-              {hasAnyBenefits ? (
-                <div className={`grid gap-4 ${benefitsGridClass}`}>
-                  {hasActiveOffers ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base">Posebne ponude</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {pharmacy.active_offers?.map((offer) => (
-                          <div key={offer.id} className="border rounded-lg p-3 space-y-1">
-                            <p className="font-semibold text-sm">{offer.title}</p>
-                            {offer.description ? (
-                              <p className="text-sm text-gray-600">{offer.description}</p>
-                            ) : null}
-                            <div className="flex flex-wrap gap-1.5 text-xs">
-                              {offer.target_group ? <Badge variant="outline">{offer.target_group}</Badge> : null}
-                              {offer.discount_percent ? <Badge variant="outline">-{offer.discount_percent}%</Badge> : null}
-                              {offer.discount_amount ? <Badge variant="outline">-{offer.discount_amount} KM</Badge> : null}
-                              {offer.service_name ? <Badge variant="outline">{offer.service_name}</Badge> : null}
-                            </div>
+              {featureCards.length > 0 ? (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {featureCards.map((feature) => {
+                    const Icon = feature.icon;
+                    return (
+                      <div
+                        key={feature.title}
+                        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${feature.className}`}>
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <div>
+                            <p className="font-semibold text-slate-950">{feature.title}</p>
+                            <p className="mt-1 text-sm text-slate-600">{feature.description}</p>
                           </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  ) : null}
-
-                  {hasActiveDiscounts ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base">Popusti</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {pharmacy.active_discounts?.map((discount) => (
-                          <div key={discount.id} className="border rounded-lg p-3 space-y-1">
-                            <p className="font-semibold text-sm capitalize">{discount.tip}</p>
-                            <p className="text-sm text-gray-700">
-                              {discount.discount_percent
-                                ? `${discount.discount_percent}% popusta`
-                                : `${discount.discount_amount || 0} KM popusta`}
-                            </p>
-                            {discount.min_purchase ? (
-                              <p className="text-xs text-gray-500">Minimalna kupovina: {discount.min_purchase} KM</p>
-                            ) : null}
-                            {discount.uslovi ? <p className="text-xs text-gray-500">{discount.uslovi}</p> : null}
-                          </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  ) : null}
-
-                  {hasActiveActions ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base">Akcije</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {pharmacy.active_actions?.map((action) => (
-                          <div key={action.id} className="border rounded-lg p-3 space-y-1">
-                            <p className="font-semibold text-sm">{action.naslov}</p>
-                            {action.opis ? <p className="text-sm text-gray-600">{action.opis}</p> : null}
-                            {action.promo_code ? (
-                              <Badge variant="secondary">Promo kod: {action.promo_code}</Badge>
-                            ) : null}
-                          </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : null}
+            </div>
+          </section>
 
-              <div className="grid lg:grid-cols-5 gap-4">
-                {pharmacy.kratki_opis || pharmacy.firma?.opis ? (
-                  <Card className="lg:col-span-2">
-                    <CardHeader>
-                      <CardTitle className="text-base">O apoteci</CardTitle>
+          <section className="pt-6">
+            <div className="container mx-auto px-4">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
+                <div className="space-y-5">
+                  {(pharmacy.kratki_opis || pharmacy.firma?.opis) ? (
+                    <Card className="rounded-lg border-slate-200 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Info className="h-5 w-5 text-cyan-700" />
+                          O apoteci
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3 text-sm leading-6 text-slate-700">
+                        {pharmacy.kratki_opis ? <p>{pharmacy.kratki_opis}</p> : null}
+                        {pharmacy.firma?.opis ? <p>{pharmacy.firma.opis}</p> : null}
+                      </CardContent>
+                    </Card>
+                  ) : null}
+
+                  <Card className="rounded-lg border-slate-200 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between gap-3">
+                      <CardTitle className="text-base">Usluge i pogodnosti</CardTitle>
+                      <Badge variant="outline">{serviceTiles.length} stavki</Badge>
                     </CardHeader>
-                    <CardContent className="space-y-3 text-sm text-gray-700">
-                      {pharmacy.kratki_opis ? <p>{pharmacy.kratki_opis}</p> : null}
-                      {pharmacy.firma?.opis ? <p>{pharmacy.firma.opis}</p> : null}
+                    <CardContent>
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {serviceTiles.map((service) => {
+                          const Icon = service.icon;
+                          return (
+                            <div key={service.title} className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                              <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-white text-cyan-700 shadow-sm">
+                                <Icon className="h-5 w-5" />
+                              </span>
+                              <p className="font-semibold text-slate-950">{service.title}</p>
+                              <p className="mt-1 text-sm text-slate-600">{service.description}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </CardContent>
                   </Card>
-                ) : null}
 
-                <div className={pharmacy.kratki_opis || pharmacy.firma?.opis ? 'lg:col-span-3' : 'lg:col-span-5'}>
+                  {hasAnyBenefits ? (
+                    <Card className="rounded-lg border-slate-200 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="text-base">Aktivne pogodnosti</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-5">
+                        {hasActiveOffers ? (
+                          <div>
+                            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                              <Gift className="h-4 w-4 text-emerald-700" />
+                              Posebne ponude
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              {pharmacy.active_offers?.map((offer) => (
+                                <div key={offer.id} className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-4">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <p className="font-semibold text-slate-950">{offer.title}</p>
+                                    {formatDiscountValue(offer) ? (
+                                      <Badge className="bg-emerald-600">{formatDiscountValue(offer)}</Badge>
+                                    ) : null}
+                                  </div>
+                                  {offer.description ? (
+                                    <p className="mt-2 text-sm text-slate-600">{offer.description}</p>
+                                  ) : null}
+                                  <div className="mt-3 flex flex-wrap gap-2">
+                                    {offer.target_group ? (
+                                      <Badge variant="outline">{targetGroupLabels[offer.target_group] || offer.target_group}</Badge>
+                                    ) : null}
+                                    {offer.service_name ? <Badge variant="outline">{offer.service_name}</Badge> : null}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {hasActiveDiscounts ? (
+                          <div>
+                            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                              <BadgePercent className="h-4 w-4 text-cyan-700" />
+                              Popusti
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              {pharmacy.active_discounts?.map((discount) => (
+                                <div key={discount.id} className="rounded-lg border border-cyan-100 bg-cyan-50/50 p-4">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <p className="font-semibold text-slate-950">{discountTypeLabels[discount.tip]}</p>
+                                    {formatDiscountValue(discount) ? (
+                                      <Badge className="bg-cyan-700">{formatDiscountValue(discount)}</Badge>
+                                    ) : null}
+                                  </div>
+                                  {discount.min_purchase ? (
+                                    <p className="mt-2 text-sm text-slate-600">Minimalna kupovina: {discount.min_purchase} KM</p>
+                                  ) : null}
+                                  {discount.uslovi ? <p className="mt-2 text-sm text-slate-600">{discount.uslovi}</p> : null}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {hasActiveActions ? (
+                          <div>
+                            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                              <Megaphone className="h-4 w-4 text-amber-700" />
+                              Akcije
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              {pharmacy.active_actions?.map((action) => (
+                                <div key={action.id} className="rounded-lg border border-amber-100 bg-amber-50/50 p-4">
+                                  <p className="font-semibold text-slate-950">{action.naslov}</p>
+                                  {action.opis ? <p className="mt-2 text-sm text-slate-600">{action.opis}</p> : null}
+                                  <div className="mt-3 flex flex-wrap gap-2">
+                                    {action.promo_code ? <Badge variant="outline">Promo kod: {action.promo_code}</Badge> : null}
+                                    {action.ends_at ? <Badge variant="outline">Do {formatDateOnly(action.ends_at)}</Badge> : null}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+                      </CardContent>
+                    </Card>
+                  ) : null}
+
+                  <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+                    <Card className="rounded-lg border-slate-200 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Clock3 className="h-5 w-5 text-cyan-700" />
+                          Radno vrijeme
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className={`rounded-lg border px-4 py-3 ${statusClass}`}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-semibold">Danas je {today?.label || 'danas'}</p>
+                              <p className="text-sm">{todayHours}</p>
+                            </div>
+                            <ChevronRight className="h-5 w-5" />
+                          </div>
+                        </div>
+
+                        {pharmacy.is_24h ? (
+                          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                            Ova apoteka radi non-stop, 0-24 svaki dan.
+                          </div>
+                        ) : (
+                          <div className="space-y-1.5">
+                            {hoursByDay.map((entry) => (
+                              <div
+                                key={entry.day}
+                                className="grid grid-cols-[90px_1fr] items-center gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm"
+                              >
+                                <span className="font-medium text-slate-800">{entry.label}</span>
+                                {!entry.item || entry.item.closed ? (
+                                  <span className="text-right text-slate-500">Zatvoreno</span>
+                                ) : (
+                                  <span className="text-right font-medium text-slate-950">
+                                    {formatTimeOnly(entry.item.open_time)} - {formatTimeOnly(entry.item.close_time)}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="rounded-lg border-slate-200 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="text-base">Izuzeci radnog vremena</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {(pharmacy.radno_vrijeme_izuzeci || []).length === 0 ? (
+                          <div className="rounded-lg border border-dashed border-slate-200 p-5 text-sm text-slate-500">
+                            Nema trenutno definisanih izuzetaka.
+                          </div>
+                        ) : (
+                          pharmacy.radno_vrijeme_izuzeci?.map((exception) => (
+                            <div key={exception.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+                              <div>
+                                <p className="font-medium text-slate-950">{formatDateOnly(exception.date)}</p>
+                                {exception.reason ? <p className="text-xs text-slate-500">{exception.reason}</p> : null}
+                              </div>
+                              {exception.closed ? (
+                                <Badge variant="secondary">Zatvoreno</Badge>
+                              ) : (
+                                <Badge variant="outline">
+                                  {formatTimeOnly(exception.open_time)} - {formatTimeOnly(exception.close_time)}
+                                </Badge>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {images.length > 0 ? (
+                    <Card className="rounded-lg border-slate-200 shadow-sm">
+                      <CardHeader className="flex flex-row items-center justify-between gap-3">
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Camera className="h-5 w-5 text-cyan-700" />
+                          Galerija
+                        </CardTitle>
+                        <Badge variant="outline">{images.length}</Badge>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                          {images.slice(0, 8).map((image, index) => (
+                            <button
+                              key={`${image}-${index}`}
+                              type="button"
+                              className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+                              onClick={() => setSelectedImage(image)}
+                            >
+                              <img
+                                src={image}
+                                alt={`${pharmacy.naziv} ${index + 1}`}
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                              {index === 7 && images.length > 8 ? (
+                                <span className="absolute inset-0 flex items-center justify-center bg-slate-950/60 text-lg font-semibold text-white">
+                                  +{images.length - 8}
+                                </span>
+                              ) : null}
+                            </button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : null}
+                </div>
+
+                <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
                   <LocationMapCard
                     naziv={pharmacy.naziv}
                     adresa={pharmacy.adresa}
@@ -568,121 +918,132 @@ export default function PharmacyProfile() {
                     longitude={pharmacy.longitude || undefined}
                     googleMapsLink={pharmacy.google_maps_link || undefined}
                     markerColor="orange"
-                    mapHeightClass="h-[320px] md:h-[420px]"
+                    mapHeightClass="h-[230px]"
                     onDirectionsClick={() => trackContactClick('map', pharmacyAnalyticsEntity, 'map_card')}
                   />
-                </div>
-              </div>
 
-              <div className="grid lg:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Clock3 className="w-5 h-5" />
-                      Sedmicno radno vrijeme
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {pharmacy.is_24h ? (
-                      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                        Ova apoteka radi non-stop, 0-24 svaki dan.
+                  <Card className="rounded-lg border-slate-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-base">Kontakt</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-sm">
+                      {pharmacy.telefon ? (
+                        <a
+                          href={`tel:${pharmacy.telefon}`}
+                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-cyan-200 hover:bg-cyan-50"
+                          onClick={() => trackContactClick('phone', pharmacyAnalyticsEntity, 'profile_contact_card')}
+                        >
+                          <Phone className="h-4 w-4 text-cyan-700" />
+                          <span className="font-medium text-slate-950">{pharmacy.telefon}</span>
+                        </a>
+                      ) : null}
+                      {pharmacy.email ? (
+                        <a
+                          href={`mailto:${pharmacy.email}`}
+                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-cyan-200 hover:bg-cyan-50"
+                          onClick={() => trackContactClick('email', pharmacyAnalyticsEntity, 'profile_contact_card')}
+                        >
+                          <Mail className="h-4 w-4 text-cyan-700" />
+                          <span className="font-medium text-slate-950">{pharmacy.email}</span>
+                        </a>
+                      ) : null}
+                      {websiteUrl ? (
+                        <a
+                          href={websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-cyan-200 hover:bg-cyan-50"
+                          onClick={() => trackContactClick('website', pharmacyAnalyticsEntity, 'profile_contact_card')}
+                        >
+                          <ExternalLink className="h-4 w-4 text-cyan-700" />
+                          <span className="font-medium text-slate-950">Web stranica</span>
+                        </a>
+                      ) : null}
+                      <div className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+                        <MapPin className="mt-0.5 h-4 w-4 text-cyan-700" />
+                        <span className="text-slate-700">{displayAddress}</span>
                       </div>
-                    ) : (
-                      hoursByDay.map((entry) => (
-                        <div key={entry.day} className="flex items-center justify-between py-2 px-3 rounded-lg border">
-                          <span className="font-medium">{entry.label}</span>
-                          {!entry.item || entry.item.closed ? (
-                            <span className="text-gray-500">Zatvoreno</span>
-                          ) : (
-                            <span className="font-medium">
-                              {formatTimeOnly(entry.item.open_time)} - {formatTimeOnly(entry.item.close_time)}
-                            </span>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Izuzeci radnog vremena</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {(pharmacy.radno_vrijeme_izuzeci || []).length === 0 ? (
-                      <p className="text-sm text-gray-500">Nema trenutno definisanih izuzetaka.</p>
-                    ) : (
-                      pharmacy.radno_vrijeme_izuzeci?.map((exception) => (
-                        <div key={exception.id} className="flex items-center justify-between gap-3 border rounded-lg p-3">
-                          <div>
-                            <p className="font-medium">{formatDateOnly(exception.date)}</p>
-                            {exception.reason ? <p className="text-xs text-gray-500">{exception.reason}</p> : null}
+                  <Card className="rounded-lg border-slate-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-base">Ocjene</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {ratingValue > 0 ? (
+                        <div className="rounded-lg border border-amber-100 bg-amber-50/50 p-4">
+                          <div className="flex items-end gap-3">
+                            <span className="text-4xl font-bold text-slate-950">{ratingValue.toFixed(1)}</span>
+                            <span className="pb-1 text-sm text-slate-600">/ 5</span>
                           </div>
-                          {exception.closed ? (
-                            <Badge variant="secondary">Zatvoreno</Badge>
-                          ) : (
-                            <Badge variant="outline">
-                              {formatTimeOnly(exception.open_time)} - {formatTimeOnly(exception.close_time)}
-                            </Badge>
-                          )}
+                          <div className="mt-3 flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-5 w-5 ${
+                                  star <= Math.round(ratingValue)
+                                    ? 'fill-amber-400 text-amber-400'
+                                    : 'text-slate-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <p className="mt-2 text-sm text-slate-600">Na osnovu {pharmacy.broj_ocjena || 0} ocjena.</p>
                         </div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
+                      ) : (
+                        <div className="rounded-lg border border-dashed border-slate-200 p-5 text-sm text-slate-500">
+                          Ocjene još nisu dostupne za ovu apoteku.
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </aside>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="pb-10">
-          <div className="container mx-auto px-4 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/apoteke">
-              <Button variant="outline">Sve apoteke</Button>
-            </Link>
-            {pharmacy.google_maps_link || pharmacy.latitude ? (
-              <a
-                href={
-                  pharmacy.google_maps_link ||
-                  `https://www.google.com/maps/dir/?api=1&destination=${pharmacy.latitude},${pharmacy.longitude}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackContactClick('map', pharmacyAnalyticsEntity, 'profile_bottom_cta')}
-              >
-                <Button>
-                  <Navigation className="w-4 h-4 mr-2" />
-                  Otvori navigaciju
-                </Button>
-              </a>
-            ) : null}
-            <Link to="/register/pharmacy">
-              <Button variant="secondary">
-                <ShieldCheck className="w-4 h-4 mr-2" />
-                Registrujte apoteku
-              </Button>
-            </Link>
-          </div>
-        </section>
+          <section className="pt-8">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-semibold text-slate-950">Pregledajte i druge apoteke</p>
+                  <p className="text-sm text-slate-600">Filtrirajte po gradu, dežurstvu, statusu rada i pogodnostima.</p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Link to="/apoteke">
+                    <Button variant="outline" className="w-full sm:w-auto">Sve apoteke</Button>
+                  </Link>
+                  <Link to="/register/pharmacy">
+                    <Button className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Registrujte apoteku
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
 
         {selectedImage ? (
           <div
-            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
             onClick={() => setSelectedImage(null)}
             role="button"
             tabIndex={0}
           >
             <button
               type="button"
-              className="absolute top-5 right-5 text-white hover:text-gray-300"
+              className="absolute right-5 top-5 text-white transition hover:text-slate-300"
               onClick={() => setSelectedImage(null)}
             >
-              <X className="w-7 h-7" />
+              <X className="h-7 w-7" />
             </button>
             <img
               src={selectedImage}
               alt="Galerija"
-              className="max-w-full max-h-full object-contain"
+              className="max-h-full max-w-full object-contain"
               onClick={(event) => event.stopPropagation()}
             />
           </div>
