@@ -379,6 +379,7 @@ export default function PharmacyProfile() {
   const hasActiveDiscounts = (pharmacy.active_discounts || []).length > 0;
   const hasActiveActions = (pharmacy.active_actions || []).length > 0;
   const hasAnyBenefits = hasActiveOffers || hasActiveDiscounts || hasActiveActions;
+  const hasHourExceptions = (pharmacy.radno_vrijeme_izuzeci || []).length > 0;
   const ratingValue = Number(pharmacy.ocjena || 0);
 
   const featureCards = [
@@ -428,12 +429,6 @@ export default function PharmacyProfile() {
 
   const serviceTiles = [
     {
-      show: true,
-      icon: Pill,
-      title: 'Apotekarski profil',
-      description: 'Kontakt, lokacija i osnovne informacije.',
-    },
-    {
       show: pharmacy.ima_dostavu,
       icon: Truck,
       title: 'Dostava',
@@ -464,6 +459,7 @@ export default function PharmacyProfile() {
       description: `${pharmacy.active_offers?.length || 0} aktivnih ponuda.`,
     },
   ].filter((item) => item.show);
+  const hasServiceTiles = serviceTiles.length > 0;
 
   return (
     <>
@@ -492,7 +488,7 @@ export default function PharmacyProfile() {
             <div className="container mx-auto px-4">
               <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <div className="grid lg:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)]">
-                  <div className="relative min-h-[300px] md:min-h-[440px] bg-slate-100">
+                  <div className="relative aspect-video bg-slate-100">
                     {primaryImage ? (
                       <button
                         type="button"
@@ -506,7 +502,7 @@ export default function PharmacyProfile() {
                         />
                       </button>
                     ) : (
-                      <div className="flex h-full min-h-[320px] items-center justify-center bg-gradient-to-br from-slate-100 via-white to-cyan-50">
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 via-white to-cyan-50">
                         <div className="text-center text-slate-500">
                           <Building2 className="mx-auto mb-3 h-14 w-14 text-slate-300" />
                           <p className="font-medium">{pharmacy.naziv}</p>
@@ -547,8 +543,8 @@ export default function PharmacyProfile() {
                       {pharmacy.naziv}
                     </h1>
 
-                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
-                      {ratingValue > 0 ? (
+                    {ratingValue > 0 ? (
+                      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -565,13 +561,8 @@ export default function PharmacyProfile() {
                           <span className="font-semibold text-slate-900">{ratingValue.toFixed(1)}</span>
                           <span>({pharmacy.broj_ocjena || 0} ocjena)</span>
                         </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Star className="h-4 w-4 text-slate-300" />
-                          <span>Ocjene još nisu dostupne</span>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : null}
 
                     <div className="mt-6 space-y-3 text-sm text-slate-700">
                       <div className="flex items-start gap-3">
@@ -690,28 +681,35 @@ export default function PharmacyProfile() {
                     </Card>
                   ) : null}
 
-                  <Card className="rounded-lg border-slate-200 shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between gap-3">
-                      <CardTitle className="text-base">Usluge i pogodnosti</CardTitle>
-                      <Badge variant="outline">{serviceTiles.length} stavki</Badge>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                        {serviceTiles.map((service) => {
-                          const Icon = service.icon;
-                          return (
-                            <div key={service.title} className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-                              <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-white text-cyan-700 shadow-sm">
-                                <Icon className="h-5 w-5" />
-                              </span>
-                              <p className="font-semibold text-slate-950">{service.title}</p>
-                              <p className="mt-1 text-sm text-slate-600">{service.description}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {hasServiceTiles ? (
+                    <Card className="rounded-lg border-slate-200 shadow-sm">
+                      <CardHeader className="flex flex-row items-center justify-between gap-3">
+                        <CardTitle className="text-base">Usluge i pogodnosti</CardTitle>
+                        <Badge variant="outline">{serviceTiles.length} stavki</Badge>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          {serviceTiles.map((service) => {
+                            const Icon = service.icon;
+                            return (
+                              <div
+                                key={service.title}
+                                className="flex items-start gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-cyan-200 hover:bg-cyan-50/40"
+                              >
+                                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-cyan-50 text-cyan-700">
+                                  <Icon className="h-5 w-5" />
+                                </span>
+                                <div>
+                                  <p className="font-semibold text-slate-950">{service.title}</p>
+                                  <p className="mt-1 text-sm leading-5 text-slate-600">{service.description}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : null}
 
                   {hasAnyBenefits ? (
                     <Card className="rounded-lg border-slate-200 shadow-sm">
@@ -798,7 +796,7 @@ export default function PharmacyProfile() {
                     </Card>
                   ) : null}
 
-                  <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+                  <div className={hasHourExceptions ? 'grid gap-5 xl:grid-cols-[0.95fr_1.05fr]' : 'grid gap-5'}>
                     <Card className="rounded-lg border-slate-200 shadow-sm">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
@@ -843,17 +841,13 @@ export default function PharmacyProfile() {
                       </CardContent>
                     </Card>
 
-                    <Card className="rounded-lg border-slate-200 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="text-base">Izuzeci radnog vremena</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {(pharmacy.radno_vrijeme_izuzeci || []).length === 0 ? (
-                          <div className="rounded-lg border border-dashed border-slate-200 p-5 text-sm text-slate-500">
-                            Nema trenutno definisanih izuzetaka.
-                          </div>
-                        ) : (
-                          pharmacy.radno_vrijeme_izuzeci?.map((exception) => (
+                    {hasHourExceptions ? (
+                      <Card className="rounded-lg border-slate-200 shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="text-base">Izuzeci radnog vremena</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {pharmacy.radno_vrijeme_izuzeci?.map((exception) => (
                             <div key={exception.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
                               <div>
                                 <p className="font-medium text-slate-950">{formatDateOnly(exception.date)}</p>
@@ -867,10 +861,10 @@ export default function PharmacyProfile() {
                                 </Badge>
                               )}
                             </div>
-                          ))
-                        )}
-                      </CardContent>
-                    </Card>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    ) : null}
                   </div>
 
                   {images.length > 0 ? (
