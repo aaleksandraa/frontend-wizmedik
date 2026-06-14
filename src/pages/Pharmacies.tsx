@@ -33,6 +33,7 @@ type PharmacyItem = {
   open_now: boolean;
   is_dezurna: boolean;
   is_24h: boolean;
+  next_change_at?: string | null;
   has_pensioner_discount: boolean;
   active_actions_count: number;
   active_offers_count: number;
@@ -78,6 +79,37 @@ const toAbsoluteImageUrl = (value?: string | null): string | null => {
   if (fixed.startsWith('http://') || fixed.startsWith('https://') || fixed.startsWith('data:')) return fixed;
 
   return `${SITE_URL}${fixed.startsWith('/') ? '' : '/'}${fixed}`;
+};
+
+const formatSarajevoTime = (value: string): string => {
+  return new Intl.DateTimeFormat('bs-BA', {
+    timeZone: 'Europe/Sarajevo',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date(value));
+};
+
+const sarajevoDateKey = (value: Date): string => {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Sarajevo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(value);
+};
+
+const closingTimeLabel = (value: string): string => {
+  const closingAt = new Date(value);
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  const closingDate = sarajevoDateKey(closingAt);
+  const time = formatSarajevoTime(value);
+
+  if (closingDate === sarajevoDateKey(today)) return `Danas otvorena do ${time}`;
+  if (closingDate === sarajevoDateKey(tomorrow)) return `Otvorena do sutra u ${time}`;
+
+  return `Otvorena do ${time}`;
 };
 
 export default function Pharmacies() {
@@ -506,6 +538,12 @@ export default function Pharmacies() {
                                   {item.active_offers_count > 0 ? <Badge variant="outline">Ponude {item.active_offers_count}</Badge> : null}
                                   {item.active_actions_count > 0 ? <Badge variant="outline">Akcije {item.active_actions_count}</Badge> : null}
                                 </div>
+                                {dutyFallbackApplied && item.open_now && !item.is_dezurna && item.next_change_at ? (
+                                  <p className="flex items-center gap-1 text-sm font-semibold text-red-600">
+                                    <Clock3 className="h-4 w-4" />
+                                    {closingTimeLabel(item.next_change_at)}
+                                  </p>
+                                ) : null}
                                 {item.distance_km !== null && item.distance_km !== undefined ? (
                                   <p className="text-xs text-gray-500">{item.distance_km} km od vas</p>
                                 ) : null}
