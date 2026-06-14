@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
@@ -15,6 +15,7 @@ import { fixImageUrl } from '@/utils/imageUrl';
 import { formatCityLabel, resolvePharmacySeoCityName, slugifyCitySegment } from '@/utils/pharmacySeo';
 import { useAllCities } from '@/hooks/useAllCities';
 import { Clock3, MapPin, Navigation, Pill, Search, ShieldAlert, ShieldCheck } from 'lucide-react';
+import type { AxiosError } from 'axios';
 
 type PharmacyItem = {
   id: number;
@@ -42,6 +43,21 @@ type PaginationMeta = {
   last_page: number;
   per_page: number;
   total: number;
+};
+
+type PharmacyQueryParams = {
+  sort: 'distance' | 'open_first';
+  per_page: number;
+  page: number;
+  grad?: string;
+  search?: string;
+  open_now?: 1;
+  dezurna_now?: 1;
+  is_24h?: 1;
+  pensioner_discount?: 1;
+  has_actions?: 1;
+  lat?: number;
+  lng?: number;
 };
 
 const SITE_URL = 'https://wizmedik.com';
@@ -76,6 +92,7 @@ export default function Pharmacies() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [dutyFallbackApplied, setDutyFallbackApplied] = useState(false);
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [city, setCity] = useState(grad ? formatCityLabel(grad) : formatCityLabel(searchParams.get('grad') || ''));
   const [openNow, setOpenNow] = useState(searchParams.get('open_now') === '1');
@@ -158,7 +175,7 @@ export default function Pharmacies() {
     navigate,
   ]);
 
-  const loadPharmacies = async (pageToLoad = 1, append = false) => {
+  const loadPharmacies = useCallback(async (pageToLoad = 1, append = false) => {
     const requestId = ++requestIdRef.current;
 
     if (append) {
@@ -167,11 +184,12 @@ export default function Pharmacies() {
       setLoading(true);
       setItems([]);
       setPagination(defaultPagination);
+      setDutyFallbackApplied(false);
     }
     setApiError(null);
 
     try {
-      const params: any = {
+      const params: PharmacyQueryParams = {
         sort: geo ? 'distance' : 'open_first',
         per_page: PHARMACIES_PAGE_SIZE,
         page: pageToLoad,
@@ -206,17 +224,20 @@ export default function Pharmacies() {
       };
 
       setPagination(nextPagination);
+      setDutyFallbackApplied(Boolean(paginationPayload?.filter_meta?.duty_fallback_applied));
       setItems((current) => {
         if (!append) return list;
         const currentIds = new Set(current.map((item) => item.id));
         return [...current, ...list.filter((item: PharmacyItem) => !currentIds.has(item.id))];
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (requestId !== requestIdRef.current) return;
-      setApiError(error?.response?.data?.message || 'API apoteka trenutno nije dostupna.');
+      const apiMessage = (error as AxiosError<{ message?: string }>)?.response?.data?.message;
+      setApiError(apiMessage || 'API apoteka trenutno nije dostupna.');
       if (!append) {
         setItems([]);
         setPagination(defaultPagination);
+        setDutyFallbackApplied(false);
       }
       console.error('Error loading pharmacies', error);
     } finally {
@@ -225,11 +246,11 @@ export default function Pharmacies() {
         setLoadingMore(false);
       }
     }
-  };
+  }, [dutyNow, geo, hasActions, is24h, openNow, pensioner, search, selectedCitySlug]);
 
   useEffect(() => {
     loadPharmacies(1, false);
-  }, [dutyNow, geo, hasActions, is24h, openNow, pensioner, search, selectedCitySlug]);
+  }, [loadPharmacies]);
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return;
@@ -403,6 +424,12 @@ export default function Pharmacies() {
 
         <section className="py-8">
           <div className="container mx-auto px-4">
+            {!loading && !apiError && dutyFallbackApplied ? (
+              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Trenutno nema evidentiranih dezurnih apoteka. Prikazane su apoteke koje rade sada prema svom radnom vremenu.
+              </div>
+            ) : null}
+
             <div className="flex items-center justify-between mb-4">
               <p className="text-gray-600">
                 {loading ? 'Ucitavanje...' : `Prikazano ${items.length} od ${totalResults} rezultata`}
