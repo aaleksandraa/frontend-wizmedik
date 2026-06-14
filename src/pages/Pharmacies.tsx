@@ -424,7 +424,7 @@ export default function Pharmacies() {
 
         <section className="py-8">
           <div className="container mx-auto px-4">
-            {!loading && !apiError && dutyFallbackApplied ? (
+            {!loading && !apiError && dutyFallbackApplied && items.length > 0 ? (
               <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 Trenutno nema evidentiranih dezurnih apoteka. Prikazane su apoteke koje rade sada prema svom radnom vremenu.
               </div>
@@ -456,7 +456,9 @@ export default function Pharmacies() {
                 ) : items.length === 0 ? (
                   <Card>
                     <CardContent className="py-12 text-center text-gray-600">
-                      Nema rezultata za zadane filtere.
+                      {dutyFallbackApplied
+                        ? 'Trenutno nema evidentiranih dezurnih niti otvorenih apoteka prema unesenom radnom vremenu.'
+                        : 'Nema rezultata za zadane filtere.'}
                     </CardContent>
                   </Card>
                 ) : (
