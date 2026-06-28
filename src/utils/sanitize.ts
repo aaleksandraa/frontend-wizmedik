@@ -36,15 +36,3 @@ export const sanitizeText = (text: string): string => {
     ALLOWED_ATTR: [],
   });
 };
-
-/**
- * Safe HTML component wrapper
- */
-export const SafeHTML: React.FC<{ html: string; className?: string }> = ({ html, className }) => {
-  return (
-    <div
-      className={className}
-      dangerouslySetInnerHTML={{ __html: sanitizeHTML(html) }}
-    />
-  );
-};
