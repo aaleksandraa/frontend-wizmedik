@@ -25,6 +25,8 @@ import { ReviewCard } from '@/components/ReviewCard';
 import { useTemplateSettings } from '@/hooks/useTemplateSettings';
 import { DoctorTemplate, DoctorTemplateType } from '@/components/doctor-templates';
 import { formatRating } from '@/utils/formatters';
+import { sanitizeRichText } from '@/utils/sanitize';
+import { safeInternalPath } from '@/utils/navigation';
 import { trackClarityEvent } from '@/config/clarity';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
 
@@ -275,8 +277,9 @@ export default function DoctorProfile() {
 
     try {
       const response = await doctorsAPI.getBySlug(slug);
-      if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
-        navigate(response.data.redirect_to, { replace: true });
+      const redirectTo = safeInternalPath(response.data?.redirect_to);
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
         return;
       }
 
@@ -744,7 +747,7 @@ export default function DoctorProfile() {
                   <CardContent>
                     <div 
                       className="prose prose-sm max-w-none text-muted-foreground mb-6"
-                      dangerouslySetInnerHTML={{ __html: doctor.opis }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(doctor.opis || '') }}
                     />
                     
                     {/* Action Buttons below description - Responsive */}

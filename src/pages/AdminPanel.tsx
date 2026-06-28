@@ -43,6 +43,7 @@ import { AdminPharmaciesManagement } from '@/components/admin/AdminPharmaciesMan
 import { AdminLijekoviManagement } from '@/components/admin/AdminLijekoviManagement';
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
+import { AdminDatabaseBackup } from '@/components/admin/AdminDatabaseBackup';
 import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtyServicePages';
 import { AdminSpasManagement } from '@/components/admin/AdminSpasManagement';
 import { AdminCareHomesManagement } from '@/components/admin/AdminCareHomesManagement';
@@ -1783,8 +1784,9 @@ export default function AdminPanel() {
             </TabsContent>
 
             {/* PROFILE SETTINGS TAB */}
-            <TabsContent value="profile-settings">
+            <TabsContent value="profile-settings" className="space-y-6">
               <AdminProfileSettings />
+              <AdminDatabaseBackup />
             </TabsContent>
           </Tabs>
 

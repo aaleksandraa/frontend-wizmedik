@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { safeInternalPath } from '@/utils/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -133,7 +134,7 @@ export default function Auth() {
 
   // Redirect if already authenticated
   if (!loading && user) {
-    const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+    const redirectUrl = safeInternalPath(sessionStorage.getItem('redirectAfterLogin'));
     if (redirectUrl) {
       sessionStorage.removeItem('redirectAfterLogin');
       return <Navigate to={redirectUrl} replace />;

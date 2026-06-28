@@ -5,7 +5,6 @@ import "./index.css";
 import { preloadCardSettings } from "./hooks/useCardSettings";
 import { preloadSearchData } from "./hooks/useSmartSearch";
 import { scheduleLowPriorityWork } from "./utils/scheduleLowPriority";
-import "./utils/mobileScrollDebug";
 
 // Import HMR setup for development
 if (import.meta.env.DEV) {

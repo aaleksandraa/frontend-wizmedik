@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { safeInternalPath } from '@/utils/navigation';
 import { format } from 'date-fns';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
@@ -95,8 +96,9 @@ export default function CareHomeProfile() {
     try {
       setLoading(true);
       const response = await domoviAPI.getBySlug(slug!);
-      if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
-        navigate(response.data.redirect_to, { replace: true });
+      const redirectTo = safeInternalPath(response.data?.redirect_to);
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
         return;
       }
 

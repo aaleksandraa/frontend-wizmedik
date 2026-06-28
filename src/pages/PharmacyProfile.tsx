@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { safeInternalPath } from '@/utils/navigation';
 import { Footer } from '@/components/Footer';
 import { Navbar } from '@/components/Navbar';
 import { LocationMapCard } from '@/components/LocationMapCard';
@@ -220,9 +221,10 @@ export default function PharmacyProfile() {
       try {
         const response = await pharmaciesAPI.getBySlug(slug);
         const payload = response.data;
-        if (typeof payload?.redirect_to === 'string' && payload.redirect_to !== '') {
+        const redirectTo = safeInternalPath(payload?.redirect_to);
+        if (redirectTo) {
           setPharmacy(null);
-          navigate(payload.redirect_to, { replace: true });
+          navigate(redirectTo, { replace: true });
           return;
         }
 

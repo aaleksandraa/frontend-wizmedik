@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { safeInternalPath } from '@/utils/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { medicinesAPI } from '@/services/api';
@@ -129,8 +130,9 @@ export default function LijekProfil() {
 
       try {
         const response = await medicinesAPI.getBySlug(slug);
-        if (typeof response.data?.redirect_to === 'string' && response.data.redirect_to !== '') {
-          navigate(response.data.redirect_to, { replace: true });
+        const redirectTo = safeInternalPath(response.data?.redirect_to);
+        if (redirectTo) {
+          navigate(redirectTo, { replace: true });
           return;
         }
 

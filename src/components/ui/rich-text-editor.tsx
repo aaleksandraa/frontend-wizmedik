@@ -3,6 +3,7 @@ import { Button } from './button';
 import { Textarea } from './textarea';
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { sanitizeRichText } from '@/utils/sanitize';
 
 interface RichTextEditorProps {
   value: string;
@@ -202,7 +203,7 @@ export function RichTextEditor({
         >
           <div 
             className="rich-text-preview"
-            dangerouslySetInnerHTML={{ __html: value || '<p style="color: #888; font-style: italic;">Kliknite da dodate tekst...</p>' }}
+            dangerouslySetInnerHTML={{ __html: value ? sanitizeRichText(value) : '<p style="color: #888; font-style: italic;">Kliknite da dodate tekst...</p>' }}
           />
         </div>
       ) : (

@@ -157,6 +157,14 @@ export const adminAPI = {
   createRfzoList: (data: any) => adminApiInstance.post('/admin/rfzo-liste', data),
   updateRfzoList: (id: number, data: any) => adminApiInstance.put(`/admin/rfzo-liste/${id}`, data),
   deleteRfzoList: (id: number) => adminApiInstance.delete(`/admin/rfzo-liste/${id}`),
+
+  getDatabaseBackupStatus: () => adminApiInstance.get('/admin/database-backup/status'),
+  downloadDatabaseBackup: (path: string) =>
+    adminApiInstance.get('/admin/database-backup/download', {
+      params: { path },
+      responseType: 'blob',
+    }),
+  runDatabaseBackup: () => adminApiInstance.post('/admin/database-backup/run'),
 };
 
 export default adminAPI;

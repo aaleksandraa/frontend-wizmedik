@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { safeInternalPath } from '@/utils/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { clinicsAPI, doctorsAPI, guestVisitsAPI } from '@/services/api';
@@ -126,8 +127,9 @@ export default function ClinicProfile() {
       const response = await clinicsAPI.getBySlug(slug!);
       const clinicData = response.data;
 
-      if (typeof clinicData?.redirect_to === 'string' && clinicData.redirect_to !== '') {
-        navigate(clinicData.redirect_to, { replace: true });
+      const redirectTo = safeInternalPath(clinicData?.redirect_to);
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
         return;
       }
       
