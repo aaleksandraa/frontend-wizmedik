@@ -122,9 +122,12 @@ export function OptimizedFeaturedDoctors({ doctors: initialDoctors, specialties,
   const hasActiveFilters = searchTerm || selectedSpecialty !== 'all' || selectedCity !== 'all' || minRating > 0;
 
   return (
-    <section className="py-16 px-4 bg-muted/20">
+    <section className="py-16 px-4 bg-slate-50/80">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
+          <Badge variant="outline" className="mb-4 border-[#0891b2]/25 bg-[#0891b2]/5 text-[#0891b2]">
+            Doktori
+          </Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             Pronađite svog doktora
           </h2>
@@ -160,7 +163,7 @@ export function OptimizedFeaturedDoctors({ doctors: initialDoctors, specialties,
           </div>
 
           {showFilters && (
-            <div className="bg-card border border-border rounded-lg p-4 space-y-4 animate-in slide-in-from-top-2">
+            <div className="rounded-2xl border border-[#0891b2]/10 bg-white p-4 space-y-4 animate-in slide-in-from-top-2 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Specijalnost</label>
@@ -278,7 +281,7 @@ export function OptimizedFeaturedDoctors({ doctors: initialDoctors, specialties,
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
             {filteredDoctors.map((doctor) => (
               <DoctorCard key={doctor.id} doctor={doctor} />
             ))}

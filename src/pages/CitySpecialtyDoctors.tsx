@@ -7,6 +7,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { Button } from '@/components/ui/button';
 import { MapPin, Stethoscope } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { DoctorListingHeader, DoctorListingGrid } from '@/components/DoctorListingLayout';
 
 interface Doctor {
   id: number;
@@ -250,65 +251,52 @@ export default function CitySpecialtyDoctors() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-slate-50/80">
         <Navbar />
 
         <main className="container mx-auto px-4 py-2 md:py-4">
           <Breadcrumb items={breadcrumbItems} />
 
-          <header className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              {resolvedSpecialtyName && resolvedCityName && (
-                <>
-                  <Stethoscope className="inline w-8 h-8 mr-2 text-primary" />
-                  {resolvedSpecialtyName} u {resolvedCityName}
-                </>
-              )}
-              {!resolvedSpecialtyName && resolvedCityName && (
-                <>
-                  <MapPin className="inline w-8 h-8 mr-2 text-primary" />
-                  Doktori - {resolvedCityName}
-                </>
-              )}
-              {resolvedSpecialtyName && !resolvedCityName && (
-                <>
-                  <Stethoscope className="inline w-8 h-8 mr-2 text-primary" />
-                  {resolvedSpecialtyName}
-                </>
-              )}
-            </h1>
-            <p className="text-xl text-muted-foreground">{pageDescription}</p>
-          </header>
+          <DoctorListingHeader
+            badge="Doktori"
+            badgeIcon={resolvedCityName ? MapPin : Stethoscope}
+            title={
+              resolvedSpecialtyName && resolvedCityName
+                ? `${resolvedSpecialtyName} u ${resolvedCityName}`
+                : resolvedCityName
+                  ? `Doktori — ${resolvedCityName}`
+                  : resolvedSpecialtyName || 'Pretraga doktora'
+            }
+            description={pageDescription}
+          />
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <DoctorListingGrid>
               {[1, 2, 3, 4, 5, 6].map((item) => (
-                <div key={item} className="h-96 bg-muted rounded-lg animate-pulse" />
+                <div key={item} className="h-72 animate-pulse rounded-2xl bg-white shadow-sm" />
               ))}
-            </div>
+            </DoctorListingGrid>
           ) : doctors.length === 0 ? (
-            <div className="text-center py-16">
-              <Stethoscope className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h2 className="text-2xl font-semibold mb-2">Nema pronadjenih doktora</h2>
-              <p className="text-muted-foreground mb-6">
+            <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
+              <Stethoscope className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40 opacity-50" />
+              <h2 className="mb-2 text-2xl font-semibold">Nema pronadjenih doktora</h2>
+              <p className="mb-6 text-muted-foreground">
                 {resolvedSpecialtyName && resolvedCityName
                   ? `Trenutno nemamo registrovanih ${resolvedSpecialtyName.toLowerCase()} doktora u gradu ${resolvedCityName}.`
                   : 'Pokusajte sa drugim kriterijima pretrage.'}
               </p>
-              <Button variant="medical" onClick={() => navigate('/')}>
+              <Button className="rounded-full bg-[#0891b2] hover:bg-[#0e7490]" onClick={() => navigate('/')}>
                 Nazad na pocetnu
               </Button>
             </div>
           ) : (
             <>
-              <div className="mb-6">
-                <p className="text-lg text-muted-foreground">
-                  Pronadjeno <span className="font-semibold text-foreground">{doctors.length}</span>{' '}
-                  {doctors.length === 1 ? 'doktor' : 'doktora'}
-                </p>
-              </div>
+              <p className="mb-6 text-muted-foreground">
+                Pronađeno <span className="font-semibold text-[#0891b2]">{doctors.length}</span>{' '}
+                {doctors.length === 1 ? 'doktor' : 'doktora'}
+              </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <DoctorListingGrid>
                 {doctors.map((doctor) => (
                   <DoctorCard
                     key={doctor.id}
@@ -328,7 +316,7 @@ export default function CitySpecialtyDoctors() {
                     }}
                   />
                 ))}
-              </div>
+              </DoctorListingGrid>
             </>
           )}
         </main>

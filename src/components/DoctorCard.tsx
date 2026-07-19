@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MapPin, Star, Phone, Calendar, CheckCircle } from 'lucide-react';
 import { useDoctorCardSettings } from '@/hooks/useCardSettings';
 import { formatRating } from '@/utils/formatters';
+import { DoctorListingCard } from '@/components/DoctorListingCard';
 
 export interface DoctorCardSettings {
   variant: string;
@@ -84,7 +85,7 @@ function normalizeDoctor(doctor: DoctorData): NormalizedDoctor {
 }
 
 const defaultSettings: DoctorCardSettings = {
-  variant: 'classic',
+  variant: 'wizmedik',
   showRating: true,
   showLocation: true,
   showPhone: true,
@@ -115,7 +116,18 @@ export function DoctorCard({ doctor: rawDoctor, settings: propSettings }: Doctor
   }
   
   const variants: Record<string, () => JSX.Element> = {
-    classic: () => <ClassicCard doctor={doctor} settings={s} />,
+    wizmedik: () => (
+      <DoctorListingCard
+        doctor={doctor}
+        showBookButton={s.showBookButton}
+      />
+    ),
+    classic: () => (
+      <DoctorListingCard
+        doctor={doctor}
+        showBookButton={s.showBookButton}
+      />
+    ),
     modern: () => <ModernCard doctor={doctor} settings={s} />,
     compact: () => <CompactCard doctor={doctor} settings={s} />,
     horizontal: () => <HorizontalCard doctor={doctor} settings={s} />,
@@ -145,7 +157,7 @@ export function DoctorCard({ doctor: rawDoctor, settings: propSettings }: Doctor
     pricing: () => <PricingCard doctor={doctor} settings={s} />,
   };
 
-  const VariantComponent = variants[s.variant] || variants.classic;
+  const VariantComponent = variants[s.variant] || variants.wizmedik;
   return <VariantComponent />;
 }
 

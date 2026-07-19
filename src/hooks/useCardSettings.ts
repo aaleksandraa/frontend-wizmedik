@@ -29,7 +29,7 @@ interface ClinicCardSettings {
 }
 
 const defaultDoctorSettings: DoctorCardSettings = {
-  variant: 'classic',
+  variant: 'wizmedik',
   showRating: true,
   showLocation: true,
   showPhone: true,

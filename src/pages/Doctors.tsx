@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Stethoscope, Search, MapPin, Navigation, X, ArrowUpDown, List, Map, LayoutGrid } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { DoctorListingHeader, DoctorListingFilters, DoctorListingGrid } from '@/components/DoctorListingLayout';
 
 interface Doctor {
   id: number;
@@ -420,35 +421,31 @@ export default function Doctors() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
       
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-slate-50/80">
         <Navbar />
         
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Stethoscope className="hidden md:block h-10 w-10 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">
-                {selectedCity ? `Doktori - ${selectedCity}` : 'Doktori u Bosni i Hercegovini'}
-              </h1>
-            </div>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {selectedCity 
-                ? `Pregledajte profile, zakažite termin online ili kontaktirajte.`
-                : 'Pronađite najboljeg doktora za vaše potrebe - kardiolozi, pedijatri, ginekolozi i drugi specijalisti'
-              }
-            </p>
-          </div>
+        <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+          <DoctorListingHeader
+            badge="Doktori"
+            badgeIcon={Stethoscope}
+            title={selectedCity ? `Doktori — ${selectedCity}` : 'Doktori u Bosni i Hercegovini'}
+            description={
+              selectedCity
+                ? 'Pregledajte profile, zakažite termin online ili kontaktirajte.'
+                : 'Pronađite najboljeg doktora za vaše potrebe — kardiolozi, pedijatri, ginekolozi i drugi specijalisti.'
+            }
+          />
 
-        {/* Filters */}
-        <div className="mb-8 space-y-4 bg-card p-4 rounded-lg border">
+        <DoctorListingFilters>
+          <div className="space-y-4">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#0891b2]/60" />
               <Input
                 placeholder="Pretražite doktore..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 rounded-xl border-[#0891b2]/15 focus-visible:ring-[#0891b2]/30"
               />
             </div>
             
@@ -464,7 +461,7 @@ export default function Doctors() {
                 }}
                 onFocus={() => setShowCitySuggestions(true)}
                 onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
-                className="pl-10 pr-8"
+                className="pl-10 pr-8 rounded-xl border-[#0891b2]/15 focus-visible:ring-[#0891b2]/30"
               />
               {selectedCity && (
                 <button onClick={clearCity} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -512,7 +509,7 @@ export default function Doctors() {
               </div>
             )}
 
-            <Button onClick={toggleLocation} variant={useUserLocation ? "default" : "outline"} className="w-full lg:w-auto">
+            <Button onClick={toggleLocation} variant={useUserLocation ? "default" : "outline"} className={`w-full lg:w-auto rounded-full ${useUserLocation ? 'bg-[#0891b2] hover:bg-[#0e7490]' : 'border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5'}`}>
               <Navigation className={`h-4 w-4 mr-2 ${useUserLocation ? 'animate-pulse' : ''}`} />
               {useUserLocation ? 'Lokacija uključena' : 'Blizu mene'}
             </Button>
@@ -538,9 +535,9 @@ export default function Doctors() {
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center justify-between border-t border-[#0891b2]/10 pt-4">
             <p className="text-sm text-muted-foreground">
-              Pronađeno {filteredDoctors.length} doktora
+              Pronađeno <span className="font-semibold text-[#0891b2]">{filteredDoctors.length}</span> doktora
               {useUserLocation && ' • Lokacija aktivna'}
             </p>
             <div className="flex items-center gap-2">
@@ -557,11 +554,12 @@ export default function Doctors() {
               </Select>
             </div>
           </div>
-        </div>
+          </div>
+        </DoctorListingFilters>
 
         {/* View Mode Tabs */}
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map' | 'split')} className="space-y-6">
-          <TabsList className={`grid w-full ${splitViewEnabled ? 'max-w-[450px] grid-cols-3' : 'max-w-[300px] grid-cols-2'}`}>
+          <TabsList className={`grid w-full rounded-xl bg-white p-1 shadow-sm ${splitViewEnabled ? 'max-w-[450px] grid-cols-3' : 'max-w-[300px] grid-cols-2'}`}>
             <TabsTrigger value="list">
               <List className="h-4 w-4 mr-2" />
               Lista
@@ -580,7 +578,7 @@ export default function Doctors() {
 
           <TabsContent value="list">
             {filteredDoctors.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <DoctorListingGrid>
                 {filteredDoctors.map(doctor => (
                   template === 'soft' ? (
                     <DoctorCardSoft key={doctor.id} doctor={doctor} />
@@ -588,11 +586,11 @@ export default function Doctors() {
                     <DoctorCard key={doctor.id} doctor={doctor} />
                   )
                 ))}
-              </div>
+              </DoctorListingGrid>
             ) : (
-              <div className="text-center py-16">
-                <Stethoscope className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Nema rezultata</h3>
+              <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
+                <Stethoscope className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40" />
+                <h3 className="mb-2 text-xl font-semibold text-foreground">Nema rezultata</h3>
                 <p className="text-muted-foreground">Probajte sa drugim kriterijumima pretrage</p>
               </div>
             )}
