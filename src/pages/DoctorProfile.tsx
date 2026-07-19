@@ -29,6 +29,8 @@ import { sanitizeRichText } from '@/utils/sanitize';
 import { safeInternalPath } from '@/utils/navigation';
 import { trackClarityEvent } from '@/config/clarity';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
+import { DoctorProfileHero } from '@/components/DoctorProfileHero';
+import { DoctorProfileMobileBar } from '@/components/DoctorProfileMobileBar';
 
 interface Doctor {
   id: number;
@@ -491,6 +493,20 @@ export default function DoctorProfile() {
   const ogImage = toAbsoluteUrl(doctor.slika_profila);
   const seoDescription = `${doctor.opis || `${doctor.specijalnost} u ${doctor.grad}u`}`.slice(0, 160);
 
+  const serviceCount =
+    (doctor.kategorijeUsluga?.reduce(
+      (acc, k) => acc + (k.usluge?.length || 0),
+      0
+    ) || 0) + services.length;
+
+  const handleBookClick = () => {
+    if (user) {
+      setShowBooking(true);
+    } else {
+      setShowGuestBooking(true);
+    }
+  };
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Physician",
@@ -629,118 +645,35 @@ export default function DoctorProfile() {
         </script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-slate-50/80 pb-24 lg:pb-0">
         <div className="container mx-auto px-4 py-2 md:py-4">
-          {/* Breadcrumb and content - no wrapper gaps */}
           <Breadcrumb items={[
             { label: 'Doktori', href: '/' },
             { label: doctor.specijalnost, href: `/doktori/specijalnost/${doctor.specijalnost.toLowerCase().replace(/\s+/g, '-')}` },
             { label: `Dr. ${doctor.ime} ${doctor.prezime}` }
           ]} />
+        </div>
 
-          <div className="grid lg:grid-cols-3 gap-4 md:gap-6 mt-2">
+        <DoctorProfileHero
+          doctor={doctor}
+          serviceCount={serviceCount}
+          onBookClick={handleBookClick}
+          onPhoneClick={() => trackContactClick('phone', doctorAnalyticsEntity, 'profile_hero')}
+          onTelemedicineClick={() => trackContactClick('phone', doctorAnalyticsEntity, 'telemedicine_hero')}
+        />
+
+        <div className="container mx-auto px-4 py-2 md:py-4">
+          <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
             <div className="lg:col-span-2 flex flex-col">
-              {/* Doctor Info Card - Mobile Optimized */}
-              <Card className="mb-4 md:mb-6 shadow-medium overflow-hidden">
-                <CardHeader className="pb-4">
-                  {/* Mobile Layout */}
-                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                    {/* Avatar */}
-                    <div className="flex justify-center sm:justify-start">
-                      {doctor.slika_profila ? (
-                        <img 
-                          src={doctor.slika_profila} 
-                          alt={`Dr. ${doctor.ime} ${doctor.prezime}`}
-                          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-primary shadow-lg"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl sm:text-2xl border-4 border-primary shadow-lg">
-                          {doctor.ime[0]}{doctor.prezime[0]}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Info */}
-                    <div className="flex-1 text-center sm:text-left">
-                      <CardTitle className="text-xl sm:text-2xl mb-1">
-                        Dr. {doctor.ime} {doctor.prezime}
-                      </CardTitle>
-                      <p className="text-base sm:text-lg text-muted-foreground mb-3">{doctor.specijalnost}</p>
-                      
-                      {/* Rating & Badge - Single Row on Mobile */}
-                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3">
-                        {doctor.ocjena && doctor.broj_ocjena > 0 ? (
-                          <div className="flex items-center gap-1 bg-yellow-50 px-2.5 py-1 rounded-full">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-semibold text-sm">{doctor.ocjena}</span>
-                            <span className="text-xs text-muted-foreground">({doctor.broj_ocjena})</span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground bg-gray-100 px-2.5 py-1 rounded-full">
-                            Nema recenzija
-                          </span>
-                        )}
-                        <Badge 
-                          variant={doctor.prihvata_online ? "default" : "outline"}
-                          className={`text-xs ${doctor.prihvata_online ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                        >
-                          {doctor.prihvata_online ? "Online rezervacije" : "Samo telefon"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-lg">Kontakt informacije</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <Phone className="w-5 h-5 text-primary" />
-                          <span>{doctor.telefon}</span>
-                        </div>
-                        {(doctor.public_email || doctor.email) && (
-                          <div className="flex items-center gap-3">
-                            <Mail className="w-5 h-5 text-primary" />
-                            <a
-                              href={`mailto:${doctor.public_email || doctor.email}`}
-                              className="text-primary hover:underline"
-                              onClick={() => trackContactClick('email', doctorAnalyticsEntity, 'profile_contact_info')}
-                            >
-                              {doctor.public_email || doctor.email}
-                            </a>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-3">
-                          <MapPin className="w-5 h-5 text-primary" />
-                          <span>{doctor.lokacija}, {doctor.grad}</span>
-                        </div>
-                        {doctor.google_maps_link && (
-                          <div className="flex items-center gap-3">
-                            <a 
-                              href={doctor.google_maps_link} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-primary hover:underline"
-                              onClick={() => trackContactClick('map', doctorAnalyticsEntity, 'profile_contact_info')}
-                            >
-                              <MapPin className="w-5 h-5" />
-                              Otvori navigaciju
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* O doktoru Section - Separate Card */}
+              {/* O doktoru Section */}
               {doctor.opis && (
-                <Card className="mb-8 shadow-medium order-1">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Briefcase className="w-5 h-5 text-primary" />
+                <Card className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-1">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                        <Briefcase className="w-5 h-5 text-[#0891b2]" />
+                      </div>
                       O doktoru
                     </CardTitle>
                   </CardHeader>
@@ -751,12 +684,12 @@ export default function DoctorProfile() {
                     />
                     
                     {/* Action Buttons below description - Responsive */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#0891b2]/10">
                       {doctor.prihvata_online && (
                         <Button 
-                          onClick={() => setShowBooking(true)}
+                          onClick={handleBookClick}
                           size="lg"
-                          className="w-full sm:flex-1"
+                          className="w-full sm:flex-1 rounded-full bg-[#0891b2] hover:bg-[#0e7490]"
                         >
                           <Calendar className="w-5 h-5 mr-2" />
                           Zakaži online
@@ -766,7 +699,7 @@ export default function DoctorProfile() {
                         <Button 
                           variant="outline"
                           size="lg"
-                          className="w-full sm:flex-1"
+                          className="w-full sm:flex-1 rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5"
                           asChild
                         >
                           <a
@@ -782,7 +715,7 @@ export default function DoctorProfile() {
                         <Button 
                           variant="secondary"
                           size="lg"
-                          className="w-full sm:flex-1"
+                          className="w-full sm:flex-1 rounded-full bg-[#0891b2]/10 text-[#0891b2] hover:bg-[#0891b2]/15"
                           onClick={() => {
                             const servicesSection = document.getElementById('usluge-section');
                             servicesSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -798,17 +731,62 @@ export default function DoctorProfile() {
                 </Card>
               )}
 
+              {/* Kontakt — kompaktna traka */}
+              <Card className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-1">
+                <CardContent className="flex flex-wrap gap-3 p-4 md:p-5">
+                  {doctor.telefon && (
+                    <a
+                      href={`tel:${doctor.telefon}`}
+                      onClick={() => trackContactClick('phone', doctorAnalyticsEntity, 'profile_contact_pills')}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#0891b2]/10 px-4 py-2 text-sm font-medium text-[#0891b2] transition-colors hover:bg-[#0891b2]/15"
+                    >
+                      <Phone className="h-4 w-4" />
+                      {doctor.telefon}
+                    </a>
+                  )}
+                  {(doctor.public_email || doctor.email) && (
+                    <a
+                      href={`mailto:${doctor.public_email || doctor.email}`}
+                      onClick={() => trackContactClick('email', doctorAnalyticsEntity, 'profile_contact_pills')}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#0891b2]/10 px-4 py-2 text-sm font-medium text-[#0891b2] transition-colors hover:bg-[#0891b2]/15"
+                    >
+                      <Mail className="h-4 w-4" />
+                      {doctor.public_email || doctor.email}
+                    </a>
+                  )}
+                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 text-[#0891b2]" />
+                    {doctor.lokacija}, {doctor.grad}
+                  </span>
+                  {doctor.google_maps_link && (
+                    <a
+                      href={doctor.google_maps_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackContactClick('map', doctorAnalyticsEntity, 'profile_contact_pills')}
+                      className="inline-flex items-center gap-2 rounded-full border border-[#0891b2]/20 px-4 py-2 text-sm font-medium text-[#0891b2] transition-colors hover:bg-[#0891b2]/5"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      Navigacija
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Telemedicine Section */}
               {doctor.telemedicine_enabled && doctor.telemedicine_phone && (
-                <Card className="mb-8 shadow-medium order-1 bg-gradient-to-br from-cyan-50 to-cyan-50 border-cyan-200">
+                <Card className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-1 overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-[#0891b2] to-[#22d3ee]" />
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-cyan-900">
-                      <Video className="w-5 h-5" />
-                      Telemedicina - Video konsultacije
+                    <CardTitle className="flex items-center gap-2 text-[#0e7490]">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                        <Video className="w-5 h-5 text-[#0891b2]" />
+                      </div>
+                      Telemedicina — video konsultacije
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-gray-700">
+                    <p className="text-muted-foreground">
                       Dr. {doctor.ime} {doctor.prezime} nudi mogućnost video konsultacija za određene usluge. 
                       Zakažite termin telefonom i dogovorite se za online pregled.
                     </p>
@@ -816,7 +794,7 @@ export default function DoctorProfile() {
                       <Button 
                         variant="default"
                         size="lg"
-                        className="flex-1" style={{ backgroundColor: '#0891b2' }}
+                        className="flex-1 rounded-full bg-[#0891b2] hover:bg-[#0e7490]"
                         asChild
                       >
                         <a
@@ -828,9 +806,9 @@ export default function DoctorProfile() {
                         </a>
                       </Button>
                     </div>
-                    <div className="bg-white/60 rounded-lg p-4 space-y-2">
-                      <p className="text-sm font-medium text-gray-900">Prednosti telemedicine:</p>
-                      <ul className="text-sm text-gray-700 space-y-1">
+                    <div className="rounded-2xl bg-[#0891b2]/5 p-4 space-y-2">
+                      <p className="text-sm font-medium">Prednosti telemedicine:</p>
+                      <ul className="text-sm text-muted-foreground space-y-1">
                         <li className="flex items-start gap-2">
                           <span className="text-green-600 mt-0.5">✓</span>
                           <span>Konsultacije iz udobnosti vašeg doma</span>
@@ -851,12 +829,14 @@ export default function DoctorProfile() {
 
               {/* YouTube Videos Section */}
               {doctor.youtube_linkovi && doctor.youtube_linkovi.length > 0 && (
-                <Card className="mb-8 shadow-medium order-1">
+                <Card className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-1">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                      </svg>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50">
+                        <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                      </div>
                       Video snimci
                     </CardTitle>
                   </CardHeader>
@@ -890,10 +870,12 @@ export default function DoctorProfile() {
 
               {/* Blog Posts Section - Savjeti */}
               {blogPosts.length > 0 && (
-                <Card className="mb-8 shadow-medium order-1">
+                <Card className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-1">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-primary" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                        <FileText className="w-5 h-5 text-[#0891b2]" />
+                      </div>
                       Savjeti
                     </CardTitle>
                   </CardHeader>
@@ -903,7 +885,7 @@ export default function DoctorProfile() {
                         <Link 
                           key={post.id} 
                           to={`/blog/${post.slug}`}
-                          className="block p-4 bg-muted/30 rounded-lg border hover:shadow-md hover:border-primary/50 transition-all"
+                          className="block rounded-2xl border border-transparent bg-slate-50/80 p-4 transition-all hover:border-[#0891b2]/20 hover:shadow-md"
                         >
                           <div className="flex gap-4">
                             {post.thumbnail && (
@@ -966,10 +948,13 @@ export default function DoctorProfile() {
 
               {/* Guest Visits Section */}
               {guestVisits.length > 0 && (
-                <Card className="mb-8 shadow-medium border-l-4 order-3" style={{ borderLeftColor: '#0891b2' }}>
+                <Card className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-3 overflow-hidden">
+                  <div className="h-1 bg-gradient-to-r from-[#0891b2] to-[#22d3ee]" />
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building2 className="w-5 h-5" style={{ color: '#0891b2' }} />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                        <Building2 className="w-5 h-5 text-[#0891b2]" />
+                      </div>
                       Gostovanja u klinikama
                     </CardTitle>
                   </CardHeader>
@@ -979,12 +964,12 @@ export default function DoctorProfile() {
                     </p>
                     <div className="space-y-4">
                       {guestVisits.map((visit) => (
-                        <div key={visit.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-cyan-50 rounded-lg border border-cyan-100 gap-4">
+                        <div key={visit.id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-2xl border border-[#0891b2]/10 bg-[#0891b2]/5 p-4 gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <Link 
                                 to={`/klinika/${visit.klinika.slug}`}
-                                className="font-semibold hover:underline" style={{ color: '#0891b2' }}
+                                className="font-semibold text-[#0891b2] hover:underline"
                               >
                                 {visit.klinika.naziv}
                               </Link>
@@ -1068,64 +1053,82 @@ export default function DoctorProfile() {
 
               {/* Services Section */}
               {(doctor.kategorijeUsluga?.length > 0 || services.length > 0) && (
-                <Card id="usluge-section" className="mb-8 shadow-medium order-4 scroll-mt-8">
+                <Card id="usluge-section" className="mb-6 md:mb-8 rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-4 scroll-mt-8">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Briefcase className="w-5 h-5 text-primary" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                        <Briefcase className="w-5 h-5 text-[#0891b2]" />
+                      </div>
                       Usluge i cijene
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* Services grouped by categories */}
                     {doctor.kategorijeUsluga && doctor.kategorijeUsluga.length > 0 ? (
                       <div className="space-y-6">
-                        {doctor.kategorijeUsluga.map((kategorija: any) => (
+                        {doctor.kategorijeUsluga.map((kategorija: any, catIndex: number) => (
                           <div key={kategorija.id}>
-                            <div className="mb-4 pb-2 border-b-2 border-primary/20">
-                              <h3 className="font-semibold text-lg text-primary">{kategorija.naziv}</h3>
+                            <div className="mb-4 pb-2 border-b border-[#0891b2]/15">
+                              <h3 className="font-semibold text-lg text-[#0891b2]">{kategorija.naziv}</h3>
                               {kategorija.opis && <p className="text-sm text-muted-foreground mt-1">{kategorija.opis}</p>}
                             </div>
                             {kategorija.usluge && kategorija.usluge.length > 0 ? (
-                              <div className="space-y-3">
-                                {kategorija.usluge.map((service: any) => (
-                                  <div key={service.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-muted/30 rounded-lg border hover:shadow-sm transition-shadow gap-3">
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {kategorija.usluge.map((service: any, svcIndex: number) => (
+                                  <div
+                                    key={service.id}
+                                    className={`flex flex-col justify-between rounded-2xl p-4 transition-shadow hover:shadow-md ${
+                                      catIndex === 0 && svcIndex === 0
+                                        ? 'bg-[#0891b2] text-white shadow-lg'
+                                        : 'border border-[#0891b2]/10 bg-white'
+                                    }`}
+                                  >
                                     <div className="flex-1">
-                                      <h4 className="font-medium text-base mb-1">{service.naziv}</h4>
+                                      <h4 className={`font-semibold text-base mb-1 ${catIndex === 0 && svcIndex === 0 ? 'text-white' : ''}`}>
+                                        {service.naziv}
+                                      </h4>
                                       {service.opis && (
-                                        <p className="text-sm text-muted-foreground mb-2">{service.opis}</p>
+                                        <p className={`text-sm mb-2 line-clamp-2 ${catIndex === 0 && svcIndex === 0 ? 'text-white/80' : 'text-muted-foreground'}`}>
+                                          {service.opis}
+                                        </p>
                                       )}
-                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                      <div className={`flex items-center gap-2 text-sm ${catIndex === 0 && svcIndex === 0 ? 'text-white/70' : 'text-muted-foreground'}`}>
                                         <Clock className="w-4 h-4" />
                                         <span>{service.trajanje_minuti} min</span>
                                       </div>
                                     </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                                      <div className="text-right">
+                                    <div className="mt-4 flex items-end justify-between gap-3">
+                                      <div>
                                         {service.cijena_popust ? (
                                           <div>
-                                            <div className="text-muted-foreground line-through text-sm">{service.cijena} KM</div>
-                                            <div className="text-green-600 font-bold text-xl">{service.cijena_popust} KM</div>
+                                            <div className={`line-through text-sm ${catIndex === 0 && svcIndex === 0 ? 'text-white/60' : 'text-muted-foreground'}`}>
+                                              {service.cijena} KM
+                                            </div>
+                                            <div className={`font-bold text-xl ${catIndex === 0 && svcIndex === 0 ? 'text-white' : 'text-emerald-600'}`}>
+                                              {service.cijena_popust} KM
+                                            </div>
                                           </div>
                                         ) : (
-                                          <div className="text-primary font-bold text-xl">{service.cijena ? `${service.cijena} KM` : 'Na upit'}</div>
+                                          <div className={`font-bold text-xl ${catIndex === 0 && svcIndex === 0 ? 'text-white' : 'text-[#0891b2]'}`}>
+                                            {service.cijena ? `${service.cijena} KM` : 'Na upit'}
+                                          </div>
                                         )}
                                       </div>
                                       {doctor.prihvata_online && (
                                         <Button
-                                          variant="outline"
                                           size="sm"
+                                          variant={catIndex === 0 && svcIndex === 0 ? 'secondary' : 'outline'}
                                           onClick={() => {
                                             setSelectedServiceId(service.id);
-                                            if (user) {
-                                              setShowBooking(true);
-                                            } else {
-                                              setShowGuestBooking(true);
-                                            }
+                                            handleBookClick();
                                           }}
-                                          className="whitespace-nowrap"
+                                          className={`whitespace-nowrap rounded-full ${
+                                            catIndex === 0 && svcIndex === 0
+                                              ? 'bg-white text-[#0891b2] hover:bg-white/90'
+                                              : 'border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5'
+                                          }`}
                                         >
-                                          <Calendar className="w-4 h-4 mr-2" />
-                                          Zakaži termin
+                                          <Calendar className="w-4 h-4 mr-1" />
+                                          Zakaži
                                         </Button>
                                       )}
                                     </div>
@@ -1216,11 +1219,13 @@ export default function DoctorProfile() {
               )}
 
               {/* Reviews Section */}
-              <Card className="shadow-medium order-5">
+              <Card className="rounded-2xl border-0 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.12)] order-5">
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                        <MessageSquare className="w-5 h-5 text-[#0891b2]" />
+                      </div>
                       Recenzije pacijenata
                     </CardTitle>
                     {user?.role === 'patient' && eligibleTermini.length > 0 && (
@@ -1404,62 +1409,26 @@ export default function DoctorProfile() {
               </div>
 
               {/* Booking Card */}
-              <Card className="lg:sticky lg:top-8 shadow-medium">
+              <Card className="lg:sticky lg:top-8 rounded-2xl border-0 shadow-[0_8px_30px_-12px_rgba(8,145,178,0.2)] overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-[#0891b2] to-[#22d3ee]" />
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Zakažite termin</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-[#0891b2]" />
+                    Zakažite termin
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {doctor.prihvata_online ? (
-                    <>
-                      {user ? (
-                        <Dialog open={showBooking} onOpenChange={setShowBooking}>
-                          <DialogTrigger asChild>
-                            <Button variant="medical" className="w-full" size="lg">
-                              <Calendar className="w-5 h-5 mr-2" />
-                              Zakaži online
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>
-                                Zakažite termin kod Dr. {doctor.ime} {doctor.prezime}
-                              </DialogTitle>
-                              <DialogDescription>Odaberite datum i vrijeme za vaš termin</DialogDescription>
-                            </DialogHeader>
-                            <BookAppointmentForm
-                              doctorId={doctor.id}
-                              doctorName={`${doctor.ime} ${doctor.prezime}`}
-                              selectedServiceId={selectedServiceId}
-                              onSuccess={() => { setShowBooking(false); setSelectedServiceId(null); }}
-                            />
-                          </DialogContent>
-                        </Dialog>
-                      ) : (
-                        <Button 
-                          variant="medical" 
-                          className="w-full" 
-                          size="lg"
-                          onClick={() => setShowGuestBooking(true)}
-                        >
-                          <Calendar className="w-5 h-5 mr-2" />
-                          Zakaži termin
-                        </Button>
-                      )}
-
-                      {!user && (
-                        <GuestBookingDialog
-                          open={showGuestBooking}
-                          onOpenChange={setShowGuestBooking}
-                          doctorId={doctor.id}
-                          doctorName={`${doctor.ime} ${doctor.prezime}`}
-                          doctorData={doctor}
-                          services={services}
-                          bookedSlots={bookedSlots}
-                        />
-                      )}
-                    </>
+                    <Button 
+                      className="w-full rounded-full bg-[#0891b2] hover:bg-[#0e7490]" 
+                      size="lg"
+                      onClick={handleBookClick}
+                    >
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Zakaži online
+                    </Button>
                   ) : (
-                    <div className="text-center py-3">
+                    <div className="rounded-2xl bg-[#0891b2]/5 p-4 text-center">
                       <p className="text-sm text-muted-foreground">
                         Ovaj doktor ne prima online rezervacije
                       </p>
@@ -1467,8 +1436,8 @@ export default function DoctorProfile() {
                   )}
                   
                   <Button
-                    variant="medical-outline"
-                    className="w-full"
+                    variant="outline"
+                    className="w-full rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5"
                     size="lg"
                     onClick={() => {
                       trackContactClick('phone', doctorAnalyticsEntity, 'booking_sidebar');
@@ -1479,13 +1448,19 @@ export default function DoctorProfile() {
                     Pozovite {doctor.telefon}
                   </Button>
 
-                  <div className="pt-4 border-t border-border">
-                    <h4 className="font-semibold text-sm mb-2">Radno vrijeme</h4>
+                  <div className="pt-4 border-t border-[#0891b2]/10">
+                    <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-[#0891b2]" />
+                      Radno vrijeme
+                    </h4>
                     {renderWorkingHours(doctor.radno_vrijeme)}
                   </div>
 
-                  <div className="pt-4 border-t border-border">
-                    <h4 className="font-semibold text-sm mb-2">Lokacija</h4>
+                  <div className="pt-4 border-t border-[#0891b2]/10">
+                    <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-[#0891b2]" />
+                      Lokacija
+                    </h4>
                     <p className="text-sm text-muted-foreground">
                       {doctor.lokacija}, {doctor.grad}
                     </p>
@@ -1510,6 +1485,43 @@ export default function DoctorProfile() {
           </div>
         </div>
       </div>
+
+      {/* Booking Dialog — logged in */}
+      <Dialog open={showBooking} onOpenChange={(open) => { setShowBooking(open); if (!open) setSelectedServiceId(null); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Zakažite termin kod Dr. {doctor.ime} {doctor.prezime}
+            </DialogTitle>
+            <DialogDescription>Odaberite datum i vrijeme za vaš termin</DialogDescription>
+          </DialogHeader>
+          <BookAppointmentForm
+            doctorId={doctor.id}
+            doctorName={`${doctor.ime} ${doctor.prezime}`}
+            selectedServiceId={selectedServiceId}
+            onSuccess={() => { setShowBooking(false); setSelectedServiceId(null); }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Guest Booking Dialog */}
+      <GuestBookingDialog
+        open={showGuestBooking}
+        onOpenChange={(open) => { setShowGuestBooking(open); if (!open) setSelectedServiceId(null); }}
+        doctorId={doctor.id}
+        doctorName={`${doctor.ime} ${doctor.prezime}`}
+        doctorData={doctor}
+        services={services}
+        bookedSlots={bookedSlots}
+        selectedServiceId={selectedServiceId}
+      />
+
+      <DoctorProfileMobileBar
+        prihvataOnline={doctor.prihvata_online}
+        telefon={doctor.telefon}
+        onBookClick={handleBookClick}
+        onPhoneClick={() => trackContactClick('phone', doctorAnalyticsEntity, 'mobile_sticky_bar')}
+      />
 
       {/* Guest Visit Booking Dialog */}
       {selectedGuestVisit && (
