@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Clock, MapPin, User, Phone, Download, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { sr } from 'date-fns/locale';
+import { bs } from 'date-fns/locale';
 
 interface AppointmentDetails {
   doctorName: string;
@@ -27,7 +27,7 @@ export function AppointmentConfirmation({ appointment, onClose }: AppointmentCon
   const cardRef = useRef<HTMLDivElement>(null);
 
   const formatDateLong = (date: Date) => {
-    return format(date, 'EEEE, d. MMMM yyyy.', { locale: sr });
+    return format(date, 'EEEE, d. MMMM yyyy.', { locale: bs });
   };
 
   // Generate Google Calendar URL
@@ -245,107 +245,71 @@ END:VCALENDAR`;
     link.click();
   };
 
+  const locationName =
+    appointment.isGuestVisit && appointment.clinicName
+      ? appointment.clinicName
+      : appointment.location;
+
+  const details = [
+    { icon: Calendar, value: formatDateLong(appointment.date) },
+    { icon: Clock, value: appointment.time },
+    { icon: MapPin, value: locationName, hint: appointment.address },
+    { icon: User, value: appointment.serviceName },
+    { icon: Phone, value: appointment.phone },
+  ].filter((item) => !!item.value);
+
   return (
-    <div className="space-y-6">
-      {/* Success Header */}
+    <div className="space-y-5">
       <div className="text-center">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="w-12 h-12 text-green-600" />
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+          <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Termin uspješno zakazan!</h2>
-        <p className="text-muted-foreground mt-1">Detalji vašeg termina su ispod</p>
+        <h2 className="text-xl font-bold text-foreground sm:text-2xl">Termin je zakazan</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Detalji su ispod, dodajte ih u kalendar</p>
       </div>
 
-      {/* Appointment Card */}
-      <Card ref={cardRef} className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardContent className="p-6 space-y-4">
-          {/* Doctor Info */}
-          <div className="text-center pb-4 border-b">
-            <h3 className="text-xl font-semibold text-primary">{appointment.doctorName}</h3>
+      <Card ref={cardRef} className="rounded-2xl border-primary/20 bg-primary/[0.03]">
+        <CardContent className="space-y-4 p-4 sm:p-5">
+          <div className="border-b pb-3 text-center">
+            <h3 className="text-lg font-semibold text-primary">{appointment.doctorName}</h3>
             {appointment.specialty && (
-              <p className="text-muted-foreground">{appointment.specialty}</p>
+              <p className="text-sm text-muted-foreground">{appointment.specialty}</p>
             )}
           </div>
 
-          {/* Details */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">{formatDateLong(appointment.date)}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">{appointment.time}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">
-                  {appointment.isGuestVisit && appointment.clinicName 
-                    ? appointment.clinicName 
-                    : appointment.location}
-                </p>
-                {appointment.address && (
-                  <p className="text-sm text-muted-foreground">{appointment.address}</p>
-                )}
-              </div>
-            </div>
-
-            {appointment.serviceName && (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{appointment.serviceName}</p>
+          <div className="space-y-2.5">
+            {details.map(({ icon: Icon, value, hint }) => (
+              <div key={value as string} className="flex items-start gap-3">
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Icon className="h-4 w-4 text-primary" />
+                </span>
+                <div className="min-w-0 pt-1">
+                  <p className="break-words text-sm font-medium leading-tight">{value}</p>
+                  {hint && hint !== value && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+                  )}
                 </div>
               </div>
-            )}
-
-            {appointment.phone && (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Phone className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{appointment.phone}</p>
-                </div>
-              </div>
-            )}
+            ))}
           </div>
 
           {appointment.isGuestVisit && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4">
-              <p className="text-sm text-amber-800">
-                <strong>Napomena:</strong> Ovaj termin je u klinici gdje doktor gostuje, ne u njegovoj matičnoj ordinaciji.
-              </p>
-            </div>
+            <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <strong>Napomena:</strong> Termin je u klinici gdje doktor gostuje, ne u matičnoj
+              ordinaciji.
+            </p>
           )}
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        <p className="text-sm text-center text-muted-foreground font-medium">Dodaj u kalendar</p>
-        <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-2.5">
+        <div className="grid gap-2.5 sm:grid-cols-2">
           <Button
             variant="outline"
-            className="h-12"
+            className="h-11 rounded-xl"
             onClick={() => window.open(getGoogleCalendarUrl(), '_blank')}
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -353,12 +317,8 @@ END:VCALENDAR`;
             </svg>
             Google Calendar
           </Button>
-          <Button
-            variant="outline"
-            className="h-12"
-            onClick={downloadICS}
-          >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <Button variant="outline" className="h-11 rounded-xl" onClick={downloadICS}>
+            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
               <line x1="16" y1="2" x2="16" y2="6"/>
               <line x1="8" y1="2" x2="8" y2="6"/>
@@ -368,16 +328,16 @@ END:VCALENDAR`;
           </Button>
         </div>
 
-        <Button
-          variant="secondary"
-          className="w-full h-12"
+        <button
+          type="button"
           onClick={downloadReminderImage}
+          className="flex w-full items-center justify-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
         >
-          <Download className="w-5 h-5 mr-2" />
-          Preuzmi podsjetnik (slika)
-        </Button>
+          <Download className="h-3.5 w-3.5" />
+          Preuzmi podsjetnik kao sliku
+        </button>
 
-        <Button variant="default" className="w-full h-12" onClick={onClose}>
+        <Button variant="default" className="h-12 w-full rounded-xl" onClick={onClose}>
           Zatvori
         </Button>
       </div>

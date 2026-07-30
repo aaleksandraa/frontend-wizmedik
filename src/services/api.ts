@@ -4,6 +4,14 @@ import { setClarityTag, trackClarityEvent } from '@/config/clarity';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+const withDevCacheBust = (params?: Record<string, unknown>) => {
+  if (!import.meta.env.DEV) {
+    return params;
+  }
+
+  return { ...params, nocache: Date.now() };
+};
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -104,10 +112,7 @@ export default api;
 // Homepage API - single optimized endpoint
 export const homepageAPI = {
   getData: () => {
-    // Add cache busting in development
-    const isDev = import.meta.env.DEV;
-    const params = isDev ? { nocache: '1' } : {};
-    return api.get('/homepage', { params });
+    return api.get('/homepage', { params: withDevCacheBust() });
   },
 };
 
@@ -121,7 +126,7 @@ export const authAPI = {
 };
 
 export const doctorsAPI = {
-  getAll: (params?: any) => api.get('/doctors', { params }),
+  getAll: (params?: any) => api.get('/doctors', { params: withDevCacheBust(params) }),
   getBySlug: (slug: string) => api.get(`/doctors/slug/${slug}`),
   getById: (id: number) => api.get(`/doctors/${id}`),
   getServices: (id: number) => api.get(`/doctors/${id}/services`),
@@ -150,17 +155,17 @@ export const doctorsAPI = {
 
 export const appointmentsAPI = {
   getMyAppointments: (params?: any) => api.get('/appointments/my', { params }),
-  create: (data: any) => api.post('/appointments', data),
-  createGuest: (data: any) => api.post('/appointments/guest', data),
-  reschedule: (id: number, data: any) => api.put(`/appointments/${id}/reschedule`, data),
-  cancel: (id: number) => api.delete(`/appointments/${id}`),
+  create: (data: any) => api.post('/appointments', data, { timeout: 20000 }),
+  createGuest: (data: any) => api.post('/appointments/guest', data, { timeout: 20000 }),
+  reschedule: (id: number, data: any) => api.put(`/appointments/${id}/reschedule`, data, { timeout: 20000 }),
+  cancel: (id: number) => api.delete(`/appointments/${id}`, { timeout: 20000 }),
   getDoctorAppointments: (params?: any) => api.get('/appointments/doctor', { params }),
-  createManual: (data: any) => api.post('/appointments/doctor/manual', data),
+  createManual: (data: any) => api.post('/appointments/doctor/manual', data, { timeout: 20000 }),
   updateStatus: (id: number, status: string) => api.put(`/appointments/${id}/status`, { status }),
 };
 
 export const clinicsAPI = {
-  getAll: (params?: any) => api.get('/clinics', { params }),
+  getAll: (params?: any) => api.get('/clinics', { params: withDevCacheBust(params) }),
   getBySlug: (slug: string) => api.get(`/clinics/${slug}`),
 };
 

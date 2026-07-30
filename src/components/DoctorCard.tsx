@@ -116,18 +116,8 @@ export function DoctorCard({ doctor: rawDoctor, settings: propSettings }: Doctor
   }
   
   const variants: Record<string, () => JSX.Element> = {
-    wizmedik: () => (
-      <DoctorListingCard
-        doctor={doctor}
-        showBookButton={s.showBookButton}
-      />
-    ),
-    classic: () => (
-      <DoctorListingCard
-        doctor={doctor}
-        showBookButton={s.showBookButton}
-      />
-    ),
+    wizmedik: () => <DoctorListingCard doctor={doctor} />,
+    classic: () => <DoctorListingCard doctor={doctor} />,
     modern: () => <ModernCard doctor={doctor} settings={s} />,
     compact: () => <CompactCard doctor={doctor} settings={s} />,
     horizontal: () => <HorizontalCard doctor={doctor} settings={s} />,

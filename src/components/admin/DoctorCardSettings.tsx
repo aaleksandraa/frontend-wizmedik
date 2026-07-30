@@ -29,6 +29,7 @@ const sampleDoctor = {
   grad: 'Sarajevo',
   lokacija: 'Centar',
   telefon: '+387 33 123 456',
+  email: 'marko.markovic@example.com',
   ocjena: 4.8,
   broj_ocjena: 124,
   prihvata_online: true,
@@ -143,7 +144,7 @@ export function DoctorCardSettings() {
             </CardHeader>
             <CardContent className="space-y-4">
               {[
-                { key: 'showRating', label: 'Ocjena' },
+                { key: 'showRating', label: 'Ocjena (listing kartice)' },
                 { key: 'showLocation', label: 'Lokacija' },
                 { key: 'showPhone', label: 'Telefon' },
                 { key: 'showSpecialty', label: 'Specijalnost' },

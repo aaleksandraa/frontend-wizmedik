@@ -6,6 +6,7 @@ import { DoctorCard } from '@/components/DoctorCard';
 import { DoctorCardSoft } from '@/components/cards/DoctorCardSoft';
 import { ClinicCard } from '@/components/ClinicCard';
 import { ClinicCardSoft } from '@/components/cards/ClinicCardSoft';
+import { ListingGrid } from '@/components/ListingLayout';
 import { LaboratoryCardSoft } from '@/components/cards/LaboratoryCardSoft';
 import SpaCardSoft from '@/components/cards/SpaCardSoft';
 import CareHomeCardSoft from '@/components/cards/CareHomeCardSoft';
@@ -562,9 +563,9 @@ export default function CityLanding() {
 
             <TabsContent value="clinics">
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="h-96 bg-muted rounded-lg animate-pulse"></div>
+                    <div key={i} className="h-40 rounded-2xl bg-muted animate-pulse"></div>
                   ))}
                 </div>
               ) : clinics.length === 0 ? (
@@ -578,7 +579,7 @@ export default function CityLanding() {
                   </p>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <ListingGrid>
                   {clinics.map(clinic => (
                     clinicTemplate === 'soft' ? (
                       <ClinicCardSoft key={clinic.id} clinic={clinic} />
@@ -586,7 +587,7 @@ export default function CityLanding() {
                       <ClinicCard key={clinic.id} clinic={clinic} />
                     )
                   ))}
-                </div>
+                </ListingGrid>
               )}
             </TabsContent>
 

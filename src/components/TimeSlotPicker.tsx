@@ -1,41 +1,28 @@
-import { useState, useEffect } from 'react';
-import { format, parse, addMinutes, isAfter, isBefore, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { format, isSameDay } from 'date-fns';
 import { bs } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarDays, CalendarX2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface WorkingHours {
-  [key: string]: {
-    radi: boolean;
-    od: string;
-    do: string;
-  };
-}
-
-interface Break {
-  od: string;
-  do: string;
-}
-
-interface Holiday {
-  od: string;
-  do: string;
-  razlog?: string;
-}
-
-interface BookedSlot {
-  datum_vrijeme: string;
-  trajanje_minuti: number;
-}
+import {
+  BookedSlot,
+  BreakPeriod,
+  HolidayPeriod,
+  SLOT_PERIOD_LABELS,
+  SlotRules,
+  WorkingHours,
+  getSlotAvailability,
+  getUpcomingBookableDays,
+  groupSlotsByPeriod,
+  isDateBookable,
+} from '@/lib/booking-slots';
 
 interface TimeSlotPickerProps {
   workingHours: WorkingHours;
-  breaks: Break[];
-  holidays: Holiday[];
+  breaks: BreakPeriod[];
+  holidays: HolidayPeriod[];
   bookedSlots: BookedSlot[];
   slotDuration: number;
   selectedDate: Date | undefined;
@@ -43,8 +30,6 @@ interface TimeSlotPickerProps {
   onDateSelect: (date: Date | undefined) => void;
   onTimeSelect: (time: string) => void;
 }
-
-const dayNames = ['nedjelja', 'ponedjeljak', 'utorak', 'srijeda', 'četvrtak', 'petak', 'subota'];
 
 export function TimeSlotPicker({
   workingHours,
@@ -55,310 +40,175 @@ export function TimeSlotPicker({
   selectedDate,
   selectedTime,
   onDateSelect,
-  onTimeSelect
+  onTimeSelect,
 }: TimeSlotPickerProps) {
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
-  useEffect(() => {
-    if (selectedDate) {
-      calculateAvailableSlots(selectedDate);
-    }
-  }, [selectedDate, workingHours, breaks, holidays, bookedSlots, slotDuration]);
+  const rules: SlotRules = useMemo(
+    () => ({ workingHours, breaks, holidays, bookedSlots, slotDuration }),
+    [workingHours, breaks, holidays, bookedSlots, slotDuration]
+  );
 
-  const calculateAvailableSlots = (date: Date) => {
-    // Check if workingHours is empty or null
-    if (!workingHours || Object.keys(workingHours).length === 0) {
-      setAvailableSlots([]);
-      return;
-    }
+  const hasWorkingHours = !!workingHours && Object.keys(workingHours).length > 0;
 
-    const dayName = dayNames[date.getDay()];
-    const daySchedule = workingHours[dayName];
+  const quickDays = useMemo(() => getUpcomingBookableDays(rules), [rules]);
 
-    // Check if day is closed (support both 'closed' and 'radi' formats)
-    const isClosed = daySchedule?.closed === true || daySchedule?.radi === false;
-    if (!daySchedule || isClosed) {
-      setAvailableSlots([]);
-      return;
-    }
+  const dayAvailability = useMemo(
+    () =>
+      quickDays.map((date) => ({
+        date,
+        freeCount: getSlotAvailability(date, rules).available.length,
+      })),
+    [quickDays, rules]
+  );
 
-    // Check if date is a holiday
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const isHoliday = holidays.some(holiday => {
-      const holidayStart = startOfDay(new Date(holiday.od));
-      const holidayEnd = endOfDay(new Date(holiday.do));
-      return isWithinInterval(date, { start: holidayStart, end: holidayEnd });
-    });
+  const slotGroups = useMemo(
+    () => (selectedDate ? groupSlotsByPeriod(getSlotAvailability(selectedDate, rules).available) : []),
+    [selectedDate, rules]
+  );
 
-    if (isHoliday) {
-      setAvailableSlots([]);
-      return;
-    }
+  const availableCount = slotGroups.reduce((sum, group) => sum + group.slots.length, 0);
 
-    // Generate all possible slots (support both 'open/close' and 'od/do' formats)
-    const slots: string[] = [];
-    const startTimeStr = daySchedule.open || daySchedule.od;
-    const endTimeStr = daySchedule.close || daySchedule.do;
-    
-    if (!startTimeStr || !endTimeStr) {
-      setAvailableSlots([]);
-      return;
-    }
-    
-    const startTime = parse(startTimeStr, 'HH:mm', date);
-    const endTime = parse(endTimeStr, 'HH:mm', date);
-
-    let currentSlot = startTime;
-    while (isBefore(currentSlot, endTime)) {
-      const slotTimeStr = format(currentSlot, 'HH:mm');
-      const slotEnd = addMinutes(currentSlot, slotDuration);
-
-      // Check if slot end is within working hours
-      if (isAfter(slotEnd, endTime)) break;
-
-      // Check if slot overlaps with breaks
-      const overlapWithBreak = breaks.some(breakItem => {
-        const breakStart = parse(breakItem.od, 'HH:mm', date);
-        const breakEnd = parse(breakItem.do, 'HH:mm', date);
-        return (
-          (isWithinInterval(currentSlot, { start: breakStart, end: breakEnd }) ||
-          isWithinInterval(slotEnd, { start: breakStart, end: breakEnd }) ||
-          (isBefore(currentSlot, breakStart) && isAfter(slotEnd, breakEnd)))
-        );
-      });
-
-      if (overlapWithBreak) {
-        currentSlot = addMinutes(currentSlot, slotDuration);
-        continue;
-      }
-
-      // Check if slot is already booked
-      const isBooked = Array.isArray(bookedSlots) && bookedSlots.some(booking => {
-        const bookingStart = new Date(booking.datum_vrijeme);
-        // Use trajanje_minuti from booking, fallback to slotDuration
-        const bookingDuration = booking.trajanje_minuti || slotDuration;
-        const bookingEnd = addMinutes(bookingStart, bookingDuration);
-        const slotDateTime = new Date(date);
-        slotDateTime.setHours(currentSlot.getHours(), currentSlot.getMinutes(), 0, 0);
-        const slotEndDateTime = addMinutes(slotDateTime, slotDuration);
-
-        // Check if this slot overlaps with the booking
-        // Slot is booked if:
-        // 1. Slot starts during the booking (but not exactly at booking end)
-        // 2. Slot ends during the booking (but not exactly at booking start)
-        // 3. Slot completely contains the booking
-        const slotStartsDuringBooking = slotDateTime >= bookingStart && slotDateTime < bookingEnd;
-        const slotEndsDuringBooking = slotEndDateTime > bookingStart && slotEndDateTime <= bookingEnd;
-        const slotContainsBooking = slotDateTime <= bookingStart && slotEndDateTime >= bookingEnd;
-
-        return (
-          format(bookingStart, 'yyyy-MM-dd') === dateStr &&
-          (slotStartsDuringBooking || slotEndsDuringBooking || slotContainsBooking)
-        );
-      });
-
-      if (!isBooked) {
-        slots.push(slotTimeStr);
-      }
-
-      currentSlot = addMinutes(currentSlot, slotDuration);
-    }
-
-    setAvailableSlots(slots);
+  const selectDate = (date: Date | undefined) => {
+    onDateSelect(date);
+    onTimeSelect('');
   };
 
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-
-  const isDateDisabled = (date: Date): boolean => {
-    if (date < minDate) return true;
-
-    const dayName = dayNames[date.getDay()];
-    const daySchedule = workingHours[dayName];
-    const isClosed = daySchedule?.closed === true || daySchedule?.radi === false;
-    if (!daySchedule || isClosed) return true;
-
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const isHoliday = holidays.some(holiday => {
-      const holidayStart = startOfDay(new Date(holiday.od));
-      const holidayEnd = endOfDay(new Date(holiday.do));
-      return isWithinInterval(date, { start: holidayStart, end: holidayEnd });
-    });
-
-    return isHoliday;
-  };
-
-  const getDayClassName = (date: Date): string => {
-    if (date < minDate) return '';
-    
-    const dayName = dayNames[date.getDay()];
-    const daySchedule = workingHours[dayName];
-    const isClosed = daySchedule?.closed === true || daySchedule?.radi === false;
-    
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const isHoliday = holidays.some(holiday => {
-      const holidayStart = startOfDay(new Date(holiday.od));
-      const holidayEnd = endOfDay(new Date(holiday.do));
-      return isWithinInterval(date, { start: holidayStart, end: holidayEnd });
-    });
-
-    if (!daySchedule || isClosed || isHoliday) {
-      return 'text-muted-foreground line-through';
-    }
-
-    const dayBookings = Array.isArray(bookedSlots) ? bookedSlots.filter(booking => {
-      const bookingDate = new Date(booking.datum_vrijeme);
-      return format(bookingDate, 'yyyy-MM-dd') === dateStr;
-    }) : [];
-
-    if (!daySchedule.open || !daySchedule.close) {
-      if (!daySchedule.od || !daySchedule.do) return 'text-green-600';
-    }
-
-    const startTimeStr = daySchedule.open || daySchedule.od;
-    const endTimeStr = daySchedule.close || daySchedule.do;
-    
-    if (!startTimeStr || !endTimeStr) return 'text-green-600';
-
-    const startTime = parse(startTimeStr, 'HH:mm', date);
-    const endTime = parse(endTimeStr, 'HH:mm', date);
-    let totalSlots = 0;
-    let currentSlot = startTime;
-
-    while (isBefore(currentSlot, endTime)) {
-      const slotEnd = addMinutes(currentSlot, slotDuration);
-      if (isAfter(slotEnd, endTime)) break;
-
-      const overlapWithBreak = breaks.some(breakItem => {
-        const breakStart = parse(breakItem.od, 'HH:mm', date);
-        const breakEnd = parse(breakItem.do, 'HH:mm', date);
-        return (
-          isWithinInterval(currentSlot, { start: breakStart, end: breakEnd }) ||
-          isWithinInterval(slotEnd, { start: breakStart, end: breakEnd }) ||
-          (isBefore(currentSlot, breakStart) && isAfter(slotEnd, breakEnd))
-        );
-      });
-
-      if (!overlapWithBreak) {
-        totalSlots++;
-      }
-
-      currentSlot = addMinutes(currentSlot, slotDuration);
-    }
-
-    const bookedCount = dayBookings.length;
-
-    if (bookedCount >= totalSlots) {
-      return 'text-red-600 font-semibold';
-    }
-
-    return 'text-green-600';
-  };
+  if (!hasWorkingHours) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-5 text-center">
+        <CalendarX2 className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">
+          Doktor nema definisano radno vrijeme. Kontaktirajte ordinaciju telefonom.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label>Datum</Label>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !selectedDate && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectedDate ? format(selectedDate, 'd. MMMM yyyy.', { locale: bs }) : <span>Izaberite datum</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => {
-                onDateSelect(date);
-                onTimeSelect('');
-                if (date) setOpen(false);
-              }}
-              disabled={isDateDisabled}
-              initialFocus
-              locale={bs}
-              weekStartsOn={1}
-              className={cn("p-3 pointer-events-auto")}
-              modifiers={{
-                available: (date) => {
-                  const className = getDayClassName(date);
-                  return className === 'text-green-600';
-                },
-                fullyBooked: (date) => {
-                  const className = getDayClassName(date);
-                  return className === 'text-red-600 font-semibold';
-                },
-                closed: (date) => {
-                  const className = getDayClassName(date);
-                  return className === 'text-muted-foreground line-through';
-                }
-              }}
-              modifiersClassNames={{
-                available: 'text-green-600',
-                fullyBooked: 'text-red-600 font-semibold',
-                closed: 'text-muted-foreground line-through'
-              }}
-            />
-            {/* Calendar Legend */}
-            <div className="px-3 pb-3 pt-2 border-t border-border">
-              <div className="text-xs space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                  <span className="text-muted-foreground">Dostupni termini</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                  <span className="text-muted-foreground">Popunjeno</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-                  <span className="text-muted-foreground">Zatvoreno</span>
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+    <div className="space-y-5">
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-semibold text-foreground">Dan</span>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button type="button" variant="ghost" size="sm" className="h-8 gap-1.5 px-2 text-xs">
+                <CalendarDays className="h-4 w-4" />
+                Drugi datum
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  selectDate(date);
+                  if (date) setCalendarOpen(false);
+                }}
+                disabled={(date) => !isDateBookable(date, rules)}
+                locale={bs}
+                weekStartsOn={1}
+                initialFocus
+                className="pointer-events-auto p-3"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {dayAvailability.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+            Trenutno nema slobodnih dana u sljedećih 60 dana.
+          </div>
+        ) : (
+          <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {dayAvailability.map(({ date, freeCount }) => {
+              const isSelected = selectedDate ? isSameDay(date, selectedDate) : false;
+              const isFull = freeCount === 0;
+
+              return (
+                <button
+                  key={date.toISOString()}
+                  type="button"
+                  disabled={isFull}
+                  onClick={() => selectDate(date)}
+                  className={cn(
+                    'flex min-w-[4.25rem] flex-shrink-0 snap-start flex-col items-center gap-0.5 rounded-2xl border px-3 py-2.5 transition-all',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                    isSelected
+                      ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                      : 'border-border bg-background hover:border-primary/50 hover:bg-primary/5',
+                    isFull && 'cursor-not-allowed opacity-40 hover:border-border hover:bg-background'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'text-[11px] font-medium uppercase',
+                      isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                    )}
+                  >
+                    {format(date, 'EEE', { locale: bs })}
+                  </span>
+                  <span className="text-lg font-semibold leading-none">{format(date, 'd')}</span>
+                  <span
+                    className={cn(
+                      'text-[11px]',
+                      isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                    )}
+                  >
+                    {format(date, 'MMM', { locale: bs })}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {selectedDate && (
-        <div>
-          <Label>Dostupni termini</Label>
-          {!workingHours || Object.keys(workingHours).length === 0 ? (
-            <div className="mt-2 p-4 bg-muted/50 rounded-lg border border-dashed">
-              <p className="text-sm text-muted-foreground text-center">
-                Doktor nema definisano radno vrijeme. Molimo kontaktirajte direktno telefonom.
-              </p>
-            </div>
-          ) : availableSlots.length === 0 ? (
-            <div className="mt-2 p-4 bg-muted/50 rounded-lg border border-dashed">
-              <p className="text-sm text-muted-foreground text-center">
-                Nema dostupnih termina za izabrani datum.
-              </p>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-sm font-semibold text-foreground">Vrijeme</span>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
+              {slotDuration} min
+              {availableCount > 0 && <span aria-hidden>·</span>}
+              {availableCount > 0 && <span>{availableCount} slobodno</span>}
+            </span>
+          </div>
+
+          {availableCount === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+              Nema slobodnih termina za {format(selectedDate, 'd. MMMM', { locale: bs })}. Izaberite
+              drugi dan.
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {availableSlots.map((slot) => (
-                <Button
-                  key={slot}
-                  type="button"
-                  variant={selectedTime === slot ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onTimeSelect(slot)}
-                  className={cn(
-                    "text-sm transition-all",
-                    selectedTime === slot && "ring-2 ring-primary ring-offset-2"
+            <div className="space-y-3">
+              {slotGroups.map(({ period, slots }) => (
+                <div key={period} className="space-y-2">
+                  {slotGroups.length > 1 && (
+                    <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      {SLOT_PERIOD_LABELS[period]}
+                    </span>
                   )}
-                >
-                  {slot}
-                </Button>
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                    {slots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => onTimeSelect(slot)}
+                        className={cn(
+                          'rounded-xl border py-2.5 text-sm font-medium tabular-nums transition-all',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                          selectedTime === slot
+                            ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                            : 'border-border bg-background hover:border-primary/50 hover:bg-primary/5'
+                        )}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

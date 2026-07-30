@@ -2,10 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Phone, Mail, Globe, Clock, Users, Building2, Star, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Users, Building2, ChevronRight } from 'lucide-react';
 import { useClinicCardSettings } from '@/hooks/useCardSettings';
 import { formatNumber } from '@/utils/formatters';
 import { fixImageUrl } from '@/utils/imageUrl';
+import { ClinicListingCard } from '@/components/ClinicListingCard';
 
 interface Clinic {
   id: number;
@@ -19,6 +20,7 @@ interface Clinic {
   slike: string[];
   radno_vrijeme: any;
   doktori?: any[];
+  specijalnosti?: any[];
   slug?: string;
   distance?: number;
   ocjena?: number;
@@ -28,26 +30,19 @@ interface Clinic {
 interface ClinicCardProps {
   clinic: Clinic;
   variant?: string;
+  compact?: boolean;
 }
 
-type ClinicCardVariant = 'classic' | 'modern' | 'compact' | 'horizontal' | 'minimal' | 'gradient';
+type ClinicCardVariant =
+  | 'wizmedik'
+  | 'classic'
+  | 'modern'
+  | 'compact'
+  | 'horizontal'
+  | 'minimal'
+  | 'gradient';
 
-const defaultSettings = {
-  variant: 'classic' as ClinicCardVariant,
-  showImage: true,
-  showDescription: true,
-  showAddress: true,
-  showPhone: true,
-  showEmail: false,
-  showWebsite: false,
-  showWorkingHours: true,
-  showDoctorsCount: true,
-  showDistance: true,
-  primaryColor: '#0891b2',
-  accentColor: '#8b5cf6',
-};
-
-export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
+export function ClinicCard({ clinic, variant: propVariant, compact = false }: ClinicCardProps) {
   const navigate = useNavigate();
   const { settings, loading } = useClinicCardSettings();
   const currentVariant = (propVariant || settings.variant) as ClinicCardVariant;
@@ -59,94 +54,21 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
   // Show skeleton while loading settings (only if no propVariant provided)
   if (loading && !propVariant) {
     return (
-      <Card className="overflow-hidden animate-pulse">
-        <div className="h-48 bg-gray-200" />
-        <div className="p-6 space-y-3">
-          <div className="h-6 bg-gray-200 rounded w-3/4" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-          <div className="h-4 bg-gray-200 rounded w-2/3" />
+      <div className="flex animate-pulse items-stretch gap-4 rounded-2xl border border-slate-100 bg-white p-4 md:p-5">
+        <div className="h-[120px] w-[104px] shrink-0 rounded-2xl bg-slate-100 md:w-[112px]" />
+        <div className="flex-1 space-y-3 py-1">
+          <div className="h-4 w-3/4 rounded bg-slate-100" />
+          <div className="h-3 w-1/2 rounded bg-slate-100" />
+          <div className="h-3 w-2/3 rounded bg-slate-100" />
+          <div className="h-10 w-24 rounded-full bg-slate-100" />
         </div>
-      </Card>
+      </div>
     );
   }
 
-  // Classic variant - full card with working hours
-  if (currentVariant === 'classic') {
-    return (
-      <Card className="overflow-hidden hover:shadow-strong transition-shadow duration-300">
-        {settings.showImage && (
-          <div 
-            className="h-48 bg-gradient-to-r from-primary/20 to-accent/20 relative cursor-pointer"
-            onClick={goToClinic}
-          >
-            {mainImage ? (
-              <img src={mainImage} alt={clinic.naziv} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
-            ) : (
-              <div className="flex items-center justify-center h-full hover:bg-primary/30 transition-colors">
-                <Building2 className="h-16 w-16 text-primary/40" />
-              </div>
-            )}
-            <div className="absolute top-4 right-4 flex flex-col gap-2">
-              <Badge variant="secondary" className="bg-white/90 text-primary">{clinic.grad}</Badge>
-              {settings.showDistance && clinic.distance && (
-                <Badge variant="default" className="bg-primary/90 text-white">{formatNumber(clinic.distance)} km</Badge>
-              )}
-            </div>
-          </div>
-        )}
-        <div className="p-6">
-          <h3 
-            className="text-xl font-bold text-foreground mb-2 cursor-pointer hover:text-primary transition-colors"
-            onClick={goToClinic}
-          >
-            {clinic.naziv}
-          </h3>
-          {settings.showDescription && clinic.opis && (
-            <p className="text-muted-foreground text-sm line-clamp-2 mb-4">{clinic.opis}</p>
-          )}
-          <div className="space-y-2 mb-4">
-            {settings.showAddress && (
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span>{clinic.adresa}, {clinic.grad}</span>
-              </div>
-            )}
-            {settings.showPhone && (
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="h-4 w-4 text-primary" />
-                <span>{clinic.telefon}</span>
-              </div>
-            )}
-          </div>
-          {settings.showWorkingHours && clinic.radno_vrijeme && Object.keys(clinic.radno_vrijeme).length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                <Clock className="h-4 w-4 text-primary" />
-                <span>Radno vrijeme</span>
-              </div>
-              <div className="text-xs text-muted-foreground space-y-1">
-                {Object.entries(clinic.radno_vrijeme).map(([day, hours]: [string, any]) => (
-                  <div key={day} className="flex justify-between">
-                    <span className="capitalize">{day}:</span>
-                    <span>{hours && typeof hours === 'object' && !hours.closed ? `${hours.open} - ${hours.close}` : 'Zatvoreno'}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {settings.showDoctorsCount && clinic.doktori && clinic.doktori.length > 0 && (
-            <div className="flex items-center gap-2 text-sm mb-4">
-              <Users className="h-4 w-4 text-primary" />
-              <span>{clinic.doktori.length} {clinic.doktori.length === 1 ? 'doktor' : 'doktora'}</span>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={goToClinic}>Više informacija</Button>
-            <Button variant="medical" className="flex-1" onClick={goToClinic}>Rezerviši termin</Button>
-          </div>
-        </div>
-      </Card>
-    );
+  // Default modern listing card (shares the design language with doctor cards)
+  if (currentVariant === 'wizmedik' || currentVariant === 'classic') {
+    return <ClinicListingCard clinic={clinic} compact={compact} />;
   }
 
   // Modern variant - clean design without working hours
@@ -344,13 +266,7 @@ export function ClinicCard({ clinic, variant: propVariant }: ClinicCardProps) {
     );
   }
 
-  // Default fallback to modern
-  return (
-    <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={goToClinic}>
-      <h3 className="font-semibold">{clinic.naziv}</h3>
-      <p className="text-sm text-muted-foreground">{clinic.grad}</p>
-    </Card>
-  );
+  return <ClinicListingCard clinic={clinic} compact={compact} />;
 }
 
 

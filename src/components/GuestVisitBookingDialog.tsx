@@ -11,8 +11,9 @@ import { AppointmentConfirmation } from '@/components/AppointmentConfirmation';
 import { Calendar, Building2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
-import { sr } from 'date-fns/locale';
+import { bs } from 'date-fns/locale';
 import { trackAppointmentCompleted } from '@/config/analytics';
+import { cn } from '@/lib/utils';
 
 interface GuestVisitService {
   id: number;
@@ -224,7 +225,7 @@ export function GuestVisitBookingDialog({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return format(date, 'EEEE, d. MMMM yyyy.', { locale: sr });
+    return format(date, 'EEEE, d. MMMM yyyy.', { locale: bs });
   };
 
   const formatTime = (time: string) => {
@@ -237,7 +238,7 @@ export function GuestVisitBookingDialog({
     const selectedService = services.find(s => s.id === selectedServiceId);
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6">
           <AppointmentConfirmation
             appointment={{
               doctorName,
@@ -259,9 +260,9 @@ export function GuestVisitBookingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Zakaži termin kod {doctorName}</DialogTitle>
+      <DialogContent className="w-[calc(100%-1.5rem)] max-w-lg rounded-2xl p-4 sm:p-6">
+        <DialogHeader className="pr-8 text-left">
+          <DialogTitle className="text-lg">Zakaži termin kod {doctorName}</DialogTitle>
           <DialogDescription>
             Gostovanje u klinici {guestVisit.klinika.naziv}
           </DialogDescription>
@@ -269,33 +270,33 @@ export function GuestVisitBookingDialog({
 
         <div className="space-y-4">
           {/* Guest visit info banner */}
-          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-            <div className="flex items-start gap-2">
-              <Building2 className="w-5 h-5 text-cyan-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-cyan-800">Termin u gostujućoj klinici</p>
-                <p className="text-sm text-cyan-700">
-                  {guestVisit.klinika.naziv} - {guestVisit.klinika.lokacija}, {guestVisit.klinika.grad}
+          <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-3">
+            <div className="flex items-start gap-2.5">
+              <Building2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-600" />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-cyan-900">Termin u gostujućoj klinici</p>
+                <p className="text-xs text-cyan-700">
+                  {guestVisit.klinika.naziv} · {guestVisit.klinika.lokacija}, {guestVisit.klinika.grad}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Date info */}
-          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-            <Calendar className="w-5 h-5 text-primary" />
-            <div>
-              <p className="font-medium">{formatDate(guestVisit.datum)}</p>
-              <p className="text-sm text-muted-foreground">
-                Radno vrijeme: {formatTime(guestVisit.vrijeme_od)} - {formatTime(guestVisit.vrijeme_do)}
+          <div className="flex items-center gap-3 rounded-xl bg-muted/60 p-3">
+            <Calendar className="h-4 w-4 flex-shrink-0 text-primary" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{formatDate(guestVisit.datum)}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatTime(guestVisit.vrijeme_od)} - {formatTime(guestVisit.vrijeme_do)}
               </p>
             </div>
           </div>
 
           {/* Service selection */}
           {services.length > 0 && (
-            <div>
-              <Label>Usluga (opcionalno)</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Usluga (opcionalno)</Label>
               <Select
                 value={selectedServiceId?.toString() || NO_SPECIFIC_SERVICE_VALUE}
                 onValueChange={(value) => {
@@ -308,7 +309,7 @@ export function GuestVisitBookingDialog({
                   setSelectedServiceId(Number.isNaN(parsedId) ? null : parsedId);
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl">
                   <SelectValue placeholder="Odaberite uslugu" />
                 </SelectTrigger>
                 <SelectContent>
@@ -324,28 +325,33 @@ export function GuestVisitBookingDialog({
           )}
 
           {/* Time slots */}
-          <div>
-            <Label className="mb-2 block">Odaberite vrijeme</Label>
+          <div className="space-y-2">
+            <Label className="block text-sm font-semibold">Odaberite vrijeme</Label>
             {loadingSlots ? (
-              <div className="text-center py-4 text-muted-foreground">
+              <div className="rounded-xl border border-dashed border-border bg-muted/40 py-4 text-center text-sm text-muted-foreground">
                 Učitavanje slobodnih termina...
               </div>
             ) : availableSlots.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
+              <div className="rounded-xl border border-dashed border-border bg-muted/40 py-4 text-center text-sm text-muted-foreground">
                 Nema slobodnih termina za ovaj datum
               </div>
             ) : (
-              <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+              <div className="grid max-h-48 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
                 {availableSlots.map((slot) => (
-                  <Button
+                  <button
                     key={slot}
-                    variant={selectedSlot === slot ? "default" : "outline"}
-                    size="sm"
+                    type="button"
                     onClick={() => setSelectedSlot(slot)}
-                    className="text-sm"
+                    className={cn(
+                      'rounded-xl border py-2.5 text-sm font-medium tabular-nums transition-all',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                      selectedSlot === slot
+                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                        : 'border-border bg-background hover:border-primary/50 hover:bg-primary/5'
+                    )}
                   >
                     {slot}
-                  </Button>
+                  </button>
                 ))}
               </div>
             )}
@@ -354,67 +360,75 @@ export function GuestVisitBookingDialog({
 
           {/* Guest booking form (if not logged in) */}
           {!user && (
-            <div className="space-y-3 pt-4 border-t">
-              <p className="text-sm font-medium">Vaši podaci</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="ime">Ime *</Label>
+            <div className="space-y-3 border-t pt-4">
+              <p className="text-sm font-semibold">Vaši podaci</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="ime" className="text-xs text-muted-foreground">Ime *</Label>
                   <Input
                     id="ime"
                     value={guestData.ime}
                     onChange={(e) => setGuestData(prev => ({ ...prev, ime: e.target.value }))}
+                    className="h-11 rounded-xl"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="prezime">Prezime *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="prezime" className="text-xs text-muted-foreground">Prezime *</Label>
                   <Input
                     id="prezime"
                     value={guestData.prezime}
                     onChange={(e) => setGuestData(prev => ({ ...prev, prezime: e.target.value }))}
+                    className="h-11 rounded-xl"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="telefon" className="text-xs text-muted-foreground">Telefon *</Label>
+                  <Input
+                    id="telefon"
+                    type="tel"
+                    inputMode="tel"
+                    value={guestData.telefon}
+                    onChange={(e) => setGuestData(prev => ({ ...prev, telefon: e.target.value }))}
+                    className="h-11 rounded-xl"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs text-muted-foreground">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    inputMode="email"
+                    value={guestData.email}
+                    onChange={(e) => setGuestData(prev => ({ ...prev, email: e.target.value }))}
+                    className="h-11 rounded-xl"
                     required
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={guestData.email}
-                  onChange={(e) => setGuestData(prev => ({ ...prev, email: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="telefon">Telefon *</Label>
-                <Input
-                  id="telefon"
-                  value={guestData.telefon}
-                  onChange={(e) => setGuestData(prev => ({ ...prev, telefon: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="napomena">Napomena (opcionalno)</Label>
-                <Textarea
-                  id="napomena"
-                  value={guestData.napomena}
-                  onChange={(e) => setGuestData(prev => ({ ...prev, napomena: e.target.value }))}
-                  rows={2}
-                />
-              </div>
+              <Textarea
+                id="napomena"
+                placeholder="Napomena (opcionalno)..."
+                value={guestData.napomena}
+                onChange={(e) => setGuestData(prev => ({ ...prev, napomena: e.target.value }))}
+                rows={2}
+                className="rounded-xl"
+              />
             </div>
           )}
 
-          <Button
-            variant="medical"
-            className="w-full"
-            onClick={handleBooking}
-            disabled={loading || !selectedSlot || (!user && (!guestData.ime || !guestData.prezime || !guestData.email || !guestData.telefon))}
-          >
-            {loading ? 'Zakazivanje...' : 'Zakaži termin'}   
-          </Button>
+          <div className="sticky bottom-0 -mx-4 border-t border-border bg-background/95 px-4 pb-1 pt-3 backdrop-blur sm:-mx-6 sm:px-6">
+            <Button
+              variant="medical"
+              className="h-12 w-full rounded-xl text-base"
+              onClick={handleBooking}
+              disabled={loading || !selectedSlot || (!user && (!guestData.ime || !guestData.prezime || !guestData.email || !guestData.telefon))}
+            >
+              {loading ? 'Zakazujem...' : 'Potvrdi termin'}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

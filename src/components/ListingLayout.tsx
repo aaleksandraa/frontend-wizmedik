@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-interface DoctorListingHeaderProps {
+interface ListingHeaderProps {
   badge?: string;
   badgeIcon?: LucideIcon;
   title: string;
@@ -10,13 +10,13 @@ interface DoctorListingHeaderProps {
   action?: ReactNode;
 }
 
-export function DoctorListingHeader({
+export function ListingHeader({
   badge,
   badgeIcon: BadgeIcon,
   title,
   description,
   action,
-}: DoctorListingHeaderProps) {
+}: ListingHeaderProps) {
   return (
     <div className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
       <div>
@@ -36,11 +36,7 @@ export function DoctorListingHeader({
   );
 }
 
-interface DoctorListingFiltersProps {
-  children: ReactNode;
-}
-
-export function DoctorListingFilters({ children }: DoctorListingFiltersProps) {
+export function ListingFilters({ children }: { children: ReactNode }) {
   return (
     <div className="mb-8 rounded-2xl border border-[#0891b2]/10 bg-white p-4 shadow-[0_4px_24px_-8px_rgba(8,145,178,0.1)] md:p-5">
       {children}
@@ -48,7 +44,7 @@ export function DoctorListingFilters({ children }: DoctorListingFiltersProps) {
   );
 }
 
-export function DoctorListingGrid({
+export function ListingGrid({
   children,
   horizontalScroll = false,
 }: {
@@ -64,8 +60,6 @@ export function DoctorListingGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-      {children}
-    </div>
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">{children}</div>
   );
 }

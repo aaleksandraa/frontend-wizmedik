@@ -7,7 +7,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { Button } from '@/components/ui/button';
 import { MapPin, Stethoscope } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { DoctorListingHeader, DoctorListingGrid } from '@/components/DoctorListingLayout';
+import { ListingHeader, ListingGrid } from '@/components/ListingLayout';
 
 interface Doctor {
   id: number;
@@ -257,7 +257,7 @@ export default function CitySpecialtyDoctors() {
         <main className="container mx-auto px-4 py-2 md:py-4">
           <Breadcrumb items={breadcrumbItems} />
 
-          <DoctorListingHeader
+          <ListingHeader
             badge="Doktori"
             badgeIcon={resolvedCityName ? MapPin : Stethoscope}
             title={
@@ -271,11 +271,11 @@ export default function CitySpecialtyDoctors() {
           />
 
           {loading ? (
-            <DoctorListingGrid>
+            <ListingGrid>
               {[1, 2, 3, 4, 5, 6].map((item) => (
                 <div key={item} className="h-72 animate-pulse rounded-2xl bg-white shadow-sm" />
               ))}
-            </DoctorListingGrid>
+            </ListingGrid>
           ) : doctors.length === 0 ? (
             <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
               <Stethoscope className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40 opacity-50" />
@@ -296,7 +296,7 @@ export default function CitySpecialtyDoctors() {
                 {doctors.length === 1 ? 'doktor' : 'doktora'}
               </p>
 
-              <DoctorListingGrid>
+              <ListingGrid>
                 {doctors.map((doctor) => (
                   <DoctorCard
                     key={doctor.id}
@@ -316,7 +316,7 @@ export default function CitySpecialtyDoctors() {
                     }}
                   />
                 ))}
-              </DoctorListingGrid>
+              </ListingGrid>
             </>
           )}
         </main>

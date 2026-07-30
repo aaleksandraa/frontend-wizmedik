@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Stethoscope, Search, MapPin, Navigation, X, ArrowUpDown, List, Map, LayoutGrid } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { DoctorListingHeader, DoctorListingFilters, DoctorListingGrid } from '@/components/DoctorListingLayout';
+import { ListingHeader, ListingFilters, ListingGrid } from '@/components/ListingLayout';
 
 interface Doctor {
   id: number;
@@ -425,7 +425,7 @@ export default function Doctors() {
         <Navbar />
         
         <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-          <DoctorListingHeader
+          <ListingHeader
             badge="Doktori"
             badgeIcon={Stethoscope}
             title={selectedCity ? `Doktori — ${selectedCity}` : 'Doktori u Bosni i Hercegovini'}
@@ -436,7 +436,7 @@ export default function Doctors() {
             }
           />
 
-        <DoctorListingFilters>
+        <ListingFilters>
           <div className="space-y-4">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
@@ -555,7 +555,7 @@ export default function Doctors() {
             </div>
           </div>
           </div>
-        </DoctorListingFilters>
+        </ListingFilters>
 
         {/* View Mode Tabs */}
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map' | 'split')} className="space-y-6">
@@ -578,7 +578,7 @@ export default function Doctors() {
 
           <TabsContent value="list">
             {filteredDoctors.length > 0 ? (
-              <DoctorListingGrid>
+              <ListingGrid>
                 {filteredDoctors.map(doctor => (
                   template === 'soft' ? (
                     <DoctorCardSoft key={doctor.id} doctor={doctor} />
@@ -586,7 +586,7 @@ export default function Doctors() {
                     <DoctorCard key={doctor.id} doctor={doctor} />
                   )
                 ))}
-              </DoctorListingGrid>
+              </ListingGrid>
             ) : (
               <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
                 <Stethoscope className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40" />

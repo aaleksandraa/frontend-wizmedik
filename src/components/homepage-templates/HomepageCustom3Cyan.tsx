@@ -5,10 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CustomSelect } from '@/components/ui/custom-select';
 import { DoctorListingCard } from '@/components/DoctorListingCard';
-import { DoctorListingGrid } from '@/components/DoctorListingLayout';
+import { ListingGrid } from '@/components/ListingLayout';
 import CareHomeCardSoft from '@/components/cards/CareHomeCardSoft';
 import SpaCardSoft from '@/components/cards/SpaCardSoft';
-import { ClinicCard } from '@/components/ClinicCard';
+import { ClinicListingCard } from '@/components/ClinicListingCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useHomepageData } from '@/hooks/useHomepageData';
@@ -670,11 +670,11 @@ export default function HomepageCustom3Cyan() {
                 </Button>
               </Link>
             </div>
-            <DoctorListingGrid horizontalScroll>
+            <ListingGrid horizontalScroll>
               {doctors.slice(0, 6).map((doctor) => (
                 <DoctorListingCard key={doctor.id} doctor={doctor} compact />
               ))}
-            </DoctorListingGrid>
+            </ListingGrid>
           </div>
         </section>
       )}
@@ -683,26 +683,26 @@ export default function HomepageCustom3Cyan() {
       {clinics.length > 0 && (
         <section className="py-16 bg-cyan-50/30">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+            <div className="flex flex-col gap-4 mb-8 md:mb-10 md:flex-row md:items-end md:justify-between">
               <div>
-                <Badge variant="outline" className="mb-4 px-4 py-1 border-cyan-200 text-cyan-700">
+                <Badge variant="outline" className="mb-4 px-4 py-1 border-[#0891b2]/25 bg-[#0891b2]/5 text-[#0891b2]">
                   <Building2 className="w-3 h-3 mr-2" />Zdravstvene ustanove
                 </Badge>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Klinike i ordinacije</h2>
                 <p className="text-gray-600 mt-2">Moderne zdravstvene ustanove sa vrhunskom opremom</p>
               </div>
               <Link to="/klinike">
-                <Button variant="outline" className="group border-cyan-200 text-cyan-700 hover:bg-cyan-50">
+                <Button variant="outline" className="group rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5">
                   Sve klinike
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {clinics.slice(0, 4).map((clinic) => (
-                <ClinicCard key={clinic.id} clinic={clinic} />
+            <ListingGrid horizontalScroll>
+              {clinics.slice(0, 6).map((clinic) => (
+                <ClinicListingCard key={clinic.id} clinic={clinic} compact />
               ))}
-            </div>
+            </ListingGrid>
           </div>
         </section>
       )}

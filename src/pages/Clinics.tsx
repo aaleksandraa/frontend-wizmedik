@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ClinicCard } from '@/components/ClinicCard';
 import { ClinicCardSoft } from '@/components/cards/ClinicCardSoft';
+import { ListingFilters, ListingGrid, ListingHeader } from '@/components/ListingLayout';
 import { useListingTemplate } from '@/hooks/useListingTemplate';
 import { ClinicsMap } from '@/components/ClinicsMap';
 import { Input } from '@/components/ui/input';
@@ -593,11 +594,27 @@ export default function Clinics() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-slate-50/80">
         <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
+        <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+          <div className="mb-8 space-y-3">
+            <div className="h-8 w-64 animate-pulse rounded-lg bg-slate-200" />
+            <div className="h-4 w-full max-w-xl animate-pulse rounded bg-slate-200" />
+          </div>
+          <ListingGrid>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex animate-pulse items-stretch gap-4 rounded-2xl border border-slate-100 bg-white p-4 md:p-5">
+                <div className="h-[120px] w-[104px] shrink-0 rounded-2xl bg-slate-100 md:w-[112px]" />
+                <div className="flex-1 space-y-3 py-1">
+                  <div className="h-4 w-3/4 rounded bg-slate-100" />
+                  <div className="h-3 w-1/2 rounded bg-slate-100" />
+                  <div className="h-3 w-2/3 rounded bg-slate-100" />
+                  <div className="h-10 w-24 rounded-full bg-slate-100" />
+                </div>
+              </div>
+            ))}
+          </ListingGrid>
+        </main>
       </div>
     );
   }
@@ -624,31 +641,24 @@ export default function Clinics() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-slate-50/80">
         <Navbar />
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center mb-12">
-            <div className="md:hidden mb-4">
-              <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
-            </div>
+        <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+          <ListingHeader
+            badge="Klinike"
+            badgeIcon={Building2}
+            title={pageTitle}
+            description="Pregledajte profile, usluge, tim doktora i kontakt informacije klinika."
+          />
 
-            <div className="hidden md:flex items-center justify-center gap-3 mb-4">
-              <Building2 className="h-10 w-10 text-primary" />
-              <h1 className="text-4xl font-bold text-foreground">{pageTitle}</h1>
-            </div>
-
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Pregledajte profile, usluge, tim doktora i kontakt informacije klinika.
-            </p>
-          </div>
-
-          <div className="mb-8 space-y-4 bg-card p-4 rounded-lg border">
+          <ListingFilters>
+            <div className="space-y-4">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#0891b2]/60" />
                 <Input
-                  placeholder="Pretrazite klinike..."
+                  placeholder="Pretražite klinike..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -656,7 +666,7 @@ export default function Clinics() {
               </div>
 
               <div className="relative w-full lg:w-56">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#0891b2]/60 z-10" />
                 <Input
                   placeholder="Unesite grad..."
                   value={citySearch}
@@ -769,9 +779,9 @@ export default function Clinics() {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
-                Pronadjeno {filteredClinics.length} klinika
+                Pronađeno {filteredClinics.length} klinika
                 {useUserLocation && ' • Lokacija aktivna'}
               </p>
               <div className="flex items-center gap-2">
@@ -790,10 +800,11 @@ export default function Clinics() {
                 </Select>
               </div>
             </div>
-          </div>
+            </div>
+          </ListingFilters>
 
           <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="space-y-6">
-            <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+            <TabsList className="grid w-full max-w-[300px] grid-cols-2 rounded-xl bg-white p-1 shadow-sm">
               <TabsTrigger value="list">
                 <Building2 className="h-4 w-4 mr-2" />
                 Lista
@@ -806,7 +817,7 @@ export default function Clinics() {
 
             <TabsContent value="list">
               {filteredClinics.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <ListingGrid>
                   {filteredClinics.map((clinic) =>
                     template === 'soft' ? (
                       <ClinicCardSoft key={clinic.id} clinic={clinic} />
@@ -814,11 +825,11 @@ export default function Clinics() {
                       <ClinicCard key={clinic.id} clinic={clinic} />
                     )
                   )}
-                </div>
+                </ListingGrid>
               ) : (
-                <div className="text-center py-16">
-                  <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-foreground mb-2">Nema rezultata</h3>
+                <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
+                  <Building2 className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40" />
+                  <h3 className="mb-2 text-xl font-semibold text-foreground">Nema rezultata</h3>
                   <p className="text-muted-foreground">Probajte sa drugim kriterijumima pretrage.</p>
                 </div>
               )}

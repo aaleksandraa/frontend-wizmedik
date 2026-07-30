@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Building2, MapPin, Phone } from 'lucide-react';
+import { Building2, MapPin, Navigation, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { formatNumber } from '@/utils/formatters';
@@ -78,34 +78,38 @@ export function ClinicsMap({ clinics, userLocation }: ClinicsMapProps) {
             position={[clinic.latitude!, clinic.longitude!]}
           >
             <Popup>
-              <div className="p-2 min-w-[200px]">
-                <div className="flex items-start gap-2 mb-2">
-                  <Building2 className="h-5 w-5 text-primary mt-1" />
-                  <h3 className="font-semibold text-lg">{clinic.naziv}</h3>
+              <div className="min-w-[220px] p-1">
+                <div className="mb-2 flex items-start gap-2">
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0891b2]/10">
+                    <Building2 className="h-4 w-4 text-[#0891b2]" />
+                  </span>
+                  <h3 className="text-base font-bold leading-tight text-slate-900">{clinic.naziv}</h3>
                 </div>
-                
-                <div className="space-y-2 text-sm mb-3">
+
+                <div className="mb-3 space-y-1.5 text-sm text-slate-600">
                   <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0891b2]" />
                     <span>{clinic.adresa}, {clinic.grad}</span>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{clinic.telefon}</span>
-                  </div>
+
+                  {clinic.telefon && (
+                    <a href={`tel:${clinic.telefon}`} className="flex items-center gap-2 hover:text-[#0891b2]">
+                      <Phone className="h-3.5 w-3.5 shrink-0 text-[#0891b2]" />
+                      <span>{clinic.telefon}</span>
+                    </a>
+                  )}
 
                   {clinic.distance && (
-                    <div className="flex items-center gap-2 text-primary font-medium">
-                      <MapPin className="h-4 w-4" />
-                      <span>{formatNumber(clinic.distance)} km od vas</span>
-                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                      <Navigation className="h-3 w-3" />
+                      {formatNumber(clinic.distance)} km od vas
+                    </span>
                   )}
                 </div>
 
                 <Button
                   size="sm"
-                  className="w-full"
+                  className="w-full rounded-full bg-[#0891b2] hover:bg-[#0e7490]"
                   onClick={() => navigate(`/klinika/${clinic.slug || clinic.id}`)}
                 >
                   Pogledaj profil

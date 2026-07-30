@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Building2, Save, Eye } from 'lucide-react';
 import { clearCardSettingsCache } from '@/hooks/useCardSettings';
+import { ClinicCard } from '@/components/ClinicCard';
+import { ClinicListingCard } from '@/components/ClinicListingCard';
 
 const VARIANTS = [
-  { id: 'classic', name: 'Klasični', desc: 'Puni prikaz sa radnim vremenom' },
-  { id: 'modern', name: 'Moderni', desc: 'Čist dizajn sa hover efektom' },
+  { id: 'wizmedik', name: 'wizMedik', desc: 'Moderna kartica, isti stil kao doktori' },
+  { id: 'modern', name: 'Moderni', desc: 'Velika slika sa naslovom preko nje' },
   { id: 'compact', name: 'Kompaktni', desc: 'Minimalan horizontalni prikaz' },
   { id: 'horizontal', name: 'Horizontalni', desc: 'Široka kartica' },
   { id: 'minimal', name: 'Minimalni', desc: 'Samo tekst' },
@@ -20,13 +22,13 @@ const VARIANTS = [
 ];
 
 const defaultSettings = {
-  variant: 'classic',
+  variant: 'wizmedik',
   showImage: true,
   showDescription: true,
   showAddress: true,
   showPhone: true,
-  showEmail: false,
-  showWebsite: false,
+  showEmail: true,
+  showWebsite: true,
   showWorkingHours: true,
   showDoctorsCount: true,
   showDistance: true,
@@ -66,6 +68,7 @@ export function ClinicCardSettings() {
 
   const sampleClinic = {
     id: 1,
+    slug: 'poliklinika-medica',
     naziv: 'Poliklinika Medica',
     opis: 'Moderna poliklinika sa najsavremenijom opremom i stručnim timom ljekara.',
     adresa: 'Titova 15',
@@ -74,8 +77,16 @@ export function ClinicCardSettings() {
     email: 'info@medica.ba',
     website: 'https://medica.ba',
     slike: [],
-    radno_vrijeme: { ponedjeljak: { open: '08:00', close: '20:00' }, utorak: { open: '08:00', close: '20:00' } },
+    radno_vrijeme: Object.fromEntries(
+      ['ponedjeljak', 'utorak', 'srijeda', 'četvrtak', 'petak', 'subota', 'nedjelja'].map((day) => [
+        day,
+        { open: '08:00', close: '20:00' },
+      ])
+    ),
     doktori: [{}, {}, {}],
+    specijalnosti: [{ id: 1, naziv: 'Kardiologija' }, { id: 2, naziv: 'Interna medicina' }],
+    ocjena: 4.8,
+    broj_ocjena: 126,
     distance: 2.5,
   };
 
@@ -179,80 +190,14 @@ export function ClinicCardSettings() {
         </CardHeader>
         <CardContent>
           <div className="max-w-md mx-auto">
-            <ClinicCardPreview settings={settings} clinic={sampleClinic} />
+            {settings.variant === 'wizmedik' ? (
+              <ClinicListingCard clinic={sampleClinic} settings={settings} />
+            ) : (
+              <ClinicCard clinic={sampleClinic} variant={settings.variant} />
+            )}
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function ClinicCardPreview({ settings, clinic }: { settings: any; clinic: any }) {
-  const { variant } = settings;
-
-  if (variant === 'compact') {
-    return (
-      <div className="p-4 border rounded-lg flex items-center gap-4">
-        {settings.showImage && (
-          <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Building2 className="h-8 w-8 text-primary/60" />
-          </div>
-        )}
-        <div>
-          <p className="font-semibold">{clinic.naziv}</p>
-          <p className="text-sm text-muted-foreground">{clinic.grad}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (variant === 'minimal') {
-    return (
-      <div className="p-4 border rounded-lg border-l-4 border-l-primary">
-        <p className="font-semibold">{clinic.naziv}</p>
-        <p className="text-sm text-muted-foreground">{clinic.grad} • {clinic.telefon}</p>
-      </div>
-    );
-  }
-
-  if (variant === 'gradient') {
-    return (
-      <div 
-        className="p-5 rounded-lg"
-        style={{ background: `linear-gradient(135deg, ${settings.primaryColor}15, ${settings.accentColor}15)` }}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div 
-            className="w-12 h-12 rounded-xl flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})` }}
-          >
-            <Building2 className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <p className="font-bold">{clinic.naziv}</p>
-            <p className="text-sm text-muted-foreground">{clinic.grad}</p>
-          </div>
-        </div>
-        {settings.showDescription && <p className="text-sm text-muted-foreground mb-3">{clinic.opis}</p>}
-      </div>
-    );
-  }
-
-  // Default preview (classic/modern/horizontal)
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      {settings.showImage && (
-        <div className="h-32 bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center">
-          <Building2 className="h-12 w-12 text-primary/40" />
-        </div>
-      )}
-      <div className="p-4">
-        <p className="font-bold text-lg">{clinic.naziv}</p>
-        {settings.showDescription && <p className="text-sm text-muted-foreground mb-2">{clinic.opis}</p>}
-        {settings.showAddress && <p className="text-sm">{clinic.adresa}, {clinic.grad}</p>}
-        {settings.showPhone && <p className="text-sm">{clinic.telefon}</p>}
-        {settings.showDoctorsCount && <p className="text-sm text-muted-foreground mt-2">{clinic.doktori.length} doktora</p>}
-      </div>
     </div>
   );
 }

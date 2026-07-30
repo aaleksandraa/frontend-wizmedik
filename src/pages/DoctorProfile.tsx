@@ -581,10 +581,13 @@ export default function DoctorProfile() {
           coverValue={modernCoverValue}
         />
         <Dialog open={showBooking} onOpenChange={(open) => { setShowBooking(open); if (!open) setSelectedServiceId(null); }}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Zakaži termin</DialogTitle>
-              <DialogDescription>Odaberite datum i vrijeme za vaš termin</DialogDescription>
+          <DialogContent className="w-[calc(100%-1.5rem)] max-w-xl rounded-2xl p-4 sm:p-6">
+            <DialogHeader className="pr-8 text-left">
+              <DialogTitle className="text-lg">Zakaži termin</DialogTitle>
+              <DialogDescription className="line-clamp-1">
+                Dr. {doctor.ime} {doctor.prezime}
+                {doctor.specijalnost ? ` · ${doctor.specijalnost}` : ''}
+              </DialogDescription>
             </DialogHeader>
             <BookAppointmentForm
               doctorId={doctor.id}
@@ -1488,12 +1491,13 @@ export default function DoctorProfile() {
 
       {/* Booking Dialog — logged in */}
       <Dialog open={showBooking} onOpenChange={(open) => { setShowBooking(open); if (!open) setSelectedServiceId(null); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Zakažite termin kod Dr. {doctor.ime} {doctor.prezime}
-            </DialogTitle>
-            <DialogDescription>Odaberite datum i vrijeme za vaš termin</DialogDescription>
+        <DialogContent className="w-[calc(100%-1.5rem)] max-w-xl rounded-2xl p-4 sm:p-6">
+          <DialogHeader className="pr-8 text-left">
+            <DialogTitle className="text-lg">Zakaži termin</DialogTitle>
+            <DialogDescription className="line-clamp-1">
+              Dr. {doctor.ime} {doctor.prezime}
+              {doctor.specijalnost ? ` · ${doctor.specijalnost}` : ''}
+            </DialogDescription>
           </DialogHeader>
           <BookAppointmentForm
             doctorId={doctor.id}

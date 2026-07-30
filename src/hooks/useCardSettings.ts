@@ -41,13 +41,13 @@ const defaultDoctorSettings: DoctorCardSettings = {
 };
 
 const defaultClinicSettings: ClinicCardSettings = {
-  variant: 'classic',
+  variant: 'wizmedik',
   showImage: true,
   showDescription: true,
   showAddress: true,
   showPhone: true,
-  showEmail: false,
-  showWebsite: false,
+  showEmail: true,
+  showWebsite: true,
   showWorkingHours: true,
   showDoctorsCount: true,
   showDistance: true,

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { TimeSlotPicker } from '@/components/TimeSlotPicker';
 import { SearchableServiceSelect } from '@/components/SearchableServiceSelect';
+import { formatBookingDateTime, getBookingErrorMessage } from '@/lib/booking-datetime';
 
 interface AddAppointmentFormProps {
   doctorId: number;
@@ -54,26 +55,18 @@ export function AddAppointmentForm({
 
     setLoading(true);
     try {
-      const [hours, minutes] = selectedTime.split(':');
-      const appointmentDateTime = new Date(selectedDate);
-      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
       const selectedServiceData = services.find((s: any) => s.id.toString() === selectedService);
-      const duration = selectedServiceData?.trajanje_minuti || slotDuration;
-      const price = selectedServiceData?.cijena || null;
 
       await appointmentsAPI.createGuest({
         doktor_id: doctorId,
-        datum_vrijeme: appointmentDateTime.toISOString(),
+        datum_vrijeme: formatBookingDateTime(selectedDate, selectedTime),
         razlog: selectedServiceData?.naziv || '',
-        napomene: notes,
-        trajanje_minuti: duration,
-        cijena: price,
-        usluga_id: parseInt(selectedService),
-        guest_ime: patientName,
-        guest_prezime: patientSurname,
-        guest_telefon: patientPhone,
-        guest_email: patientEmail || null
+        napomene: notes || null,
+        usluga_id: parseInt(selectedService, 10),
+        guest_ime: patientName.trim(),
+        guest_prezime: patientSurname.trim(),
+        guest_telefon: patientPhone.trim(),
+        guest_email: patientEmail.trim() || null
       });
 
       toast({
@@ -91,11 +84,11 @@ export function AddAppointmentForm({
       setNotes('');
 
       onSuccess();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error booking appointment:', error);
       toast({
         title: "Greška",
-        description: error.response?.data?.message || "Došlo je do greške pri zakazivanju termina.",
+        description: getBookingErrorMessage(error, "Došlo je do greške pri zakazivanju termina."),
         variant: "destructive"
       });
     } finally {
