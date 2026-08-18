@@ -112,7 +112,7 @@ export default function CookiePolicy() {
                   </span>
                 </p>
                 <p className="mt-2">
-                  Ako u buducnosti uvedemo Meta/Facebook Pixel ili dataset integraciju, ona ce biti smjestena u
+                  Ako u buducnosti uvedemo Google AdSense ili druge marketinske alate, oni ce biti smjesteni u
                   marketinsku kategoriju i nece se aktivirati bez zasebnog pristanka.
                 </p>
               </div>
@@ -123,13 +123,19 @@ export default function CookiePolicy() {
               <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
                 <p>
                   Na WizMedik platformi koristimo kombinaciju browser kolacica, localStorage i sessionStorage zapisa.
-                  Neophodni zapisi podrzavaju prijavu, sigurnost i antispam logiku. Opcioni zapisi se aktiviraju samo
-                  nakon pristanka i sluze za funkcionalne preference ili analitiku.
+                  Neophodni zapisi podrzavaju prijavu, sigurnost i antispam logiku. Google Analytics tag se ucitava odmah
+                  u Consent Mode stanju bez identifikujucih kolacica; puni analiticki zapisi i _ga kolacici aktiviraju se
+                  tek nakon analytics pristanka. Microsoft Clarity se takodje aktivira samo nakon analytics pristanka.
                 </p>
                 <p>
                   Ove postavke mozete promijeniti u bilo kojem trenutku preko linka <strong>Upravljaj kolacicima</strong>{' '}
                   u futeru. Kada iskljucite vec aktivne opcione tehnologije, aplikacija se moze kratko osvjeziti kako
                   bi promjena bila sigurno primijenjena.
+                </p>
+                <p>
+                  Marketing kategorija je pripremljena za buduci Google AdSense i druge oglasne alate. Consent Mode
+                  signali za oglase ostaju odbijeni dok ne date marketing pristanak, a oglasne skripte trenutno nisu
+                  ucitane.
                 </p>
                 <p>
                   Ako obrisete podatke pregledaca ili promijenite uredjaj, ponovo cemo vas pitati za izbor. Odluka o

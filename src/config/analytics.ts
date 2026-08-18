@@ -1,18 +1,19 @@
-import ReactGA from 'react-ga4';
-import { hasConsentFor } from '@/lib/cookie-consent';
 import { setClarityTag, setClarityTags, trackClarityEvent } from '@/config/clarity';
+import { denyGoogleAnalyticsStorage, isGtagAvailable } from '@/config/google-consent';
 
 /**
- * Initialize Google Analytics 4
- * 
+ * Google Analytics 4 via gtag.js (Advanced Consent Mode v2).
+ *
+ * The gtag script is bootstrapped from index.html with default consent denied.
+ * Events and page views are sent through gtag regardless of analytics consent;
+ * Google redacts or cookieless-pings them until analytics_storage is granted.
+ *
  * Setup:
  * 1. Create GA4 property at https://analytics.google.com
  * 2. Get Measurement ID (G-XXXXXXXXXX)
  * 3. Add to .env files as VITE_GA_MEASUREMENT_ID
  */
 
-let isInitialized = false;
-let activeMeasurementId: string | null = null;
 const trackedOnceEvents = new Set<string>();
 
 type AnalyticsValue = string | number | boolean | null | undefined;
@@ -76,17 +77,7 @@ export interface AppointmentCompletedPayload {
 }
 
 function getMeasurementId(): string {
-  return import.meta.env.VITE_GA_MEASUREMENT_ID;
-}
-
-function setAnalyticsDisabled(disabled: boolean): void {
-  const measurementId = getMeasurementId();
-  if (!measurementId || typeof window === 'undefined') {
-    return;
-  }
-
-  const flagName = `ga-disable-${measurementId}`;
-  (window as Record<string, unknown>)[flagName] = disabled;
+  return String(import.meta.env.VITE_GA_MEASUREMENT_ID || '').trim();
 }
 
 function deleteCookie(name: string): void {
@@ -215,7 +206,19 @@ function buildEntityParams(entity: AnalyticsEntity): AnalyticsParams {
 }
 
 function canTrackGA(): boolean {
-  return isInitialized && hasConsentFor('analytics');
+  if (!isGtagAvailable() || !getMeasurementId()) {
+    return false;
+  }
+
+  if (import.meta.env.MODE === 'development' && import.meta.env.VITE_GA_DEBUG !== 'true') {
+    return false;
+  }
+
+  return true;
+}
+
+function sendGaEvent(eventName: string, params: Record<string, string | number | boolean> = {}): void {
+  window.gtag?.('event', eventName, params);
 }
 
 export function trackGaEvent(eventName: string, params: AnalyticsParams = {}, options: { onceKey?: string } = {}) {
@@ -236,7 +239,7 @@ export function trackGaEvent(eventName: string, params: AnalyticsParams = {}, op
     trackedOnceEvents.add(dedupeKey);
   }
 
-  ReactGA.event(normalizedEventName, sanitizeParams(params));
+  sendGaEvent(normalizedEventName, sanitizeParams(params));
 }
 
 export function trackProfileView(entity: AnalyticsEntity) {
@@ -305,55 +308,14 @@ export function trackSignUp(userType: RegistrationUserType | string, method = 'e
   trackClarityEvent('registration_submitted');
 }
 
+/** @deprecated GA is bootstrapped from index.html; kept for compatibility. */
 export const initGA = () => {
-  const measurementId = getMeasurementId();
-  const environment = import.meta.env.MODE;
-
-  if (!hasConsentFor('analytics')) {
-    return;
-  }
-
-  if (isInitialized && activeMeasurementId === measurementId) {
-    setAnalyticsDisabled(false);
-    return;
-  }
-
-  // Only initialize if measurement ID is provided
-  if (!measurementId) {
-    return;
-  }
-
-  // Don't track in development unless explicitly enabled
-  if (environment === 'development' && !import.meta.env.VITE_GA_DEBUG) {
-    console.log('Google Analytics disabled in development. Set VITE_GA_DEBUG=true to enable.');
-    return;
-  }
-
-  try {
-    setAnalyticsDisabled(false);
-    ReactGA.initialize(measurementId, {
-      gaOptions: {
-        // Anonymize IP addresses for GDPR compliance
-        anonymizeIp: true,
-        // Cookie settings
-        cookieFlags: 'SameSite=None;Secure',
-      },
-      gtagOptions: {
-        // Send page views automatically
-        send_page_view: false, // We'll send manually for better control
-      },
-    });
-
-    isInitialized = true;
-    activeMeasurementId = measurementId;
-  } catch (error) {
-    console.error('Failed to initialize Google Analytics:', error);
-  }
+  // No-op: gtag.js loads from index.html with Consent Mode default denied.
 };
 
 export const disableGA = () => {
-  setAnalyticsDisabled(true);
   trackedOnceEvents.clear();
+  denyGoogleAnalyticsStorage();
 
   if (typeof document !== 'undefined') {
     document.cookie
@@ -369,17 +331,16 @@ export const disableGA = () => {
  * Track page view
  */
 export const trackPageView = (path?: string, title?: string) => {
-  if (!isInitialized || !hasConsentFor('analytics')) return;
+  if (!canTrackGA()) return;
 
   const page = path || window.location.pathname + window.location.search;
   const pageTitle = title || document.title;
 
-  ReactGA.send({
-    hitType: 'pageview',
-    page,
-    title: pageTitle,
+  sendGaEvent('page_view', {
+    page_path: page,
+    page_title: pageTitle,
+    page_location: window.location.href,
   });
-
 };
 
 /**
@@ -391,15 +352,13 @@ export const trackEvent = (
   label?: string,
   value?: number
 ) => {
-  if (!isInitialized || !hasConsentFor('analytics')) return;
+  if (!canTrackGA()) return;
 
-  ReactGA.event({
-    category,
-    action,
-    label,
+  sendGaEvent(`${category}_${action}`, sanitizeParams({
+    event_category: category,
+    event_label: label,
     value,
-  });
-
+  }));
 };
 
 /**
@@ -409,8 +368,7 @@ export const trackSearch = (searchTerm: string, category?: string) => {
   trackEvent('Search', 'search_query', searchTerm);
   setClarityTag('search_category', category || 'general');
   trackClarityEvent('search_performed');
-  
-  // Also send as GA4 search event
+
   if (canTrackGA()) {
     trackGaEvent('search', {
       search_term: searchTerm,
@@ -458,7 +416,7 @@ export const trackAppointmentBooking = (
   trackEvent('Appointment', 'book', `${doctorName} - ${appointmentType}`, doctorId);
   setClarityTag('entity_type', 'doctor');
   trackClarityEvent('booking_started');
-  
+
   if (canTrackGA()) {
     trackGaEvent('begin_checkout', {
       item_id: String(doctorId),
@@ -480,7 +438,7 @@ export const trackAppointmentComplete = (
   trackEvent('Appointment', 'complete', `${doctorName} - ${appointmentType}`, doctorId);
   setClarityTag('entity_type', 'doctor');
   trackClarityEvent('booking_submitted');
-  
+
   if (canTrackGA()) {
     trackAppointmentCompleted({
       doctor_id: doctorId,
@@ -503,7 +461,7 @@ export const trackRegistration = (userType: string) => {
  */
 export const trackLogin = (userType: string) => {
   trackEvent('User', 'login', userType);
-  
+
   if (canTrackGA()) {
     trackGaEvent('login', {
       method: 'email',
@@ -530,7 +488,7 @@ export const trackFilter = (
  */
 export const trackSpecialtyClick = (specialtyName: string, specialtyId: number) => {
   trackEvent('Specialty', 'click', specialtyName, specialtyId);
-  
+
   if (canTrackGA()) {
     trackGaEvent('select_content', {
       content_type: 'specialty',
@@ -545,7 +503,7 @@ export const trackSpecialtyClick = (specialtyName: string, specialtyId: number) 
  */
 export const trackCityClick = (cityName: string) => {
   trackEvent('City', 'click', cityName);
-  
+
   if (canTrackGA()) {
     trackGaEvent('select_content', {
       content_type: 'city',
@@ -559,7 +517,7 @@ export const trackCityClick = (cityName: string) => {
  */
 export const trackQuestionPost = (questionTitle: string) => {
   trackEvent('Question', 'post', questionTitle);
-  
+
   if (canTrackGA()) {
     trackGaEvent('generate_lead', {
       content_type: 'question',
@@ -573,7 +531,7 @@ export const trackQuestionPost = (questionTitle: string) => {
  */
 export const trackBlogView = (postId: number, postTitle: string) => {
   trackEvent('Blog', 'view', postTitle, postId);
-  
+
   if (canTrackGA()) {
     trackGaEvent('view_item', {
       item_id: String(postId),
@@ -588,7 +546,7 @@ export const trackBlogView = (postId: number, postTitle: string) => {
  */
 export const trackOutboundLink = (url: string, label?: string) => {
   trackEvent('Outbound', 'click', label || url);
-  
+
   if (canTrackGA()) {
     trackGaEvent('click', {
       link_url: url,
@@ -627,7 +585,7 @@ export const trackEmailClick = (email: string, entityType: string, entityName: s
  */
 export const trackError = (errorMessage: string, errorPage: string) => {
   trackEvent('Error', errorPage, errorMessage);
-  
+
   if (canTrackGA()) {
     trackGaEvent('exception', {
       description: errorMessage,
@@ -657,22 +615,17 @@ export const trackAdminEntitySaved = (entityType: string) => {
 
 export const __analyticsTest = {
   reset: () => {
-    isInitialized = false;
-    activeMeasurementId = null;
     trackedOnceEvents.clear();
-  },
-  setInitialized: (value: boolean) => {
-    isInitialized = value;
   },
 };
 
 /**
  * Set user properties
  */
-export const setUserProperties = (properties: Record<string, any>) => {
+export const setUserProperties = (properties: Record<string, unknown>) => {
   if (!canTrackGA()) return;
-  
-  ReactGA.set(properties);
+
+  window.gtag?.('set', 'user_properties', properties);
 };
 
 /**
@@ -685,7 +638,7 @@ export const trackTiming = (
   label?: string
 ) => {
   if (!canTrackGA()) return;
-  
+
   trackGaEvent('timing_complete', {
     name: variable,
     value,
@@ -693,5 +646,3 @@ export const trackTiming = (
     event_label: label,
   });
 };
-
-export default ReactGA;

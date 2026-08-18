@@ -107,7 +107,7 @@ export default defineConfig(({ mode }) => ({
             return 'charts-vendor';
           }
 
-          if (id.includes('@sentry/') || id.includes('react-ga4')) {
+          if (id.includes('@sentry/')) {
             return 'monitoring-vendor';
           }
 

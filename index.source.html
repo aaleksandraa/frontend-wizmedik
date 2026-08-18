@@ -117,6 +117,28 @@
         }
       }
     </script>
+
+    <!-- Google Consent Mode v2 (default denied) + GA4 tag bootstrap -->
+    <script src="/google-consent-bootstrap.js"></script>
+    <script>
+      (function () {
+        var gaId = '%VITE_GA_MEASUREMENT_ID%';
+        if (!gaId || gaId.indexOf('VITE_') !== -1 || gaId.indexOf('G-') !== 0) {
+          return;
+        }
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
+        document.head.appendChild(script);
+
+        window.gtag('js', new Date());
+        window.gtag('config', gaId, {
+          send_page_view: false,
+          anonymize_ip: true,
+        });
+      })();
+    </script>
   </head>
 
   <body>

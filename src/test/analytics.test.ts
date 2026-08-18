@@ -1,21 +1,18 @@
+// @vitest-environment jsdom
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  event: vi.fn(),
+  gtag: vi.fn(),
 }));
 
-vi.mock('react-ga4', () => ({
-  default: {
-    initialize: vi.fn(),
-    send: vi.fn(),
-    event: mocks.event,
-    set: vi.fn(),
-  },
-}));
-
-vi.mock('@/lib/cookie-consent', () => ({
-  hasConsentFor: vi.fn(),
-}));
+vi.mock('@/config/google-consent', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/config/google-consent')>();
+  return {
+    ...actual,
+    isGtagAvailable: vi.fn(() => true),
+  };
+});
 
 vi.mock('@/config/clarity', () => ({
   setClarityTag: vi.fn(),
@@ -23,30 +20,34 @@ vi.mock('@/config/clarity', () => ({
   trackClarityEvent: vi.fn(),
 }));
 
-import { hasConsentFor } from '@/lib/cookie-consent';
+import { isGtagAvailable } from '@/config/google-consent';
 import {
   __analyticsTest,
   trackContactClick,
   trackGaEvent,
+  trackPageView,
   trackProfileView,
 } from '@/config/analytics';
 
-const hasConsentForMock = vi.mocked(hasConsentFor);
+const isGtagAvailableMock = vi.mocked(isGtagAvailable);
 
 describe('analytics GA4 service', () => {
   beforeEach(() => {
-    mocks.event.mockClear();
-    hasConsentForMock.mockReturnValue(true);
+    mocks.gtag.mockClear();
+    window.gtag = mocks.gtag;
+    vi.stubEnv('VITE_GA_MEASUREMENT_ID', 'G-TEST12345');
+    vi.stubEnv('VITE_GA_DEBUG', 'true');
+    vi.stubEnv('MODE', 'production');
+    isGtagAvailableMock.mockReturnValue(true);
     __analyticsTest.reset();
-    __analyticsTest.setInitialized(true);
   });
 
-  it('does not send events without analytics consent', () => {
-    hasConsentForMock.mockReturnValue(false);
-
+  it('sends GA4 events even without analytics cookie consent when gtag is available', () => {
     trackGaEvent('phone_click', { entity_type: 'doctor' });
 
-    expect(mocks.event).not.toHaveBeenCalled();
+    expect(mocks.gtag).toHaveBeenCalledWith('event', 'phone_click', {
+      entity_type: 'doctor',
+    });
   });
 
   it('sends sanitized GA4 event names and params', () => {
@@ -57,10 +58,31 @@ describe('analytics GA4 service', () => {
       very_long_value: 'a'.repeat(140),
     });
 
-    expect(mocks.event).toHaveBeenCalledWith('doctor_profile_view_', {
+    expect(mocks.gtag).toHaveBeenCalledWith('event', 'doctor_profile_view_', {
       doctor_name: 'Dr. Test',
       very_long_value: 'a'.repeat(100),
     });
+  });
+
+  it('does not send events when gtag is unavailable', () => {
+    isGtagAvailableMock.mockReturnValue(false);
+
+    trackGaEvent('phone_click', { entity_type: 'doctor' });
+
+    expect(mocks.gtag).not.toHaveBeenCalled();
+  });
+
+  it('sends page views through gtag page_view event', () => {
+    trackPageView('/doktori', 'Doktori');
+
+    expect(mocks.gtag).toHaveBeenCalledWith(
+      'event',
+      'page_view',
+      expect.objectContaining({
+        page_path: '/doktori',
+        page_title: 'Doktori',
+      }),
+    );
   });
 
   it('does not send phone or email PII for contact clicks', () => {
@@ -71,7 +93,8 @@ describe('analytics GA4 service', () => {
       city: 'Sarajevo',
     });
 
-    expect(mocks.event).toHaveBeenCalledWith(
+    expect(mocks.gtag).toHaveBeenCalledWith(
+      'event',
       'phone_click',
       expect.not.objectContaining({
         phone_number: expect.anything(),
@@ -96,8 +119,8 @@ describe('analytics GA4 service', () => {
     trackProfileView(entity);
     trackProfileView(entity);
 
-    expect(mocks.event).toHaveBeenCalledTimes(1);
-    expect(mocks.event).toHaveBeenCalledWith('doctor_profile_view', expect.objectContaining({
+    expect(mocks.gtag).toHaveBeenCalledTimes(1);
+    expect(mocks.gtag).toHaveBeenCalledWith('event', 'doctor_profile_view', expect.objectContaining({
       doctor_id: 99,
       doctor_name: 'Dr. Once',
       city: 'Tuzla',

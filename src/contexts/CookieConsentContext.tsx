@@ -12,8 +12,9 @@ import {
   saveCookieConsentRecord,
   shouldHardReloadAfterConsentChange,
 } from '@/lib/cookie-consent';
-import { disableGA, initGA } from '@/config/analytics';
+import { disableGA } from '@/config/analytics';
 import { disableClarity, initClarity } from '@/config/clarity';
+import { updateGoogleConsent } from '@/config/google-consent';
 import { disableSentry, initSentry } from '@/config/sentry';
 
 interface CookieBannerSettings {
@@ -97,6 +98,12 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
   }, [consentRecord]);
 
   useEffect(() => {
+    if (consentRecord) {
+      updateGoogleConsent(consentRecord.preferences);
+    }
+  }, [consentRecord]);
+
+  useEffect(() => {
     if (consentRecord?.preferences.functional) {
       initSentry();
       return;
@@ -107,7 +114,6 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (consentRecord?.preferences.analytics) {
-      initGA();
       initClarity();
       return;
     }
@@ -144,6 +150,8 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
   ): boolean => {
     const nextRecord = createCookieConsentRecord(preferences, status, source);
     const shouldReload = shouldHardReloadAfterConsentChange(consentRecord, nextRecord);
+
+    updateGoogleConsent(preferences);
 
     saveCookieConsentRecord(nextRecord);
     setConsentRecord(nextRecord);

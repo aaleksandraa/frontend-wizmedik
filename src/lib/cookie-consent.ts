@@ -80,15 +80,15 @@ export const COOKIE_CATEGORIES: CookieCategoryDefinition[] = [
     title: 'Analitika',
     shortDescription: 'Mjerenje koristenja sajta, heatmaps i session recordings.',
     description:
-      'Analitika nam pomaze da razumijemo koje stranice i funkcije korisnici koriste, ukljucujuci agregirane izvjestaje, heatmaps i session recordings. Ne aktivira se bez vaseg pristanka.',
+      'Google Analytics tag se ucitava odmah u Consent Mode stanju bez identifikujucih kolacica. Tek nakon vaseg pristanka postavljaju se _ga kolacici i puni analiticki zapisi. Microsoft Clarity (heatmaps i session recordings) se aktivira samo uz analytics pristanak.',
     isRequired: false,
   },
   {
     key: 'marketing',
     title: 'Marketing',
-    shortDescription: 'Rezervisano za buduce marketinske alate i remarketing.',
+    shortDescription: 'Rezervisano za buduce oglase, remarketing i AdSense.',
     description:
-      'Trenutno ne aktiviramo marketinske trackere. Kada uvedemo Meta/Facebook Pixel ili dataset integracije, ova kategorija ce se koristiti samo uz poseban pristanak.',
+      'Trenutno ne ucitavamo marketinske skripte ni oglase. Consent Mode signali za oglase (ad_storage, ad_user_data, ad_personalization) ostaju odbijeni dok ne date marketing pristanak. Kada uvedemo Google AdSense ili druge alate, aktivirat ce se samo uz ovu kategoriju.',
     isRequired: false,
   },
 ];
@@ -202,13 +202,13 @@ export const COOKIE_TECHNOLOGIES: CookieTechnologyDefinition[] = [
   },
   {
     id: 'ga4',
-    name: '_ga i _ga_<container-id>',
+    name: '_ga i _ga_<container-id> / Google tag (gtag.js)',
     category: 'analytics',
     provider: 'Google Analytics 4',
     storage: 'cookie',
-    duration: 'Do 2 godine',
+    duration: 'Do 2 godine nakon pristanka',
     purpose:
-      'Anonimno razlikuje korisnike i sesije radi mjerenja posjeta, ponasanja na stranicama i performansi sajta.',
+      'Google tag se ucitava odmah u Consent Mode stanju. Bez analytics pristanka salju se samo ograniceni cookieless pingovi bez _ga kolacica. Nakon pristanka omogucava identifikaciju korisnika i sesija radi mjerenja posjeta i ponasanja.',
     required: false,
     status: hasConfiguredAnalytics ? 'conditional' : 'planned',
   },
@@ -226,13 +226,13 @@ export const COOKIE_TECHNOLOGIES: CookieTechnologyDefinition[] = [
   },
   {
     id: 'meta_pixel',
-    name: '_fbp / _fbc i Meta Pixel / Dataset',
+    name: 'Google AdSense / marketinski kolacici (planirano)',
     category: 'marketing',
-    provider: 'Meta Platforms',
+    provider: 'Google / Meta Platforms',
     storage: 'cookie',
-    duration: 'Obicno do 90 dana, zavisno od konfiguracije',
+    duration: 'Zavisi od konfiguracije oglasnog alata',
     purpose:
-      'Buduci marketinski i remarketing alati. Trenutno nisu aktivni na sajtu i nece se ukljuciti bez marketing pristanka.',
+      'Buduci marketinski i oglasni alati, ukljucujuci Google AdSense. Trenutno nisu aktivni na sajtu i nece se ukljuciti bez marketing pristanka.',
     required: false,
     status: 'planned',
   },
@@ -425,12 +425,6 @@ function clearFunctionalArtifacts(): void {
 function clearAnalyticsArtifacts(): void {
   if (!isBrowser()) {
     return;
-  }
-
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  if (measurementId) {
-    const disableFlag = `ga-disable-${measurementId}`;
-    (window as Record<string, unknown>)[disableFlag] = true;
   }
 
   const cookieNames = document.cookie
