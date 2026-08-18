@@ -17,7 +17,7 @@ import {
   Plus, Edit, Trash2, Users, Building2, Stethoscope, MapPin, Upload, Clock, 
   Palette, Settings, Search, LayoutGrid, List, ChevronRight, Phone, Mail,
   Globe, Image, X, Check, AlertCircle, FileText, Eye, Star, Shield, GripVertical, Download,
-  FlaskConical, Sparkles, Home, MessageSquare, User, Pill
+  FlaskConical, Sparkles, Home, MessageSquare, User, Pill, Megaphone
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -29,6 +29,7 @@ import { SpecialtyEditor } from '@/components/admin/SpecialtyEditor';
 import { DoctorCardSettings } from '@/components/admin/DoctorCardSettings';
 import { ClinicCardSettings } from '@/components/admin/ClinicCardSettings';
 import { LegalSettings } from '@/components/admin/LegalSettings';
+import { AdSenseSettings } from '@/components/admin/AdSenseSettings';
 import { SpecialtyTemplateSettings } from '@/components/admin/SpecialtyTemplateSettings';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { RegistrationSettings } from '@/components/admin/RegistrationSettings';
@@ -1212,6 +1213,10 @@ export default function AdminPanel() {
                 <Shield className="h-4 w-4 mr-2 hidden sm:inline" />
                 Pravno
               </TabsTrigger>
+              <TabsTrigger value="adsense" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
+                <Megaphone className="h-4 w-4 mr-2 hidden sm:inline" />
+                Oglasi
+              </TabsTrigger>
               <TabsTrigger value="specialty-template" className="flex-1 min-w-[100px] data-[state=active]:bg-background">
                 <Stethoscope className="h-4 w-4 mr-2 hidden sm:inline" />
                 Spec. Postavke
@@ -1856,6 +1861,11 @@ export default function AdminPanel() {
             {/* LEGAL SETTINGS TAB */}
             <TabsContent value="legal">
               <LegalSettings />
+            </TabsContent>
+
+            {/* ADSENSE SETTINGS TAB */}
+            <TabsContent value="adsense">
+              <AdSenseSettings />
             </TabsContent>
 
             {/* SPECIALTY TEMPLATE TAB */}

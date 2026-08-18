@@ -86,9 +86,9 @@ export const COOKIE_CATEGORIES: CookieCategoryDefinition[] = [
   {
     key: 'marketing',
     title: 'Marketing',
-    shortDescription: 'Rezervisano za buduce oglase, remarketing i AdSense.',
+    shortDescription: 'Google AdSense oglasi ispod profila (doktor, klinika, apoteka, lijek).',
     description:
-      'Trenutno ne ucitavamo marketinske skripte ni oglase. Consent Mode signali za oglase (ad_storage, ad_user_data, ad_personalization) ostaju odbijeni dok ne date marketing pristanak. Kada uvedemo Google AdSense ili druge alate, aktivirat ce se samo uz ovu kategoriju.',
+      'Google AdSense se ucitava samo ako je admin ukljucio oglase i vi date marketing pristanak. Consent Mode signali za oglase (ad_storage, ad_user_data, ad_personalization) ostaju odbijeni dok ne date marketing pristanak.',
     isRequired: false,
   },
 ];
@@ -225,16 +225,16 @@ export const COOKIE_TECHNOLOGIES: CookieTechnologyDefinition[] = [
     status: hasConfiguredClarity ? 'conditional' : 'planned',
   },
   {
-    id: 'meta_pixel',
-    name: 'Google AdSense / marketinski kolacici (planirano)',
+    id: 'google_adsense',
+    name: 'Google AdSense',
     category: 'marketing',
-    provider: 'Google / Meta Platforms',
+    provider: 'Google',
     storage: 'cookie',
-    duration: 'Zavisi od konfiguracije oglasnog alata',
+    duration: 'Zavisi od Google AdSense konfiguracije',
     purpose:
-      'Buduci marketinski i oglasni alati, ukljucujuci Google AdSense. Trenutno nisu aktivni na sajtu i nece se ukljuciti bez marketing pristanka.',
+      'Prikaz oglasa ispod profila doktora, klinika, apoteka i lijekova. Aktivira se samo ako je admin ukljucio oglase i vi date marketing pristanak.',
     required: false,
-    status: 'planned',
+    status: 'conditional',
   },
 ];
 

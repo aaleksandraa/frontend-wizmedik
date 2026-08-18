@@ -112,8 +112,8 @@ export default function CookiePolicy() {
                   </span>
                 </p>
                 <p className="mt-2">
-                  Ako u buducnosti uvedemo Google AdSense ili druge marketinske alate, oni ce biti smjesteni u
-                  marketinsku kategoriju i nece se aktivirati bez zasebnog pristanka.
+                  Google AdSense oglasi ispod profila doktora, klinika, apoteka i lijekova ucitavaju se samo ako je
+                  admin ukljucio oglase i vi date marketing pristanak.
                 </p>
               </div>
             </div>
@@ -133,9 +133,9 @@ export default function CookiePolicy() {
                   bi promjena bila sigurno primijenjena.
                 </p>
                 <p>
-                  Marketing kategorija je pripremljena za buduci Google AdSense i druge oglasne alate. Consent Mode
-                  signali za oglase ostaju odbijeni dok ne date marketing pristanak, a oglasne skripte trenutno nisu
-                  ucitane.
+                  Marketing kategorija ukljucuje Google AdSense oglase ispod profila doktora, klinika, apoteka i
+                  lijekova. Consent Mode signali za oglase ostaju odbijeni dok ne date marketing pristanak, a oglasne
+                  skripte se ucitavaju samo kada admin ukljuci oglase.
                 </p>
                 <p>
                   Ako obrisete podatke pregledaca ili promijenite uredjaj, ponovo cemo vas pitati za izbor. Odluka o

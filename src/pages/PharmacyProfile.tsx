@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { safeInternalPath } from '@/utils/navigation';
 import { Footer } from '@/components/Footer';
+import { AdSenseSlot } from '@/components/AdSenseSlot';
 import { Navbar } from '@/components/Navbar';
 import { LocationMapCard } from '@/components/LocationMapCard';
 import { Badge } from '@/components/ui/badge';
@@ -1045,6 +1046,7 @@ export default function PharmacyProfile() {
           </div>
         ) : null}
 
+        <AdSenseSlot />
         <Footer />
       </div>
     </>

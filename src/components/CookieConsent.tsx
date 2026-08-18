@@ -290,8 +290,8 @@ export function CookieConsent() {
               <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
                 <p className="font-semibold text-slate-900">Napomena o marketing alatima</p>
                 <p className="mt-2">
-                  Trenutno nemamo aktivan Meta/Facebook Pixel niti dataset integraciju. Kada ih uvedemo, ostace u
-                  kategoriji marketing i nece se pokretati bez vaseg pristanka.
+                  Google AdSense oglasi ispod profila doktora, klinika, apoteka i lijekova ucitavaju se samo ako je
+                  admin ukljucio oglase i vi date marketing pristanak.
                 </p>
               </div>
               </div>

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { safeInternalPath } from '@/utils/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { AdSenseSlot } from '@/components/AdSenseSlot';
 import { medicinesAPI } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -527,6 +528,7 @@ export default function LijekProfil() {
           )}
         </main>
 
+        <AdSenseSlot />
         <Footer />
       </div>
     </>

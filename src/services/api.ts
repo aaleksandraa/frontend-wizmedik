@@ -292,6 +292,7 @@ export const settingsAPI = {
   getSpecialtyTemplate: () => api.get('/settings/specialty-template'),
   getBlogTypography: () => api.get('/settings/blog-typography'),
   getListingTemplate: (type: string) => api.get(`/settings/listing-template?type=${type}`),
+  getAdSenseSettings: () => api.get('/settings/adsense'),
   // Admin
   updateTemplates: (data: any) => api.put('/admin/settings/templates', data),
   updateDoctorCardSettings: (data: any) => api.put('/admin/settings/doctor-card', data),
@@ -300,6 +301,7 @@ export const settingsAPI = {
   updateSpecialtyTemplate: (template: string, showStats?: boolean) => api.post('/admin/settings/specialty-template', { template, show_stats: showStats }),
   updateBlogTypography: (data: any) => api.put('/settings/blog-typography', data),
   updateListingTemplate: (data: { type: string; template: string }) => api.put('/settings/listing-template', data),
+  updateAdSenseSettings: (data: { enabled: boolean }) => api.put('/admin/settings/adsense', data),
 };
 
 export const blogAPI = {

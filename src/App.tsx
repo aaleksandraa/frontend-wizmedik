@@ -8,8 +8,10 @@ import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-route
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
+import { AdSenseProvider } from "@/contexts/AdSenseContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AdSenseLoader } from "@/components/AdSenseLoader";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { trackPageView } from "@/config/analytics";
@@ -112,8 +114,10 @@ const App = () => {
             <Sonner />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <CookieConsentProvider>
+              <AdSenseProvider>
               <PageViewTracker />
               <ScrollToTop />
+              <AdSenseLoader />
               <Suspense fallback={<PageLoader />}>
               <Routes>
               {/* Public routes */}
@@ -279,6 +283,7 @@ const App = () => {
               </Routes>
               </Suspense>
               <CookieConsent />
+              </AdSenseProvider>
               </CookieConsentProvider>
             </BrowserRouter>
           </TooltipProvider>
