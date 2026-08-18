@@ -670,9 +670,9 @@ export default function HomepageCustom3Cyan() {
                 </Button>
               </Link>
             </div>
-            <ListingGrid horizontalScroll>
+            <ListingGrid>
               {doctors.slice(0, 6).map((doctor) => (
-                <DoctorListingCard key={doctor.id} doctor={doctor} compact />
+                <DoctorListingCard key={doctor.id} doctor={doctor} />
               ))}
             </ListingGrid>
           </div>
@@ -698,9 +698,9 @@ export default function HomepageCustom3Cyan() {
                 </Button>
               </Link>
             </div>
-            <ListingGrid horizontalScroll>
+            <ListingGrid>
               {clinics.slice(0, 6).map((clinic) => (
-                <ClinicListingCard key={clinic.id} clinic={clinic} compact />
+                <ClinicListingCard key={clinic.id} clinic={clinic} />
               ))}
             </ListingGrid>
           </div>
