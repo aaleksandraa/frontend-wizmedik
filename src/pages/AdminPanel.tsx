@@ -44,6 +44,7 @@ import { AdminLijekoviManagement } from '@/components/admin/AdminLijekoviManagem
 import MedicalCalendarManagement from '@/components/admin/MedicalCalendarManagement';
 import { AdminProfileSettings } from '@/components/admin/AdminProfileSettings';
 import { AdminDatabaseBackup } from '@/components/admin/AdminDatabaseBackup';
+import { AdminListPager, defaultAdminListMeta, parseAdminListPayload, type AdminListMeta } from '@/components/admin/AdminListPager';
 import { AdminSpecialtyServicePages } from '@/components/admin/AdminSpecialtyServicePages';
 import { AdminSpasManagement } from '@/components/admin/AdminSpasManagement';
 import { AdminCareHomesManagement } from '@/components/admin/AdminCareHomesManagement';
@@ -286,11 +287,22 @@ export default function AdminPanel() {
   
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [clinicOptions, setClinicOptions] = useState<Clinic[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [doctorSearchInput, setDoctorSearchInput] = useState('');
+  const [clinicSearchInput, setClinicSearchInput] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+  const [specialtySearch, setSpecialtySearch] = useState('');
+  const [doctorSearch, setDoctorSearch] = useState('');
+  const [clinicSearch, setClinicSearch] = useState('');
+  const [doctorsPage, setDoctorsPage] = useState(1);
+  const [clinicsPage, setClinicsPage] = useState(1);
+  const [doctorsMeta, setDoctorsMeta] = useState<AdminListMeta>(defaultAdminListMeta);
+  const [clinicsMeta, setClinicsMeta] = useState<AdminListMeta>(defaultAdminListMeta);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const PAGE_SIZE = 20;
   
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
   const [editingClinic, setEditingClinic] = useState<Clinic | null>(null);
@@ -343,8 +355,35 @@ export default function AdminPanel() {
   const [editingBlogCategory, setEditingBlogCategory] = useState<any>(null);
   const [blogPostForm, setBlogPostForm] = useState({ naslov: '', sadrzaj: '', excerpt: '', thumbnail: '', meta_title: '', meta_description: '', meta_keywords: '', status: 'draft', category_ids: [] as number[] });
   const [blogCategoryForm, setBlogCategoryForm] = useState({ naziv: '', opis: '' });
+  const [blogSearch, setBlogSearch] = useState('');
+  const [blogPage, setBlogPage] = useState(1);
+  const BLOG_PAGE_SIZE = 20;
 
   useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDoctorsPage(1);
+      setDoctorSearch(doctorSearchInput.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [doctorSearchInput]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setClinicsPage(1);
+      setClinicSearch(clinicSearchInput.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [clinicSearchInput]);
+
+  useEffect(() => {
+    fetchDoctors(doctorsPage, doctorSearch);
+  }, [doctorsPage, doctorSearch]);
+
+  useEffect(() => {
+    fetchClinics(clinicsPage, clinicSearch);
+  }, [clinicsPage, clinicSearch]);
 
   const normalizeFeaturedPostIds = (value: any): number[] => {
     if (!Array.isArray(value)) return [];
@@ -362,71 +401,83 @@ export default function AdminPanel() {
     return normalized;
   };
 
+  const fetchDoctors = async (page = doctorsPage, search = doctorSearch) => {
+    try {
+      const response = await adminAPI.getDoctors({
+        page,
+        per_page: PAGE_SIZE,
+        search: search || undefined,
+      });
+      const parsed = parseAdminListPayload(response.data, page, PAGE_SIZE);
+      setDoctors(parsed.list);
+      setDoctorsMeta(parsed.meta);
+    } catch (error: any) {
+      toast({
+        title: 'Greška pri učitavanju doktora',
+        description: error.response?.data?.message || 'Nije moguće učitati doktore.',
+        variant: 'destructive',
+      });
+      setDoctors([]);
+      setDoctorsMeta(defaultAdminListMeta);
+    }
+  };
+
+  const fetchClinics = async (page = clinicsPage, search = clinicSearch) => {
+    try {
+      const response = await adminAPI.getClinics({
+        page,
+        per_page: PAGE_SIZE,
+        search: search || undefined,
+      });
+      const parsed = parseAdminListPayload(response.data, page, PAGE_SIZE);
+      setClinics(parsed.list);
+      setClinicsMeta(parsed.meta);
+    } catch (error: any) {
+      toast({
+        title: 'Greška pri učitavanju klinika',
+        description: error.response?.data?.message || 'Nije moguće učitati klinike.',
+        variant: 'destructive',
+      });
+      setClinics([]);
+      setClinicsMeta(defaultAdminListMeta);
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [doctorsRes, clinicsRes, specialtiesRes, citiesRes] = await Promise.all([
-        adminAPI.getDoctors({ per_page: 1000 }),
+      const [specialtiesRes, citiesRes, clinicOptionsRes] = await Promise.all([
+        specialtiesAPI.getAll(),
+        adminAPI.getCities(),
         adminAPI.getClinics({ per_page: 1000 }),
-        specialtiesAPI.getAll(), 
-        adminAPI.getCities()
       ]);
-      
-      // Parse doctors response - handle both paginated and non-paginated responses
-      let doctorsList = [];
-      if (doctorsRes.data?.data && Array.isArray(doctorsRes.data.data)) {
-        // Paginated response
-        doctorsList = doctorsRes.data.data;
-      } else if (Array.isArray(doctorsRes.data)) {
-        // Direct array response
-        doctorsList = doctorsRes.data;
-      }
-      console.log('âœ… Doctors loaded:', doctorsList.length);
-      setDoctors(doctorsList);
-      
-      // Parse clinics response
-      let clinicsList = [];
-      if (clinicsRes.data?.data && Array.isArray(clinicsRes.data.data)) {
-        clinicsList = clinicsRes.data.data;
-      } else if (Array.isArray(clinicsRes.data)) {
-        clinicsList = clinicsRes.data;
-      }
-      console.log('âœ… Clinics loaded:', clinicsList.length);
-      setClinics(clinicsList);
-      
-      // Parse specialties response
+
       let specialtiesList = [];
       if (specialtiesRes.data?.data && Array.isArray(specialtiesRes.data.data)) {
         specialtiesList = specialtiesRes.data.data;
       } else if (Array.isArray(specialtiesRes.data)) {
         specialtiesList = specialtiesRes.data;
       }
-      console.log('âœ… Specialties loaded:', specialtiesList.length);
       setSpecialties(specialtiesList);
-      
-      // Parse cities response
+
       let citiesList = [];
       if (citiesRes.data?.data && Array.isArray(citiesRes.data.data)) {
         citiesList = citiesRes.data.data;
       } else if (Array.isArray(citiesRes.data)) {
         citiesList = citiesRes.data;
       }
-      console.log('âœ… Cities loaded:', citiesList.length);
       setCities(citiesList.map((city: any) => ({
         ...city,
         kljucne_tacke: normalizeCityKeyPoints(city.kljucne_tacke),
       })));
+
+      const clinicOptionsParsed = parseAdminListPayload(clinicOptionsRes.data, 1, 1000);
+      setClinicOptions(clinicOptionsParsed.list);
     } catch (error: any) {
-      console.error('âŒ Error fetching admin data:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      toast({ 
-        title: "Greška pri učitavanju", 
-        description: error.response?.data?.message || "Nije moguće učitati podatke. Pokušajte osvježiti stranicu.", 
-        variant: "destructive" 
+      toast({
+        title: 'Greška pri učitavanju',
+        description: error.response?.data?.message || 'Nije moguće učitati podatke. Pokušajte osvježiti stranicu.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -518,7 +569,7 @@ export default function AdminPanel() {
       }
       setShowDoctorDialog(false);
       resetDoctorForm();
-      fetchData();
+      fetchDoctors();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
@@ -529,7 +580,7 @@ export default function AdminPanel() {
     try {
       await adminAPI.deleteDoctor(id);
       toast({ title: "Uspjeh", description: "Doktor obrisan" });
-      fetchData();
+      fetchDoctors();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     }
@@ -599,6 +650,7 @@ export default function AdminPanel() {
       }
       setShowClinicDialog(false);
       resetClinicForm();
+      fetchClinics();
       fetchData();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
@@ -610,6 +662,7 @@ export default function AdminPanel() {
     try {
       await adminAPI.deleteClinic(id);
       toast({ title: "Uspjeh", description: "Klinika obrisana" });
+      fetchClinics();
       fetchData();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
@@ -815,7 +868,7 @@ export default function AdminPanel() {
       setSendingClinicInviteId(clinic.id);
       await adminAPI.sendClinicInvite(clinic.id);
       toast({ title: "Pozivnica poslana", description: `Email je poslan na ${clinic.user.email}.` });
-      fetchData();
+      fetchClinics();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     } finally {
@@ -833,7 +886,7 @@ export default function AdminPanel() {
       setSendingDoctorInviteId(doctor.id);
       await adminAPI.sendDoctorInvite(doctor.id);
       toast({ title: "Pozivnica poslana", description: `Email je poslan na ${doctor.user.email}.` });
-      fetchData();
+      fetchDoctors();
     } catch (error: any) {
       toast({ title: "Greška", description: getErrorMessage(error), variant: "destructive" });
     } finally {
@@ -1000,14 +1053,23 @@ export default function AdminPanel() {
     }
   };
 
-  const filteredDoctors = doctors.filter(d => 
-    `${d.ime} ${d.prezime} ${d.specijalnost} ${d.grad}`.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCities = cities.filter(c =>
+    `${c.naziv} ${c.opis}`.toLowerCase().includes(citySearch.toLowerCase())
   );
-  const filteredClinics = clinics.filter(c => 
-    `${c.naziv} ${c.grad} ${c.adresa}`.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSpecialties = specialties.filter((specialty) =>
+    `${specialty.naziv} ${(specialty.children || []).map((child) => child.naziv).join(' ')}`
+      .toLowerCase()
+      .includes(specialtySearch.toLowerCase())
   );
-  const filteredCities = cities.filter(c => 
-    `${c.naziv} ${c.opis}`.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBlogPosts = blogPosts.filter((post) =>
+    `${post.naslov || ''} ${post.autor_name || ''} ${post.status || ''}`
+      .toLowerCase()
+      .includes(blogSearch.toLowerCase())
+  );
+  const blogLastPage = Math.max(1, Math.ceil(filteredBlogPosts.length / BLOG_PAGE_SIZE));
+  const pagedBlogPosts = filteredBlogPosts.slice(
+    (Math.min(blogPage, blogLastPage) - 1) * BLOG_PAGE_SIZE,
+    Math.min(blogPage, blogLastPage) * BLOG_PAGE_SIZE
   );
 
   if (loading) {
@@ -1035,15 +1097,6 @@ export default function AdminPanel() {
               <p className="text-muted-foreground mt-1">Upravljajte sadržajem platforme</p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="relative flex-1 md:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Pretraži..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
               <div className="hidden md:flex border rounded-lg p-1">
                 <Button variant={viewMode === 'list' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('list')}>
                   <List className="h-4 w-4" />
@@ -1064,7 +1117,7 @@ export default function AdminPanel() {
                     <Stethoscope className="h-5 w-5 text-cyan-600" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{doctors.length}</p>
+                    <p className="text-2xl font-bold">{doctorsMeta.total}</p>
                     <p className="text-xs text-muted-foreground">Doktora</p>
                   </div>
                 </div>
@@ -1077,7 +1130,7 @@ export default function AdminPanel() {
                     <Building2 className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{clinics.length}</p>
+                    <p className="text-2xl font-bold">{clinicsMeta.total}</p>
                     <p className="text-xs text-muted-foreground">Klinika</p>
                   </div>
                 </div>
@@ -1211,16 +1264,25 @@ export default function AdminPanel() {
 
             {/* DOCTORS TAB */}
             <TabsContent value="doctors" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Doktori ({filteredDoctors.length})</h2>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <h2 className="text-lg font-semibold">Doktori ({doctorsMeta.total})</h2>
                 <Button onClick={() => openDoctorDialog()} className="gap-2">
                   <Plus className="h-4 w-4" /> Novi doktor
                 </Button>
               </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Pretraži doktora po imenu, specijalnosti, gradu ili telefonu..."
+                  value={doctorSearchInput}
+                  onChange={(e) => setDoctorSearchInput(e.target.value)}
+                />
+              </div>
               
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
-                {filteredDoctors.length > 0 ? (
-                  filteredDoctors.map(doctor => (
+                {doctors.length > 0 ? (
+                  doctors.map(doctor => (
                     <Card key={doctor.id} className="hover:shadow-md transition-shadow">
                       <CardContent className={viewMode === 'grid' ? 'p-4' : 'p-4 flex items-center justify-between'}>
                         <div className={viewMode === 'grid' ? '' : 'flex items-center gap-4 flex-1'}>
@@ -1278,9 +1340,9 @@ export default function AdminPanel() {
                       <Stethoscope className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <p className="text-lg font-medium mb-2">Nema doktora</p>
                       <p className="text-sm text-muted-foreground mb-4">
-                        {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Dodajte prvog doktora klikom na dugme iznad.'}
+                        {doctorSearch ? 'Nema rezultata za vašu pretragu.' : 'Dodajte prvog doktora klikom na dugme iznad.'}
                       </p>
-                      {!searchTerm && (
+                      {!doctorSearch && (
                         <Button onClick={() => openDoctorDialog()} className="gap-2">
                           <Plus className="h-4 w-4" /> Dodaj doktora
                         </Button>
@@ -1289,19 +1351,29 @@ export default function AdminPanel() {
                   </Card>
                 )}
               </div>
+              <AdminListPager meta={doctorsMeta} onPageChange={setDoctorsPage} />
             </TabsContent>
 
             {/* CLINICS TAB */}
             <TabsContent value="clinics" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Klinike ({filteredClinics.length})</h2>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <h2 className="text-lg font-semibold">Klinike ({clinicsMeta.total})</h2>
                 <Button onClick={() => openClinicDialog()} className="gap-2">
                   <Plus className="h-4 w-4" /> Nova klinika
                 </Button>
               </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Pretraži kliniku po nazivu, gradu, adresi ili telefonu..."
+                  value={clinicSearchInput}
+                  onChange={(e) => setClinicSearchInput(e.target.value)}
+                />
+              </div>
               
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
-                {filteredClinics.map(clinic => (
+                {clinics.length > 0 ? clinics.map(clinic => (
                   <Card key={clinic.id} className="hover:shadow-md transition-shadow">
                     <CardContent className={viewMode === 'grid' ? 'p-4' : 'p-4 flex items-center justify-between'}>
                       <div className={viewMode === 'grid' ? '' : 'flex items-center gap-4 flex-1'}>
@@ -1356,21 +1428,43 @@ export default function AdminPanel() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )) : (
+                  <Card className="col-span-full">
+                    <CardContent className="p-8 text-center text-muted-foreground">
+                      {clinicSearch ? 'Nema rezultata za vašu pretragu.' : 'Nema klinika za prikaz.'}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
+              <AdminListPager meta={clinicsMeta} onPageChange={setClinicsPage} />
             </TabsContent>
 
             {/* CITIES TAB */}
             <TabsContent value="cities" className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h2 className="text-lg font-semibold">Gradovi ({filteredCities.length})</h2>
                 <Button onClick={() => openCityDialog()} className="gap-2">
                   <Plus className="h-4 w-4" /> Novi grad
                 </Button>
               </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Pretraži grad..."
+                  value={citySearch}
+                  onChange={(e) => setCitySearch(e.target.value)}
+                />
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredCities.map(city => (
+                {filteredCities.length === 0 ? (
+                  <Card className="col-span-full">
+                    <CardContent className="p-8 text-center text-muted-foreground">
+                      {citySearch ? 'Nema rezultata za vašu pretragu.' : 'Nema gradova za prikaz.'}
+                    </CardContent>
+                  </Card>
+                ) : filteredCities.map(city => (
                   <Card key={city.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1412,7 +1506,7 @@ export default function AdminPanel() {
 
             {/* SPECIALTIES TAB */}
             <TabsContent value="specialties" className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h2 className="text-lg font-semibold">Specijalnosti ({specialties.length})</h2>
                 <div className="flex gap-2">
                   {isSortingSpecialties ? (
@@ -1439,6 +1533,17 @@ export default function AdminPanel() {
                   )}
                 </div>
               </div>
+              {!isSortingSpecialties && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    className="pl-9"
+                    placeholder="Pretraži specijalnost..."
+                    value={specialtySearch}
+                    onChange={(e) => setSpecialtySearch(e.target.value)}
+                  />
+                </div>
+              )}
               
               <DndContext
                 sensors={sensors}
@@ -1446,12 +1551,12 @@ export default function AdminPanel() {
                 onDragEnd={handleDragEnd}
               >
                 <SortableContext
-                  items={specialties.map(s => s.id)}
+                  items={(isSortingSpecialties ? specialties : filteredSpecialties).map(s => s.id)}
                   strategy={verticalListSortingStrategy}
                   disabled={!isSortingSpecialties}
                 >
                   <div className="space-y-3">
-                    {specialties.map(category => (
+                    {(isSortingSpecialties ? specialties : filteredSpecialties).map(category => (
                       <SortableSpecialtyItem
                         key={category.id}
                         category={category}
@@ -1505,7 +1610,7 @@ export default function AdminPanel() {
                 {/* Blog Posts */}
                 <TabsContent value="posts" className="mt-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Članci ({blogPosts.length})</h2>
+                    <h2 className="text-lg font-semibold">Članci ({filteredBlogPosts.length})</h2>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" onClick={handleExportBlogPosts} className="gap-2" disabled={exportingBlog}>
                         <Download className="h-4 w-4" />
@@ -1516,8 +1621,20 @@ export default function AdminPanel() {
                       </Button>
                     </div>
                   </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      className="pl-9"
+                      placeholder="Pretraži članak po naslovu, autoru ili statusu..."
+                      value={blogSearch}
+                      onChange={(e) => {
+                        setBlogSearch(e.target.value);
+                        setBlogPage(1);
+                      }}
+                    />
+                  </div>
                   <div className="space-y-3">
-                    {blogPosts.map(post => (
+                    {pagedBlogPosts.map(post => (
                       <Card key={post.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-4 flex items-center justify-between">
                           <div className="flex items-center gap-4 flex-1">
@@ -1551,8 +1668,21 @@ export default function AdminPanel() {
                         </CardContent>
                       </Card>
                     ))}
-                    {blogPosts.length === 0 && <p className="text-center text-muted-foreground py-8">Nema članaka</p>}
+                    {filteredBlogPosts.length === 0 && (
+                      <p className="text-center text-muted-foreground py-8">
+                        {blogSearch ? 'Nema rezultata za vašu pretragu.' : 'Nema članaka'}
+                      </p>
+                    )}
                   </div>
+                  <AdminListPager
+                    meta={{
+                      current_page: Math.min(blogPage, blogLastPage),
+                      last_page: blogLastPage,
+                      per_page: BLOG_PAGE_SIZE,
+                      total: filteredBlogPosts.length,
+                    }}
+                    onPageChange={setBlogPage}
+                  />
                 </TabsContent>
 
                 {/* Blog Categories */}
@@ -1866,7 +1996,7 @@ export default function AdminPanel() {
                       <SelectTrigger><SelectValue placeholder="Samostalni doktor" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Samostalni doktor (bez klinike)</SelectItem>
-                        {clinics.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.naziv}</SelectItem>)}
+                        {clinicOptions.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.naziv}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>

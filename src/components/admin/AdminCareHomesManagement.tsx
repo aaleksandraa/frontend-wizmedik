@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminAPI } from '@/services/adminApi';
+import { AdminListPager, defaultAdminListMeta, parseAdminListPayload, type AdminListMeta } from '@/components/admin/AdminListPager';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -167,7 +168,10 @@ export function AdminCareHomesManagement() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<AdminListMeta>(defaultAdminListMeta);
   const [homes, setHomes] = useState<CareHome[]>([]);
   const [options, setOptions] = useState<FilterOptions>({
     tipovi_domova: [],
@@ -180,38 +184,44 @@ export function AdminCareHomesManagement() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<CareHomeFormState>(emptyForm);
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
-
-  const filteredHomes = useMemo(() => {
-    if (!searchTerm.trim()) return homes;
-    const q = searchTerm.toLowerCase();
-
-    return homes.filter((home) =>
-      home.naziv?.toLowerCase().includes(q) ||
-      home.grad?.toLowerCase().includes(q) ||
-      home.regija?.toLowerCase().includes(q) ||
-      home.email?.toLowerCase().includes(q) ||
-      home.telefon?.toLowerCase().includes(q) ||
-      home.user?.email?.toLowerCase().includes(q)
-    );
-  }, [homes, searchTerm]);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
-    void Promise.all([fetchHomes(), fetchOptions()]);
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setSearchTerm(searchInput.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    fetchHomes(page, searchTerm);
+  }, [page, searchTerm]);
+
+  useEffect(() => {
+    void fetchOptions();
   }, []);
 
-  const fetchHomes = async () => {
-    setLoading(true);
+  const fetchHomes = async (targetPage = page, search = searchTerm) => {
+    const isFirstLoad = homes.length === 0 && !search;
+    if (isFirstLoad) setLoading(true);
     try {
-      const response = await adminAPI.getCareHomes({ per_page: 100 });
-      const payload = response?.data;
-      const list = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
-      setHomes(list);
+      const response = await adminAPI.getCareHomes({
+        page: targetPage,
+        per_page: PAGE_SIZE,
+        search: search || undefined,
+      });
+      const parsed = parseAdminListPayload(response?.data, targetPage, PAGE_SIZE);
+      setHomes(parsed.list);
+      setMeta(parsed.meta);
     } catch (error: any) {
       toast({
         title: 'Greška',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
+      setHomes([]);
+      setMeta(defaultAdminListMeta);
     } finally {
       setLoading(false);
     }
@@ -472,7 +482,7 @@ export function AdminCareHomesManagement() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <HomeIcon className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Domovi za njegu ({filteredHomes.length})</h2>
+          <h2 className="text-lg font-semibold">Domovi za njegu ({meta.total})</h2>
         </div>
         <Button onClick={openCreateDialog} className="gap-2">
           <Plus className="h-4 w-4" /> Novi dom
@@ -484,20 +494,20 @@ export function AdminCareHomesManagement() {
         <Input
           className="pl-10"
           placeholder="Pretraži po nazivu, gradu, email-u..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
 
       <div className="space-y-3">
-        {filteredHomes.length === 0 ? (
+        {homes.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
-              Nema domova za prikaz.
+              {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Nema domova za prikaz.'}
             </CardContent>
           </Card>
         ) : (
-          filteredHomes.map((home) => (
+          homes.map((home) => (
             <Card key={home.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -562,6 +572,7 @@ export function AdminCareHomesManagement() {
           ))
         )}
       </div>
+      <AdminListPager meta={meta} loading={loading} onPageChange={setPage} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">

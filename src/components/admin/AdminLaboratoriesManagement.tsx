@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminAPI } from '@/services/adminApi';
+import { AdminListPager, defaultAdminListMeta, parseAdminListPayload, type AdminListMeta } from '@/components/admin/AdminListPager';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,44 +120,49 @@ export function AdminLaboratoriesManagement() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<AdminListMeta>(defaultAdminListMeta);
   const [laboratories, setLaboratories] = useState<Laboratory[]>([]);
   const [editingLaboratory, setEditingLaboratory] = useState<Laboratory | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<LaboratoryFormState>(() => createEmptyForm());
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
-
-  const filteredLaboratories = useMemo(() => {
-    if (!searchTerm.trim()) return laboratories;
-    const q = searchTerm.toLowerCase();
-
-    return laboratories.filter((laboratory) =>
-      laboratory.naziv?.toLowerCase().includes(q) ||
-      laboratory.grad?.toLowerCase().includes(q) ||
-      laboratory.adresa?.toLowerCase().includes(q) ||
-      laboratory.email?.toLowerCase().includes(q) ||
-      laboratory.telefon?.toLowerCase().includes(q) ||
-      laboratory.user?.email?.toLowerCase().includes(q)
-    );
-  }, [laboratories, searchTerm]);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
-    fetchLaboratories();
-  }, []);
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setSearchTerm(searchInput.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
-  const fetchLaboratories = async () => {
-    setLoading(true);
+  useEffect(() => {
+    fetchLaboratories(page, searchTerm);
+  }, [page, searchTerm]);
+
+  const fetchLaboratories = async (targetPage = page, search = searchTerm) => {
+    const isFirstLoad = laboratories.length === 0 && !search;
+    if (isFirstLoad) setLoading(true);
     try {
-      const response = await adminAPI.getLaboratories({ per_page: 100 });
-      const payload = response?.data;
-      const list = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
-      setLaboratories(list);
+      const response = await adminAPI.getLaboratories({
+        page: targetPage,
+        per_page: PAGE_SIZE,
+        search: search || undefined,
+      });
+      const parsed = parseAdminListPayload(response?.data, targetPage, PAGE_SIZE);
+      setLaboratories(parsed.list);
+      setMeta(parsed.meta);
     } catch (error: any) {
       toast({
         title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
+      setLaboratories([]);
+      setMeta(defaultAdminListMeta);
     } finally {
       setLoading(false);
     }
@@ -344,7 +350,7 @@ export function AdminLaboratoriesManagement() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FlaskConical className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Laboratorije ({filteredLaboratories.length})</h2>
+          <h2 className="text-lg font-semibold">Laboratorije ({meta.total})</h2>
         </div>
         <Button onClick={openCreateDialog} className="gap-2">
           <Plus className="h-4 w-4" /> Nova laboratorija
@@ -355,21 +361,21 @@ export function AdminLaboratoriesManagement() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="pl-10"
-          placeholder="Pretrazi po nazivu, gradu, email-u..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Pretraži po nazivu, gradu, email-u..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
 
       <div className="space-y-3">
-        {filteredLaboratories.length === 0 ? (
+        {laboratories.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
-              Nema laboratorija za prikaz.
+              {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Nema laboratorija za prikaz.'}
             </CardContent>
           </Card>
         ) : (
-          filteredLaboratories.map((laboratory) => (
+          laboratories.map((laboratory) => (
             <Card key={laboratory.id} className="transition-shadow hover:shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -437,6 +443,7 @@ export function AdminLaboratoriesManagement() {
           ))
         )}
       </div>
+      <AdminListPager meta={meta} loading={loading} onPageChange={setPage} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">

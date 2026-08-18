@@ -9,6 +9,7 @@ import {
   FlaskConical, Sparkles, Home as HomeIcon, MessageSquare 
 } from 'lucide-react';
 import { adminAPI } from '@/services/adminApi';
+import { AdminListPager, defaultAdminListMeta, parseAdminListPayload, type AdminListMeta } from '@/components/admin/AdminListPager';
 import {
   Dialog,
   DialogContent,
@@ -74,48 +75,50 @@ const entityConfig = {
 
 export function EntitiesManagement({ type }: EntitiesManagementProps) {
   const [entities, setEntities] = useState<Entity[]>([]);
-  const [filteredEntities, setFilteredEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<AdminListMeta>(defaultAdminListMeta);
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const { toast } = useToast();
+  const PAGE_SIZE = 20;
 
   const config = entityConfig[type];
   const Icon = config.icon;
 
   useEffect(() => {
-    fetchEntities();
+    setPage(1);
+    setSearchInput('');
+    setSearchTerm('');
   }, [type]);
 
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = entities.filter(entity => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          entity.naziv?.toLowerCase().includes(searchLower) ||
-          entity.naslov?.toLowerCase().includes(searchLower) ||
-          entity.ime?.toLowerCase().includes(searchLower) ||
-          entity.email?.toLowerCase().includes(searchLower) ||
-          entity.grad?.toLowerCase().includes(searchLower) ||
-          entity.user?.ime?.toLowerCase().includes(searchLower) ||
-          entity.user?.prezime?.toLowerCase().includes(searchLower) ||
-          entity.ime_korisnika?.toLowerCase().includes(searchLower)
-        );
-      });
-      setFilteredEntities(filtered);
-    } else {
-      setFilteredEntities(entities);
-    }
-  }, [searchTerm, entities]);
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setSearchTerm(searchInput.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
-  const fetchEntities = async () => {
-    setLoading(true);
+  useEffect(() => {
+    fetchEntities(page, searchTerm);
+  }, [type, page, searchTerm]);
+
+  const fetchEntities = async (targetPage = page, search = searchTerm) => {
+    if (entities.length === 0 && !search) setLoading(true);
     try {
-      const response = await adminAPI.get(config.endpoint, { params: { per_page: 1000 } });
-      const data = response.data?.data || response.data || [];
-      setEntities(Array.isArray(data) ? data : []);
-      setFilteredEntities(Array.isArray(data) ? data : []);
+      const response = await adminAPI.get(config.endpoint, {
+        params: {
+          page: targetPage,
+          per_page: PAGE_SIZE,
+          search: search || undefined,
+        },
+      });
+      const parsed = parseAdminListPayload(response.data, targetPage, PAGE_SIZE);
+      setEntities(parsed.list);
+      setMeta(parsed.meta);
     } catch (error) {
       console.error(`Error fetching ${type}:`, error);
       toast({
@@ -123,6 +126,8 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
         description: `Nije moguće učitati ${config.title.toLowerCase()}`,
         variant: 'destructive',
       });
+      setEntities([]);
+      setMeta(defaultAdminListMeta);
     } finally {
       setLoading(false);
     }
@@ -186,7 +191,7 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
         <div className="flex items-center gap-2">
           <Icon className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">
-            {config.title} ({filteredEntities.length})
+            {config.title} ({meta.total})
           </h2>
         </div>
       </div>
@@ -196,22 +201,22 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={`Pretraži ${config.title.toLowerCase()}...`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           className="pl-10"
         />
       </div>
 
       {/* List */}
       <div className="space-y-2">
-        {filteredEntities.length === 0 ? (
+        {entities.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
-              Nema rezultata
+              {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Nema rezultata'}
             </CardContent>
           </Card>
         ) : (
-          filteredEntities.map((entity) => (
+          entities.map((entity) => (
             <Card key={entity.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -295,6 +300,7 @@ export function EntitiesManagement({ type }: EntitiesManagementProps) {
           ))
         )}
       </div>
+      <AdminListPager meta={meta} loading={loading} onPageChange={setPage} />
 
       {/* View Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminAPI } from '@/services/adminApi';
+import { AdminListPager, defaultAdminListMeta, parseAdminListPayload, type AdminListMeta } from '@/components/admin/AdminListPager';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -136,7 +137,10 @@ export function AdminSpasManagement() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<AdminListMeta>(defaultAdminListMeta);
   const [spas, setSpas] = useState<Spa[]>([]);
   const [options, setOptions] = useState<SpaFilterOptions>({
     vrste: [],
@@ -147,38 +151,44 @@ export function AdminSpasManagement() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<SpaFormState>(() => createEmptyForm());
   const [sendingInviteId, setSendingInviteId] = useState<number | null>(null);
-
-  const filteredSpas = useMemo(() => {
-    if (!searchTerm.trim()) return spas;
-    const q = searchTerm.toLowerCase();
-
-    return spas.filter((spa) =>
-      spa.naziv?.toLowerCase().includes(q) ||
-      spa.grad?.toLowerCase().includes(q) ||
-      spa.regija?.toLowerCase().includes(q) ||
-      spa.email?.toLowerCase().includes(q) ||
-      spa.telefon?.toLowerCase().includes(q) ||
-      spa.user?.email?.toLowerCase().includes(q)
-    );
-  }, [spas, searchTerm]);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
-    void Promise.all([fetchSpas(), fetchOptions()]);
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setSearchTerm(searchInput.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    fetchSpas(page, searchTerm);
+  }, [page, searchTerm]);
+
+  useEffect(() => {
+    void fetchOptions();
   }, []);
 
-  const fetchSpas = async () => {
-    setLoading(true);
+  const fetchSpas = async (targetPage = page, search = searchTerm) => {
+    const isFirstLoad = spas.length === 0 && !search;
+    if (isFirstLoad) setLoading(true);
     try {
-      const response = await adminAPI.getSpas({ per_page: 100 });
-      const payload = response?.data;
-      const list = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
-      setSpas(list);
+      const response = await adminAPI.getSpas({
+        page: targetPage,
+        per_page: PAGE_SIZE,
+        search: search || undefined,
+      });
+      const parsed = parseAdminListPayload(response?.data, targetPage, PAGE_SIZE);
+      setSpas(parsed.list);
+      setMeta(parsed.meta);
     } catch (error: any) {
       toast({
         title: 'Greska',
         description: getErrorMessage(error),
         variant: 'destructive',
       });
+      setSpas([]);
+      setMeta(defaultAdminListMeta);
     } finally {
       setLoading(false);
     }
@@ -392,7 +402,7 @@ export function AdminSpasManagement() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Banje ({filteredSpas.length})</h2>
+          <h2 className="text-lg font-semibold">Banje ({meta.total})</h2>
         </div>
         <Button onClick={openCreateDialog} className="gap-2">
           <Plus className="h-4 w-4" /> Nova banja
@@ -403,21 +413,21 @@ export function AdminSpasManagement() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="pl-10"
-          placeholder="Pretrazi po nazivu, gradu, email-u..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Pretraži po nazivu, gradu, email-u..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
 
       <div className="space-y-3">
-        {filteredSpas.length === 0 ? (
+        {spas.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
-              Nema banja za prikaz.
+              {searchTerm ? 'Nema rezultata za vašu pretragu.' : 'Nema banja za prikaz.'}
             </CardContent>
           </Card>
         ) : (
-          filteredSpas.map((spa) => (
+          spas.map((spa) => (
             <Card key={spa.id} className="transition-shadow hover:shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -482,6 +492,7 @@ export function AdminSpasManagement() {
           ))
         )}
       </div>
+      <AdminListPager meta={meta} loading={loading} onPageChange={setPage} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">

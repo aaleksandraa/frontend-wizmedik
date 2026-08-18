@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar, Plus, Edit2, Trash2, Search, X, Save, Upload, Download } from 'lucide-react';
 import { adminAPI } from '@/services/adminApi';
+import { AdminListPager } from '@/components/admin/AdminListPager';
 
 interface CalendarEvent {
   id?: number;
@@ -25,6 +26,8 @@ const MedicalCalendarManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterActive, setFilterActive] = useState('all');
+  const [calendarPage, setCalendarPage] = useState(1);
+  const CALENDAR_PAGE_SIZE = 20;
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryValue, setNewCategoryValue] = useState('');
   const [newCategoryLabel, setNewCategoryLabel] = useState('');
@@ -84,6 +87,7 @@ const MedicalCalendarManagement: React.FC = () => {
 
   useEffect(() => {
     filterEventsList();
+    setCalendarPage(1);
   }, [events, searchQuery, filterType, filterActive]);
 
   useEffect(() => {
@@ -558,7 +562,12 @@ const MedicalCalendarManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredEvents.map(event => (
+                {filteredEvents
+                  .slice(
+                    (calendarPage - 1) * CALENDAR_PAGE_SIZE,
+                    calendarPage * CALENDAR_PAGE_SIZE
+                  )
+                  .map(event => (
                   <tr key={event.id} className="hover:bg-gray-50">
                     <td className="px-4 py-4 whitespace-nowrap">
                       {event.id && (
@@ -633,6 +642,17 @@ const MedicalCalendarManagement: React.FC = () => {
             </table>
           </div>
         )}
+        <div className="border-t px-4 py-3">
+          <AdminListPager
+            meta={{
+              current_page: calendarPage,
+              last_page: Math.max(1, Math.ceil(filteredEvents.length / CALENDAR_PAGE_SIZE)),
+              per_page: CALENDAR_PAGE_SIZE,
+              total: filteredEvents.length,
+            }}
+            onPageChange={setCalendarPage}
+          />
+        </div>
       </div>
 
       {/* Modal - Rendered using Portal to escape parent overflow */}
