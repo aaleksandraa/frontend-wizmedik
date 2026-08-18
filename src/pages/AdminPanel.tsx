@@ -1859,9 +1859,13 @@ export default function AdminPanel() {
                   </div>
                   <div>
                     <label className="text-sm font-medium">Klinika</label>
-                    <Select value={doctorForm.klinika_id} onValueChange={(v) => setDoctorForm({...doctorForm, klinika_id: v})}>
-                      <SelectTrigger><SelectValue placeholder="Odaberi" /></SelectTrigger>
+                    <Select
+                      value={doctorForm.klinika_id || 'none'}
+                      onValueChange={(v) => setDoctorForm({...doctorForm, klinika_id: v === 'none' ? '' : v})}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Samostalni doktor" /></SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="none">Samostalni doktor (bez klinike)</SelectItem>
                         {clinics.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.naziv}</SelectItem>)}
                       </SelectContent>
                     </Select>
