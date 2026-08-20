@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react';
 import { hasConsentFor } from '@/lib/cookie-consent';
+import { isChunkLoadError } from '@/lib/chunkLoadRecovery';
 
 /**
  * Initialize Sentry for error tracking
@@ -68,24 +69,36 @@ export const initSentry = () => {
     // Filter out known non-critical errors
     beforeSend(event, hint) {
       const error = hint.originalException;
-      
-      // Ignore network errors (handled by UI)
+
+      if (isChunkLoadError(error)) {
+        event.tags = {
+          ...event.tags,
+          chunk_load_failure: 'true',
+        };
+
+        if (environment === 'production' && Math.random() > 0.1) {
+          return null;
+        }
+
+        return event;
+      }
+
+      // Ignore generic network errors (handled by UI)
       if (error && typeof error === 'object' && 'message' in error) {
         const message = String(error.message).toLowerCase();
         if (
           message.includes('network error') ||
-          message.includes('failed to fetch') ||
           message.includes('load failed')
         ) {
           return null;
         }
       }
-      
+
       // Ignore ResizeObserver errors (browser quirk)
       if (event.message?.includes('ResizeObserver')) {
         return null;
       }
-      
+
       return event;
     },
     

@@ -6,11 +6,17 @@ const DEFAULT_ROUTES = [
   "/about",
   "/pitanja",
   "/domovi-njega",
+  "/domovi-njega/vodic",
   "/doktori",
   "/klinike",
   "/laboratorije",
   "/apoteke",
+  "/apoteke/odzak",
   "/banje",
+  "/specijalnost/opsta-i-interna-medicina",
+  "/grad/sipovo",
+  "/lijekovi/eliquis-film-tablete-25-mg-2603",
+  "/lijekovi/carvelol-tablete-25-mg",
 ];
 const REQUEST_TIMEOUT_MS = Math.max(5000, Number(process.env.FRONTEND_VERIFY_TIMEOUT_MS || 20000));
 const SERVICE_WORKER_MARKER = "// WizMedik service worker cleanup shim.";

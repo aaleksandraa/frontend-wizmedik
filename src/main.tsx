@@ -2,6 +2,11 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "leaflet/dist/leaflet.css";
+import {
+  clearChunkReloadFlag,
+  registerChunkLoadRecoveryHandlers,
+} from "./lib/chunkLoadRecovery";
 import { preloadCardSettings } from "./hooks/useCardSettings";
 import { preloadSearchData } from "./hooks/useSmartSearch";
 import { scheduleLowPriorityWork } from "./utils/scheduleLowPriority";
@@ -14,6 +19,7 @@ if (import.meta.env.DEV) {
 // Ensure React is available globally (fixes module loading issues on refresh)
 if (typeof window !== 'undefined') {
   (window as any).React = React;
+  registerChunkLoadRecoveryHandlers();
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
   });
@@ -68,6 +74,7 @@ if (!rootElement) {
 // Create root and render with error handling
 try {
   createRoot(rootElement).render(<App />);
+  clearChunkReloadFlag();
 } catch (error) {
   console.error("Failed to render app:", error);
   // Fallback error display

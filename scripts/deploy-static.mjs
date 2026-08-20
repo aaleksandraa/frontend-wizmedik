@@ -53,12 +53,22 @@ const VERIFY_ROUTE_PATHS = [
   "/about",
   "/pitanja",
   "/domovi-njega",
+  "/domovi-njega/vodic",
   "/doktori",
   "/klinike",
   "/laboratorije",
   "/apoteke",
+  "/apoteke/odzak",
   "/banje",
+  "/specijalnost/opsta-i-interna-medicina",
+  "/grad/sipovo",
+  "/lijekovi/eliquis-film-tablete-25-mg-2603",
+  "/lijekovi/carvelol-tablete-25-mg",
 ];
+const ASSET_RETENTION_DAYS = Math.max(
+  1,
+  Number(process.env.FRONTEND_ASSET_RETENTION_DAYS || 7)
+);
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -132,6 +142,15 @@ async function main() {
     throw error;
   }
 
+  if (targetExists && (await pathExists(backupDir))) {
+    console.log("[deploy-static] Merging retained assets from previous deployment...");
+    await mergeAssetsDirectory(
+      path.join(backupDir, "assets"),
+      path.join(targetDir, "assets")
+    );
+    await pruneStaleAssets(path.join(targetDir, "assets"));
+  }
+
   await cleanupPath(backupDir);
 
   await verifyDeploy(targetDir);
@@ -203,11 +222,13 @@ async function validateTarget(targetDir, allowAnyTarget, inPlaceWebRoot) {
 async function deployInPlace(targetDir) {
   await resetGeneratedTopLevelEntries(targetDir);
 
-  console.log("[deploy-static] Refreshing assets directory...");
-  await cleanupPath(path.join(targetDir, "assets"));
+  console.log("[deploy-static] Merging new assets into existing assets directory...");
+  await mergeAssetsDirectory(path.join(DIST_DIR, "assets"), path.join(targetDir, "assets"));
 
   console.log("[deploy-static] Copying fresh dist output into webroot...");
   await copyDirectoryContents(DIST_DIR, targetDir);
+
+  await pruneStaleAssets(path.join(targetDir, "assets"));
 }
 
 async function resetGeneratedTopLevelEntries(targetDir) {
@@ -271,6 +292,57 @@ async function copyDirectoryContents(sourceDir, targetDir) {
     }
 
     await fs.copyFile(sourcePath, targetPath);
+  }
+}
+
+async function mergeAssetsDirectory(sourceAssetsDir, targetAssetsDir) {
+  if (!(await pathExists(sourceAssetsDir))) {
+    return;
+  }
+
+  await fs.mkdir(targetAssetsDir, { recursive: true });
+  const entries = await fs.readdir(sourceAssetsDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    await fs.copyFile(
+      path.join(sourceAssetsDir, entry.name),
+      path.join(targetAssetsDir, entry.name)
+    );
+  }
+}
+
+async function pruneStaleAssets(assetsDir) {
+  if (!(await pathExists(assetsDir))) {
+    return;
+  }
+
+  const cutoffMs = Date.now() - ASSET_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const entries = await fs.readdir(assetsDir, { withFileTypes: true });
+  let pruned = 0;
+
+  for (const entry of entries) {
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    const filePath = path.join(assetsDir, entry.name);
+    const stat = await fs.stat(filePath).catch(() => null);
+    if (!stat || stat.mtimeMs >= cutoffMs) {
+      continue;
+    }
+
+    await fs.unlink(filePath);
+    pruned += 1;
+  }
+
+  if (pruned > 0) {
+    console.log(
+      `[deploy-static] Pruned ${pruned} asset file(s) older than ${ASSET_RETENTION_DAYS} day(s).`
+    );
   }
 }
 
