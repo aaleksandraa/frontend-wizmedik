@@ -25,6 +25,7 @@ interface Clinic {
   distance?: number;
   ocjena?: number;
   broj_ocjena?: number;
+  broj_doktora?: number;
 }
 
 interface ClinicCardProps {
@@ -46,6 +47,7 @@ export function ClinicCard({ clinic, variant: propVariant, compact = false }: Cl
   const navigate = useNavigate();
   const { settings, loading } = useClinicCardSettings();
   const currentVariant = (propVariant || settings.variant) as ClinicCardVariant;
+  const doctorCount = Number(clinic.broj_doktora ?? clinic.doktori?.length ?? 0);
   const goToClinic = () => navigate(`/klinika/${clinic.slug || clinic.id}`);
   const mainImage = clinic.slike && clinic.slike.length > 0
     ? (fixImageUrl(clinic.slike[0]) || clinic.slike[0])
@@ -102,8 +104,8 @@ export function ClinicCard({ clinic, variant: propVariant, compact = false }: Cl
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               {settings.showPhone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {clinic.telefon}</span>}
-              {settings.showDoctorsCount && clinic.doktori && clinic.doktori.length > 0 && (
-                <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {clinic.doktori.length}</span>
+              {settings.showDoctorsCount && doctorCount > 0 && (
+                <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {doctorCount}</span>
               )}
             </div>
             <ChevronRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform" />
@@ -132,8 +134,8 @@ export function ClinicCard({ clinic, variant: propVariant, compact = false }: Cl
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <MapPin className="h-3 w-3" /> {clinic.grad}
             </p>
-            {settings.showDoctorsCount && clinic.doktori && clinic.doktori.length > 0 && (
-              <p className="text-xs text-muted-foreground mt-1">{clinic.doktori.length} doktora</p>
+            {settings.showDoctorsCount && doctorCount > 0 && (
+              <p className="text-xs text-muted-foreground mt-1">{doctorCount} doktora</p>
             )}
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -184,8 +186,8 @@ export function ClinicCard({ clinic, variant: propVariant, compact = false }: Cl
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-sm">
                 {settings.showPhone && <span className="flex items-center gap-1"><Phone className="h-4 w-4 text-primary" /> {clinic.telefon}</span>}
-                {settings.showDoctorsCount && clinic.doktori && clinic.doktori.length > 0 && (
-                  <span className="flex items-center gap-1"><Users className="h-4 w-4 text-primary" /> {clinic.doktori.length} doktora</span>
+                {settings.showDoctorsCount && doctorCount > 0 && (
+                  <span className="flex items-center gap-1"><Users className="h-4 w-4 text-primary" /> {doctorCount} doktora</span>
                 )}
               </div>
               <Button variant="medical" size="sm" onClick={goToClinic}>Pogledaj</Button>
@@ -204,8 +206,8 @@ export function ClinicCard({ clinic, variant: propVariant, compact = false }: Cl
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {clinic.grad}</span>
           {settings.showPhone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {clinic.telefon}</span>}
-          {settings.showDoctorsCount && clinic.doktori && clinic.doktori.length > 0 && (
-            <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {clinic.doktori.length} doktora</span>
+          {settings.showDoctorsCount && doctorCount > 0 && (
+            <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {doctorCount} doktora</span>
           )}
         </div>
       </Card>
@@ -246,8 +248,8 @@ export function ClinicCard({ clinic, variant: propVariant, compact = false }: Cl
           )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              {settings.showDoctorsCount && clinic.doktori && clinic.doktori.length > 0 && (
-                <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {clinic.doktori.length}</span>
+              {settings.showDoctorsCount && doctorCount > 0 && (
+                <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {doctorCount}</span>
               )}
               {settings.showDistance && clinic.distance && (
                 <span>{formatNumber(clinic.distance)} km</span>

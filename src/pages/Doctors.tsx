@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { doctorsAPI, specialtiesAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
@@ -18,6 +18,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Stethoscope, Search, MapPin, Navigation, X, ArrowUpDown, List, Map, LayoutGrid } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { ListingHeader, ListingFilters, ListingGrid } from '@/components/ListingLayout';
+import {
+  LISTING_PAGE_SIZE,
+  LISTING_SEARCH_DEBOUNCE_MS,
+  defaultListingPagination,
+  listingSortParams,
+  listingSpecialtyParam,
+  parseLaravelPaginator,
+} from '@/lib/listing-pagination';
 
 interface Doctor {
   id: number;
@@ -55,15 +63,17 @@ const slugifySegment = (value: string): string => {
 
 export default function Doctors() {
   const { template } = useListingTemplate('doctors');
-  const { cities: allCities } = useAllCities(); // Get all cities from database
+  const { cities: allCities } = useAllCities();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
+  const [pagination, setPagination] = useState(defaultListingPagination());
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [selectedCity, setSelectedCity] = useState<string>(() => {
     const gradParam = searchParams.get('grad') || '';
@@ -78,9 +88,17 @@ export default function Doctors() {
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [viewMode, setViewMode] = useState<'list' | 'map' | 'split'>('list');
   const [splitViewEnabled, setSplitViewEnabled] = useState(true);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
-    fetchDoctors();
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, LISTING_SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
     fetchSpecialties();
     fetchSplitViewSetting();
   }, []);
@@ -92,7 +110,6 @@ export default function Doctors() {
     }));
   }, [specialties]);
 
-  // Normalize legacy query URLs to clean SEO routes.
   useEffect(() => {
     if (location.pathname !== '/doktori') {
       return;
@@ -137,22 +154,20 @@ export default function Doctors() {
     }
   }, [allCities, location.pathname, navigate, searchParams]);
 
-  // Update filters when URL params change
   useEffect(() => {
     const gradParam = searchParams.get('grad') || '';
     const specialnostParam = searchParams.get('specijalnost') || '';
-    
+
     if (gradParam) {
       const decodedGrad = decodeURIComponent(gradParam.replace(/\+/g, ' '));
       setSelectedCity(decodedGrad);
       setCitySearch(decodedGrad);
     }
-    
+
     if (specialnostParam && hierarchicalSpecialties.length > 0) {
       const decodedSpecijalnost = decodeURIComponent(specialnostParam.replace(/\+/g, ' '));
-      // Find specialty by slug
-      const foundSpecialty = hierarchicalSpecialties.find(spec => 
-        spec.slug === decodedSpecijalnost || 
+      const foundSpecialty = hierarchicalSpecialties.find(spec =>
+        spec.slug === decodedSpecijalnost ||
         spec.naziv.toLowerCase().replace(/\s+/g, '-') === decodedSpecijalnost
       );
       if (foundSpecialty) {
@@ -161,24 +176,11 @@ export default function Doctors() {
     }
   }, [searchParams, hierarchicalSpecialties]);
 
-  // Set citySearch when selectedCity is loaded from URL
   useEffect(() => {
     if (selectedCity) {
       setCitySearch(selectedCity);
     }
   }, [selectedCity]);
-
-  const fetchDoctors = async () => {
-    try {
-      const response = await doctorsAPI.getAll();
-      const list = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-      setDoctors(list);
-    } catch (error) {
-      console.error('Error fetching doctors:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchSpecialties = async () => {
     try {
@@ -197,6 +199,64 @@ export default function Doctors() {
       console.error('Error fetching split view setting:', error);
     }
   };
+
+  const loadDoctors = useCallback(async (pageToLoad = 1, append = false) => {
+    const requestId = ++requestIdRef.current;
+
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setDoctors([]);
+      setPagination(defaultListingPagination());
+    }
+
+    try {
+      const params: Record<string, string | number> = {
+        page: pageToLoad,
+        per_page: LISTING_PAGE_SIZE,
+        ...listingSortParams(sortBy, 'ime'),
+      };
+
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (selectedCity) params.grad = selectedCity;
+
+      const specialtyParam = listingSpecialtyParam(selectedParentSpecialty, selectedSubSpecialties);
+      if (specialtyParam) params.specijalnost = specialtyParam;
+
+      if (userLocation) {
+        params.lat = userLocation.lat;
+        params.lng = userLocation.lng;
+      }
+
+      const response = await doctorsAPI.getAll(params);
+      if (requestId !== requestIdRef.current) return;
+
+      const { list, pagination: nextPagination } = parseLaravelPaginator<Doctor>(response.data, pageToLoad);
+      setPagination(nextPagination);
+      setDoctors((current) => {
+        if (!append) return list;
+        const currentIds = new Set(current.map((item) => item.id));
+        return [...current, ...list.filter((item) => !currentIds.has(item.id))];
+      });
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      console.error('Error fetching doctors:', error);
+      if (!append) {
+        setDoctors([]);
+        setPagination(defaultListingPagination());
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [debouncedSearch, selectedCity, selectedParentSpecialty, selectedSubSpecialties, sortBy, userLocation]);
+
+  useEffect(() => {
+    void loadDoctors(1, false);
+  }, [loadDoctors]);
 
   const selectedParentData = useMemo(() => {
     if (!selectedParentSpecialty) return null;
@@ -248,7 +308,6 @@ export default function Doctors() {
     return desc;
   }, [selectedCity, selectedParentData]);
 
-  // Use all cities from database instead of extracting from doctors
   const uniqueCities = useMemo(() => {
     return allCities.map(city => city.naziv).sort();
   }, [allCities]);
@@ -258,10 +317,8 @@ export default function Doctors() {
     return uniqueCities.filter(city => city.toLowerCase().includes(citySearch.toLowerCase()));
   }, [uniqueCities, citySearch]);
 
-
-  useEffect(() => {
-    filterDoctors();
-  }, [doctors, searchTerm, selectedCity, selectedParentSpecialty, selectedSubSpecialties, userLocation, useUserLocation, sortBy, hierarchicalSpecialties]);
+  const totalResults = pagination.total || doctors.length;
+  const hasMoreResults = pagination.current_page < pagination.last_page;
 
   const toggleLocation = () => {
     if (useUserLocation) {
@@ -284,69 +341,6 @@ export default function Doctors() {
     }
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  };
-
-  const filterDoctors = () => {
-    let filtered = doctors.map(doc => ({
-      ...doc,
-      distance: userLocation && doc.latitude && doc.longitude
-        ? calculateDistance(userLocation.lat, userLocation.lng, doc.latitude, doc.longitude)
-        : undefined
-    }));
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(d =>
-        `${d.ime} ${d.prezime}`.toLowerCase().includes(term) ||
-        d.specijalnost?.toLowerCase().includes(term) ||
-        d.lokacija?.toLowerCase().includes(term)
-      );
-    }
-
-    if (selectedCity) {
-      filtered = filtered.filter(d => d.grad?.toLowerCase() === selectedCity.toLowerCase());
-    }
-
-    if (selectedParentSpecialty) {
-      const parentId = parseInt(selectedParentSpecialty);
-      const subIds = selectedSubSpecialties.map(id => parseInt(id));
-      
-      filtered = filtered.filter(doc => {
-        const docSpecId = doc.specijalnost_id;
-        if (!docSpecId) return false;
-        
-        if (subIds.length > 0) {
-          return subIds.includes(docSpecId);
-        }
-        if (docSpecId === parentId) return true;
-        const parent = hierarchicalSpecialties.find(s => s.id === parentId);
-        if (parent?.children) {
-          return parent.children.some((child: any) => child.id === docSpecId);
-        }
-        return false;
-      });
-    }
-
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name': return `${a.ime} ${a.prezime}`.localeCompare(`${b.ime} ${b.prezime}`);
-        case 'rating': return (b.ocjena || 0) - (a.ocjena || 0);
-        case 'distance': return useUserLocation ? (a.distance || 999) - (b.distance || 999) : 0;
-        default: return 0;
-      }
-    });
-
-    setFilteredDoctors(filtered);
-  };
-
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
     setCitySearch(city);
@@ -364,21 +358,24 @@ export default function Doctors() {
   };
 
   const toggleSubSpecialty = (subId: string) => {
-    setSelectedSubSpecialties(prev => 
+    setSelectedSubSpecialties(prev =>
       prev.includes(subId) ? prev.filter(id => id !== subId) : [...prev, subId]
     );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
+  const loadMoreButton = hasMoreResults ? (
+    <div className="flex justify-center pt-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5"
+        onClick={() => loadDoctors(pagination.current_page + 1, true)}
+        disabled={loadingMore}
+      >
+        {loadingMore ? 'Učitavanje...' : 'Učitaj još doktora'}
+      </Button>
+    </div>
+  ) : null;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -389,8 +386,8 @@ export default function Doctors() {
         ? `Doktori - ${selectedCity}`
         : "Doktori u Bosni i Hercegovini",
     "description": seoDescription,
-    "numberOfItems": filteredDoctors.length,
-    "itemListElement": filteredDoctors.slice(0, 10).map((doctor, index) => ({
+    "numberOfItems": totalResults,
+    "itemListElement": doctors.slice(0, 10).map((doctor, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {
@@ -420,10 +417,10 @@ export default function Doctors() {
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
-      
+
       <div className="min-h-screen bg-slate-50/80">
         <Navbar />
-        
+
         <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
           <ListingHeader
             badge="Doktori"
@@ -448,7 +445,7 @@ export default function Doctors() {
                 className="pl-10 rounded-xl border-[#0891b2]/15 focus-visible:ring-[#0891b2]/30"
               />
             </div>
-            
+
             <div className="relative w-full lg:w-56">
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Input
@@ -537,7 +534,7 @@ export default function Doctors() {
 
           <div className="flex items-center justify-between border-t border-[#0891b2]/10 pt-4">
             <p className="text-sm text-muted-foreground">
-              Pronađeno <span className="font-semibold text-[#0891b2]">{filteredDoctors.length}</span> doktora
+              Pronađeno <span className="font-semibold text-[#0891b2]">{totalResults}</span> doktora
               {useUserLocation && ' • Lokacija aktivna'}
             </p>
             <div className="flex items-center gap-2">
@@ -557,7 +554,6 @@ export default function Doctors() {
           </div>
         </ListingFilters>
 
-        {/* View Mode Tabs */}
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map' | 'split')} className="space-y-6">
           <TabsList className={`grid w-full rounded-xl bg-white p-1 shadow-sm ${splitViewEnabled ? 'max-w-[450px] grid-cols-3' : 'max-w-[300px] grid-cols-2'}`}>
             <TabsTrigger value="list">
@@ -577,16 +573,25 @@ export default function Doctors() {
           </TabsList>
 
           <TabsContent value="list">
-            {filteredDoctors.length > 0 ? (
+            {loading && doctors.length === 0 ? (
               <ListingGrid>
-                {filteredDoctors.map(doctor => (
-                  template === 'soft' ? (
-                    <DoctorCardSoft key={doctor.id} doctor={doctor} />
-                  ) : (
-                    <DoctorCard key={doctor.id} doctor={doctor} />
-                  )
+                {[1, 2, 3, 4, 5, 6].map((item) => (
+                  <div key={item} className="h-72 animate-pulse rounded-2xl bg-white shadow-sm" />
                 ))}
               </ListingGrid>
+            ) : doctors.length > 0 ? (
+              <div className="space-y-6">
+                <ListingGrid>
+                  {doctors.map(doctor => (
+                    template === 'soft' ? (
+                      <DoctorCardSoft key={doctor.id} doctor={doctor} />
+                    ) : (
+                      <DoctorCard key={doctor.id} doctor={doctor} />
+                    )
+                  ))}
+                </ListingGrid>
+                {loadMoreButton}
+              </div>
             ) : (
               <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
                 <Stethoscope className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40" />
@@ -598,8 +603,11 @@ export default function Doctors() {
 
           {splitViewEnabled && (
             <TabsContent value="split">
-              {filteredDoctors.length > 0 ? (
-                <DoctorsMapSplitView doctors={filteredDoctors} userLocation={userLocation} />
+              {doctors.length > 0 ? (
+                <div className="space-y-6">
+                  <DoctorsMapSplitView doctors={doctors} userLocation={userLocation} />
+                  {loadMoreButton}
+                </div>
               ) : (
                 <div className="text-center py-16">
                   <Stethoscope className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -611,24 +619,27 @@ export default function Doctors() {
           )}
 
           <TabsContent value="map">
-            <MapView
-              items={filteredDoctors.map(doctor => ({
-                id: doctor.id,
-                naziv: `Dr. ${doctor.ime} ${doctor.prezime}`,
-                adresa: doctor.lokacija || '',
-                grad: doctor.grad,
-                telefon: doctor.telefon,
-                latitude: doctor.latitude,
-                longitude: doctor.longitude,
-                slug: doctor.slug,
-                distance: doctor.distance,
-              }))}
-              userLocation={userLocation}
-              itemType="doktor"
-              itemIcon={<Stethoscope className="h-5 w-5 text-primary" />}
-              emptyMessage="Nema doktora sa GPS koordinatama"
-              height="550px"
-            />
+            <div className="space-y-6">
+              <MapView
+                items={doctors.map(doctor => ({
+                  id: doctor.id,
+                  naziv: `Dr. ${doctor.ime} ${doctor.prezime}`,
+                  adresa: doctor.lokacija || '',
+                  grad: doctor.grad,
+                  telefon: doctor.telefon,
+                  latitude: doctor.latitude,
+                  longitude: doctor.longitude,
+                  slug: doctor.slug,
+                  distance: doctor.distance,
+                }))}
+                userLocation={userLocation}
+                itemType="doktor"
+                itemIcon={<Stethoscope className="h-5 w-5 text-primary" />}
+                emptyMessage="Nema doktora sa GPS koordinatama"
+                height="550px"
+              />
+              {loadMoreButton}
+            </div>
           </TabsContent>
         </Tabs>
         </main>
@@ -637,4 +648,3 @@ export default function Doctors() {
     </>
   );
 }
-

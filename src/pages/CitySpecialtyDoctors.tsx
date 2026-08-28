@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { citiesAPI, doctorsAPI, specialtiesAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Stethoscope } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { ListingHeader, ListingGrid } from '@/components/ListingLayout';
+import {
+  LISTING_PAGE_SIZE,
+  defaultListingPagination,
+  parseLaravelPaginator,
+} from '@/lib/listing-pagination';
 
 interface Doctor {
   id: number;
@@ -53,86 +58,93 @@ export default function CitySpecialtyDoctors() {
   const { grad, specijalnost } = useParams<{ grad?: string; specijalnost?: string }>();
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [pagination, setPagination] = useState(defaultListingPagination());
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [resolvedCityName, setResolvedCityName] = useState('');
   const [resolvedSpecialtyName, setResolvedSpecialtyName] = useState('');
+  const requestIdRef = useRef(0);
+
+  const loadDoctors = useCallback(async (pageToLoad = 1, append = false, cityName = '', specialtyName = '') => {
+    const requestId = ++requestIdRef.current;
+
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setDoctors([]);
+      setPagination(defaultListingPagination());
+    }
+
+    try {
+      const params: Record<string, string | number> = {
+        page: pageToLoad,
+        per_page: LISTING_PAGE_SIZE,
+        sort_by: 'ocjena',
+        sort_order: 'desc',
+      };
+      if (cityName) params.grad = cityName;
+      if (specialtyName || specijalnost) params.specijalnost = specijalnost || specialtyName;
+
+      const response = await doctorsAPI.getAll(params);
+      if (requestId !== requestIdRef.current) return;
+
+      const { list, pagination: nextPagination } = parseLaravelPaginator<Doctor>(response.data, pageToLoad);
+      setPagination(nextPagination);
+      setDoctors((current) => {
+        if (!append) return list;
+        const currentIds = new Set(current.map((item) => item.id));
+        return [...current, ...list.filter((item) => !currentIds.has(item.id))];
+      });
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      console.error('Error fetching doctors:', error);
+      if (!append) {
+        setDoctors([]);
+        setPagination(defaultListingPagination());
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [specijalnost]);
 
   useEffect(() => {
-    const fetchDoctors = async () => {
-      setLoading(true);
+    const resolveAndFetch = async () => {
+      let cityName = slugToText(grad);
+      let specialtyName = slugToText(specijalnost);
 
-      try {
-        let cityName = slugToText(grad);
-        let specialtyName = slugToText(specijalnost);
-
-        if (grad) {
-          try {
-            const cityResponse = await citiesAPI.getBySlug(grad);
-            if (cityResponse.data?.naziv) {
-              cityName = cityResponse.data.naziv;
-            }
-          } catch (error) {
-            console.error('Error resolving city slug:', error);
+      if (grad) {
+        try {
+          const cityResponse = await citiesAPI.getBySlug(grad);
+          if (cityResponse.data?.naziv) {
+            cityName = cityResponse.data.naziv;
           }
+        } catch (error) {
+          console.error('Error resolving city slug:', error);
         }
-
-        if (specijalnost) {
-          try {
-            const specialtyResponse = await specialtiesAPI.getBySlug(specijalnost);
-            if (specialtyResponse.data?.naziv) {
-              specialtyName = specialtyResponse.data.naziv;
-            }
-          } catch (error) {
-            console.error('Error resolving specialty slug:', error);
-          }
-        }
-
-        setResolvedCityName(cityName);
-        setResolvedSpecialtyName(specialtyName);
-
-        const params: Record<string, string> = {};
-        if (cityName) {
-          params.grad = cityName;
-        }
-        if (specialtyName) {
-          params.specijalnost = specialtyName;
-        }
-
-        const response = await doctorsAPI.getAll(params);
-        const doctorsList = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-
-        const normalizedDoctors: Doctor[] = doctorsList
-          .map((doctor: any) => ({
-            id: doctor.id,
-            ime: doctor.ime,
-            prezime: doctor.prezime,
-            specijalnost: doctor.specijalnost,
-            grad: doctor.grad,
-            lokacija: doctor.lokacija,
-            telefon: doctor.telefon,
-            email: doctor.email,
-            ocjena: doctor.ocjena || 0,
-            broj_ocjena: doctor.broj_ocjena || 0,
-            prihvata_online: doctor.prihvata_online || false,
-            opis: doctor.opis,
-            radno_vrijeme: doctor.radno_vrijeme,
-            slug: doctor.slug,
-            slika_profila: doctor.slika_profila,
-            slika_url: doctor.slika_url,
-          }))
-          .sort((a, b) => (b.ocjena || 0) - (a.ocjena || 0));
-
-        setDoctors(normalizedDoctors);
-      } catch (error) {
-        console.error('Error fetching doctors:', error);
-        setDoctors([]);
-      } finally {
-        setLoading(false);
       }
+
+      if (specijalnost) {
+        try {
+          const specialtyResponse = await specialtiesAPI.getBySlug(specijalnost);
+          if (specialtyResponse.data?.naziv) {
+            specialtyName = specialtyResponse.data.naziv;
+          }
+        } catch (error) {
+          console.error('Error resolving specialty slug:', error);
+        }
+      }
+
+      setResolvedCityName(cityName);
+      setResolvedSpecialtyName(specialtyName);
+      await loadDoctors(1, false, cityName, specialtyName);
     };
 
-    void fetchDoctors();
-  }, [grad, specijalnost]);
+    void resolveAndFetch();
+  }, [grad, specijalnost, loadDoctors]);
 
   const canonicalUrl = useMemo(() => {
     if (grad && specijalnost) {
@@ -208,7 +220,7 @@ export default function CitySpecialtyDoctors() {
       url: canonicalUrl,
       mainEntity: {
         '@type': 'ItemList',
-        numberOfItems: doctors.length,
+        numberOfItems: pagination.total || doctors.length,
         itemListElement: doctors.slice(0, 50).map((doctor, index) => ({
           '@type': 'ListItem',
           position: index + 1,
@@ -226,7 +238,7 @@ export default function CitySpecialtyDoctors() {
         })),
       },
     };
-  }, [canonicalUrl, doctors, pageDescription, pageTitle]);
+  }, [canonicalUrl, doctors, pageDescription, pageTitle, pagination.total]);
 
   return (
     <>
@@ -292,8 +304,8 @@ export default function CitySpecialtyDoctors() {
           ) : (
             <>
               <p className="mb-6 text-muted-foreground">
-                Pronađeno <span className="font-semibold text-[#0891b2]">{doctors.length}</span>{' '}
-                {doctors.length === 1 ? 'doktor' : 'doktora'}
+                Pronađeno <span className="font-semibold text-[#0891b2]">{pagination.total || doctors.length}</span>{' '}
+                {(pagination.total || doctors.length) === 1 ? 'doktor' : 'doktora'}
               </p>
 
               <ListingGrid>
@@ -317,6 +329,20 @@ export default function CitySpecialtyDoctors() {
                   />
                 ))}
               </ListingGrid>
+
+              {pagination.current_page < pagination.last_page ? (
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5"
+                    onClick={() => loadDoctors(pagination.current_page + 1, true, resolvedCityName, resolvedSpecialtyName)}
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? 'Učitavanje...' : 'Učitaj još doktora'}
+                  </Button>
+                </div>
+              ) : null}
             </>
           )}
         </main>

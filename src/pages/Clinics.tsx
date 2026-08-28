@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { clinicsAPI, specialtiesAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
@@ -17,6 +17,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Building2, Search, MapPin, Navigation, X, ArrowUpDown } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import {
+  LISTING_PAGE_SIZE,
+  LISTING_SEARCH_DEBOUNCE_MS,
+  defaultListingPagination,
+  listingSortParams,
+  listingSpecialtyParam,
+  parseLaravelPaginator,
+} from '@/lib/listing-pagination';
 
 interface SpecialtyNode {
   id: number;
@@ -33,12 +41,6 @@ interface ClinicSpecialty {
   parent_id?: number | null;
 }
 
-interface DoctorSummary {
-  id: number;
-  specijalnost?: string;
-  specijalnost_id?: number | null;
-}
-
 interface Clinic {
   id: number;
   naziv: string;
@@ -50,7 +52,7 @@ interface Clinic {
   website?: string;
   slike: any[];
   radno_vrijeme: any;
-  doktori?: DoctorSummary[];
+  broj_doktora?: number;
   specijalnosti?: ClinicSpecialty[];
   latitude?: number;
   longitude?: number;
@@ -93,9 +95,11 @@ export default function Clinics() {
   const { cities: allCities } = useAllCities();
 
   const [clinics, setClinics] = useState<Clinic[]>([]);
-  const [filteredClinics, setFilteredClinics] = useState<Clinic[]>([]);
+  const [pagination, setPagination] = useState(defaultListingPagination());
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
@@ -106,6 +110,7 @@ export default function Clinics() {
   const [useUserLocation, setUseUserLocation] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<SortOption>('name');
+  const requestIdRef = useRef(0);
 
   const hierarchicalSpecialties = useMemo(
     () => specialties.map((parent) => ({ ...parent, children: parent.children || [] })),
@@ -124,12 +129,6 @@ export default function Clinics() {
 
     return items;
   }, [hierarchicalSpecialties]);
-
-  const specialtyById = useMemo(() => {
-    const map = new Map<number, SpecialtyNode>();
-    flatSpecialties.forEach((specialty) => map.set(specialty.id, specialty));
-    return map;
-  }, [flatSpecialties]);
 
   const specialtyBySlug = useMemo(() => {
     const map = new Map<string, SpecialtyNode>();
@@ -157,18 +156,14 @@ export default function Clinics() {
   };
 
   useEffect(() => {
-    const fetchClinics = async () => {
-      try {
-        const response = await clinicsAPI.getAll({ limit: 1000 });
-        const clinicsList = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-        setClinics(clinicsList);
-      } catch (error) {
-        console.error('Error fetching clinics:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, LISTING_SEARCH_DEBOUNCE_MS);
 
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
     const fetchSpecialties = async () => {
       try {
         const response = await specialtiesAPI.getAll();
@@ -179,8 +174,7 @@ export default function Clinics() {
       }
     };
 
-    fetchClinics();
-    fetchSpecialties();
+    void fetchSpecialties();
   }, []);
 
   useEffect(() => {
@@ -214,13 +208,35 @@ export default function Clinics() {
   }, [location.pathname, navigate, searchParams]);
 
   useEffect(() => {
-    const routeCityName = grad ? resolveCityNameFromSlug(grad) : '';
+    if (grad) {
+      return;
+    }
+
+    setSelectedCity('');
+    setCitySearch('');
+  }, [grad]);
+
+  useEffect(() => {
+    if (!grad) {
+      return;
+    }
+
+    const routeCityName = resolveCityNameFromSlug(grad);
     setSelectedCity(routeCityName);
     setCitySearch(routeCityName);
+  }, [grad, allCities]);
 
+  useEffect(() => {
+    if (specijalnost) {
+      return;
+    }
+
+    setSelectedParentSpecialty('');
+    setSelectedSubSpecialties([]);
+  }, [specijalnost]);
+
+  useEffect(() => {
     if (!specijalnost) {
-      setSelectedParentSpecialty('');
-      setSelectedSubSpecialties([]);
       return;
     }
 
@@ -243,7 +259,7 @@ export default function Clinics() {
 
     setSelectedParentSpecialty(specijalnost);
     setSelectedSubSpecialties([]);
-  }, [grad, hierarchicalSpecialties, specijalnost, allCities]);
+  }, [hierarchicalSpecialties, specijalnost]);
 
   const selectedParentData = useMemo(() => {
     if (!selectedParentSpecialty) {
@@ -252,6 +268,64 @@ export default function Clinics() {
 
     return hierarchicalSpecialties.find((specialty) => specialty.slug === selectedParentSpecialty) || null;
   }, [hierarchicalSpecialties, selectedParentSpecialty]);
+
+  const loadClinics = useCallback(async (pageToLoad = 1, append = false) => {
+    const requestId = ++requestIdRef.current;
+
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setClinics([]);
+      setPagination(defaultListingPagination());
+    }
+
+    try {
+      const params: Record<string, string | number> = {
+        page: pageToLoad,
+        per_page: LISTING_PAGE_SIZE,
+        ...listingSortParams(sortBy, 'naziv'),
+      };
+
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (selectedCity) params.grad = selectedCity;
+
+      const specialtyParam = listingSpecialtyParam(selectedParentSpecialty, selectedSubSpecialties);
+      if (specialtyParam) params.specijalnost = specialtyParam;
+
+      if (userLocation) {
+        params.lat = userLocation.lat;
+        params.lng = userLocation.lng;
+      }
+
+      const response = await clinicsAPI.getAll(params);
+      if (requestId !== requestIdRef.current) return;
+
+      const { list, pagination: nextPagination } = parseLaravelPaginator<Clinic>(response.data, pageToLoad);
+      setPagination(nextPagination);
+      setClinics((current) => {
+        if (!append) return list;
+        const currentIds = new Set(current.map((item) => item.id));
+        return [...current, ...list.filter((item) => !currentIds.has(item.id))];
+      });
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      console.error('Error fetching clinics:', error);
+      if (!append) {
+        setClinics([]);
+        setPagination(defaultListingPagination());
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [debouncedSearch, selectedCity, selectedParentSpecialty, selectedSubSpecialties, sortBy, userLocation]);
+
+  useEffect(() => {
+    void loadClinics(1, false);
+  }, [loadClinics]);
 
   const routeSpecialtyData = useMemo(() => {
     if (!specijalnost) {
@@ -276,150 +350,8 @@ export default function Clinics() {
     return uniqueCities.filter((city) => normalizeText(city).includes(normalizeText(citySearch)));
   }, [citySearch, uniqueCities]);
 
-  const getClinicSpecialtySlugs = (clinic: Clinic): string[] => {
-    const slugs = new Set<string>();
-
-    const attachSpecialty = (specialty?: SpecialtyNode | ClinicSpecialty | null) => {
-      if (!specialty?.slug) {
-        return;
-      }
-
-      slugs.add(specialty.slug);
-
-      if (specialty.parent_id) {
-        const parent = specialtyById.get(specialty.parent_id);
-        if (parent?.slug) {
-          slugs.add(parent.slug);
-        }
-      }
-    };
-
-    (clinic.specijalnosti || []).forEach((specialty) => attachSpecialty(specialty));
-
-    (clinic.doktori || []).forEach((doctor) => {
-      if (doctor.specijalnost_id) {
-        attachSpecialty(specialtyById.get(doctor.specijalnost_id));
-      }
-
-      if (doctor.specijalnost) {
-        attachSpecialty(specialtyByName.get(normalizeText(doctor.specijalnost)));
-      }
-    });
-
-    return Array.from(slugs);
-  };
-
-  const getClinicSearchTerms = (clinic: Clinic): string[] => {
-    const terms = new Set<string>();
-
-    const addTerm = (value?: string | null) => {
-      const normalized = (value || '').trim();
-      if (normalized !== '') {
-        terms.add(normalized);
-      }
-    };
-
-    (clinic.specijalnosti || []).forEach((specialty) => {
-      addTerm(specialty.naziv);
-
-      if (specialty.parent_id) {
-        addTerm(specialtyById.get(specialty.parent_id)?.naziv);
-      }
-    });
-
-    (clinic.doktori || []).forEach((doctor) => {
-      addTerm(doctor.specijalnost);
-
-      if (doctor.specijalnost_id) {
-        const specialty = specialtyById.get(doctor.specijalnost_id);
-        addTerm(specialty?.naziv);
-        if (specialty?.parent_id) {
-          addTerm(specialtyById.get(specialty.parent_id)?.naziv);
-        }
-      }
-    });
-
-    return Array.from(terms);
-  };
-
-  useEffect(() => {
-    const normalizedSearch = normalizeText(searchTerm);
-    const normalizedCity = normalizeText(selectedCity);
-
-    const filtered = clinics
-      .map((clinic) => ({
-        ...clinic,
-        distance:
-          userLocation && clinic.latitude && clinic.longitude
-            ? calculateDistance(userLocation.lat, userLocation.lng, clinic.latitude, clinic.longitude)
-            : undefined,
-      }))
-      .filter((clinic) => {
-        if (
-          normalizedSearch &&
-          ![
-            clinic.naziv,
-            clinic.opis,
-            clinic.adresa,
-            clinic.grad,
-            clinic.telefon,
-            ...getClinicSearchTerms(clinic),
-          ]
-            .filter(Boolean)
-            .some((value) => normalizeText(String(value)).includes(normalizedSearch))
-        ) {
-          return false;
-        }
-
-        if (normalizedCity && normalizeText(clinic.grad) !== normalizedCity) {
-          return false;
-        }
-
-        if (!selectedParentData) {
-          return true;
-        }
-
-        const clinicSpecialtySlugs = getClinicSpecialtySlugs(clinic);
-
-        if (selectedSubSpecialties.length > 0) {
-          return selectedSubSpecialties.some((slug) => clinicSpecialtySlugs.includes(slug));
-        }
-
-        if (clinicSpecialtySlugs.includes(selectedParentData.slug)) {
-          return true;
-        }
-
-        return (selectedParentData.children || []).some((child) => clinicSpecialtySlugs.includes(child.slug));
-      });
-
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'rating':
-          return (b.ocjena || 0) - (a.ocjena || 0);
-        case 'distance':
-          if (!useUserLocation) {
-            return 0;
-          }
-          return (a.distance || Number.MAX_SAFE_INTEGER) - (b.distance || Number.MAX_SAFE_INTEGER);
-        case 'name':
-        default:
-          return a.naziv.localeCompare(b.naziv);
-      }
-    });
-
-    setFilteredClinics(filtered);
-  }, [
-    clinics,
-    searchTerm,
-    selectedCity,
-    selectedParentData,
-    selectedSubSpecialties,
-    sortBy,
-    useUserLocation,
-    userLocation,
-    specialtyById,
-    specialtyByName,
-  ]);
+  const totalResults = pagination.total || clinics.length;
+  const hasMoreResults = pagination.current_page < pagination.last_page;
 
   const pageTitle = useMemo(() => {
     if (selectedCity && selectedParentData?.naziv) {
@@ -470,7 +402,7 @@ export default function Clinics() {
     }
 
     return 'Klinike | WizMedik';
-  }, [grad, routeSpecialtyData]);
+  }, [grad, routeSpecialtyData, allCities]);
 
   const seoDescription = useMemo(() => {
     const routeCityName = grad ? resolveCityNameFromSlug(grad) : '';
@@ -489,7 +421,7 @@ export default function Clinics() {
     }
 
     return 'Pronadjite klinike u Bosni i Hercegovini. Uporedite profile, usluge, doktore i kontakt informacije na WizMedik platformi.';
-  }, [grad, routeSpecialtyData]);
+  }, [grad, routeSpecialtyData, allCities]);
 
   const structuredData = useMemo(
     () => ({
@@ -497,8 +429,8 @@ export default function Clinics() {
       '@type': 'ItemList',
       name: pageTitle,
       description: seoDescription,
-      numberOfItems: filteredClinics.length,
-      itemListElement: filteredClinics.slice(0, 10).map((clinic, index) => ({
+      numberOfItems: totalResults,
+      itemListElement: clinics.slice(0, 10).map((clinic, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         item: {
@@ -515,22 +447,8 @@ export default function Clinics() {
         },
       })),
     }),
-    [filteredClinics, pageTitle, seoDescription]
+    [clinics, pageTitle, seoDescription, totalResults]
   );
-
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
 
   const toggleLocation = () => {
     if (useUserLocation) {
@@ -592,32 +510,19 @@ export default function Clinics() {
     setSelectedSubSpecialties([]);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50/80">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-          <div className="mb-8 space-y-3">
-            <div className="h-8 w-64 animate-pulse rounded-lg bg-slate-200" />
-            <div className="h-4 w-full max-w-xl animate-pulse rounded bg-slate-200" />
-          </div>
-          <ListingGrid>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex animate-pulse items-stretch gap-4 rounded-2xl border border-slate-100 bg-white p-4 md:p-5">
-                <div className="h-[120px] w-[104px] shrink-0 rounded-2xl bg-slate-100 md:w-[112px]" />
-                <div className="flex-1 space-y-3 py-1">
-                  <div className="h-4 w-3/4 rounded bg-slate-100" />
-                  <div className="h-3 w-1/2 rounded bg-slate-100" />
-                  <div className="h-3 w-2/3 rounded bg-slate-100" />
-                  <div className="h-10 w-24 rounded-full bg-slate-100" />
-                </div>
-              </div>
-            ))}
-          </ListingGrid>
-        </main>
-      </div>
-    );
-  }
+  const loadMoreButton = hasMoreResults ? (
+    <div className="flex justify-center pt-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5"
+        onClick={() => loadClinics(pagination.current_page + 1, true)}
+        disabled={loadingMore}
+      >
+        {loadingMore ? 'Učitavanje...' : 'Učitaj još klinika'}
+      </Button>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -781,7 +686,7 @@ export default function Clinics() {
 
             <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
-                Pronađeno {filteredClinics.length} klinika
+                Pronađeno {totalResults} klinika
                 {useUserLocation && ' • Lokacija aktivna'}
               </p>
               <div className="flex items-center gap-2">
@@ -816,16 +721,33 @@ export default function Clinics() {
             </TabsList>
 
             <TabsContent value="list">
-              {filteredClinics.length > 0 ? (
+              {loading && clinics.length === 0 ? (
                 <ListingGrid>
-                  {filteredClinics.map((clinic) =>
-                    template === 'soft' ? (
-                      <ClinicCardSoft key={clinic.id} clinic={clinic} />
-                    ) : (
-                      <ClinicCard key={clinic.id} clinic={clinic} />
-                    )
-                  )}
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="flex animate-pulse items-stretch gap-4 rounded-2xl border border-slate-100 bg-white p-4 md:p-5">
+                      <div className="h-[120px] w-[104px] shrink-0 rounded-2xl bg-slate-100 md:w-[112px]" />
+                      <div className="flex-1 space-y-3 py-1">
+                        <div className="h-4 w-3/4 rounded bg-slate-100" />
+                        <div className="h-3 w-1/2 rounded bg-slate-100" />
+                        <div className="h-3 w-2/3 rounded bg-slate-100" />
+                        <div className="h-10 w-24 rounded-full bg-slate-100" />
+                      </div>
+                    </div>
+                  ))}
                 </ListingGrid>
+              ) : clinics.length > 0 ? (
+                <div className="space-y-6">
+                  <ListingGrid>
+                    {clinics.map((clinic) =>
+                      template === 'soft' ? (
+                        <ClinicCardSoft key={clinic.id} clinic={clinic} />
+                      ) : (
+                        <ClinicCard key={clinic.id} clinic={clinic} />
+                      )
+                    )}
+                  </ListingGrid>
+                  {loadMoreButton}
+                </div>
               ) : (
                 <div className="rounded-2xl border border-[#0891b2]/10 bg-white py-16 text-center shadow-sm">
                   <Building2 className="mx-auto mb-4 h-16 w-16 text-[#0891b2]/40" />
@@ -836,7 +758,10 @@ export default function Clinics() {
             </TabsContent>
 
             <TabsContent value="map">
-              <ClinicsMap clinics={filteredClinics} userLocation={userLocation} />
+              <div className="space-y-6">
+                <ClinicsMap clinics={clinics} userLocation={userLocation} />
+                {loadMoreButton}
+              </div>
             </TabsContent>
           </Tabs>
         </main>
