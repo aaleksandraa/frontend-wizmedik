@@ -30,6 +30,7 @@ import { sanitizeRichText } from '@/utils/sanitize';
 import { safeInternalPath } from '@/utils/navigation';
 import { trackClarityEvent } from '@/config/clarity';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 import { DoctorProfileHero } from '@/components/DoctorProfileHero';
 import { DoctorProfileMobileBar } from '@/components/DoctorProfileMobileBar';
 
@@ -404,39 +405,19 @@ export default function DoctorProfile() {
       return <p className="text-sm">{radnoVrijeme}</p>;
     }
 
-    const dani = {
-      ponedjeljak: 'Pon',
-      utorak: 'Uto',
-      srijeda: 'Sri',
-      četvrtak: 'Čet',
-      petak: 'Pet',
-      subota: 'Sub',
-      nedjelja: 'Ned'
-    };
-
     return (
       <div className="space-y-1 text-sm">
-        {Object.entries(dani).map(([key, label]) => {
-          const day = radnoVrijeme[key];
-          if (!day) return null;
-          
-          const radi = !day.closed && day.radi !== false;
-          
-          return (
-            <div key={key} className="flex justify-between items-center">
-              <span className="text-muted-foreground">{label}:</span>
-              <span className={radi ? 'font-medium' : 'text-muted-foreground'}>
-                {radi ? `${formatTime(day.open || day.od)} - ${formatTime(day.close || day.do)}` : 'Zatvoreno'}
-              </span>
-            </div>
-          );
-        })}
+        {getWorkingHoursRows(radnoVrijeme).map((row) => (
+          <div key={row.day} className="flex justify-between items-center">
+            <span className="text-muted-foreground">{row.label}:</span>
+            <span className={row.closed ? 'text-muted-foreground' : 'font-medium'}>
+              {row.text}
+            </span>
+          </div>
+        ))}
       </div>
     );
   };
-
-  // Remove seconds from time string (08:00:00 -> 08:00)
-  const formatTime = (time: string) => time?.substring(0, 5) || time;
 
   if (loading) {
     return (

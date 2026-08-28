@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { MapView } from '@/components/MapView';
 import { MapPin, Phone, Star, Calendar, CheckCircle, Clock, Mail, Building2, MessageSquare } from 'lucide-react';
 import { formatRating } from '@/utils/formatters';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 import type { GuestVisit } from './index';
 
 interface DoctorTemplateProps {
@@ -145,13 +146,11 @@ export function DoctorTemplateCard({
                 Radno vrijeme
               </h2>
               <div className="space-y-2">
-                {doctor.radno_vrijeme && Object.entries(doctor.radno_vrijeme).map(([day, hours]: [string, any]) => (
-                  <div key={day} className="flex justify-between text-sm">
-                    <span className="capitalize text-gray-600">{day}</span>
-                    <span className={!hours?.closed ? 'font-medium' : 'text-gray-400'}>
-                      {!hours?.closed && hours?.open && hours?.close 
-                        ? `${hours.open} - ${hours.close}` 
-                        : 'Zatvoreno'}
+                {doctor.radno_vrijeme && getWorkingHoursRows(doctor.radno_vrijeme).map((row) => (
+                  <div key={row.day} className="flex justify-between text-sm">
+                    <span className="text-gray-600">{row.label}</span>
+                    <span className={row.closed ? 'text-gray-400' : 'font-medium'}>
+                      {row.text}
                     </span>
                   </div>
                 ))}

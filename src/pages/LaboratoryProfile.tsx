@@ -18,6 +18,7 @@ import { laboratoriesAPI } from '@/services/api';
 import { motion } from 'framer-motion';
 import { LocationMapCard } from '@/components/LocationMapCard';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 
 interface Laboratory {
   id: number;
@@ -174,7 +175,6 @@ export default function LaboratoryProfile() {
     );
   }
 
-  const dani = ['ponedeljak', 'utorak', 'srijeda', 'cetvrtak', 'petak', 'subota', 'nedjelja'];
   const laboratoryAnalyticsEntity = {
     entity_type: 'laboratory' as const,
     entity_id: laboratory.id,
@@ -576,21 +576,16 @@ export default function LaboratoryProfile() {
                           Radno Vrijeme
                         </h3>
                         <div className="space-y-2">
-                          {dani.map((dan) => {
-                            const rv = laboratory.radno_vrijeme?.[dan];
-                            return (
-                              <div key={dan} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                                <span className="font-medium text-gray-700 capitalize">{dan}</span>
-                                {rv?.closed ? (
-                                  <span className="text-gray-500">Zatvoreno</span>
-                                ) : rv?.open && rv?.close ? (
-                                  <span className="text-gray-900 font-medium">{rv.open} - {rv.close}</span>
-                                ) : (
-                                  <span className="text-gray-400">Nije postavljeno</span>
-                                )}
-                              </div>
-                            );
-                          })}
+                          {getWorkingHoursRows(laboratory.radno_vrijeme).map((row) => (
+                            <div key={row.day} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                              <span className="font-medium text-gray-700">{row.label}</span>
+                              {row.closed ? (
+                                <span className="text-gray-500">Zatvoreno</span>
+                              ) : (
+                                <span className="text-gray-900 font-medium">{row.text}</span>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

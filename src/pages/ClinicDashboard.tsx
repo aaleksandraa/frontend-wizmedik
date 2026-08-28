@@ -22,24 +22,12 @@ import { Navbar } from '@/components/Navbar';
 import { ClinicCalendar } from '@/components/clinic/ClinicCalendar';
 import { SpecialtiesCheckboxList } from '@/components/SpecialtiesCheckboxList';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import { normalizeNamedWorkingHours } from '@/components/admin/profileFormUtils';
+import { normalizeNamedWorkingHours, namedWorkingDayLabels, namedWorkingDays } from '@/components/admin/profileFormUtils';
 import { validatePassword } from '@/utils/validation';
 import { fixImageUrl } from '@/utils/imageUrl';
 
-const normalizeClinicDashboardWorkingHours = (value?: Record<string, any> | null) => {
-  const normalized = normalizeNamedWorkingHours(value);
-
-  return {
-    ponedeljak: normalized.ponedeljak,
-    utorak: normalized.utorak,
-    sreda: normalized.srijeda,
-    cetvrtak: normalized.cetvrtak,
-    'četvrtak': normalized.cetvrtak,
-    petak: normalized.petak,
-    subota: normalized.subota,
-    nedelja: normalized.nedjelja,
-  };
-};
+const normalizeClinicDashboardWorkingHours = (value?: Record<string, any> | null) =>
+  normalizeNamedWorkingHours(value);
 
 interface ClinicProfile {
   id: number;
@@ -1606,10 +1594,10 @@ export default function ClinicDashboard() {
                 <CardContent>
                   {profile && (
                     <div className="space-y-3">
-                      {['ponedeljak', 'utorak', 'sreda', 'četvrtak', 'petak', 'subota', 'nedelja'].map((dan) => (
+                      {namedWorkingDays.map((dan) => (
                         <div key={dan} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg">
                           <div className="w-32">
-                            <Label className="capitalize font-medium">{dan}</Label>
+                            <Label className="font-medium">{namedWorkingDayLabels[dan]}</Label>
                           </div>
                           <div className="flex items-center gap-2 flex-1">
                             <Input

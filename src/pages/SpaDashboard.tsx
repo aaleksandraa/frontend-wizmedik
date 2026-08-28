@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { LocationInput } from '@/components/LocationInput';
+import { WORKING_DAY_LABELS, WORKING_DAY_ORDER } from '@/lib/working-hours';
 import { 
   Droplet, BarChart3, Settings, Image as ImageIcon,
   Clock, Package, Heart, Loader2, Star, Upload, X,
@@ -187,8 +188,6 @@ export default function SpaDashboard() {
   
   // Working hours
   const [radnoVrijeme, setRadnoVrijeme] = useState<any>({});
-
-  const dani = ['ponedeljak', 'utorak', 'srijeda', 'cetvrtak', 'petak', 'subota', 'nedjelja'];
   
   // Drag and drop sensors
   const sensors = useSensors(
@@ -1390,9 +1389,9 @@ export default function SpaDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {dani.map((dan) => (
+                  {WORKING_DAY_ORDER.map((dan) => (
                     <div key={dan} className="flex items-center gap-4">
-                      <div className="w-32 font-medium capitalize">{dan}</div>
+                      <div className="w-32 font-medium">{WORKING_DAY_LABELS[dan]}</div>
                       <Switch
                         checked={!radnoVrijeme[dan]?.closed}
                         onCheckedChange={(checked) => {

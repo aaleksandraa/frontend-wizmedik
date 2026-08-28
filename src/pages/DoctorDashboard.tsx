@@ -34,6 +34,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { validatePassword } from '@/utils/validation';
+import { getDayHours, WORKING_DAY_LABELS, WORKING_DAY_ORDER } from '@/lib/working-hours';
 
 interface DoctorProfile {
   id: number;
@@ -240,15 +241,16 @@ export default function DoctorDashboard() {
     trajanje_minuti: 30, opis: '', aktivan: true, kategorija_id: null as number | null
   });
 
-  const [workingHours, setWorkingHours] = useState({
-    ponedjeljak: { radi: true, od: '08:00', do: '16:00' },
-    utorak: { radi: true, od: '08:00', do: '16:00' },
-    srijeda: { radi: true, od: '08:00', do: '16:00' },
-    četvrtak: { radi: true, od: '08:00', do: '16:00' },
-    petak: { radi: true, od: '08:00', do: '16:00' },
-    subota: { radi: false, od: '08:00', do: '16:00' },
-    nedjelja: { radi: false, od: '08:00', do: '16:00' }
-  });
+  const [workingHours, setWorkingHours] = useState(
+    WORKING_DAY_ORDER.reduce((acc, day) => {
+      acc[day] = {
+        radi: day !== 'subota' && day !== 'nedjelja',
+        od: '08:00',
+        do: '16:00',
+      };
+      return acc;
+    }, {} as Record<string, { radi: boolean; od: string; do: string }>)
+  );
 
   const [breaks, setBreaks] = useState<Array<{ od: string; do: string }>>([]);
   const [holidays, setHolidays] = useState<Array<{ od: string; do: string; razlog: string }>>([]);
@@ -538,9 +540,14 @@ export default function DoctorDashboard() {
         };
         setProfile(normalizedProfile);
         if (data.radno_vrijeme && typeof data.radno_vrijeme === 'object') {
-          const transformed: any = {};
-          Object.entries(data.radno_vrijeme).forEach(([day, schedule]: [string, any]) => {
-            transformed[day] = { radi: !schedule.closed, od: schedule.open || '08:00', do: schedule.close || '16:00' };
+          const transformed: Record<string, { radi: boolean; od: string; do: string }> = {};
+          WORKING_DAY_ORDER.forEach((day) => {
+            const schedule = getDayHours(data.radno_vrijeme, day);
+            transformed[day] = {
+              radi: schedule ? schedule.closed !== true && schedule.radi !== false : day !== 'subota' && day !== 'nedjelja',
+              od: String(schedule?.open || schedule?.od || '08:00').slice(0, 5),
+              do: String(schedule?.close || schedule?.do || '16:00').slice(0, 5),
+            };
           });
           setWorkingHours(transformed);
         }
@@ -1689,10 +1696,12 @@ export default function DoctorDashboard() {
                   <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5" /> Radno vrijeme</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {Object.entries(workingHours).map(([day, schedule]) => (
+                  {WORKING_DAY_ORDER.map((day) => {
+                    const schedule = workingHours[day];
+                    return (
                     <div key={day} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-2">
                       <div className="flex items-center gap-4">
-                        <span className="w-24 capitalize font-medium">{day}</span>
+                        <span className="w-24 font-medium">{WORKING_DAY_LABELS[day]}</span>
                         <Switch checked={schedule.radi} onCheckedChange={(checked) => setWorkingHours({...workingHours, [day]: {...schedule, radi: checked}})} />
                       </div>
                       {schedule.radi && (
@@ -1703,7 +1712,8 @@ export default function DoctorDashboard() {
                         </div>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               </Card>
 

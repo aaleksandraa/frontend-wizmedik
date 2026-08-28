@@ -2,7 +2,7 @@ export const namedWorkingDayLabels: Record<string, string> = {
   ponedeljak: 'Ponedjeljak',
   utorak: 'Utorak',
   srijeda: 'Srijeda',
-  cetvrtak: 'Cetvrtak',
+  cetvrtak: 'Četvrtak',
   petak: 'Petak',
   subota: 'Subota',
   nedjelja: 'Nedjelja',

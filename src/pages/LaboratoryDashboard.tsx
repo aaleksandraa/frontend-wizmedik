@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { citiesAPI, uploadAPI } from '@/services/api';
-import { normalizeNamedWorkingHours } from '@/components/admin/profileFormUtils';
+import { namedWorkingDayLabels, normalizeNamedWorkingHours } from '@/components/admin/profileFormUtils';
 import {
   DndContext,
   closestCenter,
@@ -1517,7 +1517,7 @@ export default function LaboratoryDashboard() {
                       {['ponedeljak', 'utorak', 'srijeda', 'cetvrtak', 'petak', 'subota', 'nedjelja'].map((dan) => (
                         <div key={dan} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg">
                           <div className="w-32">
-                            <Label className="capitalize font-medium">{dan}</Label>
+                            <Label className="font-medium">{namedWorkingDayLabels[dan] || dan}</Label>
                           </div>
                           <div className="flex items-center gap-2 flex-1">
                             <Input

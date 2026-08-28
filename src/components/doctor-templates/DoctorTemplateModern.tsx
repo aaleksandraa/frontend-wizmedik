@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { MapView } from '@/components/MapView';
 import { MapPin, Phone, Star, Clock, Calendar, CheckCircle, Award, Building2, MessageSquare, Mail } from 'lucide-react';
 import { formatRating } from '@/utils/formatters';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 
 import type { GuestVisit } from './index';
 
@@ -377,13 +378,11 @@ export function DoctorTemplateModern({
                   <Clock className="h-5 w-5 text-primary" />
                   Radno vrijeme
                 </h3>
-                {doctor.radno_vrijeme && Object.entries(doctor.radno_vrijeme).map(([day, hours]: [string, any]) => (
-                  <div key={day} className="flex justify-between py-2 border-b last:border-0 text-sm">
-                    <span className="capitalize">{day}</span>
-                    <span className={!hours?.closed ? 'text-gray-900' : 'text-gray-400'}>
-                      {!hours?.closed && hours?.open && hours?.close 
-                        ? `${hours.open} - ${hours.close}` 
-                        : 'Zatvoreno'}
+                {doctor.radno_vrijeme && getWorkingHoursRows(doctor.radno_vrijeme).map((row) => (
+                  <div key={row.day} className="flex justify-between py-2 border-b last:border-0 text-sm">
+                    <span>{row.label}</span>
+                    <span className={row.closed ? 'text-gray-400' : 'text-gray-900'}>
+                      {row.text}
                     </span>
                   </div>
                 ))}

@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { getCanonicalWorkingDay, getWorkingHoursRows } from '@/lib/working-hours';
 
 interface SEOProps {
   title?: string;
@@ -269,21 +270,23 @@ export const createSearchActionSchema = () => ({
 // Helper to parse working hours
 function parseWorkingHours(radnoVrijeme: any) {
   if (!radnoVrijeme) return undefined;
-  
+
   const daysMap: Record<string, string> = {
-    'ponedeljak': 'Monday',
-    'utorak': 'Tuesday',
-    'srijeda': 'Wednesday',
-    'cetvrtak': 'Thursday',
-    'petak': 'Friday',
-    'subota': 'Saturday',
-    'nedjelja': 'Sunday',
+    ponedeljak: 'Monday',
+    utorak: 'Tuesday',
+    srijeda: 'Wednesday',
+    cetvrtak: 'Thursday',
+    petak: 'Friday',
+    subota: 'Saturday',
+    nedjelja: 'Sunday',
   };
-  
-  return Object.entries(radnoVrijeme).map(([day, hours]: [string, any]) => ({
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: daysMap[day] || day,
-    opens: hours.od,
-    closes: hours.do,
-  }));
+
+  return getWorkingHoursRows(radnoVrijeme)
+    .filter((row) => !row.closed)
+    .map((row) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: daysMap[row.day] || getCanonicalWorkingDay(row.day) || row.day,
+      opens: String(row.hours?.open || row.hours?.od || '').slice(0, 5),
+      closes: String(row.hours?.close || row.hours?.do || '').slice(0, 5),
+    }));
 }

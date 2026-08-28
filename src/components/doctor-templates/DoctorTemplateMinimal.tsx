@@ -8,6 +8,7 @@ import { Navbar } from '@/components/Navbar';
 import { MapView } from '@/components/MapView';
 import { MapPin, Phone, Star, Calendar, CheckCircle, Building2, MessageSquare, Mail, Clock } from 'lucide-react';
 import { formatRating } from '@/utils/formatters';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 import type { GuestVisit } from './index';
 
 interface DoctorTemplateProps {
@@ -307,13 +308,11 @@ export function DoctorTemplateMinimal({
           <section className="mb-10">
             <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Radno vrijeme</h2>
             <div className="grid grid-cols-2 gap-2">
-              {Object.entries(doctor.radno_vrijeme).map(([day, hours]: [string, any]) => (
-                <div key={day} className="flex justify-between text-sm py-1">
-                  <span className="capitalize text-gray-500">{day}</span>
-                  <span className={!hours?.closed ? 'text-gray-700' : 'text-gray-400'}>
-                    {!hours?.closed && hours?.open && hours?.close 
-                      ? `${hours.open} - ${hours.close}` 
-                      : 'Zatvoreno'}
+              {getWorkingHoursRows(doctor.radno_vrijeme).map((row) => (
+                <div key={row.day} className="flex justify-between text-sm py-1">
+                  <span className="text-gray-500">{row.label}</span>
+                  <span className={row.closed ? 'text-gray-400' : 'text-gray-700'}>
+                    {row.text}
                   </span>
                 </div>
               ))}

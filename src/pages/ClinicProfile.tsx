@@ -19,6 +19,8 @@ import { ImageLightbox } from '@/components/ImageLightbox';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
+import { getDaySchedule, isClosedDay } from '@/lib/booking-slots';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 
 interface Clinic {
   id: number;
@@ -210,30 +212,16 @@ export default function ClinicProfile() {
   const renderWorkingHours = (radno_vrijeme: any) => {
     if (!radno_vrijeme) return null;
 
-    const days = ['ponedeljak', 'utorak', 'sreda', 'četvrtak', 'petak', 'subota', 'nedelja'];
-    const dayNames = {
-      ponedeljak: 'Ponedeljak',
-      utorak: 'Utorak', 
-      sreda: 'Sreda',
-      četvrtak: 'Četvrtak',
-      petak: 'Petak',
-      subota: 'Subota',
-      nedelja: 'Nedelja'
-    };
-
     return (
       <div className="space-y-2">
-        {days.map(day => {
-          const hours = radno_vrijeme[day];
-          return (
-            <div key={day} className="flex justify-between items-center">
-              <span className="font-medium">{dayNames[day as keyof typeof dayNames]}</span>
-              <span className={`${hours?.closed ? 'text-red-500' : 'text-green-600'}`}>
-                {hours?.closed ? 'Zatvoreno' : `${hours?.open} - ${hours?.close}`}
-              </span>
-            </div>
-          );
-        })}
+        {getWorkingHoursRows(radno_vrijeme).map((row) => (
+          <div key={row.day} className="flex justify-between items-center">
+            <span className="font-medium">{row.label}</span>
+            <span className={row.closed ? 'text-red-500' : 'text-green-600'}>
+              {row.text}
+            </span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -242,24 +230,30 @@ export default function ClinicProfile() {
     if (!radno_vrijeme) return { status: 'Nepoznato', color: 'gray' };
 
     const now = new Date();
-    const currentDay = now.getDay();
-    const dayMapping = ['nedelja', 'ponedeljak', 'utorak', 'sreda', 'četvrtak', 'petak', 'subota'];
-    const today = dayMapping[currentDay];
-    
-    const todayHours = radno_vrijeme[today];
-    if (!todayHours || todayHours.closed) {
+    const todayHours = getDaySchedule(radno_vrijeme, now);
+    if (isClosedDay(todayHours)) {
+      return { status: 'Zatvoreno', color: 'red' };
+    }
+
+    const open = String(todayHours?.open || todayHours?.od || '').slice(0, 5);
+    const close = String(todayHours?.close || todayHours?.do || '').slice(0, 5);
+    if (!open || !close) {
       return { status: 'Zatvoreno', color: 'red' };
     }
 
     const currentTime = now.getHours() * 100 + now.getMinutes();
-    const openTime = parseInt(todayHours.open.replace(':', ''));
-    const closeTime = parseInt(todayHours.close.replace(':', ''));
+    const openTime = parseInt(open.replace(':', ''), 10);
+    const closeTime = parseInt(close.replace(':', ''), 10);
+
+    if (Number.isNaN(openTime) || Number.isNaN(closeTime)) {
+      return { status: 'Nepoznato', color: 'gray' };
+    }
 
     if (currentTime >= openTime && currentTime <= closeTime) {
       return { status: 'Otvoreno', color: 'green' };
-    } else {
-      return { status: 'Zatvoreno', color: 'red' };
     }
+
+    return { status: 'Zatvoreno', color: 'red' };
   };
 
   if (loading) {

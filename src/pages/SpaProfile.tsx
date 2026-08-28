@@ -25,6 +25,7 @@ import { ImageLightbox } from '@/components/ImageLightbox';
 import { LocationMapCard } from '@/components/LocationMapCard';
 import { toast } from 'sonner';
 import { trackContactClick, trackContactSubmit, trackProfileView } from '@/config/analytics';
+import { getWorkingHoursRows } from '@/lib/working-hours';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -678,23 +679,14 @@ export default function SpaProfile() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {['ponedeljak', 'utorak', 'srijeda', 'cetvrtak', 'petak', 'subota', 'nedjelja'].map((dan) => {
-                        const rv = banja.radno_vrijeme[dan];
-                        if (!rv) return null;
-                        
-                        return (
-                          <div key={dan} className="flex justify-between items-center py-2 border-b last:border-0">
-                            <span className="font-medium capitalize">{dan}</span>
-                            {rv.closed ? (
-                              <span className="text-red-600">Zatvoreno</span>
-                            ) : (
-                              <span className="text-gray-700">
-                                {rv.open} - {rv.close}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
+                      {getWorkingHoursRows(banja.radno_vrijeme).map((row) => (
+                        <div key={row.day} className="flex justify-between items-center py-2 border-b last:border-0">
+                          <span className="font-medium">{row.label}</span>
+                          <span className={row.closed ? 'text-red-600' : 'text-gray-700'}>
+                            {row.text}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
