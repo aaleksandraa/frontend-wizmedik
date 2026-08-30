@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Search, Filter, MapPin, Droplet, Heart, Bed, Calendar, X, CheckCircle, HelpCircle, BookOpen, List } from 'lucide-react';
@@ -18,6 +18,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  defaultListingPagination,
+  LISTING_PAGE_SIZE,
+  parseWrappedListingPaginator,
+  type ListingPagination,
+} from '@/lib/listing-pagination';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -43,6 +49,9 @@ export default function Spas() {
   const [vrste, setVrste] = useState<VrstaBanje[]>([]);
   const [indikacije, setIndikacije] = useState<Record<string, Indikacija[]>>({});
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState<ListingPagination>(defaultListingPagination());
+  const requestIdRef = useRef(0);
   const [showFilters, setShowFilters] = useState(false);
   const [gradInput, setGradInput] = useState(() => {
     const gradParam = grad || searchParams.get('grad') || '';
@@ -68,10 +77,6 @@ export default function Spas() {
   useEffect(() => {
     loadData();
   }, []);
-
-  useEffect(() => {
-    loadBanje();
-  }, [filters]);
 
   // Update filters when URL path param changes
   useEffect(() => {
@@ -147,26 +152,63 @@ export default function Spas() {
     }
   };
 
-  const loadBanje = async () => {
-    setLoading(true);
-    try {
-      const params = { ...filters };
-      // Remove empty values and false booleans (only send true values for boolean filters)
-      Object.keys(params).forEach(key => {
-        const value = params[key as keyof BanjaFilters];
-        if (value === '' || value === undefined || value === false) {
-          delete params[key as keyof BanjaFilters];
-        }
-      });
-      
-      const response = await spasAPI.getAll(params);
-      setBanje(response.data.data || response.data);
-    } catch (error) {
-      console.error('Error loading banje:', error);
-    } finally {
-      setLoading(false);
+  const loadBanje = useCallback(async (pageToLoad = 1, append = false) => {
+    const requestId = ++requestIdRef.current;
+
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setBanje([]);
+      setPagination(defaultListingPagination());
     }
-  };
+
+    try {
+      const params: Record<string, string | number | boolean> = {
+        page: pageToLoad,
+        per_page: LISTING_PAGE_SIZE,
+      };
+
+      if (filters.search) params.search = filters.search;
+      if (filters.grad) params.grad = filters.grad;
+      if (filters.vrsta_id) params.vrste = filters.vrsta_id;
+      if (filters.indikacija_id) params.indikacije = filters.indikacija_id;
+      if (filters.medicinski_nadzor) params.medicinski_nadzor = true;
+      if (filters.ima_smjestaj) params.ima_smjestaj = true;
+      if (filters.online_rezervacija) params.online_rezervacija = true;
+
+      const sortBy = filters.sort_by === 'prosjecna_ocjena' ? 'ocjena' : (filters.sort_by || 'naziv');
+      params.sort_by = sortBy;
+      if (filters.sort_order) params.sort_order = filters.sort_order;
+
+      const response = await spasAPI.getAll(params);
+      if (requestId !== requestIdRef.current) return;
+
+      const { list, pagination: nextPagination } = parseWrappedListingPaginator<Banja>(response.data, pageToLoad);
+      setPagination(nextPagination);
+      setBanje((current) => {
+        if (!append) return list;
+        const currentIds = new Set(current.map((item) => item.id));
+        return [...current, ...list.filter((item) => !currentIds.has(item.id))];
+      });
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      console.error('Error loading banje:', error);
+      if (!append) {
+        setBanje([]);
+        setPagination(defaultListingPagination());
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    void loadBanje(1, false);
+  }, [loadBanje]);
 
   const updateFilters = (newFilters: Partial<BanjaFilters>) => {
     const updated = { ...filters, ...newFilters };
@@ -208,6 +250,23 @@ export default function Spas() {
     filters.ima_smjestaj,
     filters.online_rezervacija,
   ].filter(Boolean).length;
+
+  const totalResults = pagination.total || banje.length;
+  const hasMoreResults = pagination.current_page < pagination.last_page;
+
+  const loadMoreButton = hasMoreResults ? (
+    <div className="flex justify-center pt-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-full border-[#0891b2]/30 text-[#0891b2] hover:bg-[#0891b2]/5"
+        onClick={() => void loadBanje(pagination.current_page + 1, true)}
+        disabled={loadingMore}
+      >
+        {loadingMore ? 'Učitavanje...' : 'Učitaj još banja'}
+      </Button>
+    </div>
+  ) : null;
 
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
@@ -296,7 +355,7 @@ export default function Spas() {
     '@type': 'ItemList',
     name: filters.grad ? `Banje - ${filters.grad}` : 'Banje u Bosni i Hercegovini',
     description: seoDescription,
-    numberOfItems: banje.length,
+    numberOfItems: totalResults,
     itemListElement: banje.slice(0, 20).map((banja, index) => ({
       '@type': 'ListItem',
       position: index + 1,
@@ -572,7 +631,7 @@ export default function Spas() {
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map')} className="space-y-6">
             <div className="flex items-center justify-between">
               <p className="text-gray-600">
-                Pronađeno <span className="font-semibold text-gray-900">{banje.length}</span> banja
+                Pronađeno <span className="font-semibold text-gray-900">{totalResults}</span> banja
               </p>
               <TabsList className="grid w-[200px] grid-cols-2">
                 <TabsTrigger value="list">
@@ -612,11 +671,14 @@ export default function Spas() {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {banje.map((banja) => (
-                    <SpaCardSoft key={banja.id} banja={banja} />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {banje.map((banja) => (
+                      <SpaCardSoft key={banja.id} banja={banja} />
+                    ))}
+                  </div>
+                  {loadMoreButton}
+                </>
               )}
             </TabsContent>
 

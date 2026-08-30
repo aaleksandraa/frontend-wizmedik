@@ -38,6 +38,31 @@ export const defaultListingPagination = (perPage = LISTING_PAGE_SIZE): ListingPa
   total: 0,
 });
 
+export function parseWrappedListingPaginator<T>(
+  payload: unknown,
+  fallbackPage = 1,
+  fallbackPerPage = LISTING_PAGE_SIZE
+): { list: T[]; pagination: ListingPagination } {
+  const body = payload && typeof payload === 'object' ? (payload as Record<string, any>) : {};
+  const list = Array.isArray(body?.data)
+    ? body.data
+    : Array.isArray(body?.data?.data)
+      ? body.data.data
+      : [];
+
+  const pag = body?.pagination && typeof body.pagination === 'object' ? body.pagination : {};
+
+  return {
+    list,
+    pagination: {
+      current_page: Number(pag.current_page || fallbackPage),
+      last_page: Number(pag.last_page || 1),
+      per_page: Number(pag.per_page || fallbackPerPage),
+      total: Number(pag.total || body?.filters?.total_count || list.length || 0),
+    },
+  };
+}
+
 export function parseLaravelPaginator<T>(
   payload: unknown,
   fallbackPage = 1,

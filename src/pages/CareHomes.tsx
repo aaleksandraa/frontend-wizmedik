@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Filter, MapPin, Shield, Activity, Users, Home as HomeIcon, X, ChevronRight, Phone, Star, CheckCircle, BookOpen, List } from 'lucide-react';
+import { domoviAPI } from '@/services/api';
 import { useAllCities } from '@/hooks/useAllCities';
 import CareHomeCardSoft from '@/components/cards/CareHomeCardSoft';
 import { MapView } from '@/components/MapView';
@@ -14,6 +15,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  defaultListingPagination,
+  LISTING_PAGE_SIZE,
+  parseWrappedListingPaginator,
+  type ListingPagination,
+} from '@/lib/listing-pagination';
 
 const SITE_URL = 'https://wizmedik.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/wizmedik-logo.png`;
@@ -102,6 +109,9 @@ export default function CareHomes() {
   const [domovi, setDomovi] = useState<Dom[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState<ListingPagination>(defaultListingPagination());
+  const requestIdRef = useRef(0);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
@@ -149,10 +159,6 @@ export default function CareHomes() {
     fetchFilterOptions();
   }, []);
 
-  useEffect(() => {
-    fetchDomovi();
-  }, [selectedGrad, selectedTipDoma, selectedNivoNjege, selectedProgrami, search]);
-
   // Update filters when URL path param changes
   useEffect(() => {
     if (grad) {
@@ -171,8 +177,8 @@ export default function CareHomes() {
 
   const fetchFilterOptions = async () => {
     try {
-      const response = await fetch('/api/domovi-njega/filter-options');
-      const data = await response.json();
+      const response = await domoviAPI.getFilterOptions();
+      const data = response.data;
       if (data.success) {
         setFilterOptions(data.data);
       }
@@ -181,36 +187,69 @@ export default function CareHomes() {
     }
   };
 
-  const fetchDomovi = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (search) params.set('search', search);
-      if (selectedGrad) params.set('grad', selectedGrad);
-      if (selectedTipDoma) params.set('tip_doma', selectedTipDoma);
-      if (selectedNivoNjege) params.set('nivo_njege', selectedNivoNjege);
-      if (selectedProgrami.length > 0) params.set('programi_njege', selectedProgrami.join(','));
+  const fetchDomovi = useCallback(async (pageToLoad = 1, append = false) => {
+    const requestId = ++requestIdRef.current;
 
-      const url = `/api/domovi-njega?${params}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.success) {
-        setDomovi(data.data);
-      }
-      
-      // Update URL
-      const urlParams = new URLSearchParams(params);
-      const hasNonCityFilters = !!search || !!selectedTipDoma || !!selectedNivoNjege || selectedProgrami.length > 0;
-      if (!hasNonCityFilters) {
-        urlParams.delete('grad');
-      }
-      setSearchParams(urlParams, { replace: true });
-    } catch (error) {
-      console.error('Error fetching domovi:', error);
-    } finally {
-      setLoading(false);
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+      setDomovi([]);
+      setPagination(defaultListingPagination());
     }
-  };
+
+    try {
+      const params: Record<string, string | number> = {
+        page: pageToLoad,
+        per_page: LISTING_PAGE_SIZE,
+      };
+      if (search) params.search = search;
+      if (selectedGrad) params.grad = selectedGrad;
+      if (selectedTipDoma) params.tip_doma = selectedTipDoma;
+      if (selectedNivoNjege) params.nivo_njege = selectedNivoNjege;
+      if (selectedProgrami.length > 0) params.programi_njege = selectedProgrami.join(',');
+
+      const response = await domoviAPI.getAll(params);
+      if (requestId !== requestIdRef.current) return;
+
+      const { list, pagination: nextPagination } = parseWrappedListingPaginator<Dom>(response.data, pageToLoad);
+      setPagination(nextPagination);
+      setDomovi((current) => {
+        if (!append) return list;
+        const currentIds = new Set(current.map((item) => item.id));
+        return [...current, ...list.filter((item) => !currentIds.has(item.id))];
+      });
+
+      if (!append) {
+        const urlParams = new URLSearchParams();
+        if (search) urlParams.set('search', search);
+        if (selectedTipDoma) urlParams.set('tip_doma', selectedTipDoma);
+        if (selectedNivoNjege) urlParams.set('nivo_njege', selectedNivoNjege);
+        if (selectedProgrami.length > 0) urlParams.set('programi_njege', selectedProgrami.join(','));
+        const hasNonCityFilters = !!search || !!selectedTipDoma || !!selectedNivoNjege || selectedProgrami.length > 0;
+        if (!hasNonCityFilters) {
+          urlParams.delete('grad');
+        }
+        setSearchParams(urlParams, { replace: true });
+      }
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      console.error('Error fetching domovi:', error);
+      if (!append) {
+        setDomovi([]);
+        setPagination(defaultListingPagination());
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [search, selectedGrad, selectedTipDoma, selectedNivoNjege, selectedProgrami, setSearchParams]);
+
+  useEffect(() => {
+    void fetchDomovi(1, false);
+  }, [fetchDomovi]);
 
   const clearFilters = () => {
     setSearch('');
@@ -242,6 +281,23 @@ export default function CareHomes() {
     selectedNivoNjege,
     ...selectedProgrami
   ].filter(Boolean).length;
+
+  const totalResults = pagination.total || domovi.length;
+  const hasMoreResults = pagination.current_page < pagination.last_page;
+
+  const loadMoreButton = hasMoreResults ? (
+    <div className="flex justify-center pt-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-full"
+        onClick={() => void fetchDomovi(pagination.current_page + 1, true)}
+        disabled={loadingMore}
+      >
+        {loadingMore ? 'Učitavanje...' : 'Učitaj još domova'}
+      </Button>
+    </div>
+  ) : null;
 
   // SEO: Dynamic title and description based on filters
   const pageTitle = useMemo(() => {
@@ -313,7 +369,7 @@ export default function CareHomes() {
             "url": `${baseUrl}/dom-njega/${dom.slug}`
           }
         })),
-        "numberOfItems": domovi.length
+        "numberOfItems": totalResults
       },
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -779,7 +835,7 @@ export default function CareHomes() {
               <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'map')} className="space-y-6">
                 <div className="flex items-center justify-between">
                   <p className="text-muted-foreground">
-                    Pronadeno <span className="font-semibold text-foreground">{domovi.length}</span> domova
+                    Pronadeno <span className="font-semibold text-foreground">{totalResults}</span> domova
                   </p>
                   <TabsList className="grid w-[200px] grid-cols-2">
                     <TabsTrigger value="list">
@@ -809,11 +865,14 @@ export default function CareHomes() {
                       ))}
                     </div>
                   ) : domovi.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {domovi.map(dom => (
-                        <CareHomeCardSoft key={dom.id} dom={dom} />
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {domovi.map(dom => (
+                          <CareHomeCardSoft key={dom.id} dom={dom} />
+                        ))}
+                      </div>
+                      {loadMoreButton}
+                    </>
                   ) : (
                     <Card>
                       <CardContent className="p-12 text-center">
