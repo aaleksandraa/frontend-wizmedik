@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { safeInternalPath } from '@/utils/navigation';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { AdSenseSlot } from '@/components/AdSenseSlot';
 import { clinicsAPI, doctorsAPI, guestVisitsAPI } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -692,7 +691,6 @@ export default function ClinicProfile() {
          </div>
        </div>
       </div>
-      <AdSenseSlot />
       <Footer />
 
       {/* Image Lightbox */}

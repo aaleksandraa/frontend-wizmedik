@@ -12,7 +12,7 @@ import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import { AdSenseProvider } from "@/contexts/AdSenseContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
-import { AdSenseLoader } from "@/components/AdSenseLoader";
+import { AdSenseRouteCleanup } from "@/components/AdSenseRouteCleanup";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { trackPageView } from "@/config/analytics";
@@ -118,7 +118,7 @@ const App = () => {
               <AdSenseProvider>
               <PageViewTracker />
               <ScrollToTop />
-              <AdSenseLoader />
+              <AdSenseRouteCleanup />
               <Suspense fallback={<PageLoader />}>
               <Routes>
               {/* Public routes */}

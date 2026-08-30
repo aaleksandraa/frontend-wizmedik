@@ -112,7 +112,7 @@ export default function CookiePolicy() {
                   </span>
                 </p>
                 <p className="mt-2">
-                  Google AdSense oglasi ispod profila doktora, klinika, apoteka i lijekova ucitavaju se samo ako je
+                  Google AdSense oglasi ispod profila apoteka i lijekova ucitavaju se samo ako je
                   admin ukljucio oglase i vi date marketing pristanak.
                 </p>
               </div>
@@ -133,7 +133,7 @@ export default function CookiePolicy() {
                   bi promjena bila sigurno primijenjena.
                 </p>
                 <p>
-                  Marketing kategorija ukljucuje Google AdSense oglase ispod profila doktora, klinika, apoteka i
+                  Marketing kategorija ukljucuje Google AdSense oglase ispod profila apoteka i
                   lijekova. Consent Mode signali za oglase ostaju odbijeni dok ne date marketing pristanak, a oglasne
                   skripte se ucitavaju samo kada admin ukljuci oglase.
                 </p>

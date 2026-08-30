@@ -65,7 +65,7 @@ export function AdSenseSettings() {
           Google AdSense oglasi
         </CardTitle>
         <CardDescription>
-          Uključite ili isključite AdSense oglase ispod profila doktora, klinika, apoteka i lijekova.
+          Uključite ili isključite AdSense oglase ispod profila apoteka i lijekova.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -86,7 +86,7 @@ export function AdSenseSettings() {
             <strong>Publisher ID:</strong> {client}
           </p>
           <p>
-            <strong>Lokacije:</strong> profili doktora, klinika, apoteka i lijekova (ispod sadržaja, prije futera).
+            <strong>Lokacije:</strong> profili apoteka i lijekova (ispod sadržaja, prije futera).
           </p>
           <p>
             <strong>Napomena:</strong> ads.txt i meta oznaka za verifikaciju su već postavljeni na sajtu.

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAdSenseSettings } from '@/contexts/AdSenseContext';
 import { useCookieConsent } from '@/contexts/CookieConsentContext';
+import { loadAdSenseScript } from '@/lib/adsense-script';
 
 declare global {
   interface Window {
@@ -17,11 +18,30 @@ export function AdSenseSlot({ className }: AdSenseSlotProps) {
   const { preferences } = useCookieConsent();
   const adRef = useRef<HTMLModElement>(null);
   const pushedRef = useRef(false);
+  const [scriptReady, setScriptReady] = useState(false);
 
   const shouldShowAd = !loading && settings.enabled && preferences.marketing;
 
   useEffect(() => {
-    if (!shouldShowAd || !adRef.current || pushedRef.current) {
+    if (!shouldShowAd) {
+      return;
+    }
+
+    let cancelled = false;
+
+    loadAdSenseScript(settings.client).then(() => {
+      if (!cancelled) {
+        setScriptReady(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldShowAd, settings.client]);
+
+  useEffect(() => {
+    if (!shouldShowAd || !scriptReady || !adRef.current || pushedRef.current) {
       return;
     }
 
@@ -31,7 +51,7 @@ export function AdSenseSlot({ className }: AdSenseSlotProps) {
     } catch (error) {
       console.error('AdSense push error:', error);
     }
-  }, [shouldShowAd]);
+  }, [shouldShowAd, scriptReady]);
 
   if (!shouldShowAd) {
     return null;

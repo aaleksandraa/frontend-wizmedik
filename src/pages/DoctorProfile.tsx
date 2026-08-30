@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { AdSenseSlot } from '@/components/AdSenseSlot';
 import { doctorsAPI, appointmentsAPI, guestVisitsAPI, blogAPI } from '@/services/api';
 import { fixImageUrl } from '@/utils/imageUrl';
 import { reviewsAPI, Recenzija } from '@/services/reviewsAPI';
@@ -602,7 +601,6 @@ export default function DoctorProfile() {
             guestVisit={selectedGuestVisit}
           />
         )}
-        <AdSenseSlot />
         <Footer />
       </>
     );
@@ -1523,7 +1521,6 @@ export default function DoctorProfile() {
           guestVisit={selectedGuestVisit}
         />
       )}
-      <AdSenseSlot />
       <Footer />
     </>
   );

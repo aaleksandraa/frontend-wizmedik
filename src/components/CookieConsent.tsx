@@ -290,7 +290,7 @@ export function CookieConsent() {
               <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
                 <p className="font-semibold text-slate-900">Napomena o marketing alatima</p>
                 <p className="mt-2">
-                  Google AdSense oglasi ispod profila doktora, klinika, apoteka i lijekova ucitavaju se samo ako je
+                  Google AdSense oglasi ispod profila apoteka i lijekova ucitavaju se samo ako je
                   admin ukljucio oglase i vi date marketing pristanak.
                 </p>
               </div>

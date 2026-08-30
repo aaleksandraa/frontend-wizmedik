@@ -86,7 +86,7 @@ export const COOKIE_CATEGORIES: CookieCategoryDefinition[] = [
   {
     key: 'marketing',
     title: 'Marketing',
-    shortDescription: 'Google AdSense oglasi ispod profila (doktor, klinika, apoteka, lijek).',
+    shortDescription: 'Google AdSense oglasi ispod profila apoteka i lijekova.',
     description:
       'Google AdSense se ucitava samo ako je admin ukljucio oglase i vi date marketing pristanak. Consent Mode signali za oglase (ad_storage, ad_user_data, ad_personalization) ostaju odbijeni dok ne date marketing pristanak.',
     isRequired: false,
@@ -232,7 +232,7 @@ export const COOKIE_TECHNOLOGIES: CookieTechnologyDefinition[] = [
     storage: 'cookie',
     duration: 'Zavisi od Google AdSense konfiguracije',
     purpose:
-      'Prikaz oglasa ispod profila doktora, klinika, apoteka i lijekova. Aktivira se samo ako je admin ukljucio oglase i vi date marketing pristanak.',
+      'Prikaz oglasa ispod profila apoteka i lijekova. Aktivira se samo ako je admin ukljucio oglase i vi date marketing pristanak.',
     required: false,
     status: 'conditional',
   },
