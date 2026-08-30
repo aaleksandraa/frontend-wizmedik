@@ -62,7 +62,7 @@ export default function CareHomeCardSoft({ dom }: CareHomeCardSoftProps) {
   };
 
   return (
-    <Link to={dom.url || `/dom-njega/${dom.slug}`}>
+    <Link to={`/dom-njega/${dom.slug}`}>
       <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden h-full border-0 bg-white">
         {/* Image */}
         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-cyan-50 to-purple-50">

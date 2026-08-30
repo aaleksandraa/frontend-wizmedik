@@ -105,7 +105,7 @@ export default function CareHomes() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { cities: allCities } = useAllCities(); // Get all cities from database
+  const { cities: allCities, loading: citiesLoading } = useAllCities(); // Get all cities from database
   const [domovi, setDomovi] = useState<Dom[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -159,14 +159,30 @@ export default function CareHomes() {
     fetchFilterOptions();
   }, []);
 
+  const isKnownCitySlug = useCallback(
+    (citySlug: string) =>
+      allCities.some(
+        (city) => city.slug === citySlug || slugifySegment(city.naziv) === citySlug
+      ),
+    [allCities]
+  );
+
+  // Legacy/wrong profile URLs: /domovi-njega/{slug} -> /dom-njega/{slug}
+  useEffect(() => {
+    if (!grad || citiesLoading) return;
+    if (!isKnownCitySlug(grad)) {
+      navigate(`/dom-njega/${grad}`, { replace: true });
+    }
+  }, [citiesLoading, grad, isKnownCitySlug, navigate]);
+
   // Update filters when URL path param changes
   useEffect(() => {
-    if (grad) {
-      const cityName = resolveCityNameFromSlug(grad);
-      setGradInput(cityName);
-      setSelectedGrad(cityName);
-    }
-  }, [grad, allCities]);
+    if (!grad || citiesLoading || !isKnownCitySlug(grad)) return;
+
+    const cityName = resolveCityNameFromSlug(grad);
+    setGradInput(cityName);
+    setSelectedGrad(cityName);
+  }, [citiesLoading, grad, allCities, isKnownCitySlug]);
 
   // Set gradInput when selectedGrad is loaded from URL
   useEffect(() => {
