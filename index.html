@@ -12,8 +12,6 @@
     />
     <meta name="author" content="WizMedik" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="googlebot" content="index, follow" />
-    <meta name="google-adsense-account" content="ca-pub-1407310093643341" />
 
     <!-- Default canonical (route-specific canonical set via react-helmet) -->
     <link rel="canonical" href="https://wizmedik.com/" />
@@ -83,39 +81,43 @@
     <meta name="msapplication-TileColor" content="#0891b2" />
     <meta name="msapplication-navbutton-color" content="#0891b2" />
 
-    <!-- Schema: MedicalBusiness -->
+    <!-- Schema: Organization + WebSite. WizMedik is a discovery platform, not a care provider. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "MedicalBusiness",
-        "name": "WizMedik",
-        "description": "Platforma za pronalaženje doktora i online zakazivanje termina u Bosni i Hercegovini.",
-        "url": "https://wizmedik.com/",
-        "logo": "https://wizmedik.com/logo.png",
-        "image": "https://wizmedik.com/og-image.jpg",
-        "areaServed": {
-          "@type": "Country",
-          "name": "Bosnia and Herzegovina"
-        },
-        "sameAs": [
-          "https://www.facebook.com/wizmedik",
-          "https://www.instagram.com/wizmedik.ba"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://wizmedik.com/#organization",
+            "name": "WizMedik",
+            "url": "https://wizmedik.com/",
+            "logo": "https://wizmedik.com/wizmedik-logo.png",
+            "description": "Digitalna platforma za pronalazak doktora, ustanova i online zakazivanje termina u Bosni i Hercegovini. WizMedik ne pruža medicinske usluge.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "Bosna i Hercegovina"
+            },
+            "sameAs": [
+              "https://www.facebook.com/wizmedik",
+              "https://www.instagram.com/wizmedik.ba"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://wizmedik.com/#website",
+            "name": "WizMedik",
+            "url": "https://wizmedik.com/",
+            "inLanguage": "bs",
+            "publisher": {
+              "@id": "https://wizmedik.com/#organization"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://wizmedik.com/doktori?pretraga={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
         ]
-      }
-    </script>
-
-    <!-- Schema: WebSite (Sitelinks Search) -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "WizMedik",
-        "url": "https://wizmedik.com/",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://wizmedik.com/doktori?search={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
       }
     </script>
 

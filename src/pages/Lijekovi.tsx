@@ -243,7 +243,6 @@ export default function Lijekovi() {
           content="spisak lijekova, doplata fond republike srpske, fond republike srpske lijekovi, RFZO lista, cijena lijeka, ATC \u0161ifra, INN"
         />
         <meta name="robots" content="index, follow, max-image-preview:large" />
-        <meta name="googlebot" content="index, follow" />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />

@@ -142,7 +142,8 @@ export default function BlogPost() {
     "publisher": {
       "@type": "Organization",
       "name": "WizMedik",
-      "logo": { "@type": "ImageObject", "url": "https://wizmedik.com/logo.png" }
+      "@id": "https://wizmedik.com/#organization",
+      "logo": { "@type": "ImageObject", "url": "https://wizmedik.com/wizmedik-logo.png" }
     },
     "datePublished": post.published_at,
     "mainEntityOfPage": { "@type": "WebPage", "@id": `https://wizmedik.com/blog/${post.slug}` }

@@ -380,7 +380,6 @@ export default function LijekProfil() {
           content="lijek, cijena lijeka, doplata, preko fonda, RFZO lista, indikacije, ATC \u0161ifra, INN"
         />
         <meta name="robots" content="index, follow, max-image-preview:large" />
-        <meta name="googlebot" content="index, follow" />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />

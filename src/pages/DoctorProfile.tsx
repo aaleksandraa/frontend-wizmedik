@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
@@ -30,6 +30,14 @@ import { safeInternalPath } from '@/utils/navigation';
 import { trackClarityEvent } from '@/config/clarity';
 import { trackContactClick, trackProfileView } from '@/config/analytics';
 import { getWorkingHoursRows } from '@/lib/working-hours';
+import {
+  classifyDoctorLoadError,
+  classifyDoctorPayload,
+  profileShell,
+  reconcileSeoSnapshot,
+  snapshotMatchesSlug,
+  type SeoSnapshotPhase,
+} from '@/lib/seo-snapshot';
 import { DoctorProfileHero } from '@/components/DoctorProfileHero';
 import { DoctorProfileMobileBar } from '@/components/DoctorProfileMobileBar';
 
@@ -150,6 +158,9 @@ export default function DoctorProfile() {
   const navigate = useNavigate();
   
   const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [loadStatus, setLoadStatus] = useState<SeoSnapshotPhase>('loading');
+  const [loadedSlug, setLoadedSlug] = useState(slug);
+  const requestRef = useRef(0);
   const [recenzije, setRecenzije] = useState<Recenzija[]>([]);
   const [ratingStats, setRatingStats] = useState<RatingStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,11 +185,27 @@ export default function DoctorProfile() {
   const [blogHasMore, setBlogHasMore] = useState(false);
   const [loadingBlog, setLoadingBlog] = useState(false);
 
+  if (slug !== loadedSlug) {
+    setLoadedSlug(slug);
+    setDoctor(null);
+    setLoading(true);
+    setLoadStatus('loading');
+  }
+
   useEffect(() => {
-    if (slug) {
-      fetchDoctor();
-    }
+    if (!slug) return;
+    const requestId = ++requestRef.current;
+    void fetchDoctor(slug, requestId);
   }, [slug]);
+
+  useLayoutEffect(() => {
+    const doctorName = doctor ? `Dr. ${doctor.ime} ${doctor.prezime}`.trim() : '';
+    reconcileSeoSnapshot({
+      slug,
+      phase: loading ? 'loading' : loadStatus,
+      doctorName,
+    });
+  }, [slug, loading, loadStatus, doctor]);
 
   useEffect(() => {
     if (doctor?.id) {
@@ -275,23 +302,34 @@ export default function DoctorProfile() {
     }
   }, [showBooking, showGuestBooking, showGuestVisitBooking, doctor?.id]);
 
-  const fetchDoctor = async () => {
-    if (!slug) return;
+  const fetchDoctor = async (requestedSlug: string, requestId: number) => {
+    setLoading(true);
+    setLoadStatus('loading');
+    setDoctor(null);
 
     try {
-      const response = await doctorsAPI.getBySlug(slug);
+      const response = await doctorsAPI.getBySlug(requestedSlug);
+      if (requestRef.current !== requestId) return;
+
       const redirectTo = safeInternalPath(response.data?.redirect_to);
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
         return;
       }
 
-      // Normalize the data - use snake_case if available
       const normalizedData = {
         ...response.data,
-        kategorijeUsluga: response.data.kategorije_usluga || response.data.kategorijeUsluga
+        kategorijeUsluga: response.data?.kategorije_usluga || response.data?.kategorijeUsluga
       };
+
+      if (classifyDoctorPayload(normalizedData) !== 'ready') {
+        setDoctor(null);
+        setLoadStatus('unavailable');
+        return;
+      }
+
       setDoctor(normalizedData);
+      setLoadStatus('ready');
       trackProfileView({
         entity_type: 'doctor',
         entity_id: normalizedData.id,
@@ -300,13 +338,17 @@ export default function DoctorProfile() {
         doctor_name: `Dr. ${normalizedData.ime} ${normalizedData.prezime}`,
         city: normalizedData.grad,
         specialization: normalizedData.specijalnost,
-        profile_slug: normalizedData.slug || slug,
+        profile_slug: normalizedData.slug || requestedSlug,
       });
     } catch (error) {
+      if (requestRef.current !== requestId) return;
       console.error('Error fetching doctor:', error);
-      navigate('/');
+      setDoctor(null);
+      setLoadStatus(classifyDoctorLoadError(error));
     } finally {
-      setLoading(false);
+      if (requestRef.current === requestId) {
+        setLoading(false);
+      }
     }
   };
 
@@ -418,13 +460,19 @@ export default function DoctorProfile() {
     );
   };
 
-  if (loading) {
+  const shell = profileShell(loading ? 'loading' : loadStatus, snapshotMatchesSlug(slug));
+
+  if (shell === 'snapshot-only') {
+    return null;
+  }
+
+  if (shell === 'skeleton') {
     return (
       <>
         <Navbar />
         <div className="min-h-screen bg-background">
           <div className="container mx-auto px-4 py-8">
-            <div className="animate-pulse">
+            <div className="animate-pulse" role="status" aria-label="Učitavanje profila doktora">
               <div className="h-8 bg-muted rounded w-64 mb-8"></div>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
@@ -441,12 +489,45 @@ export default function DoctorProfile() {
     );
   }
 
-  if (!doctor) {
+  if (shell === 'unavailable' || shell === 'unavailable-with-snapshot') {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-background flex items-center justify-center px-4">
+          <Card className="max-w-md">
+            <CardContent className="text-center py-12">
+              <p role="alert" className="text-lg font-semibold mb-2">Detaljni profil trenutno nije dostupan</p>
+              <p className="text-muted-foreground mb-6">
+                {shell === 'unavailable-with-snapshot'
+                  ? 'Osnovni javni podaci iznad ostaju prikazani. Zakazivanje i ostale interaktivne informacije nisu učitane.'
+                  : 'Podaci o doktoru nisu učitani. Pokušajte ponovo ili pregledajte listu doktora.'}
+              </p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  variant="medical"
+                  onClick={() => {
+                    if (!slug) return;
+                    const requestId = ++requestRef.current;
+                    void fetchDoctor(slug, requestId);
+                  }}
+                >
+                  Pokušaj ponovo
+                </Button>
+                <Link to="/doktori">Lista doktora</Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  if (!doctor || shell === 'not-found') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-2">Doktor nije pronađen</h2>
+            <h1 className="text-2xl font-bold mb-2">Doktor nije pronađen</h1>
             <p className="text-muted-foreground mb-6">
               Doktor koji tražite ne postoji ili je uklonjen.
             </p>

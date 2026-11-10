@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useLayoutEffect } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -18,6 +18,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { trackPageView } from "@/config/analytics";
 import { trackClarityPageView } from "@/config/clarity";
 import { Loader2 } from "lucide-react";
+import { doctorSlugFromPath, reconcileSeoSnapshot, snapshotMatchesSlug } from "@/lib/seo-snapshot";
 
 // Core entry pages - keep initial bundle lean
 import Index from "./pages/Index";
@@ -85,11 +86,38 @@ const MyBlogPosts = lazyWithRetry(() => import("./pages/MyBlogPosts"));
 const MedicalCalendar = lazyWithRetry(() => import("./pages/MedicalCalendar"));
 
 // Loading component for lazy-loaded pages
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  </div>
-);
+const PageLoader = () => {
+  const { pathname } = useLocation();
+  if (snapshotMatchesSlug(doctorSlugFromPath(pathname) || undefined)) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+};
+
+const DoctorSnapshotRouteSync = () => {
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    const snapshot = document.getElementById('seo-snapshot');
+    if (!snapshot) return;
+
+    const routeSlug = doctorSlugFromPath(pathname);
+    const currentSlug = snapshot.getAttribute('data-doctor-slug');
+    if (currentSlug && currentSlug === routeSlug) return;
+
+    reconcileSeoSnapshot({
+      slug: routeSlug || undefined,
+      phase: 'loading',
+    });
+  }, [pathname]);
+
+  return null;
+};
 
 // Component to track page views
 const PageViewTracker = () => {
@@ -117,6 +145,7 @@ const App = () => {
               <CookieConsentProvider>
               <AdSenseProvider>
               <PageViewTracker />
+              <DoctorSnapshotRouteSync />
               <ScrollToTop />
               <AdSenseRouteCleanup />
               <Suspense fallback={<PageLoader />}>

@@ -85,6 +85,10 @@ FileETag None
   RewriteOptions AllowNoSlash
   RewriteBase /
 
+  # Apex host. Confirm on production that this vhost also receives www requests.
+  RewriteCond %{HTTP_HOST} ^www\.wizmedik\.com$ [NC]
+  RewriteRule ^ https://wizmedik.com%{REQUEST_URI} [R=301,L]
+
   # Never redirect sitemap XML outside this host.
   # If file exists locally, serve it directly.
   RewriteCond %{REQUEST_FILENAME} -f

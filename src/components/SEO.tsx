@@ -123,18 +123,14 @@ export function SEO({
 export const createOrganizationSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': 'https://wizmedik.com/#organization',
   name: 'WizMedik',
-  url: 'https://wizmedik.com',
-  logo: 'https://wizmedik.com/logo.png',
-  description: 'Vodeći zdravstveni portal u Bosni i Hercegovini',
-  address: {
-    '@type': 'PostalAddress',
-    addressCountry: 'BA',
-  },
+  url: 'https://wizmedik.com/',
+  logo: 'https://wizmedik.com/wizmedik-logo.png',
+  description: 'Digitalna platforma za pronalazak doktora, ustanova i online zakazivanje termina u Bosni i Hercegovini. WizMedik ne pruža medicinske usluge.',
   sameAs: [
     'https://www.facebook.com/wizmedik',
-    'https://www.instagram.com/wizmedik',
-    'https://twitter.com/wizmedik',
+    'https://www.instagram.com/wizmedik.ba',
   ],
 });
 

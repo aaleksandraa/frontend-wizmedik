@@ -80,7 +80,7 @@ try {
   // Fallback error display
   rootElement.innerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; text-align: center;">
-      <h1 style="color: #dc2626; margin-bottom: 16px;">Greška pri učitavanju aplikacije</h1>
+      <p role="alert" style="color: #dc2626; margin-bottom: 16px; font-size: 1.5rem; font-weight: 700;">Greška pri učitavanju aplikacije</p>
       <p style="margin-bottom: 24px;">Molimo osvježite stranicu (Ctrl+Shift+R)</p>
       <button onclick="window.location.reload()" style="padding: 12px 24px; background: #0891b2; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">
         Osvježi stranicu
