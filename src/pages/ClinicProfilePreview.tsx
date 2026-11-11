@@ -115,7 +115,6 @@ function currentStatus(radnoVrijeme: typeof hours) {
 }
 
 const jumps = [
-  { href: '#galerija', label: 'Galerija' },
   { href: '#o-klinici', label: 'O klinici' },
   { href: '#doktori', label: 'Naši doktori' },
   { href: '#gosti', label: 'Gostujući specijalisti' },
@@ -130,6 +129,10 @@ export default function ClinicProfilePreview() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [specialtyFilter, setSpecialtyFilter] = useState<string | null>(null);
+  const visibleDoctors = specialtyFilter
+    ? doctors.filter((doctor) => doctor.specijalnost === specialtyFilter)
+    : doctors;
   const status = currentStatus(hours);
   const hourRows = getWorkingHoursRows(hours);
   const todayName = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'][new Date().getDay()];
@@ -225,11 +228,10 @@ export default function ClinicProfilePreview() {
 
           <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-6">
-              <section id="galerija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
-                <h2 className="font-serif text-3xl tracking-tight">Galerija</h2>
+              <section id="galerija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8" aria-label="Slike klinike">
                 <button
                   type="button"
-                  className="mt-5 block w-full overflow-hidden rounded-2xl"
+                  className="block w-full overflow-hidden rounded-2xl"
                   onClick={() => {
                     setLightboxIndex(selectedImage);
                     setLightboxOpen(true);
@@ -270,20 +272,29 @@ export default function ClinicProfilePreview() {
                 <div className="mt-5">
                   <h3 className="text-sm font-medium text-[#6b7280]">Specijalnosti klinike</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {specialties.map((specialty) => (
-                      <Link
-                        key={specialty.slug}
-                        to={`/specijalnost/${specialty.slug}`}
-                        className="inline-flex h-8 items-center rounded-full bg-[#f3faf8] px-3 text-sm font-medium text-[#0e7490] hover:bg-[#0e7490] hover:text-white"
-                      >
-                        {specialty.naziv}
-                      </Link>
-                    ))}
+                    {specialties.map((specialty) => {
+                      const active = specialtyFilter === specialty.naziv;
+                      return (
+                        <button
+                          key={specialty.slug}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => setSpecialtyFilter((current) => (current === specialty.naziv ? null : specialty.naziv))}
+                          className={`inline-flex h-8 items-center rounded-full px-3 text-sm font-medium ${
+                            active
+                              ? 'bg-[#0e7490] text-white'
+                              : 'bg-[#f3faf8] text-[#0e7490] hover:bg-[#0e7490] hover:text-white'
+                          }`}
+                        >
+                          {specialty.naziv}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-                {doctors.length > 0 ? (
+                {visibleDoctors.length > 0 ? (
                   <ul className="mt-6 grid gap-4 md:grid-cols-2">
-                    {doctors.map((doctor) => (
+                    {visibleDoctors.map((doctor) => (
                       <li key={doctor.id} className="rounded-2xl border border-[#efeae2] p-4">
                         <div className="flex gap-4">
                           {doctor.slika ? (
