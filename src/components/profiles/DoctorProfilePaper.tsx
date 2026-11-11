@@ -247,11 +247,17 @@ export function DoctorProfilePaper({
   const jumps = [
     ...(biography ? [{ href: '#biografija', label: 'O doktoru' }] : []),
     ...(pricedServices.length > 0 ? [{ href: '#usluge', label: 'Usluge i cijene' }] : []),
-    ...(hasRatings || canReview ? [{ href: '#recenzije', label: 'Recenzije' }] : []),
+    ...(recenzije.length > 0 ? [{ href: '#recenzije', label: 'Recenzije' }] : []),
     ...(guestVisits.length > 0 ? [{ href: '#gostovanja', label: 'Gostovanja u klinikama' }] : []),
     { href: '#lokacija', label: 'Lokacija' },
     ...(hourRows.length > 0 || typeof doctor.radno_vrijeme === 'string' ? [{ href: '#radno-vrijeme', label: 'Radno vrijeme' }] : []),
     ...(places.length > 0 ? [{ href: '#dostupan', label: 'Dostupan u' }] : []),
+  ];
+  const mobileJumps = [
+    ...(pricedServices.length > 0 ? [{ href: '#usluge', label: 'Usluge' }] : []),
+    { href: '#kontakt', label: 'Kontakt' },
+    { href: '#lokacija', label: 'Lokacija' },
+    ...(recenzije.length > 0 ? [{ href: '#recenzije', label: 'Recenzije' }] : []),
   ];
 
   return (
@@ -358,25 +364,37 @@ export function DoctorProfilePaper({
               className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-background/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
               aria-label="Dijelovi profila"
             >
-              <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
-                {jumps.map((item) => (
-                  <li key={item.href}>
-                    <a
-                      href={item.href}
-                      className="inline-flex h-9 items-center rounded-full border border-border bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+            <ul className="flex w-max gap-2 md:hidden">
+              {mobileJumps.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="inline-flex h-9 items-center rounded-full border border-border bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <ul className="hidden w-auto flex-wrap gap-2 md:flex">
+              {jumps.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="inline-flex h-9 items-center rounded-full border border-border bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
             </nav>
           )}
 
-          <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
-            <div className="space-y-6">
+          <div className="mt-4 flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_300px] md:items-start">
+            <div className="contents md:block md:space-y-6">
               {biography && (
-                <section id="biografija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="biografija" className="order-1 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">O doktoru</p>
                   <h2 className="mt-2 font-serif text-3xl tracking-tight">Biografija</h2>
                   <div
@@ -398,7 +416,7 @@ export function DoctorProfilePaper({
               )}
 
               {pricedServices.length > 0 && (
-                <section id="usluge" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="usluge" className="order-2 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Ordinacija</p>
                   <h2 className="mt-2 font-serif text-3xl tracking-tight">Usluge i cijene</h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6b7280]">
@@ -445,7 +463,7 @@ export function DoctorProfilePaper({
               )}
 
               {guestVisits.length > 0 && (
-                <section id="gostovanja" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="gostovanja" className="order-4 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <h2 className="font-serif text-3xl tracking-tight">Gostovanja u klinikama</h2>
                   <p className="mt-3 text-sm text-[#6b7280]">
                     Dr. {fullName} gostuje u sljedećim klinikama.
@@ -492,7 +510,7 @@ export function DoctorProfilePaper({
               )}
 
               {doctor.youtube_linkovi && doctor.youtube_linkovi.length > 0 && (
-                <section id="video" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="video" className="order-5 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <h2 className="font-serif text-3xl tracking-tight">Video snimci</h2>
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
                     {doctor.youtube_linkovi.map((video, index) => {
@@ -518,7 +536,7 @@ export function DoctorProfilePaper({
               )}
 
               {blogPosts.length > 0 && (
-                <section id="savjeti" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="savjeti" className="order-6 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <h2 className="font-serif text-3xl tracking-tight">Savjeti</h2>
                   <ul className="mt-5 space-y-4">
                     {blogPosts.map((post) => (
@@ -539,7 +557,7 @@ export function DoctorProfilePaper({
               )}
 
               {(hasRatings || canReview) && (
-                <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="recenzije" className="order-10 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Iskustva</p>
@@ -631,8 +649,8 @@ export function DoctorProfilePaper({
               )}
             </div>
 
-            <aside id="zakazivanje" className="space-y-4 md:sticky md:top-24">
-              <section className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
+            <aside id="zakazivanje" className="contents md:sticky md:top-24 md:block md:space-y-4">
+              <section id="kontakt" className="order-3 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-serif text-2xl tracking-tight">Zakažite termin</h2>
                 {online ? (
                   <>
@@ -685,7 +703,7 @@ export function DoctorProfilePaper({
                 )}
               </section>
 
-              <div id="lokacija" className="scroll-mt-28 overflow-hidden rounded-[28px] border border-border bg-white">
+              <div id="lokacija" className="order-7 scroll-mt-28 overflow-hidden rounded-[28px] border border-border bg-white">
                 <LocationMapCard
                   naziv={`Dr. ${fullName}`}
                   adresa={doctor.lokacija || ''}
@@ -700,7 +718,7 @@ export function DoctorProfilePaper({
               </div>
 
               {places.length > 0 && (
-                <section id="dostupan" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
+                <section id="dostupan" className="order-8 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                   <h2 className="font-medium">Dostupan u:</h2>
                   <ul className="mt-3 space-y-3 text-sm">
                     {places.map((place) => (
@@ -718,7 +736,7 @@ export function DoctorProfilePaper({
               )}
 
               {(hourRows.length > 0 || typeof doctor.radno_vrijeme === 'string') && (
-                <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
+                <section id="radno-vrijeme" className="order-9 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                   <h2 className="font-medium">Radno vrijeme</h2>
                   {typeof doctor.radno_vrijeme === 'string' ? (
                     <p className="mt-3 text-sm text-[#4b5563]">{doctor.radno_vrijeme}</p>

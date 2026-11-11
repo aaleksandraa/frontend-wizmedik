@@ -133,10 +133,16 @@ export function ClinicProfilePaper({
     ...(clinic.opis ? [{ href: '#o-klinici', label: 'O klinici' }] : []),
     { href: '#doktori', label: 'Naši doktori' },
     ...(guests.length > 0 ? [{ href: '#gosti', label: 'Gostujući specijalisti' }] : []),
-    { href: '#recenzije', label: 'Recenzije' },
+    ...(recenzije.length > 0 ? [{ href: '#recenzije', label: 'Recenzije' }] : []),
     { href: '#kontakt', label: 'Kontakt informacije' },
     ...(hourRows.length > 0 ? [{ href: '#radno-vrijeme', label: 'Radno vrijeme' }] : []),
     { href: '#lokacija', label: 'Lokacija' },
+  ];
+  const mobileJumps = [
+    { href: '#doktori', label: 'Doktori' },
+    { href: '#kontakt', label: 'Kontakt' },
+    { href: '#lokacija', label: 'Lokacija' },
+    ...(recenzije.length > 0 ? [{ href: '#recenzije', label: 'Recenzije' }] : []),
   ];
 
   return (
@@ -215,7 +221,19 @@ export function ClinicProfilePaper({
             className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-background/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
             aria-label="Dijelovi profila"
           >
-            <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
+            <ul className="flex w-max gap-2 md:hidden">
+              {mobileJumps.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="inline-flex h-9 items-center rounded-full border border-border bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <ul className="hidden w-auto flex-wrap gap-2 md:flex">
               {jumps.map((item) => (
                 <li key={item.href}>
                   <a
@@ -229,10 +247,10 @@ export function ClinicProfilePaper({
             </ul>
           </nav>
 
-          <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="space-y-6">
+          <div className="mt-4 flex flex-col gap-6 md:grid md:grid-cols-[minmax(0,1fr)_320px] md:items-start">
+            <div className="contents md:block md:space-y-6">
               {gallery.length > 0 && (
-                <section id="galerija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8" aria-label="Slike klinike">
+                <section id="galerija" className="order-1 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8" aria-label="Slike klinike">
                   <button
                     type="button"
                     className="block w-full overflow-hidden rounded-2xl"
@@ -265,13 +283,13 @@ export function ClinicProfilePaper({
               )}
 
               {clinic.opis && (
-                <section id="o-klinici" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="o-klinici" className="order-2 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <h2 className="font-serif text-3xl tracking-tight">O klinici</h2>
                   <p className="mt-5 max-w-2xl whitespace-pre-line text-[15px] leading-7 text-[#3f4a56]">{clinic.opis}</p>
                 </section>
               )}
 
-              <section id="doktori" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+              <section id="doktori" className="order-3 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="font-serif text-3xl tracking-tight">Naši doktori</h2>
                 {specialties.length > 0 && (
                   <div className="mt-5">
@@ -349,7 +367,7 @@ export function ClinicProfilePaper({
               </section>
 
               {guests.length > 0 && (
-                <section id="gosti" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+                <section id="gosti" className="order-5 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <h2 className="flex items-center gap-2 font-serif text-3xl tracking-tight">
                     <UserPlus className="h-6 w-6 text-[#0e7490]" />
                     Gostujući specijalisti
@@ -404,7 +422,7 @@ export function ClinicProfilePaper({
                 </section>
               )}
 
-              <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
+              <section id="recenzije" className="order-9 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="font-serif text-3xl tracking-tight">Recenzije ({recenzije.length})</h2>
                 {recenzije.length === 0 ? (
                   <p className="py-8 text-center text-[#6b7280]">
@@ -425,8 +443,8 @@ export function ClinicProfilePaper({
               </section>
             </div>
 
-            <aside className="space-y-4 md:sticky md:top-24">
-              <section id="kontakt" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
+            <aside className="contents md:sticky md:top-24 md:block md:space-y-4">
+              <section id="kontakt" className="order-4 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-medium">Kontakt informacije</h2>
                 <dl className="mt-4 space-y-4 text-sm">
                   <div className="flex items-start gap-3">
@@ -490,7 +508,7 @@ export function ClinicProfilePaper({
               </section>
 
               {hourRows.length > 0 && (
-                <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
+                <section id="radno-vrijeme" className="order-6 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                   <h2 className="flex items-center gap-2 font-medium">
                     <Clock className="h-4 w-4" />
                     Radno vrijeme
@@ -511,7 +529,7 @@ export function ClinicProfilePaper({
                 </section>
               )}
 
-              <div id="lokacija" className="scroll-mt-28 overflow-hidden rounded-[28px] border border-border bg-white">
+              <div id="lokacija" className="order-7 scroll-mt-28 overflow-hidden rounded-[28px] border border-border bg-white">
                 <LocationMapCard
                   naziv={clinic.naziv}
                   adresa={clinic.adresa || ''}
@@ -525,7 +543,7 @@ export function ClinicProfilePaper({
                 />
               </div>
 
-              <section id="rezervacija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
+              <section id="rezervacija" className="order-8 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-medium">Rezervišite termin</h2>
                 <p className="mt-3 text-sm leading-6 text-[#6b7280]">
                   Kontaktirajte nas za zakazivanje termina ili izaberite doktora iz liste.
