@@ -76,8 +76,10 @@ const Impressum = lazyWithRetry(() => import("./pages/Impressum"));
 const AdminPanel = lazyWithRetry(() => import("./pages/AdminPanel"));
 const DoctorDashboard = lazyWithRetry(() => import("./pages/DoctorDashboard"));
 const DoctorProfile = lazyWithRetry(() => import("./pages/DoctorProfile"));
+const DoctorProfileReserve = lazyWithRetry(() => import("./pages/DoctorProfileReserve"));
 const DoctorProfilePreview = lazyWithRetry(() => import("./pages/DoctorProfilePreview"));
 const ClinicProfilePreview = lazyWithRetry(() => import("./pages/ClinicProfilePreview"));
+const ClinicProfileReserve = lazyWithRetry(() => import("./pages/ClinicProfileReserve"));
 const ClinicDashboard = lazyWithRetry(() => import("./pages/ClinicDashboard"));
 const LaboratoryDashboard = lazyWithRetry(() => import("./pages/LaboratoryDashboard"));
 const PharmacyProfile = lazyWithRetry(() => import("./pages/PharmacyProfile"));
@@ -162,10 +164,12 @@ const App = () => {
               <Route path="/klinike/:grad/:specijalnost" element={<Clinics />} />
               <Route path="/klinike/:grad" element={<Clinics />} />
               <Route path="/klinika/:slug" element={<ClinicProfile />} />
+              <Route path="/rezerva/klinika/:slug" element={<ClinicProfileReserve />} />
               <Route path="/specijalnosti" element={<Specialties />} />
               <Route path="/doktori" element={<Doctors />} />
               <Route path="/doktori/lista" element={<DoctorsCompactList />} />
               <Route path="/doktor/:slug" element={<DoctorProfile />} />
+              <Route path="/rezerva/doktor/:slug" element={<DoctorProfileReserve />} />
               <Route path="/test/profil-doktora" element={<DoctorProfilePreview />} />
               <Route path="/test/profil-klinike" element={<ClinicProfilePreview />} />
               <Route path="/laboratorije" element={<Laboratories />} />
