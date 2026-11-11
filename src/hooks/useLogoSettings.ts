@@ -3,7 +3,7 @@ import axios from 'axios';
 import { canUseFunctionalStorage } from '@/lib/cookie-consent';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-const LOGO_SETTINGS_STORAGE_KEY = 'wm_logo_settings_cache_v1';
+const LOGO_SETTINGS_STORAGE_KEY = 'wm_logo_settings_cache_v2';
 
 interface LogoSettings {
   logo_url: string | null;
@@ -29,8 +29,8 @@ const defaultLogoSettings: LogoSettings = {
   footer_logo_url: null,
   footer_logo_enabled: true,
   footer_logo_type: 'text',
-  show_heart_icon: true,
-  show_heart_icon_header: true,
+  show_heart_icon: false,
+  show_heart_icon_header: false,
   logo_height_desktop: 70,
   logo_height_mobile: 50,
   footer_logo_height_desktop: 70,

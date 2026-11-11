@@ -9,11 +9,20 @@ import {
   ChevronDown,
   Clock,
   MapPin,
+  Navigation,
   Phone,
   Star,
 } from 'lucide-react';
 
-const ACCENT = '#0e7490';
+const PHONE_DISPLAY = '033 210 440';
+const PHONE_HREF = 'tel:+38733210440';
+const ADDRESS = 'Zmaja od Bosne 7';
+const CITY = 'Sarajevo';
+const MAPS_HREF = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `Poliklinika Medica, ${ADDRESS}, ${CITY}`
+)}`;
+
+const prihvataOnline = false;
 
 const services = [
   { id: 1, naziv: 'Prvi pregled', opis: 'Razgovor, pregled i plan daljnje obrade.', trajanje: '40 min', cijena: '80 KM' },
@@ -21,6 +30,11 @@ const services = [
   { id: 3, naziv: 'Ultrazvuk srca', opis: 'Ehokardiografija u ordinaciji.', trajanje: '30 min', cijena: '70 KM' },
   { id: 4, naziv: 'Holter monitoring', opis: '24-satno snimanje ritma.', trajanje: '24 h', cijena: '90 KM' },
   { id: 5, naziv: 'EKG', opis: 'Snimanje u ordinaciji, nalaz isti dan.', trajanje: '15 min', cijena: '25 KM' },
+];
+
+const places = [
+  { naziv: 'Poliklinika Medica', detalj: `${ADDRESS}, ${CITY}` },
+  { naziv: 'Klinički centar', detalj: `${CITY} · petkom` },
 ];
 
 const hours = [
@@ -33,26 +47,7 @@ const hours = [
   { day: 0, label: 'Nedjelja', value: 'Zatvoreno' },
 ];
 
-const reviews = [
-  {
-    ime: 'Amina K.',
-    datum: '12. oktobar 2026.',
-    ocjena: 5,
-    tekst: 'Pregled je bio miran i jasan. Doktorica je objasnila nalaz bez žurbe i dogovorila kontrolu.',
-  },
-  {
-    ime: 'Haris M.',
-    datum: '3. septembar 2026.',
-    ocjena: 5,
-    tekst: 'Termin sam dobio isti dan. Čekaonica uredna, a ultrazvuk urađen odmah uz pregled.',
-  },
-  {
-    ime: 'Selma R.',
-    datum: '18. august 2026.',
-    ocjena: 4,
-    tekst: 'Profesionalan pristup. Cijena je bila ista kao na profilu, bez dodatnih iznenađenja.',
-  },
-];
+const reviews: Array<{ ime: string; datum: string; ocjena: number; tekst: string }> = [];
 
 function Stars({ value }: { value: number }) {
   return (
@@ -74,13 +69,22 @@ export default function DoctorProfilePreview() {
   const today = new Date().getDay();
   const selected = services.find((service) => service.id === serviceId) ?? services[0];
   const todayHours = hours.find((row) => row.day === today);
+  const hasRatings = reviews.length > 0;
+  const openNow = Boolean(todayHours && todayHours.value !== 'Zatvoreno');
 
-  const status = useMemo(() => {
-    if (!todayHours || todayHours.value === 'Zatvoreno') return 'Danas ne prima';
-    return `Danas prima ${todayHours.value}`;
-  }, [todayHours]);
+  const jumps = useMemo(
+    () => [
+      { href: '#usluge', label: 'Usluge i cijene' },
+      ...(hasRatings ? [{ href: '#recenzije', label: 'Recenzije' }] : []),
+      { href: '#lokacija', label: 'Lokacija' },
+      { href: '#radno-vrijeme', label: 'Radno vrijeme' },
+      { href: '#dostupan', label: 'Dostupan u' },
+    ],
+    [hasRatings]
+  );
 
   const requestTermin = (id?: number) => {
+    if (!prihvataOnline) return;
     if (id) setServiceId(id);
     setAsked(true);
     if (window.innerWidth < 768) {
@@ -122,7 +126,7 @@ export default function DoctorProfilePreview() {
           <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5 shadow-[0_1px_2px_rgba(28,36,48,0.04)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <div
-                className="flex h-28 w-28 shrink-0 items-center justify-center rounded-full border border-[#d7efe8] bg-[#f3faf8] font-serif text-3xl text-[#0e7490] md:h-36 md:w-36 md:text-4xl"
+                className="flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl border border-[#d7efe8] bg-[#f3faf8] font-serif text-3xl text-[#0e7490] md:h-36 md:w-36 md:text-4xl"
                 aria-hidden
               >
                 LH
@@ -138,49 +142,78 @@ export default function DoctorProfilePreview() {
                 </p>
                 <div className="mt-4 flex flex-col gap-1.5 text-sm text-[#374151]">
                   <p className="inline-flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#0e7490]" />
-                    Sarajevo
+                    <MapPin className="h-4 w-4 shrink-0 text-[#0e7490]" />
+                    {CITY}
                   </p>
-                  <p>Poliklinika Medica</p>
-                  <p className="inline-flex items-center gap-2 text-[#0e7490]">
+                  <p>
+                    <span className="text-[#6b7280]">Dostupan u: </span>
+                    {places.map((place) => place.naziv).join(' · ')}
+                  </p>
+                  <p className={`inline-flex items-center gap-2 ${openNow ? 'text-[#0e7490]' : 'text-[#6b7280]'}`}>
                     <Clock className="h-4 w-4" />
-                    {status}
+                    {openNow ? 'Otvoreno' : 'Zatvoreno'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex w-full flex-col gap-4 border-t border-[#eeeae3] pt-5 md:w-56 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8a8175]">
-                    Pacijentska ocjena
+              <div className="flex w-full flex-col gap-3 border-t border-[#eeeae3] pt-5 md:w-60 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+                {hasRatings && (
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8a8175]">
+                      Pacijentska ocjena
+                    </p>
+                    <p className="mt-1 flex items-end gap-2">
+                      <span className="font-serif text-4xl leading-none">4,9</span>
+                      <span className="pb-1 text-sm text-[#6b7280]">{reviews.length} recenzija</span>
+                    </p>
+                    <Stars value={5} />
+                  </div>
+                )}
+                {prihvataOnline ? (
+                  <Button
+                    className="h-11 rounded-full bg-[#0e7490] text-white hover:bg-[#0c657d]"
+                    onClick={() => requestTermin()}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Zakažite termin
+                  </Button>
+                ) : (
+                  <p className="rounded-2xl bg-[#f6f4ef] px-3 py-3 text-center text-sm leading-6 text-[#3f4a56]">
+                    Ovaj doktor ne prima online rezervacije
                   </p>
-                  <p className="mt-1 flex items-end gap-2">
-                    <span className="font-serif text-4xl leading-none">4,9</span>
-                    <span className="pb-1 text-sm text-[#6b7280]">86 recenzija</span>
-                  </p>
-                  <Stars value={5} />
-                </div>
-                <Button
-                  className="h-11 rounded-full bg-[#0e7490] text-white hover:bg-[#0c657d]"
-                  onClick={() => requestTermin()}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Zakaži termin
-                </Button>
+                )}
                 <a
-                  href="tel:+38733210440"
+                  href={PHONE_HREF}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#d9d3c8] text-sm font-medium hover:bg-[#faf8f4]"
                 >
                   <Phone className="h-4 w-4" />
-                  033 210 440
+                  {PHONE_DISPLAY}
                 </a>
               </div>
             </div>
           </section>
 
-          <div className="mt-6 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
+          <nav
+            className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-[#f6f4ef]/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
+            aria-label="Dijelovi profila"
+          >
+            <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
+              {jumps.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="inline-flex h-9 items-center rounded-full border border-[#e6e0d6] bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
             <div className="space-y-6">
-              <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="biografija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">O doktoru</p>
                 <h2 className="mt-2 font-serif text-3xl tracking-tight">Biografija</h2>
                 <div className="mt-5 max-w-2xl space-y-4 text-[15px] leading-7 text-[#3f4a56]">
@@ -197,7 +230,7 @@ export default function DoctorProfilePreview() {
                     <p>
                       Specijalizaciju je završila u Sarajevu, uz kraća usavršavanja iz ehokardiografije.
                       Na profilu su navedene samo usluge i cijene koje ordinacija potvrđuje. Za hitna stanja
-                      nazovite hitnu pomoć, a za redovan termin koristite zakazivanje ili telefon ordinacije.
+                      nazovite hitnu pomoć, a za redovan termin pozovite ordinaciju.
                     </p>
                   )}
                 </div>
@@ -212,15 +245,17 @@ export default function DoctorProfilePreview() {
                 </button>
               </section>
 
-              <section id="usluge" className="rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="usluge" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Ordinacija</p>
                 <h2 className="mt-2 font-serif text-3xl tracking-tight">Usluge i cijene</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6b7280]">
-                  Cijene su one koje ordinacija objavljuje. Termin birate uz uslugu, bez dodatnih kartica.
+                  {prihvataOnline
+                    ? 'Odaberite uslugu i nastavite na zakazivanje.'
+                    : 'Za termin pozovite ordinaciju. Online rezervacije nisu uključene.'}
                 </p>
                 <ul className="mt-6 divide-y divide-[#efeae2]">
                   {services.map((service) => {
-                    const active = service.id === serviceId;
+                    const active = prihvataOnline && service.id === serviceId;
                     return (
                       <li key={service.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
@@ -230,17 +265,17 @@ export default function DoctorProfilePreview() {
                         <div className="flex items-center justify-between gap-4 sm:justify-end">
                           <span className="text-sm text-[#6b7280]">{service.trajanje}</span>
                           <span className="w-16 text-right font-semibold tabular-nums">{service.cijena}</span>
-                          <button
-                            type="button"
-                            onClick={() => requestTermin(service.id)}
-                            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-                              active
-                                ? 'bg-[#0e7490] text-white'
-                                : 'text-[#0e7490] hover:bg-[#f3faf8]'
-                            }`}
-                          >
-                            Zakaži
-                          </button>
+                          {prihvataOnline && (
+                            <button
+                              type="button"
+                              onClick={() => requestTermin(service.id)}
+                              className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+                                active ? 'bg-[#0e7490] text-white' : 'text-[#0e7490] hover:bg-[#f3faf8]'
+                              }`}
+                            >
+                              Zakažite
+                            </button>
+                          )}
                         </div>
                       </li>
                     );
@@ -248,73 +283,101 @@ export default function DoctorProfilePreview() {
                 </ul>
               </section>
 
-              <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Iskustva</p>
-                    <h2 className="mt-2 font-serif text-3xl tracking-tight">Recenzije pacijenata</h2>
+              {hasRatings && (
+                <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Iskustva</p>
+                      <h2 className="mt-2 font-serif text-3xl tracking-tight">Recenzije pacijenata</h2>
+                    </div>
                   </div>
-                  <p className="text-sm text-[#6b7280]">4,9 od 86 odobrenih recenzija</p>
-                </div>
-                <ul className="mt-6 space-y-5">
-                  {reviews.map((review) => (
-                    <li key={review.ime} className="border-t border-[#efeae2] pt-5 first:border-t-0 first:pt-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="font-medium">{review.ime}</p>
-                        <Stars value={review.ocjena} />
-                      </div>
-                      <p className="mt-2 text-[15px] leading-7 text-[#3f4a56]">{review.tekst}</p>
-                      <p className="mt-2 text-xs text-[#8a8175]">{review.datum}</p>
+                  <ul className="mt-6 space-y-5">
+                    {reviews.map((review) => (
+                      <li key={review.ime} className="border-t border-[#efeae2] pt-5 first:border-t-0 first:pt-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="font-medium">{review.ime}</p>
+                          <Stars value={review.ocjena} />
+                        </div>
+                        <p className="mt-2 text-[15px] leading-7 text-[#3f4a56]">{review.tekst}</p>
+                        <p className="mt-2 text-xs text-[#8a8175]">{review.datum}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </div>
+
+            <aside id="zakazivanje" className="space-y-4 md:sticky md:top-24">
+              <section className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+                <h2 className="font-serif text-2xl tracking-tight">Zakažite termin</h2>
+                {prihvataOnline ? (
+                  <>
+                    <p className="mt-3 text-sm leading-6 text-[#5c6770]">
+                      Odabrana usluga: <span className="font-medium text-[#1c2430]">{selected.naziv}</span>
+                      {' · '}
+                      {selected.trajanje}
+                      {' · '}
+                      {selected.cijena}
+                    </p>
+                    <Button
+                      className="mt-4 h-11 w-full rounded-full bg-[#0e7490] hover:bg-[#0c657d]"
+                      onClick={() => requestTermin()}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Zakažite termin
+                    </Button>
+                    {asked && (
+                      <p className="mt-3 rounded-2xl bg-[#f3faf8] px-3 py-3 text-sm leading-6 text-[#0f5163]">
+                        U ovom testu termin se ne šalje. Na pravom profilu ovdje se otvara postojeći obrazac za zakazivanje.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="mt-3 rounded-2xl bg-[#f6f4ef] px-3 py-3 text-sm leading-6 text-[#3f4a56]">
+                    Ovaj doktor ne prima online rezervacije
+                  </p>
+                )}
+                <a
+                  href={PHONE_HREF}
+                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#d9d3c8] text-sm font-medium hover:bg-[#faf8f4]"
+                >
+                  <Phone className="h-4 w-4" />
+                  Pozovite {PHONE_DISPLAY}
+                </a>
+              </section>
+
+              <section id="lokacija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+                <h2 className="flex items-center gap-2 font-medium">
+                  <MapPin className="h-4 w-4 text-[#0e7490]" />
+                  Lokacija
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-[#3f4a56]">
+                  {ADDRESS}, {CITY}
+                </p>
+                <a
+                  href={MAPS_HREF}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#0e7490] text-sm font-medium text-white hover:bg-[#0c657d]"
+                >
+                  <Navigation className="h-4 w-4" />
+                  Vodi me do lokacije
+                </a>
+              </section>
+
+              <section id="dostupan" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+                <h2 className="font-medium">Dostupan u:</h2>
+                <ul className="mt-3 space-y-3 text-sm">
+                  {places.map((place) => (
+                    <li key={place.naziv} className="border-t border-[#efeae2] pt-3 first:border-t-0 first:pt-0">
+                      <p className="font-medium">{place.naziv}</p>
+                      <p className="text-[#6b7280]">{place.detalj}</p>
                     </li>
                   ))}
                 </ul>
               </section>
-            </div>
 
-            <aside id="zakazivanje" className="space-y-4 md:sticky md:top-24">
-              <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Zakazivanje</p>
-                <h2 className="mt-2 font-serif text-2xl tracking-tight">Termin za Lejlu Hadžić</h2>
-                <p className="mt-3 text-sm leading-6 text-[#5c6770]">
-                  Odabrana usluga: <span className="font-medium text-[#1c2430]">{selected.naziv}</span>
-                  {' · '}
-                  {selected.trajanje}
-                  {' · '}
-                  {selected.cijena}
-                </p>
-                <Button
-                  className="mt-4 h-11 w-full rounded-full bg-[#0e7490] hover:bg-[#0c657d]"
-                  onClick={() => requestTermin()}
-                >
-                  Nastavi na termin
-                </Button>
-                {asked && (
-                  <p className="mt-3 rounded-2xl bg-[#f3faf8] px-3 py-3 text-sm leading-6 text-[#0f5163]">
-                    U ovom testu termin se ne šalje. Na pravom profilu ovdje se otvara postojeći obrazac za zakazivanje.
-                  </p>
-                )}
-                <a href="tel:+38733210440" className="mt-4 flex items-center justify-between text-sm">
-                  <span className="text-[#6b7280]">Telefon ordinacije</span>
-                  <span className="font-medium text-[#0e7490]">033 210 440</span>
-                </a>
-              </section>
-
-              <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5">
-                <h2 className="font-medium">Gdje prima</h2>
-                <ul className="mt-3 space-y-3 text-sm">
-                  <li>
-                    <p className="font-medium">Poliklinika Medica</p>
-                    <p className="text-[#6b7280]">Zmaja od Bosne 7, Sarajevo</p>
-                    <p className="text-[#6b7280]">Ponedjeljak–petak</p>
-                  </li>
-                  <li className="border-t border-[#efeae2] pt-3">
-                    <p className="font-medium">Klinički centar</p>
-                    <p className="text-[#6b7280]">Sarajevo · gostovanje petkom</p>
-                  </li>
-                </ul>
-              </section>
-
-              <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
                 <h2 className="font-medium">Radno vrijeme</h2>
                 <ul className="mt-3 space-y-1.5 text-sm">
                   {hours.map((row) => (
@@ -338,19 +401,29 @@ export default function DoctorProfilePreview() {
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e6e0d6] bg-white/95 p-3 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-6xl gap-2">
           <a
-            href="tel:+38733210440"
+            href={PHONE_HREF}
             className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#d9d3c8] text-sm font-medium"
           >
-            Pozovi
+            Pozovite
           </a>
-          <button
-            type="button"
-            onClick={() => requestTermin()}
-            className="inline-flex h-12 flex-[1.4] items-center justify-center rounded-full text-sm font-medium text-white"
-            style={{ backgroundColor: ACCENT }}
-          >
-            Zakaži termin
-          </button>
+          {prihvataOnline ? (
+            <button
+              type="button"
+              onClick={() => requestTermin()}
+              className="inline-flex h-12 flex-[1.4] items-center justify-center rounded-full bg-[#0e7490] text-sm font-medium text-white"
+            >
+              Zakažite termin
+            </button>
+          ) : (
+            <a
+              href={MAPS_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 flex-[1.4] items-center justify-center rounded-full bg-[#0e7490] text-sm font-medium text-white"
+            >
+              Vodi me do lokacije
+            </a>
+          )}
         </div>
       </div>
       <Footer />
