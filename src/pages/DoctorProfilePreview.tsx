@@ -99,8 +99,8 @@ export default function DoctorProfilePreview() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <Navbar />
-      <main className="min-h-screen bg-[#f6f4ef] pb-28 text-[#1c2430] md:pb-16">
-        <div className="border-b border-[#e7e1d6] bg-[#fffdf8]">
+      <main className="min-h-screen bg-background pb-28 text-[#1c2430] md:pb-16">
+        <div className="border-b border-border bg-white">
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 text-sm text-[#5c6770] sm:flex-row sm:items-center sm:justify-between">
             <p>
               Test primjer novog profila. Postojeći profil na{' '}
@@ -123,7 +123,7 @@ export default function DoctorProfilePreview() {
             </ol>
           </nav>
 
-          <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5 shadow-[0_1px_2px_rgba(28,36,48,0.04)] md:p-8">
+          <section className="rounded-[28px] border border-border bg-white p-5 shadow-[0_1px_2px_rgba(28,36,48,0.04)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <div
                 className="flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl border border-[#d7efe8] bg-[#f3faf8] font-serif text-3xl text-[#0e7490] md:h-36 md:w-36 md:text-4xl"
@@ -178,13 +178,13 @@ export default function DoctorProfilePreview() {
                     Zakažite termin
                   </Button>
                 ) : (
-                  <p className="rounded-2xl bg-[#f6f4ef] px-3 py-3 text-center text-sm leading-6 text-[#3f4a56]">
+                  <p className="rounded-2xl bg-background px-3 py-3 text-center text-sm leading-6 text-[#3f4a56]">
                     Ovaj doktor ne prima online rezervacije
                   </p>
                 )}
                 <a
                   href={PHONE_HREF}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#d9d3c8] text-sm font-medium hover:bg-[#faf8f4]"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium hover:bg-muted"
                 >
                   <Phone className="h-4 w-4" />
                   {PHONE_DISPLAY}
@@ -194,7 +194,7 @@ export default function DoctorProfilePreview() {
           </section>
 
           <nav
-            className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-[#f6f4ef]/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
+            className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-background/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
             aria-label="Dijelovi profila"
           >
             <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
@@ -202,7 +202,7 @@ export default function DoctorProfilePreview() {
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    className="inline-flex h-9 items-center rounded-full border border-[#e6e0d6] bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
+                    className="inline-flex h-9 items-center rounded-full border border-border bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
                   >
                     {item.label}
                   </a>
@@ -213,7 +213,7 @@ export default function DoctorProfilePreview() {
 
           <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
             <div className="space-y-6">
-              <section id="biografija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="biografija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">O doktoru</p>
                 <h2 className="mt-2 font-serif text-3xl tracking-tight">Biografija</h2>
                 <div className="mt-5 max-w-2xl space-y-4 text-[15px] leading-7 text-[#3f4a56]">
@@ -245,7 +245,7 @@ export default function DoctorProfilePreview() {
                 </button>
               </section>
 
-              <section id="usluge" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="usluge" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Ordinacija</p>
                 <h2 className="mt-2 font-serif text-3xl tracking-tight">Usluge i cijene</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6b7280]">
@@ -253,7 +253,7 @@ export default function DoctorProfilePreview() {
                     ? 'Odaberite uslugu i nastavite na zakazivanje.'
                     : 'Za termin pozovite ordinaciju. Online rezervacije nisu uključene.'}
                 </p>
-                <ul className="mt-6 divide-y divide-[#efeae2]">
+                <ul className="mt-6 divide-y divide-border">
                   {services.map((service) => {
                     const active = prihvataOnline && service.id === serviceId;
                     return (
@@ -284,7 +284,7 @@ export default function DoctorProfilePreview() {
               </section>
 
               {hasRatings && (
-                <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+                <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Iskustva</p>
@@ -293,7 +293,7 @@ export default function DoctorProfilePreview() {
                   </div>
                   <ul className="mt-6 space-y-5">
                     {reviews.map((review) => (
-                      <li key={review.ime} className="border-t border-[#efeae2] pt-5 first:border-t-0 first:pt-0">
+                      <li key={review.ime} className="border-t border-border pt-5 first:border-t-0 first:pt-0">
                         <div className="flex items-center justify-between gap-3">
                           <p className="font-medium">{review.ime}</p>
                           <Stars value={review.ocjena} />
@@ -308,7 +308,7 @@ export default function DoctorProfilePreview() {
             </div>
 
             <aside id="zakazivanje" className="space-y-4 md:sticky md:top-24">
-              <section className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-serif text-2xl tracking-tight">Zakažite termin</h2>
                 {prihvataOnline ? (
                   <>
@@ -333,20 +333,20 @@ export default function DoctorProfilePreview() {
                     )}
                   </>
                 ) : (
-                  <p className="mt-3 rounded-2xl bg-[#f6f4ef] px-3 py-3 text-sm leading-6 text-[#3f4a56]">
+                  <p className="mt-3 rounded-2xl bg-background px-3 py-3 text-sm leading-6 text-[#3f4a56]">
                     Ovaj doktor ne prima online rezervacije
                   </p>
                 )}
                 <a
                   href={PHONE_HREF}
-                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#d9d3c8] text-sm font-medium hover:bg-[#faf8f4]"
+                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border text-sm font-medium hover:bg-muted"
                 >
                   <Phone className="h-4 w-4" />
                   Pozovite {PHONE_DISPLAY}
                 </a>
               </section>
 
-              <section id="lokacija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="lokacija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="flex items-center gap-2 font-medium">
                   <MapPin className="h-4 w-4 text-[#0e7490]" />
                   Lokacija
@@ -365,11 +365,11 @@ export default function DoctorProfilePreview() {
                 </a>
               </section>
 
-              <section id="dostupan" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="dostupan" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-medium">Dostupan u:</h2>
                 <ul className="mt-3 space-y-3 text-sm">
                   {places.map((place) => (
-                    <li key={place.naziv} className="border-t border-[#efeae2] pt-3 first:border-t-0 first:pt-0">
+                    <li key={place.naziv} className="border-t border-border pt-3 first:border-t-0 first:pt-0">
                       <p className="font-medium">{place.naziv}</p>
                       <p className="text-[#6b7280]">{place.detalj}</p>
                     </li>
@@ -377,7 +377,7 @@ export default function DoctorProfilePreview() {
                 </ul>
               </section>
 
-              <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-medium">Radno vrijeme</h2>
                 <ul className="mt-3 space-y-1.5 text-sm">
                   {hours.map((row) => (
@@ -398,11 +398,11 @@ export default function DoctorProfilePreview() {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e6e0d6] bg-white/95 p-3 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 p-3 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-6xl gap-2">
           <a
             href={PHONE_HREF}
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#d9d3c8] text-sm font-medium"
+            className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-border text-sm font-medium"
           >
             Pozovite
           </a>

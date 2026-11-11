@@ -144,8 +144,8 @@ export default function ClinicProfilePreview() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <Navbar />
-      <main className="min-h-screen bg-[#f6f4ef] pb-28 text-[#1c2430] md:pb-16">
-        <div className="border-b border-[#e7e1d6] bg-[#fffdf8]">
+      <main className="min-h-screen bg-background pb-28 text-[#1c2430] md:pb-16">
+        <div className="border-b border-border bg-white">
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 text-sm text-[#5c6770] sm:flex-row sm:items-center sm:justify-between">
             <p>
               Test primjer novog profila klinike. Postojeći profil na{' '}
@@ -168,7 +168,7 @@ export default function ClinicProfilePreview() {
             </ol>
           </nav>
 
-          <section className="rounded-[28px] border border-[#e6e0d6] bg-white p-5 shadow-[0_1px_2px_rgba(28,36,48,0.04)] md:p-8">
+          <section className="rounded-[28px] border border-border bg-white p-5 shadow-[0_1px_2px_rgba(28,36,48,0.04)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <img
                 src={gallery[0]}
@@ -199,7 +199,7 @@ export default function ClinicProfilePreview() {
                 </a>
                 <a
                   href={`mailto:${EMAIL}`}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#d9d3c8] text-sm font-medium hover:bg-[#faf8f4]"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border text-sm font-medium hover:bg-muted"
                 >
                   <Mail className="h-4 w-4" />
                   Pošaljite email
@@ -209,7 +209,7 @@ export default function ClinicProfilePreview() {
           </section>
 
           <nav
-            className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-[#f6f4ef]/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
+            className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto bg-background/95 px-4 py-2 backdrop-blur md:static md:mx-0 md:overflow-visible md:bg-transparent md:px-0 md:py-0"
             aria-label="Dijelovi profila"
           >
             <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
@@ -217,7 +217,7 @@ export default function ClinicProfilePreview() {
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    className="inline-flex h-9 items-center rounded-full border border-[#e6e0d6] bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
+                    className="inline-flex h-9 items-center rounded-full border border-border bg-white px-3 text-sm font-medium text-[#0e7490] hover:bg-[#f3faf8]"
                   >
                     {item.label}
                   </a>
@@ -228,7 +228,7 @@ export default function ClinicProfilePreview() {
 
           <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-6">
-              <section id="galerija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8" aria-label="Slike klinike">
+              <section id="galerija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8" aria-label="Slike klinike">
                 <button
                   type="button"
                   className="block w-full overflow-hidden rounded-2xl"
@@ -259,7 +259,7 @@ export default function ClinicProfilePreview() {
                 </div>
               </section>
 
-              <section id="o-klinici" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="o-klinici" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="font-serif text-3xl tracking-tight">O klinici</h2>
                 <p className="mt-5 max-w-2xl text-[15px] leading-7 text-[#3f4a56]">
                   Poliklinika Medica u Sarajevu prima pacijente na kardiološke i internističke preglede.
@@ -267,7 +267,7 @@ export default function ClinicProfilePreview() {
                 </p>
               </section>
 
-              <section id="doktori" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="doktori" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="font-serif text-3xl tracking-tight">Naši doktori</h2>
                 <div className="mt-5">
                   <h3 className="text-sm font-medium text-[#6b7280]">Specijalnosti klinike</h3>
@@ -295,7 +295,7 @@ export default function ClinicProfilePreview() {
                 {visibleDoctors.length > 0 ? (
                   <ul className="mt-6 grid gap-4 md:grid-cols-2">
                     {visibleDoctors.map((doctor) => (
-                      <li key={doctor.id} className="rounded-2xl border border-[#efeae2] p-4">
+                      <li key={doctor.id} className="rounded-2xl border border-border p-4">
                         <div className="flex gap-4">
                           {doctor.slika ? (
                             <img
@@ -337,7 +337,7 @@ export default function ClinicProfilePreview() {
                 )}
               </section>
 
-              <section id="gosti" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="gosti" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="flex items-center gap-2 font-serif text-3xl tracking-tight">
                   <UserPlus className="h-6 w-6 text-[#0e7490]" />
                   Gostujući specijalisti
@@ -347,7 +347,7 @@ export default function ClinicProfilePreview() {
                 </p>
                 <ul className="mt-5 grid gap-4 md:grid-cols-2">
                   {guests.map((visit) => (
-                    <li key={visit.id} className="rounded-2xl border border-[#efeae2] p-4">
+                    <li key={visit.id} className="rounded-2xl border border-border p-4">
                       <div className="flex gap-4">
                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f3faf8] font-serif text-lg text-[#0e7490]">
                           {visit.doktor.ime[0]}{visit.doktor.prezime[0]}
@@ -380,7 +380,7 @@ export default function ClinicProfilePreview() {
                 </ul>
               </section>
 
-              <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5 md:p-8">
+              <section id="recenzije" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="font-serif text-3xl tracking-tight">Recenzije ({recenzije.length})</h2>
                 {recenzije.length === 0 ? (
                   <p className="py-8 text-center text-[#6b7280]">
@@ -397,7 +397,7 @@ export default function ClinicProfilePreview() {
             </div>
 
             <aside className="space-y-4 md:sticky md:top-24">
-              <section id="kontakt" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="kontakt" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-medium">Kontakt informacije</h2>
                 <dl className="mt-4 space-y-4 text-sm">
                   <div className="flex items-start gap-3">
@@ -442,7 +442,7 @@ export default function ClinicProfilePreview() {
                 </dl>
               </section>
 
-              <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="radno-vrijeme" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="flex items-center gap-2 font-medium">
                   <Clock className="h-4 w-4" />
                   Radno vrijeme
@@ -462,7 +462,7 @@ export default function ClinicProfilePreview() {
                 </ul>
               </section>
 
-              <div id="lokacija" className="scroll-mt-28 overflow-hidden rounded-[28px] border border-[#e6e0d6] bg-white">
+              <div id="lokacija" className="scroll-mt-28 overflow-hidden rounded-[28px] border border-border bg-white">
                 <LocationMapCard
                   naziv="Poliklinika Medica"
                   adresa={ADDRESS}
@@ -475,7 +475,7 @@ export default function ClinicProfilePreview() {
                 />
               </div>
 
-              <section id="rezervacija" className="scroll-mt-28 rounded-[28px] border border-[#e6e0d6] bg-white p-5">
+              <section id="rezervacija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
                 <h2 className="font-medium">Rezervišite termin</h2>
                 <p className="mt-3 text-sm leading-6 text-[#6b7280]">
                   Kontaktirajte nas za zakazivanje termina ili izaberite doktora iz liste.
@@ -490,7 +490,7 @@ export default function ClinicProfilePreview() {
                   </a>
                   <a
                     href={`mailto:${EMAIL}`}
-                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#d9d3c8] text-sm font-medium hover:bg-[#faf8f4]"
+                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border text-sm font-medium hover:bg-muted"
                   >
                     <Mail className="h-4 w-4" />
                     Pošaljite email
@@ -502,11 +502,11 @@ export default function ClinicProfilePreview() {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e6e0d6] bg-white/95 p-3 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 p-3 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-6xl gap-2">
           <a
             href="tel:+38733210440"
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#d9d3c8] text-sm font-medium"
+            className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-border text-sm font-medium"
           >
             Pozovite sada
           </a>
