@@ -77,6 +77,7 @@ const AdminPanel = lazyWithRetry(() => import("./pages/AdminPanel"));
 const DoctorDashboard = lazyWithRetry(() => import("./pages/DoctorDashboard"));
 const DoctorProfile = lazyWithRetry(() => import("./pages/DoctorProfile"));
 const DoctorProfilePreview = lazyWithRetry(() => import("./pages/DoctorProfilePreview"));
+const ClinicProfilePreview = lazyWithRetry(() => import("./pages/ClinicProfilePreview"));
 const ClinicDashboard = lazyWithRetry(() => import("./pages/ClinicDashboard"));
 const LaboratoryDashboard = lazyWithRetry(() => import("./pages/LaboratoryDashboard"));
 const PharmacyProfile = lazyWithRetry(() => import("./pages/PharmacyProfile"));
@@ -166,6 +167,7 @@ const App = () => {
               <Route path="/doktori/lista" element={<DoctorsCompactList />} />
               <Route path="/doktor/:slug" element={<DoctorProfile />} />
               <Route path="/test/profil-doktora" element={<DoctorProfilePreview />} />
+              <Route path="/test/profil-klinike" element={<ClinicProfilePreview />} />
               <Route path="/laboratorije" element={<Laboratories />} />
               <Route path="/laboratorije/:grad" element={<Laboratories />} />
               <Route path="/laboratorija/:slug" element={<LaboratoryProfile />} />
