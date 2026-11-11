@@ -177,6 +177,11 @@ export default function ClinicProfilePreview() {
                 <h1 className="mt-1 font-serif text-4xl leading-none tracking-tight text-[#17202a] md:text-5xl">
                   Poliklinika Medica
                 </h1>
+                {specialties.length > 0 && (
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#4b5563]">
+                    {specialties.map((specialty) => specialty.naziv).join(' · ')}
+                  </p>
+                )}
                 <p className={`mt-4 inline-flex items-center gap-2 text-sm ${status === 'Otvoreno' ? 'text-[#0e7490]' : 'text-[#6b7280]'}`}>
                   <Clock className="h-4 w-4" />
                   {status}
