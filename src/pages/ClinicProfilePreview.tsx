@@ -24,12 +24,7 @@ function swatch(label: string, fill: string) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-const gallery = [
-  swatch('Ulaz', '#e7f4f2'),
-  swatch('Čekaonica', '#f3f6ea'),
-  swatch('Ordinacija', '#eef3f8'),
-  swatch('Hodnik', '#f7f1e8'),
-];
+const gallery: string[] = [];
 
 const hours = {
   ponedeljak: { open: '08:00', close: '16:00' },
@@ -170,11 +165,13 @@ export default function ClinicProfilePreview() {
 
           <section className="rounded-[28px] border border-border bg-white p-5 shadow-[0_1px_2px_rgba(28,36,48,0.04)] md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
-              <img
-                src={gallery[0]}
-                alt="Poliklinika Medica"
-                className="h-28 w-28 shrink-0 rounded-2xl border border-[#d7efe8] object-cover md:h-36 md:w-36"
-              />
+              {gallery[0] && (
+                <img
+                  src={gallery[0]}
+                  alt="Poliklinika Medica"
+                  className="h-28 w-28 shrink-0 rounded-2xl border border-[#d7efe8] object-cover md:h-36 md:w-36"
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold tracking-wide text-[#0e7490]">{CITY}</p>
                 <h1 className="mt-1 font-serif text-4xl leading-none tracking-tight text-[#17202a] md:text-5xl">
@@ -228,6 +225,7 @@ export default function ClinicProfilePreview() {
 
           <div className="mt-4 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-6">
+              {gallery.length > 0 && (
               <section id="galerija" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8" aria-label="Slike klinike">
                 <button
                   type="button"
@@ -258,6 +256,7 @@ export default function ClinicProfilePreview() {
                   ))}
                 </div>
               </section>
+              )}
 
               <section id="o-klinici" className="scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                 <h2 className="font-serif text-3xl tracking-tight">O klinici</h2>
@@ -521,12 +520,14 @@ export default function ClinicProfilePreview() {
         </div>
       </div>
       <Footer />
-      <ImageLightbox
-        images={gallery}
-        initialIndex={lightboxIndex}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-      />
+      {gallery.length > 0 && (
+        <ImageLightbox
+          images={gallery}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </>
   );
 }
