@@ -311,7 +311,18 @@ export function DoctorProfilePaper({
                   {places.length > 0 && (
                     <p>
                       <span className="text-[#6b7280]">Dostupan u: </span>
-                      {places.map((place) => place.naziv).join(' · ')}
+                      {places.map((place, index) => (
+                        <span key={place.naziv}>
+                          {index > 0 && ' · '}
+                          {place.href ? (
+                            <Link to={place.href} className="font-medium text-[#0e7490] hover:underline">
+                              {place.naziv}
+                            </Link>
+                          ) : (
+                            place.naziv
+                          )}
+                        </span>
+                      ))}
                     </p>
                   )}
                   {status && (
