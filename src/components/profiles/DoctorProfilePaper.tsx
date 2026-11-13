@@ -263,7 +263,7 @@ export function DoctorProfilePaper({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background pb-28 text-[#1c2430] md:pb-16">
+      <main className="min-h-screen bg-background pb-28 font-[Poppins,sans-serif] text-[#1c2430] md:pb-16">
         <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
           <nav className="mb-5 text-sm text-[#6b7280]" aria-label="Putanja">
             <ol className="flex flex-wrap items-center gap-1.5">
@@ -285,7 +285,7 @@ export function DoctorProfilePaper({
                 />
               ) : (
                 <div
-                  className="flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl border border-[#d7efe8] bg-[#f3faf8] font-serif text-3xl text-[#0e7490] md:h-36 md:w-36 md:text-4xl"
+                  className="flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl border border-[#d7efe8] bg-[#f3faf8] text-3xl text-[#0e7490] md:h-36 md:w-36 md:text-4xl"
                   aria-hidden
                 >
                   {initials}
@@ -295,7 +295,7 @@ export function DoctorProfilePaper({
                 {doctor.specijalnost && (
                   <p className="text-sm font-semibold tracking-wide text-[#0e7490]">{doctor.specijalnost}</p>
                 )}
-                <h1 className="mt-1 font-serif text-4xl leading-none tracking-tight text-[#17202a] md:text-5xl">
+                <h1 className="mt-1 text-4xl leading-none tracking-tight text-[#17202a] md:text-5xl">
                   {fullName}
                 </h1>
                 {excerpt && (
@@ -329,7 +329,7 @@ export function DoctorProfilePaper({
                       Pacijentska ocjena
                     </p>
                     <p className="mt-1 flex items-end gap-2">
-                      <span className="font-serif text-4xl leading-none">{formatRating(ratingValue)}</span>
+                      <span className="text-4xl leading-none">{formatRating(ratingValue)}</span>
                       <span className="pb-1 text-sm text-[#6b7280]">{ratingCount} recenzija</span>
                     </p>
                     <Stars value={Math.round(Number(ratingValue) || 0)} />
@@ -396,7 +396,7 @@ export function DoctorProfilePaper({
               {biography && (
                 <section id="biografija" className="order-1 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">O doktoru</p>
-                  <h2 className="mt-2 font-serif text-3xl tracking-tight">Biografija</h2>
+                  <h2 className="mt-2 text-3xl tracking-tight">Biografija</h2>
                   <div
                     className={`prose prose-sm mt-5 max-w-2xl text-[15px] leading-7 text-[#3f4a56] ${longBio && !bioOpen ? 'line-clamp-4' : ''}`}
                     dangerouslySetInnerHTML={{ __html: sanitizeRichText(doctor.opis || '') }}
@@ -418,7 +418,7 @@ export function DoctorProfilePaper({
               {pricedServices.length > 0 && (
                 <section id="usluge" className="order-2 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Ordinacija</p>
-                  <h2 className="mt-2 font-serif text-3xl tracking-tight">Usluge i cijene</h2>
+                  <h2 className="mt-2 text-3xl tracking-tight">Usluge i cijene</h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6b7280]">
                     {online
                       ? 'Odaberite uslugu i nastavite na zakazivanje.'
@@ -464,7 +464,7 @@ export function DoctorProfilePaper({
 
               {guestVisits.length > 0 && (
                 <section id="gostovanja" className="order-4 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                  <h2 className="font-serif text-3xl tracking-tight">Gostovanja u klinikama</h2>
+                  <h2 className="text-3xl tracking-tight">Gostovanja u klinikama</h2>
                   <p className="mt-3 text-sm text-[#6b7280]">
                     Dr. {fullName} gostuje u sljedećim klinikama.
                   </p>
@@ -511,7 +511,7 @@ export function DoctorProfilePaper({
 
               {doctor.youtube_linkovi && doctor.youtube_linkovi.length > 0 && (
                 <section id="video" className="order-5 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                  <h2 className="font-serif text-3xl tracking-tight">Video snimci</h2>
+                  <h2 className="text-3xl tracking-tight">Video snimci</h2>
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
                     {doctor.youtube_linkovi.map((video, index) => {
                       const id = youtubeId(video.url);
@@ -537,7 +537,7 @@ export function DoctorProfilePaper({
 
               {blogPosts.length > 0 && (
                 <section id="savjeti" className="order-6 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                  <h2 className="font-serif text-3xl tracking-tight">Savjeti</h2>
+                  <h2 className="text-3xl tracking-tight">Savjeti</h2>
                   <ul className="mt-5 space-y-4">
                     {blogPosts.map((post) => (
                       <li key={post.id}>
@@ -561,7 +561,7 @@ export function DoctorProfilePaper({
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0e7490]">Iskustva</p>
-                      <h2 className="mt-2 font-serif text-3xl tracking-tight">Recenzije pacijenata</h2>
+                      <h2 className="mt-2 text-3xl tracking-tight">Recenzije pacijenata</h2>
                     </div>
                     {canReview && (
                       <Dialog open={showReviewForm} onOpenChange={onReviewForm}>
@@ -651,7 +651,7 @@ export function DoctorProfilePaper({
 
             <aside id="zakazivanje" className="contents md:sticky md:top-24 md:block md:space-y-4">
               <section id="kontakt" className="order-3 scroll-mt-28 rounded-[28px] border border-border bg-white p-5">
-                <h2 className="font-serif text-2xl tracking-tight">Zakažite termin</h2>
+                <h2 className="text-2xl tracking-tight">Zakažite termin</h2>
                 {online ? (
                   <>
                     {selected && (

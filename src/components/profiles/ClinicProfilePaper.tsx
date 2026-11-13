@@ -148,7 +148,7 @@ export function ClinicProfilePaper({
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background pb-28 text-[#1c2430] md:pb-16">
+      <main className="min-h-screen bg-background pb-28 font-[Poppins,sans-serif] text-[#1c2430] md:pb-16">
         <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
           <nav className="mb-5 text-sm text-[#6b7280]" aria-label="Putanja">
             <ol className="flex flex-wrap items-center gap-1.5">
@@ -173,7 +173,7 @@ export function ClinicProfilePaper({
                 {clinic.grad && (
                   <p className="text-sm font-semibold tracking-wide text-[#0e7490]">{clinic.grad}</p>
                 )}
-                <h1 className="mt-1 font-serif text-4xl leading-none tracking-tight text-[#17202a] md:text-5xl">
+                <h1 className="mt-1 text-4xl leading-none tracking-tight text-[#17202a] md:text-5xl">
                   {clinic.naziv}
                 </h1>
                 {specialties.length > 0 && (
@@ -189,7 +189,7 @@ export function ClinicProfilePaper({
                 )}
               </div>
               <div className="flex w-full flex-col gap-3 border-t border-border pt-5 md:w-64 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-                <h2 className="font-serif text-2xl tracking-tight">Rezervišite termin</h2>
+                <h2 className="text-2xl tracking-tight">Rezervišite termin</h2>
                 <p className="text-sm leading-6 text-[#5c6770]">
                   Kontaktirajte nas za zakazivanje termina ili izaberite doktora iz liste.
                 </p>
@@ -284,13 +284,13 @@ export function ClinicProfilePaper({
 
               {clinic.opis && (
                 <section id="o-klinici" className="order-2 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                  <h2 className="font-serif text-3xl tracking-tight">O klinici</h2>
+                  <h2 className="text-3xl tracking-tight">O klinici</h2>
                   <p className="mt-5 max-w-2xl whitespace-pre-line text-[15px] leading-7 text-[#3f4a56]">{clinic.opis}</p>
                 </section>
               )}
 
               <section id="doktori" className="order-3 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                <h2 className="font-serif text-3xl tracking-tight">Naši doktori</h2>
+                <h2 className="text-3xl tracking-tight">Naši doktori</h2>
                 {specialties.length > 0 && (
                   <div className="mt-5">
                     <h3 className="text-sm font-medium text-[#6b7280]">Specijalnosti klinike</h3>
@@ -330,7 +330,7 @@ export function ClinicProfilePaper({
                                 className="h-16 w-16 rounded-2xl object-cover"
                               />
                             ) : (
-                              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f3faf8] font-serif text-lg text-[#0e7490]">
+                              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f3faf8] text-lg text-[#0e7490]">
                                 {doctor.ime?.[0]}{doctor.prezime?.[0]}
                               </div>
                             )}
@@ -368,7 +368,7 @@ export function ClinicProfilePaper({
 
               {guests.length > 0 && (
                 <section id="gosti" className="order-5 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                  <h2 className="flex items-center gap-2 font-serif text-3xl tracking-tight">
+                  <h2 className="flex items-center gap-2 text-3xl tracking-tight">
                     <UserPlus className="h-6 w-6 text-[#0e7490]" />
                     Gostujući specijalisti
                   </h2>
@@ -384,7 +384,7 @@ export function ClinicProfilePaper({
                             {photo ? (
                               <img src={photo} alt="" className="h-16 w-16 rounded-2xl object-cover" />
                             ) : (
-                              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f3faf8] font-serif text-lg text-[#0e7490]">
+                              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f3faf8] text-lg text-[#0e7490]">
                                 {visit.doktor?.ime?.[0]}{visit.doktor?.prezime?.[0]}
                               </div>
                             )}
@@ -423,7 +423,7 @@ export function ClinicProfilePaper({
               )}
 
               <section id="recenzije" className="order-9 scroll-mt-28 rounded-[28px] border border-border bg-white p-5 md:p-8">
-                <h2 className="font-serif text-3xl tracking-tight">Recenzije ({recenzije.length})</h2>
+                <h2 className="text-3xl tracking-tight">Recenzije ({recenzije.length})</h2>
                 {recenzije.length === 0 ? (
                   <p className="py-8 text-center text-[#6b7280]">
                     Još nema recenzija. Budite prvi koji će ocijeniti!
